@@ -1,0 +1,36 @@
+---
+# Settings for Ansible & Vagrant for deployment for: vagrant-minio
+  ans_hostname: ansible
+  ans_ip: 192.168.40.10
+  ans_cpus: 1
+  ans_mem: 1024
+
+  swarm_hostname: node
+  swarm_nodes: 5
+  swarm_mgrs: 3 
+
+  node_cpus: 1
+  node_mem: 2048
+  node_storage: 4096
+  node_ip_start: 192.168.40.100
+  node_storage_devices:
+  - /dev/sdc
+
+  #minio_* variables are not yet used, docker-compose file is still static.
+  minio_nodes: 4
+  minio_image: minio/minio:RELEASE.2018-04-12T23-41-09Z
+
+  gluster_volname: vol1
+  #gluster_quota: 500.0MB
+  gluster_share_mountpoint: /data/glusterfs/shared-vol
+  gluster_brick_mountpoints:
+  - /data/glusterfs/vol1/brick1
+
+  version_glusterppa: glusterfs-3.8
+  version_glusterfs: 3.8.15-ubuntu1~xenial1
+  version_dockerce: 18.03.0~ce-0~ubuntu
+  version_dockercompose: 1.20.1
+  #version_pythonpip: 8.1.1-2ubuntu0.4
+  #version_virtualenv: 15.0.1+ds-3ubuntu1
+  #version_apache2utils: 2.4.18-2ubuntu3.5
+

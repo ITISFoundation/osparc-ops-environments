@@ -1,0 +1,138 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+settings = YAML.load_file './conf/settings.yaml'
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  config.vm.box = "ubuntu/bionic64"
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  #config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder ".", "/vagrant", type: "nfs"
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+
+  # generate our ansible inventory file, insert entry for our ansible master node
+  ansible_inventory_file = "./conf/generated/ansible_hosts"
+  File.delete(ansible_inventory_file) if File.exist?(ansible_inventory_file)
+  File.open("#{ansible_inventory_file}", 'w') do |f|
+    f.write "[local]\n"
+    f.write "#{settings['ans_hostname']} ansible_host=127.0.0.1 ansible_connection=local\n\n"
+    f.write "[docker-hosts]\n\n"
+    f.write "[docker-swarm-managers]\n\n"
+    f.write "[docker-swarm-workers]\n\n"
+  end
+
+  # ansible control node, so your host doesn't need ansible setup
+  config.vm.define "#{settings['ans_hostname']}" do |ans|
+    ans.vm.provider "virtualbox" do |vb|
+      vb.memory = settings['ans_mem']
+      vb.cpus = settings['ans_cpus']
+    end
+    ans.vm.network :private_network, ip: "#{settings['ans_ip']}"
+    ans.vm.hostname = "#{settings['ans_hostname']}"
+    ans.vm.provision "shell" do |s|
+        s.path = "./provision.sh"
+        s.args = "ansible"
+    end
+  end
+
+  # max 100 nodes with this syntax
+  (0..settings['swarm_nodes']-1).reverse_each do |i|
+    j = sprintf '%02d', i
+
+    #TODO: Arithmetic to read IP address from settings.yaml, calculate it, set it appropriately!!
+    #ansible inventory file insertion
+    text = File.read(ansible_inventory_file)
+    text = text.gsub(/\[docker-hosts\]/, "[docker-hosts]\n#{settings['swarm_hostname']}#{j} ansible_host=192.168.40.1#{j} ansible_port=22 ansible_user=vagrant")
+    if i >= 0 && i < settings['swarm_mgrs']
+      text = text.gsub(/\[docker-swarm-managers\]/, "[docker-swarm-managers]\n#{settings['swarm_hostname']}#{j} ansible_host=192.168.40.1#{j} ansible_port=22 ansible_user=vagrant")
+      provision_type = "docker-swarm-manager"
+    else
+      text = text.gsub(/\[docker-swarm-workers\]/, "[docker-swarm-workers]\n#{settings['swarm_hostname']}#{j} ansible_host=192.168.40.1#{j} ansible_port=22 ansible_user=vagrant")
+      provision_type = "docker-swarm-worker"
+    end
+    File.open(ansible_inventory_file, "w") {|file| file.puts text}
+
+    config.vm.define "#{settings['swarm_hostname']}#{j}" do |node|
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = settings['node_mem']
+        vb.cpus = settings['node_cpus']
+        diskimage = "./storage/#{settings['swarm_hostname']}#{j}-data.vdi"
+        unless File.exists?(diskimage)
+          vb.customize ["createhd", "--filename", diskimage, "--variant", "Fixed", "--size", settings['node_storage']]
+        end
+        # to list available storage controlers on a VM using: vboxmanage showinfo <vmname>
+        vb.customize ["storageattach", :id, "--storagectl", "SCSI", "--port", 2, "--device", 0, "--type", "hdd", "--medium", diskimage]
+      end
+      node.vm.network :private_network, ip: "192.168.40.1#{j}"
+      node.vm.hostname = "#{settings['swarm_hostname']}#{j}"
+      node.vm.provision "shell" do |s|
+        s.path = "./provision.sh"
+        s.args = "#{provision_type}"
+      end
+    end
+  end
+
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  #config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # yum -y install nano net-tools
+  #SHELL
+#config.vm.provision "shell", path: "provision-node.sh"
+end
