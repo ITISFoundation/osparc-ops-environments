@@ -2,7 +2,51 @@
 # vi: set ft=ruby :
 
 require 'yaml'
-settings = YAML.load_file './conf/settings.yaml'
+
+CLUSTER_SETTINGS_FILE = "./cluster_settings.yml"
+ANSIBLE_INV_FILE = "./conf/generated/ansible-hosts"
+ETC_HOSTS_FILE = "./conf/generated/etc-hosts"
+
+def generate_ansible_inventory(settings, ansible_inv_file)
+  File.delete(ansible_inv_file) if File.exist?(ansible_inv_file)
+  File.open(ansible_inv_file, 'w') do |f|
+    ip = settings['cluster']['ip_start']
+
+    f.write "[ansible]\n"
+    f.write "#{settings['ansible']['hostname']} "
+    f.write "ansible_host=127.0.0.1 "
+    f.write "ansible_connection=local\n\n"
+
+    settings['cluster']['groups'].each do |key, value|
+      f.write "[#{key}]\n"
+      (1..value['qty']).each do |i|
+        ip += 1
+        suffix = sprintf "#{value['hostname_suffix']}", i
+        f.write "#{value['hostname_prefix']}#{suffix} "
+        f.write "ansible_host=#{settings['cluster']['ip_block']}.#{ip} "
+        f.write "ansible_port=#{settings['ansible']['port']} "
+        f.write "ansible_user=#{settings['ansible']['port']}\n"
+      end
+      f.write "\n"
+    end
+  end
+end
+
+def generate_etc_hosts(settings, etc_hosts_file)
+  File.delete(etc_hosts_file) if File.exist?(etc_hosts_file)
+  File.open(etc_hosts_file, 'w') do |f|
+    ip = settings['cluster']['ip_start']
+    f.write "ansible #{settings['cluster']['ip_block']}.#{ip}\n"
+    settings['cluster']['groups'].each do |key, value|
+      (1..value['qty']).each do |i|
+        ip += 1
+        suffix = sprintf "#{value['hostname_suffix']}", i
+        f.write "#{value['hostname_prefix']}#{suffix} "
+        f.write "#{settings['cluster']['ip_block']}.#{ip}\n"
+      end
+    end
+  end
+end
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -13,9 +57,11 @@ Vagrant.configure("2") do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
+  settings = YAML.load_file(CLUSTER_SETTINGS_FILE)
+
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "#{settings['vagrant_vm_box']}"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -61,64 +107,47 @@ Vagrant.configure("2") do |config|
   #   vb.memory = "1024"
   # end
 
-  # generate our ansible inventory file, insert entry for our ansible master node
-  ansible_inventory_file = "./conf/generated/ansible_hosts"
-  File.delete(ansible_inventory_file) if File.exist?(ansible_inventory_file)
-  File.open("#{ansible_inventory_file}", 'w') do |f|
-    f.write "[local]\n"
-    f.write "#{settings['ans_hostname']} ansible_host=127.0.0.1 ansible_connection=local\n\n"
-    f.write "[docker-hosts]\n\n"
-    f.write "[docker-swarm-managers]\n\n"
-    f.write "[docker-swarm-workers]\n\n"
-  end
+  generate_ansible_inventory(settings, ANSIBLE_INV_FILE)
+  generate_etc_hosts(settings, ETC_HOSTS_FILE)
+
+  # Make a dict out of hostnames--ips for convenience
+  host_ips = Hash[*File.read(ETC_HOSTS_FILE).split(/[ \n]+/)]
 
   # ansible control node, so your host doesn't need ansible setup
-  config.vm.define "#{settings['ans_hostname']}" do |ans|
+  config.vm.define "#{settings['ansible']['hostname']}" do |ans|
     ans.vm.provider "virtualbox" do |vb|
-      vb.memory = settings['ans_mem']
-      vb.cpus = settings['ans_cpus']
+      vb.memory = settings['ansible']['mem']
+      vb.cpus = settings['ansible']['cpus']
     end
-    ans.vm.network :private_network, ip: "#{settings['ans_ip']}"
-    ans.vm.hostname = "#{settings['ans_hostname']}"
+    ans.vm.network :private_network, ip: "#{host_ips[settings['ansible']['hostname']]}"
+    ans.vm.hostname = "#{settings['ansible']['hostname']}"
     ans.vm.provision "shell" do |s|
         s.path = "./provision.sh"
         s.args = "ansible"
     end
   end
 
-  # max 100 nodes with this syntax
-  (0..settings['swarm_nodes']-1).reverse_each do |i|
-    j = sprintf '%02d', i
-
-    #TODO: Arithmetic to read IP address from settings.yaml, calculate it, set it appropriately!!
-    #ansible inventory file insertion
-    text = File.read(ansible_inventory_file)
-    text = text.gsub(/\[docker-hosts\]/, "[docker-hosts]\n#{settings['swarm_hostname']}#{j} ansible_host=192.168.40.1#{j} ansible_port=22 ansible_user=vagrant")
-    if i >= 0 && i < settings['swarm_mgrs']
-      text = text.gsub(/\[docker-swarm-managers\]/, "[docker-swarm-managers]\n#{settings['swarm_hostname']}#{j} ansible_host=192.168.40.1#{j} ansible_port=22 ansible_user=vagrant")
-      provision_type = "docker-swarm-manager"
-    else
-      text = text.gsub(/\[docker-swarm-workers\]/, "[docker-swarm-workers]\n#{settings['swarm_hostname']}#{j} ansible_host=192.168.40.1#{j} ansible_port=22 ansible_user=vagrant")
-      provision_type = "docker-swarm-worker"
-    end
-    File.open(ansible_inventory_file, "w") {|file| file.puts text}
-
-    config.vm.define "#{settings['swarm_hostname']}#{j}" do |node|
+  # create cluster groups
+  settings['cluster']['groups'].each do |key, value|
+    (1..value['qty']).each do |i|
+      suffix = sprintf "#{value['hostname_suffix']}", i
+      config.vm.define "#{value['hostname_prefix']}#{suffix}" do |node|
       node.vm.provider "virtualbox" do |vb|
-        vb.memory = settings['node_mem']
-        vb.cpus = settings['node_cpus']
-        diskimage = "./storage/#{settings['swarm_hostname']}#{j}-data.vdi"
-        unless File.exists?(diskimage)
-          vb.customize ["createhd", "--filename", diskimage, "--variant", "Fixed", "--size", settings['node_storage']]
-        end
-        # to list available storage controlers on a VM using: vboxmanage showinfo <vmname>
-        vb.customize ["storageattach", :id, "--storagectl", "SCSI", "--port", 2, "--device", 0, "--type", "hdd", "--medium", diskimage]
+        vb.memory = value['mem']
+        vb.cpus = value['cpus']
+        # ToDo: Finish this capability... needs to check if extra_storage is defined for each group or not
+        #diskimage = "./storage/#{value['hostname_prefix']}#{suffix}-data.vdi"
+        #unless File.exists?(diskimage)
+        #  vb.customize ["createhd", "--filename", diskimage, "--variant", "Fixed", "--size", value['extra_storage']]
+        #end
+        ### to list available storage controlers on a VM using: vboxmanage showinfo <vmname>
+        #vb.customize ["storageattach", :id, "--storagectl", "SCSI", "--port", 2, "--device", 0, "--type", "hdd", "--medium", diskimage] 
       end
-      node.vm.network :private_network, ip: "192.168.40.1#{j}"
-      node.vm.hostname = "#{settings['swarm_hostname']}#{j}"
+      node.vm.network :private_network, ip: "#{host_ips[value['hostname_prefix']}#{suffix}]}"
+      node.vm.hostname = "value['hostname_prefix']}#{suffix}"
       node.vm.provision "shell" do |s|
         s.path = "./provision.sh"
-        s.args = "#{provision_type}"
+        s.args = "#{key}"
       end
     end
   end

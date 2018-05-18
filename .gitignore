@@ -1,2 +1,28 @@
-# entire osparc-simcore repository, if checked out anywhere in here
-osparc-simcore/
+# macOS garbage
+.DS_Store
+
+# Vagrant per-vm and on-the-fly generated configurations
+.vagrant
+**/generated/*
+
+# Vagrant persistent storage disk images
+*.vdi
+**/storage/*
+
+# Secrets for Ansible/Vagrant deployment
+*secrets.yml
+
+# Ansible related stuff
+*.retry
+
+# EHZ Shell Script logs and debug
+*.log
+*.xtrace
+
+# SSH/SSL Keys and the like
+authorized_keys
+known_hosts
+id_rsa*
+id_ed25519*
+*.key
+*.crt

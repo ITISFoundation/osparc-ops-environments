@@ -1,0 +1,31 @@
+---
+# Settings for Ansible & Vagrant for deployment
+  vagrant_vm_box: ubuntu/bionic64
+
+  ansible:
+    hostname: ansible
+    cpus: 1
+    mem: 1024
+    user: ans
+    port: 22
+
+  cluster:
+    ip_block: 192.168.40
+    ip_start: 10
+    groups:
+      managers:
+        hostname_prefix: manager
+        hostname_suffix: "%02d"
+        qty: 3
+        cpus: 1
+        mem: 2048
+      workers:
+        hostname_prefix: worker
+        hostname_suffix: "%02d"
+        extra_storage: 4096
+        qty: 2
+        cpus: 1
+        mem: 2048
+
+
+
