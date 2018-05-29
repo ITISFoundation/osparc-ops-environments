@@ -12,7 +12,7 @@
 
 To deploy on your own host, you need:
 
-- Linux, here we assume Ubuntu 18.04
+- Linux, (tested on Ubuntu/Xenial and Ubuntu/Bionic)
 - [VirtualBox](https://www.virtualbox.org/)
 - [Vagrant](https://www.vagrantup.com/docs/)
 - Working NFS server installed ([Ubuntu](https://help.ubuntu.com/stable/serverguide/network-file-system.html)/Debian = nfs-kernel-server ; RedHat/CentOS = nfsd) to use an [NFS synced vagrant folder](https://www.vagrantup.com/docs/synced-folders/nfs.html).  Using NFS outperforms standard Vagrant rsync folder share method significantly.  Else comment out the following line in Vagrantfile:
@@ -24,7 +24,7 @@ To deploy on your own host, you need:
 - Install [Vagrant-hostsupdater plugin](https://github.com/cogitatio/vagrant-hostsupdater)
 `$ vagrant plugin install vagrant-hostsupdater`
 Else, you will need to add contents of `./config/hosts` to your own `/etc/hosts` file to allow your own host to communicate with all nodes by name (and disable hostsupdater parts of Vagrantfile).
-- Modify your host's sudoers file to allow passwordless operation of Vagrant to setup an NFS share and use the persistent-storage plugin above.  Example for Ubuntu hosts:
+- Modify your host's sudoers file (use `visudo`) to allow passwordless operation of Vagrant to setup an NFS share and use the persistent-storage plugin above.  Example for Ubuntu hosts:
 ```
 Cmnd_Alias VAGRANT_EXPORTS_CHOWN = /bin/chown 0\:0 /tmp/*
 Cmnd_Alias VAGRANT_EXPORTS_MV = /bin/mv -f /tmp/* /etc/exports
@@ -35,11 +35,17 @@ Cmnd_Alias VAGRANT_HOSTS_ADD = /bin/sh -c 'echo "*" >> /etc/hosts'
 Cmnd_Alias VAGRANT_HOSTS_REMOVE = /bin/sed -i -e /*/ d /etc/hosts
 %sudo ALL=(root) NOPASSWD: VAGRANT_EXPORTS_CHOWN, VAGRANT_EXPORTS_MV, VAGRANT_NFSD_CHECK, VAGRANT_NFSD_START, VAGRANT_NFSD_APPLY, VAGRANT_HOSTS_ADD, VAGRANT_HOSTS_REMOVE
 ```
- Else you will need to type your `sudo` password when you `vagrant up` to allow vagrant-hostsupdater to modify your `/etc/hosts` file
+ Else you will need to type your `sudo` password when you `vagrant up` to allow vagrant-hostsupdater to modify your `/etc/hosts` file. Note: _Ubuntu still asks me for sudo password... what am I missing here? ~EHZ_
 
 ### Resources ###
 
-Ansible's docs:
+Virtualbox Docs:
+> https://www.virtualbox.org/wiki/Documentation
+
+Vagrant Docs:
+> https://www.vagrantup.com/docs/
+
+Ansible's Docs:
 > http://docs.ansible.com/ansible/latest/
 
 Nice guide to setup/manage docker swarm with ansible:
@@ -59,27 +65,55 @@ Note: `cluster_secrets.yml` is covered by `.gitignore`
 **Fire up all nodes and provision them**
 
 ```
-$ ./vagrant up
+you@yourhost:~/osparc-ops/virtual_cluster$ ./vagrant up
 ```
 
 This will:
 
 - take ~3-5 minutes per node
 - instantiate the VMs
-- install minimal packages to get Ansible running on node `ansible`
+- install minimal packages to get Ansible running on the control node
 - create an Ansible hosts file for the cluster
-- setup SSH key-based login from `ansible` to `node00` through `nodeXX`
-
-*ToDo: vagrant-hostsupdater still asks me for sudo password... why?*
+- setup SSH key-based login from the control node to all other nodes
 
 Finally, you can start working...
 
+SSH to the ansible control node (default name `ansible` defined in `cluster_settings.yml`)
+```
+you@yourhost:~/osparc-ops/virtual_cluster$ vagrant ssh ansible
+```
+
+Test that Ansible is setup correctly and can talk to all your nodes:
+```
+vagrant@ansible:~$ ansible all -m setup -a "filter=ansible_distribution*
+```
+
+Clone the osparc-simcore repository onto your control node, so you can start a deployment:
+```
+vagrant@ansible:~$ ansible-playbook /vagrant/ansible/osparc-fetch.yml
+```
+
+Deploy osparc-simcore to your virtual cluster:
+```
+vagrant@ansible:~$ cd osparc-simcore/ops/ansible
+vagrant@ansible:~/osparc-simcore/ops/ansible$ ansible-playbook osparc-simcore-deploy.yml
+```
+
+Once that's done, access services at: `http://<IP-address-of-manager-node>:<port>`. See `cluster_settings.yml` to find that IP address.
+
+Manage your cluster from a manger node:
+```
+you@yourhost:~/osparc-ops/virtual_cluster$ vagrant ssh manager01
+...
+vagrant@manager01:~$ docker service ls
+```
+
 When finished, stop the Vagrant VMs:
 ```
-vagrant halt -f
+you@yourhost:~/osparc-ops/virtual_cluster$ vagrant halt -f
 ```
 
 Destroy the VM environment:
 ```
-vagrant destroy -f
+you@yourhost:~/osparc-ops/virtual_cluster$ vagrant destroy -f
 ```
