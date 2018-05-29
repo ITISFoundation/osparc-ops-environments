@@ -1,0 +1,15 @@
+---
+# fetch osparc from github as pre-requisite to deployment
+- hosts: ansible
+  tasks:
+  - name: Create directory for local git repo
+    file:
+      path: '/home/vagrant/osparc-simcore'
+      state: directory
+      group: vagrant
+      mode: 0775
+  - name: clone osparc-simcore from github
+    git:
+      repo: 'https://github.com/ehzastrow/osparc-simcore.git'
+      dest: '/home/vagrant/osparc-simcore'
+      version: 'feature/s3storage'

@@ -151,7 +151,7 @@ main() {
 	catch ${?} ${FATAL} "provision_all on ${MY_HOSTNAME}"
 
 	case ${NODE_TYPE} in
-		"ansible")
+		"control")
 			provision_ansible
 			catch ${?} ${FATAL} "provision_ansible on ${MY_HOSTNAME}"
 			;;
@@ -188,7 +188,7 @@ parse_opts() {
 
 	#validate opts, if necessary
   case $NODE_TYPE in
-    ansible)
+    control)
       # do stuff here
       ;;
     managers)
@@ -301,6 +301,9 @@ provision_ansible() {
 		ansible-galaxy install -r "${f}"
 		catch ${?} "${WARN}" "ansible-galaxy install required roles in ${f}*"  || return ${FAIL}
 	done
+
+	#take ownership of /etc/ansible/roles for vagrant user
+	chown -R vagrant:vagrant /etc/ansible/roles
 
 	return ${OK}
 }

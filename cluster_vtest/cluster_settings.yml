@@ -2,8 +2,8 @@
 # Settings for Ansible & Vagrant for deployment
   vagrant_vm_box: ubuntu/bionic64
 
-  ansible:
-    hostname: ans
+  control:
+    hostname: ansible
     cpus: 1
     mem: 2048
     user: vagrant

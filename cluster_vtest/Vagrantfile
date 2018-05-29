@@ -13,8 +13,9 @@ def generate_ansible_inventory(settings, ansible_inv_file)
   File.open(ansible_inv_file, 'w') do |f|
     ip = settings['cluster']['ip_start']
 
-    f.write "[ansible]\n"
-    f.write "#{settings['ansible']['hostname']} "
+    f.write "localhost ansible_connection=local\n\n"
+    f.write "[control]\n"
+    f.write "#{settings['control']['hostname']} "
     f.write "ansible_host=127.0.0.1 "
     f.write "ansible_connection=local\n\n"
 
@@ -25,8 +26,8 @@ def generate_ansible_inventory(settings, ansible_inv_file)
         suffix = sprintf "#{value['hostname_suffix']}", i
         f.write "#{value['hostname_prefix']}#{suffix} "
         f.write "ansible_host=#{settings['cluster']['ip_block']}.#{ip} "
-        f.write "ansible_port=#{settings['ansible']['port']} "
-        f.write "ansible_user=#{settings['ansible']['user']}\n"
+        f.write "ansible_port=#{settings['control']['port']} "
+        f.write "ansible_user=#{settings['control']['user']}\n"
       end
       f.write "\n"
     end
@@ -37,7 +38,7 @@ def generate_etc_hosts(settings, etc_hosts_file)
   File.delete(etc_hosts_file) if File.exist?(etc_hosts_file)
   File.open(etc_hosts_file, 'w') do |f|
     ip = settings['cluster']['ip_start']
-    f.write "#{settings['ansible']['hostname']} #{settings['cluster']['ip_block']}.#{ip}\n"
+    f.write "#{settings['control']['hostname']} #{settings['cluster']['ip_block']}.#{ip}\n"
     settings['cluster']['groups'].each do |key, value|
       (1..value['qty']).each do |i|
         ip += 1
@@ -120,16 +121,16 @@ Vagrant.configure("2") do |config|
   host_ips = Hash[*File.read(ETC_HOSTS_FILE).split(/[ \n]+/)]
 
   # ansible control node, so your host doesn't need ansible setup
-  config.vm.define "#{settings['ansible']['hostname']}" do |ans|
+  config.vm.define "#{settings['control']['hostname']}" do |ans|
     ans.vm.provider "virtualbox" do |vb|
-      vb.memory = settings['ansible']['mem']
-      vb.cpus = settings['ansible']['cpus']
+      vb.memory = settings['control']['mem']
+      vb.cpus = settings['control']['cpus']
     end
-    ans.vm.network :private_network, ip: "#{host_ips[settings['ansible']['hostname']]}"
-    ans.vm.hostname = "#{settings['ansible']['hostname']}"
+    ans.vm.network :private_network, ip: "#{host_ips[settings['control']['hostname']]}"
+    ans.vm.hostname = "#{settings['control']['hostname']}"
     ans.vm.provision "shell" do |s|
         s.path = "./provision.sh"
-        s.args = "ansible"
+        s.args = "control"
     end
   end
 
