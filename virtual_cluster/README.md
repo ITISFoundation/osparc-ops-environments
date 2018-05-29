@@ -1,18 +1,23 @@
-# Virtual Cluster Template
+# oSparc Simcore Operations Development - Virtual Cluster
 
-Copy `cluster_template/` (this folder) to a new folder to being working on a specific feature
+**Virtual Cluster for osparce platform operations development**
+
+- Quickly provision a cluster of VMs using Vagrant & VirtualBox
+- Setup one node as an ansible control host, with passwordless SSH access to all other nodes
+- Cluster defined in files: 
+  - `cluster_settings.yml`
+  - `cluster_secrets.yml`
 
 ### Requirements ###
 
 To deploy on your own host, you need:
 
-- Linux, (tested with Ubuntu 18.04)
+- Linux, here we assume Ubuntu 18.04
 - [VirtualBox](https://www.virtualbox.org/)
 - [Vagrant](https://www.vagrantup.com/docs/)
-- Working NFS server installed ([Ubuntu](https://help.ubuntu.com/stable/serverguide/network-file-system.html)/Debian = nfs-kernel-server ; RedHat/CentOS = nfsd) to use an [NFS synced vagrant folder](https://www.vagrantup.com/docs/synced-folders/nfs.html).  Using NFS significantly outperforms standard Vagrant rsync folder share method.  If not using NFS, comment out the following line in Vagrantfile:
+- Working NFS server installed ([Ubuntu](https://help.ubuntu.com/stable/serverguide/network-file-system.html)/Debian = nfs-kernel-server ; RedHat/CentOS = nfsd) to use an [NFS synced vagrant folder](https://www.vagrantup.com/docs/synced-folders/nfs.html).  Using NFS outperforms standard Vagrant rsync folder share method significantly.  Else comment out the following line in Vagrantfile:
 `  config.vm.synced_folder ".", "/vagrant", type: "nfs"`
 - Sufficeint (SSD hopefully) disk storage to host the VM images and any persistent container disk images.
-
 
 **Recommended**
 
@@ -30,7 +35,7 @@ Cmnd_Alias VAGRANT_HOSTS_ADD = /bin/sh -c 'echo "*" >> /etc/hosts'
 Cmnd_Alias VAGRANT_HOSTS_REMOVE = /bin/sed -i -e /*/ d /etc/hosts
 %sudo ALL=(root) NOPASSWD: VAGRANT_EXPORTS_CHOWN, VAGRANT_EXPORTS_MV, VAGRANT_NFSD_CHECK, VAGRANT_NFSD_START, VAGRANT_NFSD_APPLY, VAGRANT_HOSTS_ADD, VAGRANT_HOSTS_REMOVE
 ```
- Else you will need to type your `sudo` password when you `vagrant up` to allow vagrant-hostsupdater to modify your `/etc/hosts` file. [  *I still need to type in sudo... why? ~EHZ* ]
+ Else you will need to type your `sudo` password when you `vagrant up` to allow vagrant-hostsupdater to modify your `/etc/hosts` file
 
 ### Resources ###
 
@@ -40,25 +45,16 @@ Ansible's docs:
 Nice guide to setup/manage docker swarm with ansible:
 > https://caylent.com/manage-docker-swarm-using-ansible/
 
-
 ### Instructions ###
 
 Clone this repo onto your local machine, perform setup described in 'Requirements' section.
 
-**Copy `cluster_template/` to a new folder to being working on a specific feature**
-
-```
-$ cp -r ./cluster_template/ ./osparc-ops-myfeature
-$ cd osparc-ops-myfeature
-```
-
-**Clone osparc-simcore repository into a top level folder: `_source`**
-
-- git will ignore anything in this directory
-
 **Configure your virtual cluster**
 
-- Edit `./cluster_settings.yaml` as desired.
+- Edit `cluster_settings.yaml` as desired.
+- Rename `cluster_secrets.example.yml` to `cluster_secrets.yml` and edit as desired
+
+Note: `cluster_secrets.yml` is covered by `.gitignore`
 
 **Fire up all nodes and provision them**
 
@@ -70,22 +66,20 @@ This will:
 
 - take ~3-5 minutes per node
 - instantiate the VMs
-- install minimal packages to get Ansible running on node `ans`
+- install minimal packages to get Ansible running on node `ansible`
 - create an Ansible hosts file for the cluster
-- setup SSH key-based login from `ans` to all other nodes in your cluster
+- setup SSH key-based login from `ansible` to `node00` through `nodeXX`
 
+*ToDo: vagrant-hostsupdater still asks me for sudo password... why?*
 
-Finally, you can start working.  As a test, try this command from the Ansible control node:
-```
-$ ansible all -m setup -a "filter=ansible_distribution*"
-```
+Finally, you can start working...
 
 When finished, stop the Vagrant VMs:
 ```
-$ vagrant halt -f
+vagrant halt -f
 ```
 
 Destroy the VM environment:
 ```
-$ vagrant destroy -f
+vagrant destroy -f
 ```

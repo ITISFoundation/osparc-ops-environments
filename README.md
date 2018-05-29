@@ -1,6 +1,5 @@
 # oSparc Simcore Operations Development
 
-
 **Virtual Cluster for osparce platform operations development**
 
 - Quickly provision a cluster of VMs using Vagrant & VirtualBox
@@ -17,7 +16,6 @@ To deploy on your own host, you need:
 - Working NFS server installed ([Ubuntu](https://help.ubuntu.com/stable/serverguide/network-file-system.html)/Debian = nfs-kernel-server ; RedHat/CentOS = nfsd) to use an [NFS synced vagrant folder](https://www.vagrantup.com/docs/synced-folders/nfs.html).  Using NFS outperforms standard Vagrant rsync folder share method significantly.  Else comment out the following line in Vagrantfile:
 `  config.vm.synced_folder ".", "/vagrant", type: "nfs"`
 - Sufficeint (SSD hopefully) disk storage to host the VM images and any persistent container disk images.
-
 
 **Recommended**
 
@@ -44,7 +42,6 @@ Ansible's docs:
 
 Nice guide to setup/manage docker swarm with ansible:
 > https://caylent.com/manage-docker-swarm-using-ansible/
-
 
 ### Instructions ###
 
