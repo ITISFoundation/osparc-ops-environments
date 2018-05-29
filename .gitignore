@@ -11,11 +11,13 @@
 
 # Secrets for Ansible/Vagrant deployment
 *secrets.yml
+*secrets.yaml
 
 # Ansible related stuff
 *.retry
 
 # EHZ Shell Script logs and debug
+log/
 *.log
 *.xtrace
 

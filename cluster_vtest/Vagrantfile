@@ -64,7 +64,7 @@ Vagrant.configure("2") do |config|
       secrets = YAML.load_file(CLUSTER_SECRETS_FILE)
     end
   end
-  
+
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "#{settings['vagrant_vm_box']}"
