@@ -1,6 +1,37 @@
-# oSparc Simcore Operations Development - Virtual Cluster
+# osparc-simcore Operations Development - Virtual Cluster
 
-**Virtual Cluster for osparce platform operations development**
+Quick start:
+
+```bash
+  # installs som pre-requisites
+  sudo apt install virtualbox vagrant nfs-kernel-server
+  sudo vagrant plugin install vagrant-hostsupdater # optional
+
+  git clone git@github.com:itisfoundation/osparc-ops.git
+  cd osparc-ops/virtual_cluster
+
+  mkdir -p ./conf/generated/
+  vagrant up
+
+  # see that everything is up and running
+  vagrant status
+
+  # connect to ansible maghine
+  vagrant ssh ansible
+
+  # in ansible machine, we can run ansible
+
+  # connect to manager01
+  vagrant ssh manager01
+
+  # stops all
+  vagrant halt
+
+  # destroys all virtual machines
+  vagrant destroy -f
+```
+
+## Virtual Cluster for osparce platform operations development
 
 - Quickly provision a cluster of VMs using Vagrant & VirtualBox
 - Setup one node as an ansible control host, with passwordless SSH access to all other nodes
@@ -8,7 +39,7 @@
   - `cluster_settings.yml`
   - `cluster_secrets.yml`
 
-### Requirements ###
+## Requirements
 
 To deploy on your own host, you need:
 
@@ -51,13 +82,13 @@ Ansible's Docs:
 Nice guide to setup/manage docker swarm with ansible:
 > https://caylent.com/manage-docker-swarm-using-ansible/
 
-### Instructions ###
+## Instructions
 
 Clone this repo onto your local machine, perform setup described in 'Requirements' section.
 
 **Configure your virtual cluster**
 
-- Edit `cluster_settings.yaml` as desired.
+- Edit `cluster_settings.yml` as desired.
 - Rename `cluster_secrets.example.yml` to `cluster_secrets.yml` and edit as desired
 
 Note: `cluster_secrets.yml` is covered by `.gitignore`
