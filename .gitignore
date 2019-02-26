@@ -28,3 +28,6 @@ id_rsa*
 id_ed25519*
 *.key
 *.crt
+
+# vscode
+.vscode/
