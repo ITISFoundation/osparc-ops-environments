@@ -114,16 +114,6 @@ async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Di
     await docker_subtask.init()
     return docker_subtask
 
-async def update_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict, subtasks: List[SubTask]) -> List[SubTask]:
-    log.debug("updating docker watch subtask")
-    new_subtasks = []
-    for subtask in subtasks:
-        if isinstance(subtask, DockerRegistriesWatcher):
-            # replace the task
-            new_subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
-        else:
-            new_subtasks.append(subtask)
-    return new_subtasks
 async def create_git_watch_subtask(app_config: Dict) -> SubTask:
     log.debug("creating git repo watch subtask")
     git_sub_task = GitUrlWatcher(app_config)
@@ -135,10 +125,18 @@ async def init_task(app_config: Dict) -> List[SubTask]:
     subtasks = []
     # start by creating the git watcher/repos
     subtasks.append(await create_git_watch_subtask(app_config))
-    # ensure the portainer has a stack config deployed
-    stack_cfg = await deploy(app_config, subtasks)
+    # then generate the stack file
+    stack_file = await generate_stack_file(app_config, subtasks)
+    log.debug("generated stack file in %s", stack_file.name)
+    # filter the stack file if needed
+    stack_cfg = await filter_services(app_config, stack_file)
+    log.debug("filtered stack configuration")
     # create the docker repos watchers
     subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
+    # deploy to portainer
+    await update_portainer_stack(app_config, stack_cfg)
+    log.debug("updated portainer app")
+    # notify
     await notify(app_config)
     log.debug("task initialised")
     return subtasks
@@ -150,15 +148,6 @@ async def check_changes(subtasks: List[SubTask]):
             log.info("Changes detected with task %s", task.name)
             return True
     return False
-
-async def deploy(app_config: Dict, subtasks: List[SubTask]) -> Dict:
-    stack_file = await generate_stack_file(app_config, subtasks)
-    log.debug("generated stack file in %s", stack_file.name)
-    stack_cfg = await filter_services(app_config, stack_file)
-    log.debug("filtered stack configuration")
-    await update_portainer_stack(app_config, stack_cfg)
-    log.debug("updated portainer app")
-    return stack_cfg
 
 async def auto_deploy(app: web.Application):
     log.info("start autodeploy task")
@@ -175,13 +164,8 @@ async def auto_deploy(app: web.Application):
             changes_detected = await check_changes(subtasks)
             if changes_detected:
                 log.info("changes detected, redeploying the stack...")
-                # create the tasks before deployment, in case some image is pushed after that call and before deployment that it will still be redeployed
-                subtasks = await update_docker_registries_watch_subtask(app_config, new_stack_cfg, subtasks)
-                new_stack_cfg = await deploy(app_config, subtasks)
-                
-                log.info("stack redeployed.")                
-                await notify(app_config)
-                log.info("notification sent.")
+                subtasks = await init_task(app_config)
+                log.info("stack re-deployed")
             await asyncio.sleep(app_config["main"]["polling_interval"])
 
     except asyncio.CancelledError:
