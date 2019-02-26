@@ -1,0 +1,49 @@
+dist: xenial
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.23.2
+services:
+  - docker
+addons:
+  apt:
+    packages:
+      - docker-ce
+jobs:
+  include:
+    - stage: unit testing
+      name: deployment-agent
+      language: python
+      python:
+       - "3.6"
+       - "3.7"
+      cache: pip
+      before_install:
+        - sudo bash ops/travis/unit-testing/deployment-agent before_install
+      install:
+        - bash ops/travis/unit-testing/deployment-agent install
+      before_script:
+        - bash ops/travis/unit-testing/deployment-agent before_script
+      script:
+        - bash ops/travis/unit-testing/deployment-agent script
+      after_success:
+        - bash ops/travis/unit-testing/deployment-agent after_success
+    
+    - stage: system testing, staging
+      name: deployment-agent
+      language: python
+      before_install:
+        - sudo bash ops/travis/system-testing/deployment-agent before_install
+      install:
+        - bash ops/travis/system-testing/deployment-agent install
+      before_script:
+        - bash ops/travis/system-testing/deployment-agent before_script
+      script:
+        - bash ops/travis/system-testing/deployment-agent script
+      after_success:
+        - bash ops/travis/system-testing/deployment-agent after_success
+      deploy:
+        - provider: script
+          skip_cleanup: true
+          script: bash ops/travis/deploy/deployment-agent deploy
+          # on:
+          #   branch: master
