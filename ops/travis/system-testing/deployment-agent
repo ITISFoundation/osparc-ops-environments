@@ -19,7 +19,7 @@ install() {
 before_script() {
     pip freeze
     docker images
-    pushd services/deployment-agent; make up; popd
+    pushd services/deployment-agent; cp tests/test-config.yaml deployment_config.yaml;  make up; popd
 }
 
 script() {
@@ -28,11 +28,11 @@ script() {
 }
 
 after_success() {
-    make down
+    pushd services/deployment-agent; make down; popd
 }
 
 after_failure() {
-    make down
+    pushd services/deployment-agent; make down; popd
 }
 
 # Check if the function exists (bash specific)
