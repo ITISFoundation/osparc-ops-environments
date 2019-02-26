@@ -1,0 +1,10 @@
+*
+__pycache__
+!src/
+!requirements/
+!docker/
+!tests/
+!setup.py
+!*.yml
+!*.json
+!*.yaml

@@ -1,0 +1,6 @@
+aiohttp
+aiohttp-swagger
+docker
+semantic_version
+tenacity
+trafaret_config
