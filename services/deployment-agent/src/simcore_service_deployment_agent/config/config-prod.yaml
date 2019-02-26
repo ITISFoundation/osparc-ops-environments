@@ -1,6 +1,9 @@
 ## Runtime configuration for the simcore_service_deployment_agent application.
 ##
 version: '1.0'
+rest:
+  version: v0
+  location: oas3/v0/openapi.yaml
 main:
   log_level: WARNING
   host: 127.0.0.1
@@ -39,4 +42,10 @@ main:
   excluded_services: []
   excluded_volumes: []
   polling_interval: 30
-  
+  notifications:    
+      - service: mattermost
+        url: mattermost_url
+        message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
+        enabled: true
+        channel_id: dfsfdsfsf
+        personal_token: some_token
