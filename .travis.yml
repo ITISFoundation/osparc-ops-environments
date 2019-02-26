@@ -31,6 +31,9 @@ jobs:
     - stage: system testing, staging
       name: deployment-agent
       language: python
+      python:
+       - "3.6"
+       - "3.7"
       before_install:
         - sudo bash ops/travis/system-testing/deployment-agent before_install
       install:
