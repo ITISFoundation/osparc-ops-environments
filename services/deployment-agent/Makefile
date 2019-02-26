@@ -73,11 +73,11 @@ down:
 	${DOCKER} swarm leave -f
 
 AGENT_VERSION = 1.0.0
-REGISTRY=masu.speag.com
+REGISTRY=itisfoundation
 push:
 	${DOCKER} login ${REGISTRY}
-	${DOCKER} tag deployment-agent:latest ${REGISTRY}/simcore/it/deployment-agent:${AGENT_VERSION}
-	${DOCKER} push ${REGISTRY}/simcore/it/deployment-agent:${AGENT_VERSION}
+	${DOCKER} tag deployment-agent:latest ${REGISTRY}/deployment-agent:${AGENT_VERSION}
+	${DOCKER} push ${REGISTRY}/deployment-agent:${AGENT_VERSION}
 
 .env: .env-devel
 	# first check if file exists, copies it
