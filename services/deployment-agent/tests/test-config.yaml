@@ -22,8 +22,8 @@ main:
   docker_private_registries:
     # lists registries and their credentials if necessary to check for services to download from
     - url: https://index.docker.io/v1
-      username: the-username
-      password: the-password
+      username: username
+      password: ""
   docker_stack_recipe:
     # defines the recipe to generate the docker-compose style stack file to be deployed in the swarm
     # An optional command line may be defined to that end that generate the docker-compose file.
@@ -37,12 +37,12 @@ main:
       username: admin
       password: adminadmin
       stack_name: services
-  excluded_services: []
+  excluded_services: [webclient]
   excluded_volumes: []
   polling_interval: 30
   notifications:    
       - service: mattermost
-        url: mattermost_url
+        url: http://mattermost.com
         message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
         enabled: false
         channel_id: some_token
