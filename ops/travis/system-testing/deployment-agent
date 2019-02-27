@@ -17,6 +17,7 @@ before_script() {
     pip freeze
     docker images
     make up
+    docker service ls
 }
 
 script() {
@@ -29,6 +30,7 @@ after_success() {
 }
 
 after_failure() {
+    docker service ls
     make down
 }
 
