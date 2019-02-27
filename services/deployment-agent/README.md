@@ -5,13 +5,14 @@ Optionally the tool can also send a configurable notification to an external ser
 
 ## Configuration
 
-A sample configuration file for the auto deployment agent is visible in [here](src/simcore_service_deployment_agent/config/config-prod.yaml).
+A sample configuration file for the auto deployment agent is visible in [here](src/simcore_service_deployment_agent/tests/test-config.yaml).
 
 
 
 ## Deployment
 
-The auto deployment agent may be deployed locally provided a configuration file named deployment_config.yaml is provided at the same level as the Makefile:
+The auto deployment agent may be deployed locally provided a configuration file named deployment_config.yaml is provided at the same level as the Makefile. If none is provided the test-configuration will be automatically copied (which automatically deploys the simcore core platform with some default values).
+
 ```bash
 make build
 make up
