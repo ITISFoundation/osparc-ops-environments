@@ -64,7 +64,7 @@ def services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
 
 
 def _list_services():
-    exclude = []
+    exclude = ["portainer", "agent"]
     content = _services_docker_compose(_osparc_simcore_root_dir(_here()))
     return [name for name in content["services"].keys() if name not in exclude]
 
