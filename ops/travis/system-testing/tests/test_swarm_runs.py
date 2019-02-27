@@ -119,8 +119,6 @@ async def test_service_running(service_name, docker_client, loop):
         NOTE: loop fixture makes this test async
     """
     running_services = docker_client.services.list()
-    import pdb
-    pdb.set_trace()
     # find the service
     running_service = [
         s for s in running_services if service_name == s.name.split("_")[1]]
