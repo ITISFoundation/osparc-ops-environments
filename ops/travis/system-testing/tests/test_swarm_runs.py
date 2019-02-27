@@ -21,22 +21,27 @@ logger = logging.getLogger(__name__)
 
 WAIT_TIME_SECS = 20
 RETRY_COUNT = 7
-MAX_WAIT_TIME=240
+MAX_WAIT_TIME = 240
 
 logger = logging.getLogger(__name__)
 
+
 def _here() -> Path:
     return Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
+
 
 @pytest.fixture(scope="session")
 def here() -> Path:
     return _here()
 
+
 def _osparc_simcore_root_dir(here) -> Path:
     root_dir = here.parent.parent.parent.parent.resolve()
-    assert root_dir.exists(), "Is this service within osparc-simcore repo?"
-    assert any(root_dir.glob("services/web/server")), "%s not look like rootdir" % root_dir
+    assert root_dir.exists(), "Is this service within osparc-ops repo?"
+    assert any(root_dir.glob("services/deployment-agent")
+               ), "%s not look like rootdir" % root_dir
     return root_dir
+
 
 @pytest.fixture(scope='session')
 def osparc_simcore_root_dir(here) -> Path:
@@ -52,6 +57,7 @@ def _services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
         content = yaml.safe_load(f)
     return content
 
+
 @pytest.fixture("session")
 def services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
     return _services_docker_compose(osparc_simcore_root_dir)
@@ -59,13 +65,15 @@ def services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
 
 @pytest.fixture("session")
 def tools_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
-    docker_compose_path = osparc_simcore_root_dir / "services" / "docker-compose.tools.yml"
+    docker_compose_path = osparc_simcore_root_dir / \
+        "services" / "docker-compose.tools.yml"
     assert docker_compose_path.exists()
 
     content = {}
     with docker_compose_path.open() as f:
         content = yaml.safe_load(f)
     return content
+
 
 def _list_core_services():
     exclude = ["webclient"]
@@ -90,26 +98,32 @@ def get_tasks_summary(tasks):
     msg = ""
     for t in tasks:
         t["Status"].setdefault("Err", '')
-        msg += "- task ID:{ID}, STATE: {Status[State]}, ERROR: '{Status[Err]}' \n".format(**t)
+        msg += "- task ID:{ID}, STATE: {Status[State]}, ERROR: '{Status[Err]}' \n".format(
+            **t)
     return msg
 
+
 def get_failed_tasks_logs(service, docker_client):
-    failed_states = ["COMPLETE", "FAILED", "SHUTDOWN", "REJECTED", "ORPHANED", "REMOVE"]
+    failed_states = ["COMPLETE", "FAILED",
+                     "SHUTDOWN", "REJECTED", "ORPHANED", "REMOVE"]
     failed_logs = ""
     for t in service.tasks():
         if t['Status']['State'].upper() in failed_states:
             cid = t['Status']['ContainerStatus']['ContainerID']
-            failed_logs += "{2} {0} - {1} BEGIN {2}\n".format(service.name, t['ID'], "="*10)
+            failed_logs += "{2} {0} - {1} BEGIN {2}\n".format(
+                service.name, t['ID'], "="*10)
             if cid:
                 container = docker_client.containers.get(cid)
                 failed_logs += container.logs().decode('utf-8')
             else:
                 failed_logs += "  log unavailable. container does not exists\n"
-            failed_logs += "{2} {0} - {1} END {2}\n".format(service.name, t['ID'], "="*10)
+            failed_logs += "{2} {0} - {1} END {2}\n".format(
+                service.name, t['ID'], "="*10)
 
     return failed_logs
 
 # TESTS -------------------------------
+
 
 def test_all_services_up(docker_client, services_docker_compose, tools_docker_compose):
     """
@@ -117,7 +131,8 @@ def test_all_services_up(docker_client, services_docker_compose, tools_docker_co
     """
     running_services = docker_client.services.list()
 
-    assert (len(services_docker_compose["services"]) + len(tools_docker_compose["services"])) == len(running_services)
+    assert (len(services_docker_compose["services"]) + len(
+        tools_docker_compose["services"])) == len(running_services)
 
     # TODO: check names instead
 
@@ -130,7 +145,8 @@ async def test_core_service_running(core_service_name, docker_client, loop):
     running_services = docker_client.services.list()
 
     # find the service
-    running_service = [s for s in running_services if core_service_name in s.name]
+    running_service = [
+        s for s in running_services if core_service_name in s.name]
     assert len(running_service) == 1
 
     running_service = running_service[0]
@@ -155,7 +171,8 @@ async def test_core_service_running(core_service_name, docker_client, loop):
     for n in range(RETRY_COUNT):
         task = running_service.tasks()[0]
         if task['Status']['State'].upper() in pre_states:
-            print("Waiting [{}/{}] ...\n{}".format(n, RETRY_COUNT, get_tasks_summary(tasks)))
+            print("Waiting [{}/{}] ...\n{}".format(n,
+                                                   RETRY_COUNT, get_tasks_summary(tasks)))
             await asyncio.sleep(WAIT_TIME_SECS)
         else:
             break
@@ -163,5 +180,5 @@ async def test_core_service_running(core_service_name, docker_client, loop):
     # should be running
     assert task['Status']['State'].upper() == "RUNNING", \
         "Expected running, got \n{}\n{}".format(
-                pformat(task),
-                get_failed_tasks_logs(running_service, docker_client))
+        pformat(task),
+        get_failed_tasks_logs(running_service, docker_client))
