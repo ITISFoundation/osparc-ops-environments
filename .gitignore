@@ -35,6 +35,7 @@ id_ed25519*
 # python
 *.pyc
 .venv/
+.pytest_cache/
 
 #docker
 .env
