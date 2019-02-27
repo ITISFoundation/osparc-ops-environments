@@ -2,15 +2,22 @@
 
 # TODO: add flavours by combinging docker-compose files. Namely development, test and production.
 VERSION := $(shell uname -a)
-# SAN this is a hack so that docker-compose works in the linux virtual environment under Windows
 ifneq (,$(findstring Microsoft,$(VERSION)))
-$(info    detected posix)
+$(info    detected WSL)
 export DOCKER_COMPOSE=docker-compose
 export DOCKER=docker
 else ifeq ($(OS), Windows_NT)
 $(info    detected Powershell/CMD)
 export DOCKER_COMPOSE=docker-compose.exe
 export DOCKER=docker.exe
+else ifneq (,$(findstring Darwin,$(VERSION)))
+$(info    detected OSX)
+export DOCKER_COMPOSE=docker-compose
+export DOCKER=docker
+else
+$(info    detected native linux)
+export DOCKER_COMPOSE=docker-compose
+export DOCKER=docker
 endif
 
 TEMPCOMPOSE := $(shell mktemp)
