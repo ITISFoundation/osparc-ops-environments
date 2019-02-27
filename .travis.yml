@@ -14,8 +14,8 @@ jobs:
       name: deployment-agent
       language: python
       python:
-       - "3.6"
-       - "3.7"
+        - "3.6"
+        - "3.7"
       cache: pip
       before_install:
         - sudo bash ops/travis/unit-testing/deployment-agent before_install
@@ -27,13 +27,13 @@ jobs:
         - bash ops/travis/unit-testing/deployment-agent script
       after_success:
         - bash ops/travis/unit-testing/deployment-agent after_success
-    
+
     - stage: system testing, staging
       name: deployment-agent
       language: python
       python:
-       - "3.6"
-       - "3.7"
+        - "3.6"
+        - "3.7"
       before_install:
         - sudo bash ops/travis/system-testing/deployment-agent before_install
       install:
@@ -44,6 +44,8 @@ jobs:
         - bash ops/travis/system-testing/deployment-agent script
       after_success:
         - bash ops/travis/system-testing/deployment-agent after_success
+      after_failure:
+        - bash ops/travis/system-testing/deployment-agent after_failure
       deploy:
         - provider: script
           skip_cleanup: true
