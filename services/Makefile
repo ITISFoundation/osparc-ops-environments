@@ -69,14 +69,21 @@ up: .env deployment_config.yaml
 down:
 	${DOCKER} swarm leave -f
 
-.PHONY: push
+.PHONY: push-release push-staging
 # target: push: – Pushes services to the registry.
-push:
+push-release:
 	${DOCKER} login ${DOCKER_REGISTRY};\
 	for i in $(SERVICES_LIST); do \
 		VERSION=$$(cat $$i/VERSION);\
 		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:$$VERSION;\
 		${DOCKER} push ${DOCKER_REGISTRY}/$$i:$$VERSION;\
+	done
+
+push-staging:
+	${DOCKER} login ${DOCKER_REGISTRY};\
+	for i in $(SERVICES_LIST); do \
+		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:staging-latest;\
+		${DOCKER} push ${DOCKER_REGISTRY}/$$i:staging-latest;\
 	done
 
 # basic checks -------------------------------------
