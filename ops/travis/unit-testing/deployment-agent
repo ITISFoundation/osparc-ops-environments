@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 FOLDER_CHECKS="deployment-agent\/"
 
 before_install() {
