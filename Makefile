@@ -38,39 +38,27 @@ endif
 .PHONY: build build-devel
 # target: build, build-devel: – Builds all service images.
 build:
-	for i in $(SERVICE_FOLDERS_LIST); do \
-		cd $$i && ${MAKE} build; \
-	done
+	cd services && ${MAKE} build;
 
 build-devel:
-	for i in $(SERVICE_FOLDERS_LIST); do \
-		cd $$i && ${MAKE} build-devel; \
-	done
+	cd services && ${MAKE} build-devel;
 
 
 .PHONY: up up-devel
 # target: up, up-devel, down: – Starts/Stops services.
 up:
-	for i in $(SERVICE_FOLDERS_LIST); do \
-		cd $$i && ${MAKE} up; \
-	done
+	cd services && ${MAKE} up;
 
 up-devel:
-	for i in $(SERVICE_FOLDERS_LIST); do \
-		cd $$i && ${MAKE} up-devel; \
-	done
+	cd services && ${MAKE} up-devel;
 
 down:
-	for i in $(SERVICE_FOLDERS_LIST); do \
-		cd $$i && ${MAKE} down; \
-	done
+	cd services && ${MAKE} down;
 
 .PHONY: push
 # target: push: – Pushes services to the registry.
 push:
-	for i in $(SERVICE_FOLDERS_LIST); do \
-		cd $$i && ${MAKE} push; \
-	done
+	cd services && ${MAKE} push;
 
 ## -------------------------------
 # Tools
@@ -87,6 +75,16 @@ info:
 	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
 	@echo '+ SERVICES_VERSION     : ${SERVICES_VERSION}'
 	@echo '+ PY_FILES             : $(shell echo $(PY_FILES) | wc -w) files'
+
+
+## -------------------------------
+# Virtual Environments
+.venv:
+# target: .venv – Creates a python virtual environment with dev tools (pip, pylint, ...)
+	python3 -m venv .venv
+	.venv/bin/pip3 install --upgrade pip wheel setuptools
+	.venv/bin/pip3 install pylint autopep8 virtualenv
+	@echo "To activate the venv, execute 'source .venv/bin/activate' or '.venv/bin/activate.bat' (WIN)"
 
 ## -------------------------------
 # Auxiliary targets.

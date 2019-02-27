@@ -89,5 +89,5 @@ push:
 	fi
 
 deployment_config.yaml:
-	echo "deployment_config.yaml file is missing! Copying from tests folder..."
-	cp tests/test-config.yaml deployment_config.yaml
+	@echo "deployment_config.yaml file is missing! Copying from tests folder..."
+	cp deployment-agent/tests/test-config.yaml deployment_config.yaml;
