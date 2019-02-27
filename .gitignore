@@ -32,5 +32,6 @@ id_ed25519*
 # vscode
 .vscode/
 
-* pzthon
+# python
 *.pyc
+.venv/
