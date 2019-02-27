@@ -3,6 +3,7 @@
 # test_for_changes ^web\/server webserver blah
 # this will test if these regexp are part of the modified files since the branching,
 # or on the push commit range if running on travis
+set -e
 
 REGEXPS_TO_CHECK=("$@")
 
@@ -11,8 +12,8 @@ if [ -z $TRAVIS ] || [ $TRAVIS = "false" ];
 then
     CHANGES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
 else
-    CHANGES=$(git --no-pager diff --name-only $TRAVIS_COMMIT_RANGE) 
-fi    
+    CHANGES=$(git --no-pager diff --name-only $TRAVIS_COMMIT_RANGE)
+fi
 
 # look for changes
 for i in "${REGEXPS_TO_CHECK[@]}";
