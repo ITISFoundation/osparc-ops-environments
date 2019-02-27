@@ -14,28 +14,46 @@ export DOCKER=docker.exe
 endif
 
 TEMPCOMPOSE := $(shell mktemp)
-
-.venv:
-# target: .venv – Creates a python virtual environment with dev tools (pip, pylint, ...)
-	python3 -m venv .venv
-	.venv/bin/pip3 install --upgrade pip wheel setuptools
-	.venv/bin/pip3 install pylint autopep8 virtualenv
-	@echo "To activate the venv, execute 'source .venv/bin/activate' or '.venv/bin/activate.bat' (WIN)"
+SERVICES_LIST := deployment-agent
 
 
-clean:
-	@git clean -dxf -e .vscode/
+## Tools ------------------------------------------------------------------------------------------------------
+#
+tools =
+
+ifeq ($(shell uname -s),Darwin)
+	SED = gsed
+else
+	SED = sed
+endif
+
+ifeq ($(shell which ${SED}),)
+	tools += $(SED)
+endif
+
+
+## ------------------------------------------------------------------------------------------------------
+.PHONY: all
+all: help info
+ifdef tools
+	$(error "Can't find tools:${tools}")
+endif
+
+
+.PHONY: build build-devel
+# target: build, build-devel: – Builds all service images.
+build:
+	${DOCKER_COMPOSE} -f docker-compose.yml build --parallel
 
 build-devel:
 	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
 
+.PHONY: up up-devel down
+# target: up, up-devel, down: – Starts/Stops services.
 up-devel: .env deployment_config.yaml
 	${DOCKER} swarm init
 	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml config > $(TEMPCOMPOSE).tmp-compose.yml
 	${DOCKER} stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml portainer
-
-build:
-	${DOCKER_COMPOSE} -f docker-compose.yml build --parallel
 
 up: .env deployment_config.yaml
 	${DOCKER} swarm init
@@ -45,11 +63,17 @@ up: .env deployment_config.yaml
 down:
 	${DOCKER} swarm leave -f
 
+.PHONY: push
+# target: push: – Pushes services to the registry.
 push:
-	${DOCKER} login ${DOCKER_REGISTRY}
-	${DOCKER} tag deployment-agent:latest ${DOCKER_REGISTRY}/deployment-agent:${SERVICES_VERSION}
-	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:${SERVICES_VERSION}
+	${DOCKER} login ${DOCKER_REGISTRY};\
+	for i in $(SERVICES_LIST); do \
+		VERSION=$$(cat $$i/VERSION);\
+		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:$$VERSION;\
+		${DOCKER} push ${DOCKER_REGISTRY}/$$i:$$VERSION;\
+	done
 
+# basic checks -------------------------------------
 .env: .env-devel
 	# first check if file exists, copies it
 	@if [ ! -f $@ ]	; then \
@@ -64,3 +88,44 @@ push:
 deployment_config.yaml:
 	@echo "deployment_config.yaml file is missing! Copying from tests folder..."
 	cp deployment-agent/tests/test-config.yaml deployment_config.yaml;
+
+.PHONY: info
+# target: info – Displays some parameters of makefile environments
+info:
+	@echo '+ VCS_* '
+	@echo '  - ULR                : ${VCS_URL}'
+	@echo '  - REF                : ${VCS_REF}'
+	@echo '  - (STATUS)REF_CLIENT : (${VCS_STATUS_CLIENT})'
+	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
+	@echo '+ VERSION              : ${VERSION}'
+	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
+	@echo '+ SERVICES_VERSION     : ${SERVICES_VERSION}'
+	@echo '+ PY_FILES             : $(shell echo $(PY_FILES) | wc -w) files'
+
+
+## -------------------------------
+# Virtual Environments
+.venv:
+# target: .venv – Creates a python virtual environment with dev tools (pip, pylint, ...)
+	python3 -m venv .venv
+	.venv/bin/pip3 install --upgrade pip wheel setuptools
+	.venv/bin/pip3 install pylint autopep8 virtualenv
+	@echo "To activate the venv, execute 'source .venv/bin/activate' or '.venv/bin/activate.bat' (WIN)"
+
+## -------------------------------
+# Auxiliary targets.
+
+.PHONY: clean
+# target: clean – Cleans all unversioned files in project
+clean:
+	@git clean -dxf -e .vscode/
+
+
+.PHONY: help
+# target: help – Display all callable targets
+help:
+	@echo "Make targets in osparc-simcore:"
+	@echo
+	@egrep "^\s*#\s*target\s*:\s*" [Mm]akefile \
+	| $(SED) -r "s/^\s*#\s*target\s*:\s*//g"
+	@echo
