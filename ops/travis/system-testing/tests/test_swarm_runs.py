@@ -63,26 +63,14 @@ def services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
     return _services_docker_compose(osparc_simcore_root_dir)
 
 
-@pytest.fixture("session")
-def tools_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
-    docker_compose_path = osparc_simcore_root_dir / \
-        "services" / "docker-compose.tools.yml"
-    assert docker_compose_path.exists()
-
-    content = {}
-    with docker_compose_path.open() as f:
-        content = yaml.safe_load(f)
-    return content
-
-
-def _list_core_services():
-    exclude = ["webclient"]
+def _list_services():
+    exclude = []
     content = _services_docker_compose(_osparc_simcore_root_dir(_here()))
     return [name for name in content["services"].keys() if name not in exclude]
 
 @pytest.fixture(scope="session",
-                params=_list_core_services())
-def core_service_name(request, services_docker_compose):
+                params=_list_services())
+def service_name(request, services_docker_compose):
     return str(request.param)
 
 
@@ -125,28 +113,17 @@ def get_failed_tasks_logs(service, docker_client):
 # TESTS -------------------------------
 
 
-def test_all_services_up(docker_client, services_docker_compose, tools_docker_compose):
-    """
-        NOTE: Assumes `make up-swarm` executed
-    """
-    running_services = docker_client.services.list()
-
-    assert (len(services_docker_compose["services"]) + len(
-        tools_docker_compose["services"])) == len(running_services)
-
-    # TODO: check names instead
-
-
-async def test_core_service_running(core_service_name, docker_client, loop):
+async def test_service_running(service_name, docker_client, loop):
     """
         NOTE: Assumes `make up-swarm` executed
         NOTE: loop fixture makes this test async
     """
     running_services = docker_client.services.list()
-
+    import pdb
+    pdb.set_trace()
     # find the service
     running_service = [
-        s for s in running_services if core_service_name in s.name]
+        s for s in running_services if service_name == s.name.split("_")[1]]
     assert len(running_service) == 1
 
     running_service = running_service[0]
@@ -160,7 +137,7 @@ async def test_core_service_running(core_service_name, docker_client, loop):
     tasks = running_service.tasks()
 
     assert len(tasks) == 1, "Expected a single task for '{0}',"\
-        " got:\n{1}\n{2}".format(core_service_name,
+        " got:\n{1}\n{2}".format(service_name,
                                  get_tasks_summary(tasks),
                                  get_failed_tasks_logs(running_service, docker_client))
 
