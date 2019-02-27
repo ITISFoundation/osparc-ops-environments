@@ -1,6 +1,5 @@
 # author: Sylvain Anderegg
 
-# TODO: add flavours by combinging docker-compose files. Namely development, test and production.
 VERSION := $(shell uname -a)
 ifneq (,$(findstring Microsoft,$(VERSION)))
 $(info    detected WSL)
