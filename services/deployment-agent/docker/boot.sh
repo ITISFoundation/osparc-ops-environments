@@ -1,20 +1,43 @@
 #!/bin/sh
-echo "Activating python virtual env..."
-source $HOME/.venv/bin/activate
+#
 
-if [[ ${DEBUG} == "1" ]]
+# BOOTING application ---------------------------------------------
+echo "Booting in ${SC_BOOT_MODE} mode ..."
+echo "  User    :`id $(whoami)`"
+echo "  Workdir :`pwd`"
+
+if [[ ${SC_BUILD_TARGET} == "development" ]]
 then
-  echo "Booting in development mode ..."
-  echo "DEBUG: User    :`id $(whoami)`"
-  echo "DEBUG: Workdir :`pwd`"
+  echo "  Environment :"
+  printenv  | sed 's/=/: /' | sed 's/^/    /' | sort
+  #--------------------
 
-  cd $HOME/src/deployment-agent
-  pip install -r requirements/dev.txt
-  pip list
+  APP_CONFIG=host-dev.yaml
 
-  cd $HOME/  
-  simcore-service-deployment-agent --config host-dev.yaml
-else
-  echo "Booting in production mode ..."
-  simcore-service-deployment-agent --config config-prod.yaml
+  cd services/deployment-agent
+  $SC_PIP install --user -r requirements/dev.txt
+  cd /devel
+
+  #--------------------
+  echo "  Python :"
+  python --version | sed 's/^/    /'
+  which python | sed 's/^/    /'
+  echo "  PIP :"
+  $SC_PIP list | sed 's/^/    /'
+
+elif [[ ${SC_BUILD_TARGET} == "production" ]]
+then
+  APP_CONFIG=config-prod.yaml
+  LOG_LEVEL=info
 fi
+
+
+# RUNNING application ----------------------------------------
+if [[ ${SC_BOOT_MODE} == "debug" ]]
+then
+  LOG_LEVEL=debug
+else
+  LOG_LEVEL=info
+fi
+
+simcore-service-deployment-agent --config $APP_CONFIG --loglevel=$LOG_LEVEL

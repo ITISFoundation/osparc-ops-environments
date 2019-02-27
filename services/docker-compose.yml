@@ -10,18 +10,12 @@ services:
         org.label-schema.build-date: "${BUILD_DATE}"
         org.label-schema.vcs-url: "https://github.com/ITISFoundation/osparc-simcore"
         org.label-schema.vcs-ref: "${VCS_REF}"
-      args:
-        - DOCKER_GID_ARG=${DOCKER_GID:?Undefined docker gid in host}
     image: deployment-agent:latest
     ports:
       - "8888:8888"
     configs:
       - source: deployment_config
         target: /home/scu/config-prod.yaml
-    environment:
-      GITLAB_USERNAME: ${GITLAB_USERNAME}
-      GITLAB_PASSWORD: ${GITLAB_PASSWORD}
-      RUN_DOCKER_ENGINE_ROOT: ${RUN_DOCKER_ENGINE_ROOT}
     networks:
       - agent_network
     volumes:

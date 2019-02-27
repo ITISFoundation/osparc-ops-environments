@@ -1,19 +1,10 @@
-version: '3.6'
+version: "3.6"
 services:
   auto-deployment-agent:
     build:
       target: development
     ports:
-      - '8888:8888'
-    image: deployment-agent:dev    
-    environment:
-      GITLAB_USERNAME: ${GITLAB_USERNAME}
-      GITLAB_PASSWORD: ${GITLAB_PASSWORD}
-      RUN_DOCKER_ENGINE_ROOT: ${RUN_DOCKER_ENGINE_ROOT}
+      - "8888:8888"
+    image: deployment-agent:dev
     volumes:
-      - ./:/home/scu/src/deployment-agent
-      - ./docker:/home/scu/docker
-    configs:
-      - source: deployment_config
-        target: /home/scu/host-dev.yaml
-  
+      - ./deployment-agent:/devel/services/deployment-agent
