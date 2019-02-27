@@ -65,6 +65,13 @@ down:
 		cd $$i && ${MAKE} down; \
 	done
 
+.PHONY: push
+# target: push: – Pushes services to the registry.
+push:
+	for i in $(SERVICE_FOLDERS_LIST); do \
+		cd $$i && ${MAKE} push; \
+	done
+
 ## -------------------------------
 # Tools
 
@@ -86,7 +93,7 @@ info:
 
 .PHONY: clean
 # target: clean – Cleans all unversioned files in project
-clean: remove-intermediate-file
+clean:
 	@git clean -dxf -e .vscode/
 
 

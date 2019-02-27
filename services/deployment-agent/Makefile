@@ -54,7 +54,7 @@ clean:
 	@git clean -dxf -e .vscode/
 
 build-devel:
-	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml build
+	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
 
 up-devel: .env deployment_config.yaml
 	${DOCKER} swarm init
@@ -62,7 +62,7 @@ up-devel: .env deployment_config.yaml
 	${DOCKER} stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml portainer
 
 build:
-	${DOCKER_COMPOSE} -f docker-compose.yml build
+	${DOCKER_COMPOSE} -f docker-compose.yml build --parallel
 
 up: .env deployment_config.yaml
 	${DOCKER} swarm init
@@ -72,12 +72,10 @@ up: .env deployment_config.yaml
 down:
 	${DOCKER} swarm leave -f
 
-AGENT_VERSION = 1.0.0
-REGISTRY=itisfoundation
 push:
-	${DOCKER} login ${REGISTRY}
-	${DOCKER} tag deployment-agent:latest ${REGISTRY}/deployment-agent:${AGENT_VERSION}
-	${DOCKER} push ${REGISTRY}/deployment-agent:${AGENT_VERSION}
+	${DOCKER} login ${DOCKER_REGISTRY}
+	${DOCKER} tag deployment-agent:latest ${DOCKER_REGISTRY}/deployment-agent:${SERVICES_VERSION}
+	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:${SERVICES_VERSION}
 
 .env: .env-devel
 	# first check if file exists, copies it
@@ -91,6 +89,5 @@ push:
 	fi
 
 deployment_config.yaml:
-	echo "deployment_config.yaml file is missing! Exiting..."
-	false
-	
+	echo "deployment_config.yaml file is missing! Copying from tests folder..."
+	cp tests/test-config.yaml deployment_config.yaml

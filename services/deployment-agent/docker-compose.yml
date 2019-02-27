@@ -1,11 +1,11 @@
-version: '3.6'
+version: "3.6"
 services:
-  auto-deployment-agent:    
+  auto-deployment-agent:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-      labels: 
+      labels:
         org.label-schema.schema-version: "1.0"
         org.label-schema.build-date: "${BUILD_DATE}"
         org.label-schema.vcs-url: "https://github.com/ITISFoundation/osparc-simcore"
@@ -14,7 +14,7 @@ services:
         - DOCKER_GID_ARG=${DOCKER_GID:?Undefined docker gid in host}
     image: deployment-agent:latest
     ports:
-      - '8888:8888'
+      - "8888:8888"
     configs:
       - source: deployment_config
         target: /home/scu/config-prod.yaml
@@ -47,7 +47,7 @@ services:
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    command: --admin-password ${DOCKER_ADMIN_PWD} -H tcp://tasks.agent:9001 --tlsskipverify
     ports:
       - "9000:9000"
     volumes:
