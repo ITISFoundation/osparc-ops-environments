@@ -1,9 +1,10 @@
 #!/bin/bash
 # these variable must be available securely from travis
+set -e
 
 deploy() {
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    pushd services/deployment-agent; make push; popd
+    make push
 }
 
 # Check if the function exists (bash specific)
