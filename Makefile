@@ -5,7 +5,6 @@ export VCS_URL:=$(shell git config --get remote.origin.url)
 export VCS_REF:=$(shell git rev-parse --short HEAD)
 export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
 export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-SERVICE_FOLDERS_LIST := services/deployment-agent
 export SERVICES_VERSION=1.0.0
 export DOCKER_REGISTRY=itisfoundation
 
