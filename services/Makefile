@@ -39,8 +39,6 @@ export HOST_GID=1000
 endif
 
 TEMPCOMPOSE := $(shell mktemp)
-export VCS_REF:=$(shell git rev-parse --short HEAD)
-export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 .venv:
 # target: .venv – Creates a python virtual environment with dev tools (pip, pylint, ...)
