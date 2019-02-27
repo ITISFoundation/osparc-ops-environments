@@ -19,7 +19,7 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-WAIT_TIME_SECS = 20
+WAIT_TIME_SECS = 40
 RETRY_COUNT = 7
 MAX_WAIT_TIME = 240
 
