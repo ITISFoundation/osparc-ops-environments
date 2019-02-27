@@ -43,7 +43,7 @@ build-devel:
 	cd services && ${MAKE} build-devel;
 
 
-.PHONY: up up-devel
+.PHONY: up up-devel down
 # target: up, up-devel, down: – Starts/Stops services.
 up:
 	cd services && ${MAKE} up;
