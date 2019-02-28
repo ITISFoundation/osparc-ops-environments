@@ -3,6 +3,8 @@
 # pylint: disable=bare-except
 # pylint:disable=redefined-outer-name
 
+import asyncio
+import platform
 import sys
 from pathlib import Path
 
@@ -45,3 +47,12 @@ def api_specs_dir(osparc_simcore_root_dir):
 def test_config(here):
     with Path(here / "test-config.yaml").open() as fp:
         return yaml.safe_load(fp)
+
+
+@pytest.fixture
+def async_subprocess_compatible_loop():
+    if platform.system() == "Windows":
+        loop = asyncio.ProactorEventLoop()
+        asyncio.set_event_loop(loop)
+    loop = asyncio.get_event_loop()
+    yield loop
