@@ -79,7 +79,7 @@ HEALTHCHECK --interval=30s \
       --timeout=60s \
       --start-period=60s \
       --retries=3 \
-      CMD python3 /home/scu/services/deployment-agent/docker/healthcheck_curl_host.py 'http://localhost:8888/v0/'
+      CMD python3 /home/scu/services/deployment-agent/docker/healthcheck.py 'http://localhost:8888/v0/'
 
 ENTRYPOINT [ "/bin/sh", "services/deployment-agent/docker/entrypoint.sh" ]
 CMD ["/bin/sh", "services/deployment-agent/docker/boot.sh"]
