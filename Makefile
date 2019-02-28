@@ -5,7 +5,6 @@ export VCS_URL:=$(shell git config --get remote.origin.url)
 export VCS_REF:=$(shell git rev-parse --short HEAD)
 export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
 export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-export SERVICES_VERSION=1.0.0
 export DOCKER_REGISTRY=itisfoundation
 
 ## Tools ------------------------------------------------------------------------------------------------------
@@ -72,8 +71,6 @@ info:
 	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
 	@echo '+ VERSION              : ${VERSION}'
 	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
-	@echo '+ SERVICES_VERSION     : ${SERVICES_VERSION}'
-	@echo '+ PY_FILES             : $(shell echo $(PY_FILES) | wc -w) files'
 
 
 ## -------------------------------

@@ -74,9 +74,9 @@ down:
 push-release:
 	${DOCKER} login ${DOCKER_REGISTRY};\
 	for i in $(SERVICES_LIST); do \
-		VERSION=$$(cat $$i/VERSION);\
-		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:$$VERSION;\
-		${DOCKER} push ${DOCKER_REGISTRY}/$$i:$$VERSION;\
+		SERVICE_VERSION=$$(cat $$i/VERSION);\
+		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:$$SERVICE_VERSION;\
+		${DOCKER} push ${DOCKER_REGISTRY}/$$i:$$SERVICE_VERSION;\
 	done
 
 push-staging:
@@ -112,8 +112,6 @@ info:
 	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
 	@echo '+ VERSION              : ${VERSION}'
 	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
-	@echo '+ SERVICES_VERSION     : ${SERVICES_VERSION}'
-	@echo '+ PY_FILES             : $(shell echo $(PY_FILES) | wc -w) files'
 
 
 ## -------------------------------
