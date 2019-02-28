@@ -101,5 +101,3 @@ VOLUME /devel/services/deployment-agent/
 
 ENTRYPOINT [ "/bin/sh", "services/deployment-agent/docker/entrypoint.sh" ]
 CMD ["/bin/sh", "services/deployment-agent/docker/boot.sh"]
-
-
