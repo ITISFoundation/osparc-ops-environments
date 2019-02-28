@@ -28,6 +28,7 @@ async def _git_checkout_files(directory: Path, paths: List[Path]):
 async def _git_checkout_file(directory: Path, file_path: Path):
     await _git_checkout_files(directory, [file_path])
 
+
 async def _git_checkout_repo(directory: Path):
     cmd = "cd {directory} && git checkout HEAD".format(directory=directory)
     await run_cmd_line(cmd)
@@ -48,13 +49,16 @@ async def _git_fetch(directory: Path):
     cmd = "cd {directory} && git fetch --prune".format(directory=directory)
     await run_cmd_line(cmd)
 
+
 async def _git_diff_filenames(directory: Path) -> str:
-    cmd = "cd {directory} && git --no-pager diff --name-only FETCH_HEAD".format(directory=directory)
+    cmd = "cd {directory} && git --no-pager diff --name-only FETCH_HEAD".format(
+        directory=directory)
     modified_files = await run_cmd_line(cmd)
     return modified_files
 
 
 watched_repos = list()
+
 
 @attr.s(auto_attribs=True)
 class GitRepo:  # pylint: disable=too-many-instance-attributes, too-many-arguments
@@ -63,9 +67,10 @@ class GitRepo:  # pylint: disable=too-many-instance-attributes, too-many-argumen
     branch: str
     username: str
     password: str
-    paths: List[Path]    
+    paths: List[Path]
     pull_only_files: bool
-    directory: str=""
+    directory: str = ""
+
 
 async def _init_repositories(repos: List[GitRepo]):
     for repo in repos:
@@ -81,6 +86,7 @@ async def _check_repositories(repos: List[GitRepo]) -> bool:
     change_detected = False
     for repo in repos:
         log.debug("checking repo: %s...", repo.repo_url)
+        assert repo.directory
         await _git_fetch(repo.directory)
         modified_files = await _git_diff_filenames(repo.directory)
         if not modified_files:
@@ -90,8 +96,9 @@ async def _check_repositories(repos: List[GitRepo]) -> bool:
             await _git_pull_files(repo.directory, repo.paths)
         else:
             await _git_pull(repo.directory)
-        # check if a watched file has changed        
-        common_files = set(modified_files.split()).intersection(set(repo.paths))
+        # check if a watched file has changed
+        common_files = set(modified_files.split()
+                           ).intersection(set(repo.paths))
         if common_files:
             log.info("File %s changed!!", common_files)
             change_detected = True
