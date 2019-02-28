@@ -1,11 +1,11 @@
 #!/bin/bash
-
+# die on non 0 exit code
 set -e
 
-FOLDER_CHECKS="deployment-agent\/"
+FOLDER_CHECKS=(deployment-agent/)
 
 before_install() {
-    if [ -n "$(bash ops/travis/helpers/test_for_changes deployment-agent)" ];
+    if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         bash ops/travis/helpers/install_docker_compose
         bash ops/travis/helpers/show_system_versions
@@ -13,7 +13,7 @@ before_install() {
 }
 
 install() {
-    if [ -n "$(bash ops/travis/helpers/test_for_changes deployment-agent)" ];
+    if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         pip install --upgrade pip wheel setuptools && pip3 --version
         pushd services/deployment-agent; pip3 install -r requirements/dev.txt; popd
@@ -21,7 +21,7 @@ install() {
 }
 
 before_script() {
-    if [ -n "$(bash ops/travis/helpers/test_for_changes deployment-agent)" ];
+    if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         pip freeze
         docker images
@@ -29,7 +29,7 @@ before_script() {
 }
 
 script() {
-    if [ -n "$(bash ops/travis/helpers/test_for_changes deployment-agent)" ];
+    if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         pytest --cov=simcore_service_deployment_agent -v services/deployment-agent/tests
     else
@@ -38,7 +38,7 @@ script() {
 }
 
 after_success() {
-    if [ -n "$(bash ops/travis/helpers/test_for_changes deployment-agent)" ];
+    if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         coveralls
     fi

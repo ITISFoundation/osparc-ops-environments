@@ -1,6 +1,6 @@
 #!/bin/bash
+# die on non 0 exit code
 set -e
-
 uname -a
 lsb_release -a
 

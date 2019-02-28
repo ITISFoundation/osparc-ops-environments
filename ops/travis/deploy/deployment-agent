@@ -1,5 +1,5 @@
 #!/bin/bash
-# these variable must be available securely from travis
+# die on non 0 exit code
 set -e
 
 deploy-staging() {
