@@ -176,7 +176,8 @@ async def wait_for_dependencies(app_config: Dict):
             log.info("portainer at %s ready", url)
         except ClientError:
             log.exception("portainer not ready at %s", url)
-            raise DependencyNotReadyError
+            raise DependencyNotReadyError(
+                "Portainer not ready at {}".format(url))
 
 
 async def auto_deploy(app: web.Application):
