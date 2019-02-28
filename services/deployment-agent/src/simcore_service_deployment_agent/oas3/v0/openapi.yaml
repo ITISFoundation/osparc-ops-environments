@@ -10,29 +10,31 @@ info:
     name: MIT
     url: https://github.com/ITISFoundation/osparc-simcore/blob/master/LICENSE
 servers:
+  - description: API server
+    url: "/v0"
   - url: http://{host}:{port}/{version}
     description: Development server
     variables:
       host:
-        default: 'localhost'
+        default: "localhost"
       port:
-        default: '8888'
+        default: "8888"
       version:
-        default: 'v0'
+        default: "v0"
         enum:
           # TODO: add all possible versions and set latest as default
-          - 'v0'
+          - "v0"
 tags:
-- name: admins
-  description: Secured Admin-only calls
-- name: tests
-  description: Operations available for testing
-- name: users
-  description: Operations available to regular users
+  - name: admins
+    description: Secured Admin-only calls
+  - name: tests
+    description: Operations available for testing
+  - name: users
+    description: Operations available to regular users
 paths:
   /:
     get:
-      tags: 
+      tags:
         - users
       summary: Service health-check endpoint
       description: Some general information on the API and state of the service behind
@@ -43,13 +45,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components/schemas/health_check.yaml#HealthCheckEnveloped'
+                $ref: "components/schemas/health_check.yaml#HealthCheckEnveloped"
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: 'components/schemas/error.yaml#ErrorEnveloped'
+                $ref: "components/schemas/error.yaml#ErrorEnveloped"
   /check/{action}:
     post:
       tags:
@@ -64,25 +66,23 @@ paths:
           name: action
           schema:
             type: string
-            default: 'echo'
-            enum: ['fail', 'echo']
+            default: "echo"
+            enum: ["fail", "echo"]
       requestBody:
         content:
           application/json:
             schema:
-              $ref: 'components/schemas/fake.yaml#Fake'
+              $ref: "components/schemas/fake.yaml#Fake"
       responses:
-        '200':
+        "200":
           description: Echoes response based on action
           content:
             application/json:
               schema:
-                $ref: 'components/schemas/fake.yaml#FakeEnveloped'
+                $ref: "components/schemas/fake.yaml#FakeEnveloped"
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: 'components/schemas/error.yaml#ErrorEnveloped'
-
-          
+                $ref: "components/schemas/error.yaml#ErrorEnveloped"

@@ -13,6 +13,7 @@ from .auto_deploy_task import State, TASK_STATE
 
 log = logging.getLogger(__name__)
 
+
 async def check_health(request: web.Request):
     params, query, body = await extract_and_validate(request)
     app = request.app
@@ -28,9 +29,9 @@ async def check_health(request: web.Request):
         State.STOPPED: "SERVICE_STOPPED"
     }
     data = {
-        'name':__name__.split('.')[0],
+        'name': __name__.split('.')[0],
         'version': __version__,
-        'status': status[app[TASK_STATE]],
+        'status': status[app[TASK_STATE] if TASK_STATE in app else State.FAILED],
         'api_version': __version__
     }
 
@@ -47,12 +48,11 @@ async def check_action(request: web.Request):
     if params['action'] == 'fail':
         raise ValueError("some randome failure")
 
-
     # echo's input
     data = {
-        "path_value" : params.get('action'),
+        "path_value": params.get('action'),
         "query_value": query.get('data'),
-        "body_value" : body_to_dict(body)
+        "body_value": body_to_dict(body)
     }
 
     return wrap_as_envelope(data=data)
