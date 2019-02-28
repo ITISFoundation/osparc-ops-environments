@@ -5,7 +5,7 @@ rest:
   version: v0
   location: oas3/v0/openapi.yaml
 main:
-  log_level: WARNING
+  log_level: INFO
   host: 127.0.0.1
   port: 8888
   watched_git_repositories:
