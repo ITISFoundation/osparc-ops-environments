@@ -31,6 +31,7 @@ after_success() {
 
 after_failure() {
     docker service ls
+    docker service ps portainer_auto-deployment-agent
     docker service logs portainer_auto-deployment-agent
     docker ps
     make down
