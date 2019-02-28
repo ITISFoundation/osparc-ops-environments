@@ -6,7 +6,7 @@
 # pylint:disable=bare-except
 
 from pathlib import Path
-
+from asyncio import Future
 import pytest
 import yaml
 
@@ -19,20 +19,31 @@ def valid_git_config(here):
         return yaml.safe_load(fp)
 
 
-def test_watcher_workflow(async_subprocess_compatible_loop, valid_git_config):
+def test_watcher_workflow(async_subprocess_compatible_loop, valid_git_config, mocker):
+    mock = mocker.patch(
+        "simcore_service_deployment_agent.git_url_watcher.run_cmd_line", return_value=Future())
+    mock.return_value.set_result("")
     git_watcher = git_url_watcher.GitUrlWatcher(valid_git_config)
 
     with pytest.raises(AssertionError):
         async_subprocess_compatible_loop.run_until_complete(
             git_watcher.check_for_changes())
+    mock.assert_not_called()
 
     try:
         async_subprocess_compatible_loop.run_until_complete(git_watcher.init())
     except:
         pytest.fail("Unexpected error cloning repos...")
+    mock.assert_called()
 
     assert async_subprocess_compatible_loop.run_until_complete(
         git_watcher.check_for_changes()) == False
+
+    mock_changed_files = mocker.patch(
+        "simcore_service_deployment_agent.git_url_watcher.run_cmd_line", return_value=Future())
+    mock_changed_files.return_value.set_result("Makefile")
+    assert async_subprocess_compatible_loop.run_until_complete(
+        git_watcher.check_for_changes()) == True
 
     try:
         async_subprocess_compatible_loop.run_until_complete(

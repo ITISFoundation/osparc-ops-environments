@@ -56,3 +56,4 @@ def async_subprocess_compatible_loop():
         asyncio.set_event_loop(loop)
     loop = asyncio.get_event_loop()
     yield loop
+    loop.close()

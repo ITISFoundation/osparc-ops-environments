@@ -8,5 +8,6 @@ pytest
 pytest-aiohttp
 pytest-cov
 pytest-docker
+pytest-mock
 openapi_spec_validator
 pyyaml
