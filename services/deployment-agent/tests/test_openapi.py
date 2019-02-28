@@ -15,9 +15,11 @@ import simcore_service_deployment_agent
 
 API_VERSIONS = ('v0', )
 
+
 @pytest.fixture
 def spec_basepath():
-    basepath = Path(pkg_resources.resource_filename(simcore_service_deployment_agent.__name__, 'oas3'))
+    basepath = Path(pkg_resources.resource_filename(
+        simcore_service_deployment_agent.__name__, 'oas3'))
     assert basepath.exists()
     return basepath
 
@@ -28,7 +30,7 @@ def test_specifications(spec_basepath, version):
     spec_path = spec_basepath / "{}/openapi.yaml".format(version)
 
     with spec_path.open() as fh:
-        specs = yaml.load(fh)
+        specs = yaml.safe_load(fh)
         try:
             validate_spec(specs, spec_url=spec_path.as_uri())
         except OpenAPIValidationError as err:
