@@ -77,7 +77,7 @@ RUN apk del --no-cache\
 
 HEALTHCHECK --interval=30s \
       --timeout=60s \
-      --start-period=60s \
+      --start-period=30s \
       --retries=3 \
       CMD python3 /home/scu/services/deployment-agent/docker/healthcheck.py 'http://localhost:8888/v0/'
 
