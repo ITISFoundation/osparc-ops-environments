@@ -54,6 +54,8 @@ def async_subprocess_compatible_loop():
     if platform.system() == "Windows":
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
+    else:
+        loop = asyncio.new_event_loop()
     loop = asyncio.get_event_loop()
     yield loop
     loop.close()
