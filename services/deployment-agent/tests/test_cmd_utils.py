@@ -9,15 +9,13 @@ import pytest
 from simcore_service_deployment_agent import cmd_utils, exceptions
 
 
-def test_valid_cmd(async_subprocess_compatible_loop):
+async def test_valid_cmd(loop):
     try:
-        async_subprocess_compatible_loop.run_until_complete(
-            cmd_utils.run_cmd_line("whoami"))
+        await cmd_utils.run_cmd_line("whoami")
     except exceptions.CmdLineError:
         pytest.fail("Unexpected error")
 
 
-def test_invalid_cmd(async_subprocess_compatible_loop):
+async def test_invalid_cmd(loop):
     with pytest.raises(exceptions.CmdLineError):
-        async_subprocess_compatible_loop.run_until_complete(
-            cmd_utils.run_cmd_line("whoamiasd"))
+        await cmd_utils.run_cmd_line("whoamiasd")

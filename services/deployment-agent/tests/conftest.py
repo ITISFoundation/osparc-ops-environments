@@ -44,13 +44,18 @@ def api_specs_dir(osparc_simcore_root_dir):
 
 
 @pytest.fixture
-def test_config(here):
-    with Path(here / "test-config.yaml").open() as fp:
+def test_config_file(here) -> Path:
+    return Path(here / "test-config.yaml")
+
+
+@pytest.fixture
+def test_config(test_config_file):
+    with test_config_file.open() as fp:
         return yaml.safe_load(fp)
 
 
 @pytest.fixture
-def async_subprocess_compatible_loop():
+def loop():
     if platform.system() == "Windows":
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
