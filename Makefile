@@ -53,10 +53,10 @@ up-devel:
 down:
 	cd services && ${MAKE} down;
 
-.PHONY: push
+.PHONY: push-staging
 # target: push: – Pushes services to the registry.
-push:
-	cd services && ${MAKE} push;
+push-staging:
+	cd services && ${MAKE} push-staging;
 
 ## -------------------------------
 # Tools
