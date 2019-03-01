@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 TASK_NAME = __name__ + "_autodeploy_task"
 TASK_STATE = "{}_state".format(TASK_NAME)
 
-RETRY_WAIT_SECS = 20
+RETRY_WAIT_SECS = 2
 RETRY_COUNT = 10
 
 
@@ -214,13 +214,12 @@ async def auto_deploy(app: web.Application):
 
 
 async def start(app: web.Application):
-    app[TASK_NAME] = app.loop.create_task(auto_deploy(app))
+    app[TASK_NAME] = asyncio.get_event_loop().create_task(auto_deploy(app))
 
 
 async def cleanup(app: web.Application):
     task = app[TASK_NAME]
     task.cancel()
-    await task
 
 
 def setup(app: web.Application):

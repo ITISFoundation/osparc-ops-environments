@@ -19,12 +19,6 @@ def valid_docker_config(here):
         return yaml.safe_load(fp)
 
 
-@pytest.fixture
-def valid_docker_stack(here):
-    with Path(here / "mocks" / "valid_docker_stack.yaml").open() as fp:
-        return yaml.safe_load(fp)
-
-
 def _assert_docker_client_calls(mocked_docker_client, mocker, registry_config, docker_stack):
     mocked_docker_client.assert_has_calls(
         [

@@ -1,0 +1,49 @@
+## Runtime configuration for the simcore_service_deployment_agent application.
+##
+version: "1.0"
+rest:
+  version: v0
+  location: oas3/v0/openapi.yaml
+main:
+  log_level: INFO
+  host: 127.0.0.1
+  port: 8888
+  watched_git_repositories:
+    # all git repositories that shall be controlled
+    - id: simcore-github-repo
+      url: https://github.com/ITISFoundation/osparc-simcore.git
+      branch: master
+      pull_only_files: false # if true will only pull the files define in paths
+      paths:
+        # lists the files where to look for changes in the repo
+        - services/docker-compose.yml
+        - Makefile
+        - .env-devel
+  docker_private_registries:
+    # lists registries and their credentials if necessary to check for services to download from
+    - url: https://index.docker.io/v1
+      username: username
+      password: ""
+  docker_stack_recipe:
+    # defines the recipe to generate the docker-compose style stack file to be deployed in the swarm
+    # An optional command line may be defined to that end that generate the docker-compose file.
+    files: [] # nothing to copy around
+    workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
+    command: make create-staging-stack-file output_file=stack.yml
+    stack_file: stack.yml # the output file of the command above, or just the file to use
+  portainer:
+    # lists the portainer instances to call upon
+    - url: http://portainer:9000
+      username: admin
+      password: adminadmin
+      stack_name: services
+  excluded_services: [app]
+  excluded_volumes: [some_volume]
+  polling_interval: 30
+  notifications:
+    - service: mattermost
+      url: http://mattermost.com
+      message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
+      enabled: false
+      channel_id: some_token
+      personal_token: some_token

@@ -55,6 +55,23 @@ def test_config(test_config_file):
 
 
 @pytest.fixture
+def valid_docker_stack_file(here):
+    return Path(here / "mocks" / "valid_docker_stack.yaml")
+
+
+@pytest.fixture
+def valid_docker_stack(valid_docker_stack_file):
+    with valid_docker_stack_file.open() as fp:
+        return yaml.safe_load(fp)
+
+
+@pytest.fixture
+def valid_config(here):
+    with Path(here / "mocks" / "valid_config.yaml").open() as fp:
+        return yaml.safe_load(fp)
+
+
+@pytest.fixture
 def loop():
     if platform.system() == "Windows":
         loop = asyncio.ProactorEventLoop()

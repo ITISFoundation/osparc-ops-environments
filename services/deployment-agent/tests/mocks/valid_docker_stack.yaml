@@ -6,3 +6,9 @@ services:
     ports:
       - "8080:8080"
     restart: always
+  anotherapp:
+    build:
+      context: ../
+    image: ubuntu
+volumes:
+  some_volume:

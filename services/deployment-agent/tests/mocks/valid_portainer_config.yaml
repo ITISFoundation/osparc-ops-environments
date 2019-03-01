@@ -1,0 +1,17 @@
+## Runtime configuration for the simcore_service_deployment_agent application.
+##
+version: "1.0"
+rest:
+  version: v0
+  location: oas3/v0/openapi.yaml
+main:
+  portainer:
+    # lists the portainer instances to call upon
+    - url: http://portainer:9000
+      username: admin
+      password: adminadmin
+      stack_name: services
+    - url: http://portainer2:9000
+      username: admin32
+      password: adminadmin32
+      stack_name: services32
