@@ -51,7 +51,7 @@ stat $DOCKER_MOUNT &> /dev/null
 if [[ $? -eq 0 ]]
 then
     GROUPID=$(stat -c %g $DOCKER_MOUNT)
-    GROUPNAME=docker
+    GROUPNAME=scdocker
 
     addgroup -g $GROUPID $GROUPNAME &> /dev/null
     if [[ $? -gt 0 ]]
