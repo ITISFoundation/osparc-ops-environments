@@ -2,7 +2,7 @@
 # die on non 0 exit code
 set -e
 
-FOLDER_CHECKS=(deployment-agent/)
+FOLDER_CHECKS=(deployment-agent/ .travis.yml)
 
 before_install() {
     if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
