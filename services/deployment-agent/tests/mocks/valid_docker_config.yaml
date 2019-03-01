@@ -1,0 +1,9 @@
+## Runtime configuration for the simcore_service_deployment_agent application.
+##
+version: "1.0"
+main:
+  docker_private_registries:
+    # lists registries and their credentials if necessary to check for services to download from
+    - url: https://index.docker.io/v1
+      username: username
+      password: ""

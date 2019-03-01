@@ -1,0 +1,10 @@
+version: "3.6"
+services:
+  auto-deployment-agent:
+    build:
+      target: development
+    ports:
+      - "8888:8888"
+    image: deployment-agent:dev
+    volumes:
+      - ./deployment-agent:/devel/services/deployment-agent

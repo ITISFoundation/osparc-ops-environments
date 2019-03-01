@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  description: API definition for simcore-service-deployment-agent service
+  version: 0.1.0
+  title: simcore-service-deployment-agent API
+  contact:
+    name: IT'IS Foundation
+    email: support@simcore.io
+  license:
+    name: MIT
+    url: https://github.com/ITISFoundation/osparc-simcore/blob/master/LICENSE
+servers:
+  - description: API server
+    url: "/v0"
+  - url: http://{host}:{port}/{version}
+    description: Development server
+    variables:
+      host:
+        default: "localhost"
+      port:
+        default: "8888"
+      version:
+        default: "v0"
+        enum:
+          # TODO: add all possible versions and set latest as default
+          - "v0"
+tags:
+  - name: admins
+    description: Secured Admin-only calls
+  - name: tests
+    description: Operations available for testing
+  - name: users
+    description: Operations available to regular users
+paths:
+  /:
+    get:
+      tags:
+        - users
+      summary: Service health-check endpoint
+      description: Some general information on the API and state of the service behind
+      operationId: root_get
+      responses:
+        "200":
+          description: Service information
+          content:
+            application/json:
+              schema:
+                $ref: "components/schemas/health_check.yaml#HealthCheckEnveloped"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "components/schemas/error.yaml#ErrorEnveloped"
+  /check/{action}:
+    post:
+      tags:
+        - tests
+      summary: Test checkpoint to ask server to fail or echo back the transmitted data
+      parameters:
+        - in: query
+          name: data
+          schema:
+            type: string
+        - in: path
+          name: action
+          schema:
+            type: string
+            default: "echo"
+            enum: ["fail", "echo"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "components/schemas/fake.yaml#Fake"
+      responses:
+        "200":
+          description: Echoes response based on action
+          content:
+            application/json:
+              schema:
+                $ref: "components/schemas/fake.yaml#FakeEnveloped"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "components/schemas/error.yaml#ErrorEnveloped"

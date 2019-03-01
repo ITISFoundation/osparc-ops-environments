@@ -1,0 +1,13 @@
+## Python requirements for running tests.
+##
+##    pip install --requirement=requirements.txt
+##
+coveralls
+pylint
+pytest
+pytest-aiohttp
+pytest-cov
+pytest-docker
+pytest-mock
+openapi_spec_validator
+pyyaml
