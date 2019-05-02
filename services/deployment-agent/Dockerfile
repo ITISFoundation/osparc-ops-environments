@@ -39,7 +39,9 @@ RUN apk add --no-cache \
       libc-dev \
       git \
       docker \
-      make
+      make \
+      libffi-dev \
+      openssl-dev
 
 RUN $SC_PIP install --upgrade \
       pip \
