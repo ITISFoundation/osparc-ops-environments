@@ -7,7 +7,7 @@ app_schema = T.Dict({
     "log_level": T.Enum("DEBUG", "WARNING", "INFO", "ERROR", "CRITICAL", "FATAL", "NOTSET"),
     "watched_git_repositories": T.List(T.Dict({
         "id": T.String(),
-        "url": T.URL,
+        "url": T.Or(T.URL, T.String()),
         T.Key("username", optional=True, default=""): T.String(allow_blank=True),
         T.Key("password", optional=True, default=""): T.String(allow_blank=True),
         T.Key("branch", default="master", optional=True): T.String(allow_blank=True),
