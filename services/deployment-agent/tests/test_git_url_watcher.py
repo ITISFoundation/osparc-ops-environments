@@ -13,11 +13,16 @@ import yaml
 from simcore_service_deployment_agent import git_url_watcher
 
 
-@pytest.fixture
-def valid_git_config(here):
-    with Path(here / "mocks" / "valid_git_config.yaml").open() as fp:
-        return yaml.safe_load(fp)
+def _list_valid_configs():
+    return [
+        "valid_git_config.yaml",
+        "valid_git_config_path.yaml"
+    ]
 
+@pytest.fixture(scope="session", params=_list_valid_configs())
+def valid_git_config(here, request):
+    with Path(here / "mocks" / request.param).open() as fp:
+        return yaml.safe_load(fp)
 
 async def test_watcher_workflow(loop, valid_git_config, mocker):
     mock = mocker.patch(
