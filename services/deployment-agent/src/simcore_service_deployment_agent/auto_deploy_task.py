@@ -51,6 +51,8 @@ async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
             stack_cfg["services"][service].pop("build", None)
         return stack_cfg
 
+async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
+    pass
 
 async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path:
     # collect repos informations
@@ -141,6 +143,9 @@ async def init_task(app_config: Dict) -> List[SubTask]:
     # filter the stack file if needed
     stack_cfg = await filter_services(app_config, stack_file)
     log.debug("filtered stack configuration")
+    # add parameter to the stack file if needed
+    stack_cfg = await add_parameters(app_config, stack_file)
+    log.debug("added stack parameters")
     # create the docker repos watchers
     subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
     # deploy to portainer

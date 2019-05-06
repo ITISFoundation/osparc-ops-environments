@@ -39,6 +39,7 @@ main:
       stack_name: services
   excluded_services: [app]
   excluded_volumes: [some_volume]
+  additional_parameters: {extra_hosts: {"some_test_host":"123.43.23.44", "another_test_host": "332.4.234.12"}}
   polling_interval: 30
   notifications:
     - service: mattermost
