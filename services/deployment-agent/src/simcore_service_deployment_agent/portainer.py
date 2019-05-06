@@ -18,7 +18,7 @@ async def _portainer_request(url: URL, method: str, **kwargs) -> str:
                 return data
             if resp.status == 404:
                 log.error("could not find route in %s", url)
-                raise ConfigurationError("Could not authenticate with Portainer app in {}:\n {}".format(url, await resp.text()))
+                raise ConfigurationError("Could not reach Portainer app in {}:\n {}".format(url, await resp.text()))
             log.error("Unknown error")
             raise AutoDeployAgentException("Unknown error while accessing Portainer app in {}:\n {}".format(url, await resp.text()))
 
@@ -39,7 +39,7 @@ async def get_swarm_id(base_url: URL, bearer_code: str) -> str:
     url = base_url.with_path("api/endpoints/1/docker/swarm")
     data = await _portainer_request(url, "GET", headers=headers)
     log.debug("received swarm details: %s", data)
-    swarm_id = data["ID"]            
+    swarm_id = data["ID"]
     return swarm_id
 
 async def get_stacks_list(base_url: URL, bearer_code: str) -> List[Dict]:
@@ -58,7 +58,7 @@ async def get_current_stack_id(base_url: URL, bearer_code: str, stack_name: str)
             return stack["Id"]
     return None
 
-async def post_new_stack(base_url: URL, bearer_code: str, swarm_id: str, stack_name: str, stack_cfg: Dict):    
+async def post_new_stack(base_url: URL, bearer_code: str, swarm_id: str, stack_name: str, stack_cfg: Dict):
     log.debug("creating new stack %s", base_url)
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
     body_data = {
@@ -69,15 +69,6 @@ async def post_new_stack(base_url: URL, bearer_code: str, swarm_id: str, stack_n
     url = base_url.with_path("api/stacks").with_query({"type": 1, "method": "string", "endpointId": 1})
     data = await _portainer_request(url, "POST", headers=headers, json=body_data)
     log.debug("created new stack: %s", data)
-
-async def get_current_stack_config(base_url: URL, bearer_code: str, stack_id: str) -> Dict:
-    log.debug("getting current stack config %s", base_url)
-    headers = {"Authorization": "Bearer {}".format(bearer_code)}
-    url = URL(base_url).with_path("api/stacks/{}/file".format(stack_id))
-    data = await _portainer_request(url, "GET", headers=headers)
-    data = json.loads(data["StackFileContent"])
-    log.debug("retrieved stack config: %s", data)
-    return data
 
 async def update_stack(base_url: URL, bearer_code: str, stack_id: str, stack_cfg: Dict):
     log.debug("updating stack %s", base_url)

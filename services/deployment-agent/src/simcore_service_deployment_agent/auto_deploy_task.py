@@ -118,9 +118,6 @@ async def update_portainer_stack(app_config: Dict, stack_cfg: Dict):
             swarm_id = await portainer.get_swarm_id(url, bearer_code)
             await portainer.post_new_stack(url, bearer_code, swarm_id, config["stack_name"], stack_cfg)
         else:
-            # check if the stack needs an update
-            # current_stack_cfg = await portainer.get_current_stack_config(url, bearer_code, current_stack_id)
-            # if current_stack_cfg != stack_cfg:
             log.debug("updating the configuration of the stack...")
             await portainer.update_stack(url, bearer_code, current_stack_id, stack_cfg)
 
