@@ -148,7 +148,7 @@ async def init_task(app_config: Dict, message: str) -> List[SubTask]:
     stack_cfg = await filter_services(app_config, stack_file)
     log.debug("filtered stack configuration")
     # add parameter to the stack file if needed
-    stack_cfg = await add_parameters(app_config, stack_file)
+    stack_cfg = await add_parameters(app_config, stack_cfg)
     log.debug("added stack parameters")
     # create the docker repos watchers
     subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
