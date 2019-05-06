@@ -36,8 +36,8 @@ class State(IntEnum):
 
 
 async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
-    excluded_services = app_config["main"]["excluded_services"]
-    excluded_volumes = app_config["main"]["excluded_volumes"]
+    excluded_services = app_config["main"]["docker_stack_recipe"]["excluded_services"]
+    excluded_volumes = app_config["main"]["docker_stack_recipe"]["excluded_volumes"]
     with Path(stack_file).open() as fp:
         stack_cfg = yaml.safe_load(fp)
         # remove excluded services
@@ -52,7 +52,14 @@ async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
         return stack_cfg
 
 async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
-    pass
+    additional_parameters = app_config["main"]["docker_stack_recipe"]["additional_parameters"]
+    if not additional_parameters:
+        # nothing to add
+        return stack_cfg
+    for service_key in stack_cfg["services"].keys():
+        stack_cfg["services"][service_key].update(additional_parameters)
+
+    return stack_cfg
 
 async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path:
     # collect repos informations
