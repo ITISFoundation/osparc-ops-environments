@@ -22,7 +22,7 @@ before_script() {
 
 script() {
     # wait for a minute to let the swarm warm up...
-    pytest -v ops/travis/system-testing/tests
+    pytest --cov-append --cov=simcore_service_deployment_agent -v ops/travis/system-testing/tests
 }
 
 after_success() {
