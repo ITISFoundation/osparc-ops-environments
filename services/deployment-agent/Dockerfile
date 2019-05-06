@@ -44,7 +44,7 @@ RUN apk add --no-cache \
       openssl-dev
 
 RUN $SC_PIP install --upgrade \
-      pip \
+      pip==19.0.3 \
       wheel \
       setuptools \
       docker-compose
