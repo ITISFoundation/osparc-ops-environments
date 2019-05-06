@@ -4,7 +4,7 @@ main:
   watched_git_repositories:
     # all git repositories that shall be controlled
     - id: simcore-github-repo
-      url: file:///home/test/git_repository
+      url: file://localhost/home/test/git_repository
       branch: master
       pull_only_files: false # if true will only pull the files define in paths
       paths:
