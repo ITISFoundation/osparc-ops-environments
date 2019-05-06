@@ -136,7 +136,7 @@ async def create_git_watch_subtask(app_config: Dict) -> SubTask:
     return git_sub_task
 
 
-async def init_task(app_config: Dict) -> List[SubTask]:
+async def init_task(app_config: Dict, message: str) -> List[SubTask]:
     log.debug("initialising task")
     subtasks = []
     # start by creating the git watcher/repos
@@ -156,7 +156,7 @@ async def init_task(app_config: Dict) -> List[SubTask]:
     await update_portainer_stack(app_config, stack_cfg)
     log.debug("updated portainer app")
     # notify
-    await notify(app_config)
+    await notify(app_config, message=message)
     log.debug("task initialised")
     return subtasks
 
@@ -196,7 +196,7 @@ async def auto_deploy(app: web.Application):
         app_config = app[APP_CONFIG_KEY]
         log.info("initialising...")
         await wait_for_dependencies(app_config)
-        subtasks = await init_task(app_config)
+        subtasks = await init_task(app_config, message="Stack initialised")
         log.info("initialisation completed")
         app[TASK_STATE] = State.RUNNING
         # loop forever to detect changes
@@ -205,7 +205,7 @@ async def auto_deploy(app: web.Application):
             changes_detected = await check_changes(subtasks)
             if changes_detected:
                 log.info("changes detected, redeploying the stack...")
-                subtasks = await init_task(app_config)
+                subtasks = await init_task(app_config, message="Updated stack")
                 log.info("stack re-deployed")
             await asyncio.sleep(app_config["main"]["polling_interval"])
 
