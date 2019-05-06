@@ -35,4 +35,4 @@ async def notify(app_config: Dict, message: str=None):
     notify_configs = app_config["main"]["notifications"]
     for notify_config in notify_configs:
         if "mattermost" == notify_config["service"]:
-            await notify_mattermost(notify_config)
+            await notify_mattermost(notify_config, add_message=message)
