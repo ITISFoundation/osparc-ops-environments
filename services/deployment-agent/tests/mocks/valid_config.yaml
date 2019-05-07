@@ -35,8 +35,8 @@ main:
     excluded_volumes: [some_volume]
     additional_parameters:
       extra_hosts:
-        some_test_host: "123.43.23.44"
-        another_test_host: "332.4.234.12"
+        - "some_test_host:123.43.23.44"
+        - "another_test_host:332.4.234.12"
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000

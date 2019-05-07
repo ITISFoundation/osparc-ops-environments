@@ -29,7 +29,7 @@ app_schema = T.Dict({
         "stack_file": T.String(),
         "excluded_services": T.List(T.String()),
         "excluded_volumes": T.List(T.String()),
-        "additional_parameters": T.Dict()
+        "additional_parameters": T.Any()
     }),
     "portainer": T.List(T.Dict({
         "url": T.String(),
