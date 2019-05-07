@@ -7,7 +7,7 @@ app_schema = T.Dict({
     "log_level": T.Enum("DEBUG", "WARNING", "INFO", "ERROR", "CRITICAL", "FATAL", "NOTSET"),
     "watched_git_repositories": T.List(T.Dict({
         "id": T.String(),
-        "url": T.Or(T.URL, T.String()),
+        "url": T.URL,
         T.Key("username", optional=True, default=""): T.String(allow_blank=True),
         T.Key("password", optional=True, default=""): T.String(allow_blank=True),
         T.Key("branch", default="master", optional=True): T.String(allow_blank=True),
@@ -26,7 +26,10 @@ app_schema = T.Dict({
         })),
         "workdir": T.String(),
         "command": T.String(allow_blank=True),
-        "stack_file": T.String()
+        "stack_file": T.String(),
+        "excluded_services": T.List(T.String()),
+        "excluded_volumes": T.List(T.String()),
+        "additional_parameters": T.Dict()
     }),
     "portainer": T.List(T.Dict({
         "url": T.String(),
@@ -34,8 +37,6 @@ app_schema = T.Dict({
         T.Key("password", optional=True, default=""): T.String(allow_blank=True),
         "stack_name": T.String(),
     }), min_length=1),
-    "excluded_services": T.List(T.String()),
-    "excluded_volumes": T.List(T.String()),    
     "polling_interval": T.Int(gte=0),
     "notifications": T.List(T.Dict({
             "service":T.String,
@@ -48,7 +49,7 @@ app_schema = T.Dict({
 })
 
 schema = T.Dict({
-    "version": T.String(),   
+    "version": T.String(),
     T.Key("rest"): rest_schema,
     T.Key("main"): app_schema
 })

@@ -31,14 +31,15 @@ main:
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
     command: make create-staging-stack-file output_file=stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
+    excluded_services: [webclient]
+    excluded_volumes: []
+    additional_parameters: {}
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
       username: admin
       password: adminadmin
       stack_name: services
-  excluded_services: [webclient]
-  excluded_volumes: []
   polling_interval: 30
   notifications:
     - service: mattermost

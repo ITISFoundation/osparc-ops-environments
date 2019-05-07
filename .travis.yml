@@ -8,6 +8,7 @@ addons:
   apt:
     packages:
       - docker-ce
+      - expect-dev # for unbuffer: brings color back into travis logs
 jobs:
   include:
     - stage: unit testing
@@ -20,13 +21,13 @@ jobs:
       before_install:
         - sudo bash ops/travis/unit-testing/deployment-agent before_install
       install:
-        - bash ops/travis/unit-testing/deployment-agent install
+        - unbuffer bash ops/travis/unit-testing/deployment-agent install
       before_script:
-        - bash ops/travis/unit-testing/deployment-agent before_script
+        - unbuffer bash ops/travis/unit-testing/deployment-agent before_script
       script:
-        - bash ops/travis/unit-testing/deployment-agent script
+        - unbuffer bash ops/travis/unit-testing/deployment-agent script
       after_success:
-        - bash ops/travis/unit-testing/deployment-agent after_success
+        - unbuffer bash ops/travis/unit-testing/deployment-agent after_success
 
     - stage: system testing, staging
       name: deployment-agent
@@ -37,18 +38,18 @@ jobs:
       before_install:
         - sudo bash ops/travis/system-testing/deployment-agent before_install
       install:
-        - bash ops/travis/system-testing/deployment-agent install
+        - unbuffer bash ops/travis/system-testing/deployment-agent install
       before_script:
-        - bash ops/travis/system-testing/deployment-agent before_script
+        - unbuffer bash ops/travis/system-testing/deployment-agent before_script
       script:
-        - bash ops/travis/system-testing/deployment-agent script
+        - unbuffer bash ops/travis/system-testing/deployment-agent script
       after_success:
-        - bash ops/travis/system-testing/deployment-agent after_success
+        - unbuffer bash ops/travis/system-testing/deployment-agent after_success
       after_failure:
-        - bash ops/travis/system-testing/deployment-agent after_failure
+        - unbuffer bash ops/travis/system-testing/deployment-agent after_failure
       deploy:
         - provider: script
           skip_cleanup: true
-          script: bash ops/travis/deploy/deployment-agent deploy-staging
+          script: unbuffer bash ops/travis/deploy/deployment-agent deploy-staging
           on:
             branch: master

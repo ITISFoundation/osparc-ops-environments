@@ -61,6 +61,11 @@ async def test_filter_services(loop, valid_config, valid_docker_stack_file):
     assert "some_volume" not in stack_cfg["volumes"]
     assert "build" not in stack_cfg["services"]["anotherapp"]
 
+async def test_add_parameters(loop, valid_config, valid_docker_stack):
+    stack_cfg = await auto_deploy_task.add_parameters(valid_config, valid_docker_stack)
+    assert "extra_hosts" in stack_cfg["services"]["app"]
+    assert "extra_hosts" in stack_cfg["services"]["anotherapp"]
+
 
 async def test_setup_task(loop, fake_app):
     try:

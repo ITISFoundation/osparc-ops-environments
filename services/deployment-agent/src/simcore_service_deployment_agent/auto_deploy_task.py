@@ -36,8 +36,8 @@ class State(IntEnum):
 
 
 async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
-    excluded_services = app_config["main"]["excluded_services"]
-    excluded_volumes = app_config["main"]["excluded_volumes"]
+    excluded_services = app_config["main"]["docker_stack_recipe"]["excluded_services"]
+    excluded_volumes = app_config["main"]["docker_stack_recipe"]["excluded_volumes"]
     with Path(stack_file).open() as fp:
         stack_cfg = yaml.safe_load(fp)
         # remove excluded services
@@ -51,6 +51,15 @@ async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
             stack_cfg["services"][service].pop("build", None)
         return stack_cfg
 
+async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
+    additional_parameters = app_config["main"]["docker_stack_recipe"]["additional_parameters"]
+    if not additional_parameters:
+        # nothing to add
+        return stack_cfg
+    for service_key in stack_cfg["services"].keys():
+        stack_cfg["services"][service_key].update(additional_parameters)
+
+    return stack_cfg
 
 async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path:
     # collect repos informations
@@ -109,9 +118,6 @@ async def update_portainer_stack(app_config: Dict, stack_cfg: Dict):
             swarm_id = await portainer.get_swarm_id(url, bearer_code)
             await portainer.post_new_stack(url, bearer_code, swarm_id, config["stack_name"], stack_cfg)
         else:
-            # check if the stack needs an update
-            # current_stack_cfg = await portainer.get_current_stack_config(url, bearer_code, current_stack_id)
-            # if current_stack_cfg != stack_cfg:
             log.debug("updating the configuration of the stack...")
             await portainer.update_stack(url, bearer_code, current_stack_id, stack_cfg)
 
@@ -130,7 +136,7 @@ async def create_git_watch_subtask(app_config: Dict) -> SubTask:
     return git_sub_task
 
 
-async def init_task(app_config: Dict) -> List[SubTask]:
+async def init_task(app_config: Dict, message: str) -> List[SubTask]:
     log.debug("initialising task")
     subtasks = []
     # start by creating the git watcher/repos
@@ -141,13 +147,16 @@ async def init_task(app_config: Dict) -> List[SubTask]:
     # filter the stack file if needed
     stack_cfg = await filter_services(app_config, stack_file)
     log.debug("filtered stack configuration")
+    # add parameter to the stack file if needed
+    stack_cfg = await add_parameters(app_config, stack_cfg)
+    log.debug("added stack parameters")
     # create the docker repos watchers
     subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
     # deploy to portainer
     await update_portainer_stack(app_config, stack_cfg)
     log.debug("updated portainer app")
     # notify
-    await notify(app_config)
+    await notify(app_config, message=message)
     log.debug("task initialised")
     return subtasks
 
@@ -187,7 +196,7 @@ async def auto_deploy(app: web.Application):
         app_config = app[APP_CONFIG_KEY]
         log.info("initialising...")
         await wait_for_dependencies(app_config)
-        subtasks = await init_task(app_config)
+        subtasks = await init_task(app_config, message="Stack initialised")
         log.info("initialisation completed")
         app[TASK_STATE] = State.RUNNING
         # loop forever to detect changes
@@ -196,7 +205,7 @@ async def auto_deploy(app: web.Application):
             changes_detected = await check_changes(subtasks)
             if changes_detected:
                 log.info("changes detected, redeploying the stack...")
-                subtasks = await init_task(app_config)
+                subtasks = await init_task(app_config, message="Updated stack")
                 log.info("stack re-deployed")
             await asyncio.sleep(app_config["main"]["polling_interval"])
 

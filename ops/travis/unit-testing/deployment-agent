@@ -32,7 +32,7 @@ before_script() {
 script() {
     if bash ops/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
-        pytest --cov=simcore_service_deployment_agent -v services/deployment-agent/tests
+        pytest --cov-append --cov=simcore_service_deployment_agent -v services/deployment-agent/tests
     else
         echo "No changes detected. Skipping unit-testing of deployment-agent."
     fi

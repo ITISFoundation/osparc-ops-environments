@@ -8,9 +8,11 @@ from .exceptions import ConfigurationError, AutoDeployAgentException
 
 log = logging.getLogger(__name__)
 
-async def notify_mattermost(mattermost_config: Dict):
+async def notify_mattermost(mattermost_config: Dict, add_message: str):
     if mattermost_config["enabled"]:
         message = mattermost_config["message"]
+        if add_message:
+            message = "{base_message}\n{additional_message}".format(base_message=message, additional_message=add_message)
         personal_token = mattermost_config["personal_token"]
         channel_id = mattermost_config["channel_id"]
         url = URL(mattermost_config["url"]).with_path("api/v4/posts")
@@ -29,8 +31,8 @@ async def notify_mattermost(mattermost_config: Dict):
                 raise AutoDeployAgentException("Unknown error while accessing Portainer app in {}:\n {}".format(url, await resp.text()))
 
 
-async def notify(app_config: Dict):
+async def notify(app_config: Dict, message: str=None):
     notify_configs = app_config["main"]["notifications"]
     for notify_config in notify_configs:
         if "mattermost" == notify_config["service"]:
-            await notify_mattermost(notify_config)
+            await notify_mattermost(notify_config, add_message=message)
