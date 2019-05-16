@@ -24,6 +24,23 @@ ENV SC_BUILD_TARGET base
 
 EXPOSE 8888
 
+RUN apk add --no-cache \
+      docker \
+      make \
+      bash \
+      git
+
+RUN apk add --no-cache --virtual .build-deps \
+      gcc \
+      libc-dev \
+      openssl-dev \
+      libffi-dev &&\
+      $SC_PIP install --upgrade \
+      pip \
+      wheel \
+      setuptools \
+      docker-compose &&\
+      apk --purge del .build-deps
 # -------------------------- Build stage -------------------
 # Installs build/package management tools and third party dependencies
 #
@@ -34,26 +51,18 @@ FROM base as build
 
 ENV SC_BUILD_TARGET build
 
-RUN apk add --no-cache \
+# install base 3rd party packages to accelerate runtime installs
+WORKDIR /build
+COPY --chown=scu:scu requirements/base.txt requirements-base.txt
+
+RUN apk add --no-cache --virtual .build-deps \
       gcc \
       libc-dev \
-      git \
-      docker \
-      make \
-      libffi-dev \
-      openssl-dev
-
-RUN $SC_PIP install --upgrade \
-      pip \
-      wheel \
-      setuptools \
-      docker-compose
-
-WORKDIR /build
-# install base 3rd party packages to accelerate runtime installs
-COPY --chown=scu:scu requirements/base.txt requirements-base.txt
-RUN $SC_PIP install \
-      -r requirements-base.txt
+      musl-dev \
+      postgresql-dev &&\
+      $SC_PIP install \
+      -r requirements-base.txt && \
+      apk --purge del .build-deps
 
 # --------------------------Production stage -------------------
 FROM build as production
@@ -62,20 +71,19 @@ ENV SC_BUILD_TARGET production
 ENV SC_BOOT_MODE production
 
 COPY --chown=scu:scu . /build/services/deployment-agent
-
 WORKDIR /build/services/deployment-agent
-RUN $SC_PIP install -r requirements/prod.txt &&\
-      $SC_PIP list
+
+RUN apk add --no-cache --virtual .build-deps \
+      gcc \
+      libc-dev &&\
+      $SC_PIP install -r requirements/prod.txt &&\
+      mkdir -p /home/scu/services/deployment-agent &&\
+      chown scu:scu /home/scu/services/deployment-agent &&\
+      mv /build/services/deployment-agent/docker /home/scu/services/deployment-agent/docker &&\
+      rm -rf /build &&\
+      apk --purge del .build-deps
 
 WORKDIR /home/scu
-RUN mkdir -p services/deployment-agent &&\
-      chown scu:scu services/deployment-agent &&\
-      mv /build/services/deployment-agent/docker services/deployment-agent/docker &&\
-      rm -rf /build
-
-RUN apk del --no-cache\
-      gcc \
-      libc-dev
 
 HEALTHCHECK --interval=30s \
       --timeout=60s \
