@@ -37,6 +37,9 @@ main:
       extra_hosts:
         - "some_test_host:123.43.23.44"
         - "another_test_host:332.4.234.12"
+      environment:
+        TEST_ENV: "some test"
+        ANOTHER_TEST_ENV: "some other test"
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
