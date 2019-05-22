@@ -1,0 +1,11 @@
+## Runtime configuration for the simcore_service_deployment_agent application.
+##
+version: "1.0"
+main:
+  notifications:
+    - service: mattermost
+      url: http://mattermost.com
+      message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
+      enabled: true
+      channel_id: some_token
+      personal_token: some_token
