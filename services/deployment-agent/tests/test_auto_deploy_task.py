@@ -74,7 +74,7 @@ async def test_add_parameters(loop, valid_config, valid_docker_stack):
     assert "ORIGINAL_ENV" in envs
     assert envs["ORIGINAL_ENV"] == "the original env"
     assert "YET_ANOTHER_ENV" in envs
-    assert envs["YET_ANOTHER_ENV"] == "the other original env"
+    assert envs["YET_ANOTHER_ENV"] == "this one is replaced"
     assert "TEST_ENV" in envs
     assert envs["TEST_ENV"] == "some test"
     assert "ANOTHER_TEST_ENV" in envs
