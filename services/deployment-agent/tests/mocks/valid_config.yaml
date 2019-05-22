@@ -41,6 +41,7 @@ main:
         TEST_ENV: "some test"
         ANOTHER_TEST_ENV: "some other test"
         YET_ANOTHER_ENV: "this one is replaced"
+      image: testimage
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000

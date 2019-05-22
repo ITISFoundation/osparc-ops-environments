@@ -53,11 +53,22 @@ async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
 
 async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
     additional_parameters = app_config["main"]["docker_stack_recipe"]["additional_parameters"]
-    if not additional_parameters:
-        # nothing to add
-        return stack_cfg
-    for service_key in stack_cfg["services"].keys():
-        stack_cfg["services"][service_key].update(additional_parameters)
+    for key, value in additional_parameters.items():
+        if isinstance(value, dict):
+            for _, service_params in stack_cfg["services"].items():
+                if key in service_params:
+                    service_params[key].update(**value)
+                else:
+                    service_params[key] = value
+        elif isinstance(value, list):
+            for _, service_params in stack_cfg["services"].items():
+                if key in service_params:
+                    service_params[key].extend(value)
+                else:
+                    service_params[key] = value
+        elif isinstance(value, str):
+            for _, service_params in stack_cfg["services"].items():
+                service_params[key] = value
 
     return stack_cfg
 

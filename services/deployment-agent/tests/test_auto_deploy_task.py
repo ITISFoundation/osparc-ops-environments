@@ -91,6 +91,11 @@ async def test_add_parameters(loop, valid_config, valid_docker_stack):
     assert "ANOTHER_TEST_ENV" in envs
     assert envs["ANOTHER_TEST_ENV"] == "some other test"
 
+    assert "image" in stack_cfg["services"]["app"]
+    assert "testimage" in stack_cfg["services"]["app"]["image"]
+    assert "image" in stack_cfg["services"]["anotherapp"]
+    assert "testimage" in stack_cfg["services"]["anotherapp"]["image"]
+
 
 async def test_setup_task(loop, fake_app):
     try:
