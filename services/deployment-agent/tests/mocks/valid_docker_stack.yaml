@@ -6,6 +6,11 @@ services:
     ports:
       - "8080:8080"
     restart: always
+    environment:
+      ORIGINAL_ENV: "the original env"
+      YET_ANOTHER_ENV: "the other original env"
+    extra_hosts:
+      - "original_host:243.23.23.44"
   anotherapp:
     build:
       context: ../

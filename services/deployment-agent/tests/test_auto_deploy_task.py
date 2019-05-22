@@ -64,7 +64,37 @@ async def test_filter_services(loop, valid_config, valid_docker_stack_file):
 async def test_add_parameters(loop, valid_config, valid_docker_stack):
     stack_cfg = await auto_deploy_task.add_parameters(valid_config, valid_docker_stack)
     assert "extra_hosts" in stack_cfg["services"]["app"]
+    hosts = stack_cfg["services"]["app"]["extra_hosts"]
+    assert "original_host:243.23.23.44" in hosts
+    assert "some_test_host:123.43.23.44" in hosts
+    assert "another_test_host:332.4.234.12" in hosts
+
+    assert "environment" in stack_cfg["services"]["app"]
+    envs = stack_cfg["services"]["app"]["environment"]
+    assert "ORIGINAL_ENV" in envs
+    assert envs["ORIGINAL_ENV"] == "the original env"
+    assert "YET_ANOTHER_ENV" in envs
+    assert envs["YET_ANOTHER_ENV"] == "this one is replaced"
+    assert "TEST_ENV" in envs
+    assert envs["TEST_ENV"] == "some test"
+    assert "ANOTHER_TEST_ENV" in envs
+    assert envs["ANOTHER_TEST_ENV"] == "some other test"
+
     assert "extra_hosts" in stack_cfg["services"]["anotherapp"]
+    hosts = stack_cfg["services"]["anotherapp"]["extra_hosts"]
+    assert "some_test_host:123.43.23.44" in hosts
+    assert "another_test_host:332.4.234.12" in hosts
+    assert "environment" in stack_cfg["services"]["app"]
+    envs = stack_cfg["services"]["app"]["environment"]
+    assert "TEST_ENV" in envs
+    assert envs["TEST_ENV"] == "some test"
+    assert "ANOTHER_TEST_ENV" in envs
+    assert envs["ANOTHER_TEST_ENV"] == "some other test"
+
+    assert "image" in stack_cfg["services"]["app"]
+    assert "testimage" in stack_cfg["services"]["app"]["image"]
+    assert "image" in stack_cfg["services"]["anotherapp"]
+    assert "testimage" in stack_cfg["services"]["anotherapp"]["image"]
 
 
 async def test_setup_task(loop, fake_app):

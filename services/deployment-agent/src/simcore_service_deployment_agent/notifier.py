@@ -26,9 +26,9 @@ async def notify_mattermost(mattermost_config: Dict, add_message: str):
                     return data
                 if resp.status == 404:
                     log.error("could not find route in %s", url)
-                    raise ConfigurationError("Could not authenticate with Portainer app in {}:\n {}".format(url, await resp.text()))
+                    raise ConfigurationError("Could not find channel within Mattermost app in {}:\n {}".format(url, await resp.text()))
                 log.error("Unknown error")
-                raise AutoDeployAgentException("Unknown error while accessing Portainer app in {}:\n {}".format(url, await resp.text()))
+                raise AutoDeployAgentException("Unknown error while accessing Mattermost app in {}:\n {}".format(url, await resp.text()))
 
 
 async def notify(app_config: Dict, message: str=None):
