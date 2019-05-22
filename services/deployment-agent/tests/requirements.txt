@@ -2,6 +2,7 @@
 ##
 ##    pip install --requirement=requirements.txt
 ##
+codecov
 coveralls
 pylint
 pytest
