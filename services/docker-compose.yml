@@ -46,8 +46,6 @@ services:
     command: --admin-password ${DOCKER_ADMIN_PWD} -H tcp://tasks.agent:9001 --tlsskipverify
     ports:
       - "9000:9000"
-    volumes:
-      - portainer_data:/data
     networks:
       - agent_network
     deploy:
@@ -60,9 +58,6 @@ networks:
   agent_network:
     driver: overlay
     attachable: true
-
-volumes:
-  portainer_data:
 
 configs:
   deployment_config:
