@@ -213,10 +213,14 @@ async def auto_deploy(app: web.Application):
         # loop forever to detect changes
         while True:
             log.info("checking for changes...")
-            changes_detected = await check_changes(subtasks)
+            changes_detected, changes = await check_changes(subtasks)
             if changes_detected:
                 log.info("changes detected, redeploying the stack...")
-                subtasks = await init_task(app_config, message="Updated stack")
+                log.info("changes: %s", changes)
+                message = "Updated stack"
+                if changes:
+                    message = message + "\n{}".format(changes)
+                subtasks = await init_task(app_config, message=message)
                 log.info("stack re-deployed")
             await asyncio.sleep(app_config["main"]["polling_interval"])
 
