@@ -111,7 +111,7 @@ async def _check_repositories(repos: List[GitRepo]) -> Tuple[bool, str]:
             log.info("File %s changed!!", common_files)
             change_detected = True
 
-    return change_detected, changes
+    return (change_detected, changes)
 
 
 async def _delete_repositories(repos: List[GitRepo]):

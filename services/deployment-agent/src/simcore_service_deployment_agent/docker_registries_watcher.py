@@ -61,14 +61,14 @@ class DockerRegistriesWatcher(SubTask):
         log.debug("docker watcher initialised")
 
     @retry(reraise=True, stop=stop_after_attempt(NUMBER_OF_ATTEMPS), wait=wait_random(min=1, max=MAX_TIME_TO_WAIT_S), after=after_log(log, logging.DEBUG))
-    async def check_for_changes(self):
+    async def check_for_changes(self) -> Tuple[bool, str]:
         with docker_client(self.private_registries) as client:
             for repo in self.watched_repos:
                 try:
                     registry_data = client.images.get_registry_data(repo["image"])
                     if repo["registry_data_attrs"] != registry_data.attrs:
                         log.info("docker image %s signature changed!", repo["image"])
-                        return True
+                        return (True, "image {} changed".format(repo["image"]))
                 except docker.errors.APIError:
                     if repo["registry_data_attrs"]:
                         # in that case something is wrong...either docker or config
@@ -78,7 +78,7 @@ class DockerRegistriesWatcher(SubTask):
                         # in that case the registry does not contain yet the new service
                         log.warning("the image %s is still not available in the registry", repo["image"])
 
-        return False
+        return (False, "")
 
     async def cleanup(self):
         pass
