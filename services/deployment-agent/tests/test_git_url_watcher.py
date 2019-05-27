@@ -40,12 +40,12 @@ async def test_watcher_workflow(loop, valid_git_config, mocker):
         pytest.fail("Unexpected error cloning repos...")
     mock.assert_called()
 
-    assert await git_watcher.check_for_changes() == False
+    assert await git_watcher.check_for_changes() == (False, "")
 
     mock_changed_files = mocker.patch(
         "simcore_service_deployment_agent.git_url_watcher.run_cmd_line", return_value=Future())
     mock_changed_files.return_value.set_result("Makefile")
-    assert await git_watcher.check_for_changes() == True
+    assert await git_watcher.check_for_changes() == (True, "Makefile")
 
     try:
         await git_watcher.cleanup()
