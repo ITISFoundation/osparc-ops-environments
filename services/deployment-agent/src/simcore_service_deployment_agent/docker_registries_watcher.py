@@ -9,6 +9,9 @@ from .subtask import SubTask
 
 log = logging.getLogger(__name__)
 
+NUMBER_OF_ATTEMPS = 5
+MAX_TIME_TO_WAIT_S = 10
+
 
 @contextmanager
 def docker_client(registries: List[Dict]) -> docker.client:
@@ -57,7 +60,7 @@ class DockerRegistriesWatcher(SubTask):
                     repo["registry_data_attrs"] = ""
         log.debug("docker watcher initialised")
 
-    @retry(stop=stop_after_attempt(5), wait=wait_random(min=1, max=10), after=after_log(log, logging.DEBUG))
+    @retry(reraise=True, stop=stop_after_attempt(NUMBER_OF_ATTEMPS), wait=wait_random(min=1, max=MAX_TIME_TO_WAIT_S), after=after_log(log, logging.DEBUG))
     async def check_for_changes(self):
         with docker_client(self.private_registries) as client:
             for repo in self.watched_repos:

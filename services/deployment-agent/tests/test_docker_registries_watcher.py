@@ -35,6 +35,7 @@ def _assert_docker_client_calls(mocked_docker_client, mocker, registry_config, d
 
 
 async def test_watcher_workflow(loop, valid_docker_config, valid_docker_stack, mocker):
+    docker_registries_watcher.NUMBER_OF_ATTEMPS = 1
     mocked_docker_client = mocker.patch(
         "simcore_service_deployment_agent.docker_registries_watcher.docker",
         **{"from_env.return_value.images.get_registry_data.return_value.attrs": "somesignature",
