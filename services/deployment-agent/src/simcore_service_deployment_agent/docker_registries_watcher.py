@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import Dict, List
 
 import docker
+from tenacity import after_log, retry, stop_after_attempt, wait_random
 
 from .subtask import SubTask
 
@@ -56,6 +57,7 @@ class DockerRegistriesWatcher(SubTask):
                     repo["registry_data_attrs"] = ""
         log.debug("docker watcher initialised")
 
+    @retry(stop=stop_after_attempt(5), wait=wait_random(min=1, max=10), after=after_log(log, logging.DEBUG))
     async def check_for_changes(self):
         with docker_client(self.private_registries) as client:
             for repo in self.watched_repos:
@@ -72,7 +74,7 @@ class DockerRegistriesWatcher(SubTask):
                     else:
                         # in that case the registry does not contain yet the new service
                         log.warning("the image %s is still not available in the registry", repo["image"])
-                
+
         return False
 
     async def cleanup(self):
