@@ -4,13 +4,14 @@ import tempfile
 from enum import IntEnum
 from pathlib import Path
 from shutil import copy2
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import yaml
 from aiohttp import ClientError, web
 from servicelib.application_keys import APP_CONFIG_KEY
+from tenacity import (before_sleep_log, retry, retry_if_exception_type,
+                      stop_after_attempt, wait_fixed)
 from yarl import URL
-from tenacity import before_sleep_log, retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 
 from . import portainer
 from .cmd_utils import run_cmd_line
@@ -172,13 +173,13 @@ async def init_task(app_config: Dict, message: str) -> List[SubTask]:
     return subtasks
 
 
-async def check_changes(subtasks: List[SubTask]):
+async def check_changes(subtasks: List[SubTask]) -> Tuple[bool, str]:
     for task in subtasks:
-        changes = await task.check_for_changes()
+        changes, details = await task.check_for_changes()
         if changes:
-            log.info("Changes detected with task %s", task.name)
-            return True
-    return False
+            log.info("Changes detected with task %s, details: %s", task.name, details)
+            return (True, details)
+    return (False, "")
 
 
 @retry(wait=wait_fixed(RETRY_WAIT_SECS),
@@ -213,10 +214,14 @@ async def auto_deploy(app: web.Application):
         # loop forever to detect changes
         while True:
             log.info("checking for changes...")
-            changes_detected = await check_changes(subtasks)
+            changes_detected, changes = await check_changes(subtasks)
             if changes_detected:
                 log.info("changes detected, redeploying the stack...")
-                subtasks = await init_task(app_config, message="Updated stack")
+                log.info("changes: %s", changes)
+                message = "Updated stack"
+                if changes:
+                    message = message + "\n{}".format(changes)
+                subtasks = await init_task(app_config, message=message)
                 log.info("stack re-deployed")
             await asyncio.sleep(app_config["main"]["polling_interval"])
 

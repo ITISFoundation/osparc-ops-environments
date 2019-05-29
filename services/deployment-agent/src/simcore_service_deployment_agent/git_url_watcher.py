@@ -2,7 +2,7 @@ import logging
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import attr
 from yarl import URL
@@ -56,6 +56,11 @@ async def _git_diff_filenames(directory: Path) -> str:
     modified_files = await run_cmd_line(cmd)
     return modified_files
 
+async def _git_get_logs(directory: Path, branch: str) -> str:
+    cmd = "cd {directory} && git log --oneline {branch}..origin/{branch}".format(
+        directory=directory, branch=branch)
+    logs = await run_cmd_line(cmd)
+    return logs
 
 watched_repos = list()
 
@@ -82,8 +87,9 @@ async def _init_repositories(repos: List[GitRepo]):
             await _git_checkout_repo(repo.directory)
 
 
-async def _check_repositories(repos: List[GitRepo]) -> bool:
+async def _check_repositories(repos: List[GitRepo]) -> Tuple[bool, str]:
     change_detected = False
+    changes = ""
     for repo in repos:
         log.debug("checking repo: %s...", repo.repo_url)
         assert repo.directory
@@ -92,6 +98,8 @@ async def _check_repositories(repos: List[GitRepo]) -> bool:
         if not modified_files:
             # no modifications
             continue
+        # get the logs
+        changes = await _git_get_logs(repo.directory, repo.branch)
         if repo.pull_only_files:
             await _git_pull_files(repo.directory, repo.paths)
         else:
@@ -103,7 +111,7 @@ async def _check_repositories(repos: List[GitRepo]) -> bool:
             log.info("File %s changed!!", common_files)
             change_detected = True
 
-    return change_detected
+    return (change_detected, changes)
 
 
 async def _delete_repositories(repos: List[GitRepo]):
@@ -129,7 +137,7 @@ class GitUrlWatcher(SubTask):
     async def init(self):
         await _init_repositories(self.watched_repos)
 
-    async def check_for_changes(self) -> bool:
+    async def check_for_changes(self) -> Tuple[bool, str]:
         result = await _check_repositories(self.watched_repos)
         return result
 

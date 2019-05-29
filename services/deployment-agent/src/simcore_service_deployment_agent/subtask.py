@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 
 class SubTask(ABC):
@@ -11,7 +12,7 @@ class SubTask(ABC):
         pass
 
     @abstractmethod
-    async def check_for_changes(self):
+    async def check_for_changes(self) -> Tuple[bool, str]:
         pass
 
     @abstractmethod
