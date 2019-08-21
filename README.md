@@ -1,5 +1,7 @@
 # oSparc Simcore Operations Development
 
+[![Build Status](https://travis-ci.org/ITISFoundation/osparc-ops.svg?branch=master)](https://travis-ci.org/ITISFoundation/osparc-ops)
+
 Tools for oSPARC deployment and management (not directly part of osparc platform)
 
 ## Contents
