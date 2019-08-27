@@ -14,14 +14,23 @@ help: ## This colourful help
 
 .DEFAULT_GOAL := help
 
+
 .PHONY: up
-up: ## Inits swarm and deploys currents stack
+.make-init:
 	docker swarm init
+	@touch .make-init
+
+up: .make-init ## Inits swarm and deploys currents stack
 	HOSTNAME=$(hostname) docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
-.PHONY: down
-down: ## Stops and leaves swarm
-	docker swarm leave -f
+.PHONY: down down-all
+down: ## Stops stack
+	docker stack rm $(STACK_NAME)
+
+down-all: ## stops all stacks and leaves swarm
+	-rm .make-init; docker swarm leave -f
+	
+
 
 .PHONY: info
 info: ## General info
@@ -32,5 +41,10 @@ info: ## General info
 	)
 	@echo "\nSTACKS ---------------"
 	@docker stack ls 2>/dev/null
-	@echo "\nSERVICES -------------"
-	@docker service ls 2>/dev/null
+	@echo "\nCONTAINERS -------------"
+	@docker ps 2>/dev/null
+	@echo "\nTASKS in $(STACK_NAME) stack -------------"
+	@docker stack ps $(STACK_NAME) 2>/dev/null
+	@echo "\nSERVICES  in $(STACK_NAME) stack -------------"
+	@docker stack services $(STACK_NAME) 2>/dev/null
+	

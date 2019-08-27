@@ -2,14 +2,19 @@
 
 Creates a stack for monitoring services based in [prometheus] and [graphana]
 
+## Usage
+
     $ make help
     $ make up
     $ make info
     $ make down
 
+Available web front-ends when deployed in locahost:
 
 - graphana: http://127.0.0.1:3000/dashboards   [admin, foobar]
 - prometheus: http://127.0.0.1:9090
+- cAdvisor: http://127.0.0.1:8080/containers/
+- Alertmanager: http://127.0.0.1:9093
 
 
 ## References

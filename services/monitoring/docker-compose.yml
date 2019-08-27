@@ -48,7 +48,7 @@ services:
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     ports:
-      - 9100:9100
+      - 9100
     networks:
       - monitor-net
     deploy:
@@ -111,3 +111,13 @@ services:
       #restart_policy:
       #  condition: on-failure
 
+  postgres-exporter:
+    image: wrouesnel/postgres_exporter
+    ports:
+      - 9187:9187
+    networks:
+      - monitor-net
+    environment:
+      - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
+    deploy:
+      mode: global
