@@ -31,7 +31,7 @@ setup(
         '': [
             'config/*.y*ml',
             'oas3/v0/*.y*ml',
-            'oas3/v0/components/schemas/*.y*ml'
+            'oas3/v0/components/schemas/*.y*ml',
             'data/*.json',
             'templates/**/*.html',
             ]
