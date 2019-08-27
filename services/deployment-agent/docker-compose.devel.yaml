@@ -5,4 +5,4 @@ services:
       target: development
     image: deployment-agent:dev
     volumes:
-      - ./deployment-agent:/devel/services/deployment-agent
+      - ./:/devel/services/deployment-agent
