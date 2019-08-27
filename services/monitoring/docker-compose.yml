@@ -6,6 +6,8 @@ volumes:
 
 networks:
   monitor-net:
+  osparc_default:
+    external: true
 
 services:
 
@@ -25,6 +27,7 @@ services:
       - cadvisor
     networks:
       - monitor-net
+      - osparc_default
     #logging:
     #  driver: gelf
     #  options:
@@ -85,6 +88,7 @@ services:
       - 8080:8080
     networks:
       - monitor-net
+      - osparc_default
     deploy:
       mode: global
     #restart_policy:
@@ -117,6 +121,7 @@ services:
       - 9187:9187
     networks:
       - monitor-net
+      - osparc_default
     environment:
       - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
     deploy:
