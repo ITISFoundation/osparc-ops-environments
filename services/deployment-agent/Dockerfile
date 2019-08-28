@@ -53,7 +53,7 @@ ENV SC_BUILD_TARGET build
 
 # install base 3rd party packages to accelerate runtime installs
 WORKDIR /build
-COPY --chown=scu:scu requirements/base.txt requirements-base.txt
+COPY --chown=scu:scu requirements/_base.txt requirements-base.txt
 
 RUN apk add --no-cache --virtual .build-deps \
       gcc \

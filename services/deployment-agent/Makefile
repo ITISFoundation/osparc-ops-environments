@@ -71,14 +71,14 @@ down:
 
 .PHONY: push-release push-staging
 # target: push: – Pushes services to the registry.
-push-release:	
+push-release:
 	for i in $(SERVICES_LIST); do \
 		SERVICE_VERSION=$$(cat $$i/VERSION);\
 		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:$$SERVICE_VERSION;\
 		${DOCKER} push ${DOCKER_REGISTRY}/$$i:$$SERVICE_VERSION;\
 	done
 
-push-staging:	
+push-staging:
 	for i in $(SERVICES_LIST); do \
 		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:staging-latest;\
 		${DOCKER} push ${DOCKER_REGISTRY}/$$i:staging-latest;\
@@ -98,7 +98,7 @@ push-staging:
 
 deployment_config.yaml:
 	@echo "deployment_config.yaml file is missing! Copying from tests folder..."
-	cp deployment-agent/tests/test-config.yaml deployment_config.yaml;
+	cp tests/test-config.yaml deployment_config.yaml;
 
 .PHONY: info
 # target: info – Displays some parameters of makefile environments

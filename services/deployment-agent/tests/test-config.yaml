@@ -12,8 +12,6 @@ main:
     # all git repositories that shall be controlled
     - id: simcore-github-repo
       url: https://github.com/ITISFoundation/osparc-simcore.git
-      username:
-      password:
       branch: master
       pull_only_files: false # if true will only pull the files define in paths
       paths:
@@ -31,7 +29,7 @@ main:
     # An optional command line may be defined to that end that generate the docker-compose file.
     files: [] # nothing to copy around
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
-    command: > 
+    command: >
             export DOCKER_IMAGE_TAG=staging-latest &&
             export SWARM_NETWORK_NAME=simcore &&
             cp .env-devel .env &&

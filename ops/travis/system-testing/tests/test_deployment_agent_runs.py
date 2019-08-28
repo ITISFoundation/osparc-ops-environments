@@ -49,7 +49,7 @@ def osparc_simcore_root_dir(here) -> Path:
 
 
 def _services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
-    docker_compose_path = osparc_simcore_root_dir / "services" / "docker-compose.yml"
+    docker_compose_path = osparc_simcore_root_dir / "services" / "deployment-agent" / "docker-compose.yml"
     assert docker_compose_path.exists()
 
     content = {}

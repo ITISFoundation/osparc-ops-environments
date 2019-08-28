@@ -108,6 +108,9 @@ async def test_setup_task(loop, fake_app, mocker):
     mock_portainer.update_stack.return_value = Future()
     mock_portainer.update_stack.return_value.set_result("")
 
+    # fake username/password for task
+    fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["username"] = ""
+    fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["password"] = ""
 
     try:
         auto_deploy_task.setup(fake_app)
@@ -116,10 +119,10 @@ async def test_setup_task(loop, fake_app, mocker):
 
     try:
         await auto_deploy_task.start(fake_app)
-        assert auto_deploy_task.TASK_NAME in fake_app        
+        assert auto_deploy_task.TASK_NAME in fake_app
         task = asyncio.ensure_future(fake_app[auto_deploy_task.TASK_NAME])
-        assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STARTING        
-        while fake_app[auto_deploy_task.TASK_STATE] != auto_deploy_task.State.RUNNING:            
+        assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STARTING
+        while fake_app[auto_deploy_task.TASK_STATE] != auto_deploy_task.State.RUNNING:
             if fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.FAILED:
                 pytest.fail("task failed to start")
             await asyncio.sleep(1)

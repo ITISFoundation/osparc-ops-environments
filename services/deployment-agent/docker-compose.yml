@@ -2,7 +2,7 @@ version: "3.7"
 services:
   auto-deployment-agent:
     build:
-      context: ./deployment-agent
+      context: ./
       dockerfile: Dockerfile
       target: production
       labels:
