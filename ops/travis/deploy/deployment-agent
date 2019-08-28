@@ -3,14 +3,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-deploy-staging() {
+deploy() {
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    pushd services/deployment-agent; make push-staging ; popd
-}
-
-deploy-release() {
-    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    pushd services/deployment-agent; make push-release ; popd
+    pushd services/deployment-agent; make push ; popd
 }
 
 # Check if the function exists (bash specific)
