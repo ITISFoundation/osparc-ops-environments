@@ -1,6 +1,6 @@
-docker~=3.7
-pytest~=3.6
-pytest-cov~=2.5
+docker>=4.0
+pytest
+pytest-cov
 pytest-aiohttp
-pyyaml>=4.2b1
-tenacity~=4.12
+pyyaml
+tenacity

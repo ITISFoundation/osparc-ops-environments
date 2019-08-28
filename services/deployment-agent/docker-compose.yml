@@ -1,8 +1,8 @@
-version: "3.6"
+version: "3.7"
 services:
   auto-deployment-agent:
     build:
-      context: ./deployment-agent
+      context: ./
       dockerfile: Dockerfile
       target: production
       labels:
@@ -11,6 +11,7 @@ services:
         org.label-schema.vcs-url: "https://github.com/ITISFoundation/osparc-simcore"
         org.label-schema.vcs-ref: "${VCS_REF}"
     image: deployment-agent:latest
+    init: true
     ports:
       - "8888:8888"
     configs:

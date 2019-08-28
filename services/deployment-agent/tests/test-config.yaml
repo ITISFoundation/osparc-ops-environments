@@ -29,9 +29,10 @@ main:
     # An optional command line may be defined to that end that generate the docker-compose file.
     files: [] # nothing to copy around
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
-    command: > 
+    command: >
             export DOCKER_IMAGE_TAG=staging-latest &&
             export SWARM_NETWORK_NAME=simcore &&
+            cp .env-devel .env &&
             make create-stack-file output_file=stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
     excluded_services: [webclient]
@@ -45,7 +46,7 @@ main:
       username: admin
       password: adminadmin
       stack_name: simcore
-  polling_interval: 30
+  polling_interval: 15
   notifications:
     - service: mattermost
       url: http://mattermost.com

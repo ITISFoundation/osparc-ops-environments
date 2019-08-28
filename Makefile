@@ -31,34 +31,6 @@ endif
 
 
 ## -------------------------------
-# Docker build and composition
-
-.PHONY: build build-devel
-# target: build, build-devel: – Builds all service images.
-build:
-	cd services && ${MAKE} build;
-
-build-devel:
-	cd services && ${MAKE} build-devel;
-
-
-.PHONY: up up-devel down
-# target: up, up-devel, down: – Starts/Stops services.
-up:
-	cd services && ${MAKE} up;
-
-up-devel:
-	cd services && ${MAKE} up-devel;
-
-down:
-	cd services && ${MAKE} down;
-
-.PHONY: push-staging
-# target: push: – Pushes services to the registry.
-push-staging:
-	cd services && ${MAKE} push-staging;
-
-## -------------------------------
 # Tools
 
 .PHONY: info

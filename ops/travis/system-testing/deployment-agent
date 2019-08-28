@@ -11,13 +11,13 @@ before_install() {
 install() {
     pip3 install --upgrade pip wheel setuptools && pip3 --version
     pip3 install -r ops/travis/system-testing/requirements.txt
-    make build
+    pushd services/deployment-agent; make build ; popd
 }
 
 before_script() {
     pip freeze
     docker images
-    make up
+    pushd services/deployment-agent; make up ; popd
     docker service ls
 }
 
@@ -27,7 +27,7 @@ script() {
 }
 
 after_success() {
-    make down
+    pushd services/deployment-agent; make down ; popd
 }
 
 after_failure() {
@@ -35,7 +35,7 @@ after_failure() {
     docker service ps portainer_auto-deployment-agent
     docker service logs portainer_auto-deployment-agent
     docker ps
-    make down
+    pushd services/deployment-agent; make down ; popd
 }
 
 # Check if the function exists (bash specific)
