@@ -22,6 +22,19 @@ endif
 TEMPCOMPOSE := $(shell mktemp)
 SERVICES_LIST := deployment-agent
 
+export VCS_URL:=$(shell git config --get remote.origin.url)
+export VCS_REF:=$(shell git rev-parse --short HEAD)
+export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
+export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# using ?= will only set if absent
+export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
+$(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
+
+# default to local (no registry)
+export DOCKER_REGISTRY ?= itisfoundation
+$(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
+
 
 ## Tools ------------------------------------------------------------------------------------------------------
 #
@@ -69,20 +82,17 @@ up: .env deployment_config.yaml
 down:
 	${DOCKER} swarm leave -f
 
-.PHONY: push-release push-staging
+.PHONY: push
 # target: push: – Pushes services to the registry.
-push-release:
-	for i in $(SERVICES_LIST); do \
-		SERVICE_VERSION=$$(cat $$i/VERSION);\
-		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:$$SERVICE_VERSION;\
-		${DOCKER} push ${DOCKER_REGISTRY}/$$i:$$SERVICE_VERSION;\
-	done
+push:
+	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+	${DOCKER} tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
+	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:latest
 
-push-staging:
-	for i in $(SERVICES_LIST); do \
-		${DOCKER} tag $$i:latest ${DOCKER_REGISTRY}/$$i:staging-latest;\
-		${DOCKER} push ${DOCKER_REGISTRY}/$$i:staging-latest;\
-	done
+.PHONY: pull
+# target: pull: – Pulls services from the registry.
+pull:
+	${DOCKER} pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
 
 # basic checks -------------------------------------
 .env: .env-devel
@@ -110,6 +120,7 @@ info:
 	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
 	@echo '+ VERSION              : ${VERSION}'
 	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
+	@echo '+ DOCKER_IMAGE_TAG     : ${DOCKER_IMAGE_TAG}'
 
 
 ## -------------------------------
