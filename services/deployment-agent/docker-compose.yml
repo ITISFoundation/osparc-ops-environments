@@ -10,7 +10,7 @@ services:
         org.label-schema.build-date: "${BUILD_DATE}"
         org.label-schema.vcs-url: "https://github.com/ITISFoundation/osparc-simcore"
         org.label-schema.vcs-ref: "${VCS_REF}"
-    image: deployment-agent:latest
+    image: ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
     init: true
     ports:
       - "8888:8888"
