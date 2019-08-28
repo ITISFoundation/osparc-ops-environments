@@ -5,9 +5,10 @@ volumes:
     grafana_data: {}
 
 networks:
-  monitor-net:
-  osparc_default:
-    external: true
+  internal-net: {}
+  external-net:
+    name: ${EXTERNAL_NETWORK}
+    external: false # WIP:
 
 services:
 
@@ -26,8 +27,8 @@ services:
     depends_on:
       - cadvisor
     networks:
-      - monitor-net
-      - osparc_default
+      - internal-net
+      - external-net
     #logging:
     #  driver: gelf
     #  options:
@@ -53,7 +54,7 @@ services:
     ports:
       - 9100
     networks:
-      - monitor-net
+      - internal-net
     deploy:
       mode: global
     #restart_policy:
@@ -65,11 +66,11 @@ services:
       - 9093:9093
     volumes:
       - "./alertmanager/:/etc/alertmanager/"
-    networks:
-      - monitor-net
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
+    networks:
+      - internal-net
     deploy:
       placement:
         constraints:
@@ -87,12 +88,24 @@ services:
     ports:
       - 8080:8080
     networks:
-      - monitor-net
-      - osparc_default
+      - internal-net
+      - external-net
     deploy:
       mode: global
     #restart_policy:
     #    condition: on-failure
+
+  postgres-exporter:
+    image: wrouesnel/postgres_exporter
+    ports:
+      - 9187:9187
+    networks:
+      - internal-net
+      - external-net
+    environment:
+      - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
+    deploy:
+      mode: global
 
   grafana:
     image: grafana/grafana
@@ -105,9 +118,9 @@ services:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
       - ./grafana/config.monitoring
-    networks:
-      - monitor-net
     user: "104"
+    networks:
+      - internal-net
     deploy:
       placement:
         constraints:
@@ -115,14 +128,3 @@ services:
       #restart_policy:
       #  condition: on-failure
 
-  postgres-exporter:
-    image: wrouesnel/postgres_exporter
-    ports:
-      - 9187:9187
-    networks:
-      - monitor-net
-      - osparc_default
-    environment:
-      - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
-    deploy:
-      mode: global
