@@ -5,6 +5,7 @@
 # pylint:disable=redefined-outer-name
 # pylint:disable=bare-except
 
+import asyncio
 from asyncio import Future
 from pathlib import Path
 
@@ -97,7 +98,20 @@ async def test_add_parameters(loop, valid_config, valid_docker_stack):
     assert "testimage" in stack_cfg["services"]["anotherapp"]["image"]
 
 
-async def test_setup_task(loop, fake_app):
+async def test_setup_task(loop, fake_app, mocker):
+    mock_portainer = mocker.patch(
+        "simcore_service_deployment_agent.auto_deploy_task.portainer")
+    mock_portainer.authenticate.return_value = Future()
+    mock_portainer.authenticate.return_value.set_result("")
+    mock_portainer.get_current_stack_id.return_value = Future()
+    mock_portainer.get_current_stack_id.return_value.set_result("some_id")
+    mock_portainer.update_stack.return_value = Future()
+    mock_portainer.update_stack.return_value.set_result("")
+
+    # fake username/password for task
+    fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["username"] = ""
+    fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["password"] = ""
+
     try:
         auto_deploy_task.setup(fake_app)
     except:
@@ -106,7 +120,16 @@ async def test_setup_task(loop, fake_app):
     try:
         await auto_deploy_task.start(fake_app)
         assert auto_deploy_task.TASK_NAME in fake_app
-        # await fake_app[auto_deploy_task.TASK_NAME] (infinite needs a mock that fails after a while)
+        task = asyncio.ensure_future(fake_app[auto_deploy_task.TASK_NAME])
+        assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STARTING
+        while fake_app[auto_deploy_task.TASK_STATE] != auto_deploy_task.State.RUNNING:
+            if fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.FAILED:
+                pytest.fail("task failed to start")
+            await asyncio.sleep(1)
+
         await auto_deploy_task.cleanup(fake_app)
+        await asyncio.wait({task}, timeout=30)
+        assert task.cancelled()
+        assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STOPPED
     except:
         pytest.fail("Unexpected error")

@@ -239,6 +239,7 @@ async def auto_deploy(app: web.Application):
 
 
 async def start(app: web.Application):
+    app[TASK_STATE] = State.STARTING
     app[TASK_NAME] = asyncio.get_event_loop().create_task(auto_deploy(app))
 
 
@@ -248,6 +249,8 @@ async def cleanup(app: web.Application):
 
 
 def setup(app: web.Application):
+    app[TASK_NAME] = None
+    app[TASK_STATE] = State.STOPPED
     app.on_startup.append(start)
     app.on_cleanup.append(cleanup)
 

@@ -1,15 +1,16 @@
 #!/bin/bash
-# die on non 0 exit code
-set -e
+# as of http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
 
 deploy-staging() {
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    make push-staging
+    pushd services/deployment-agent; make push-staging ; popd
 }
 
 deploy-release() {
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    make push-release
+    pushd services/deployment-agent; make push-release ; popd
 }
 
 # Check if the function exists (bash specific)
