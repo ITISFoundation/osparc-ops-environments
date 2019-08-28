@@ -29,7 +29,7 @@ jobs:
       after_success:
         - unbuffer bash ops/travis/unit-testing/deployment-agent after_success
 
-    - stage: system testing, staging
+    - stage: system testing, deploy to dockerhub
       name: deployment-agent
       language: python
       python:
@@ -50,6 +50,6 @@ jobs:
       deploy:
         - provider: script
           skip_cleanup: true
-          script: unbuffer bash ops/travis/deploy/deployment-agent deploy-staging
+          script: unbuffer bash ops/travis/deploy/deployment-agent deploy
           on:
             branch: master
