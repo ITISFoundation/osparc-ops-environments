@@ -9,25 +9,7 @@ STACK_NAME = $(notdir $(PWD))
 
 # VARIABLES ------------------------------------------------
 #
-# - these variables parametrize the monitoring config
-# - monitoring of osparc-simcore stack
-# - defaults corresponds to osparc-simcore stack in development mode
-# - all services to monitor must be in MONITORED_NETWORK
-#
-
-# Network that includes all services to monitor
-#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
-#  - by default it will create an overal attachable network called monitored_network
-MONITORED_NETWORK ?= monitored_network
-
-# postgres db ulr
-POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://simcore:simcore@postgres:5432/simcoredb?sslmode=disable
-
-# Add here more ...
-
-
-export MONITORED_NETWORK
-export POSTGRES_EXPORTER_DATA_SOURCE_NAME
+# - these variables parametrize  ....
 
 
 # TARGETS --------------------------------------------------
@@ -48,11 +30,7 @@ init: ## initializeds swarm cluster
 		docker swarm init \
 	)
 
-up: init ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
-	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
-	)
+up: init ## Deploys or updates current stack "$(STACK_NAME)"
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset
