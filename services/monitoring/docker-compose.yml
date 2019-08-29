@@ -106,8 +106,8 @@ services:
       - monitored-net
     environment:
       - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
-    deploy:
-      mode: global
+    #deploy:
+    #  mode: global
 
   grafana:
     image: grafana/grafana
