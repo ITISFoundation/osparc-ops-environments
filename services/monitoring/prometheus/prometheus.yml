@@ -74,3 +74,13 @@ scrape_configs:
 
     #static_configs:
     #    - targets: ['postgres-exporter:9187']
+
+    # Instrumented osparc-simcore services
+    # TODO: shall monitor all replicas!
+  - job_name: 'webserver'
+    static_configs:
+        - targets: ['webserver:8080']
+
+  - job_name: 'storage'
+    static_configs:
+        - targets: ['storage:8080']

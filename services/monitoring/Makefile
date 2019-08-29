@@ -31,6 +31,8 @@ export POSTGRES_EXPORTER_DATA_SOURCE_NAME
 
 
 # TARGETS --------------------------------------------------
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
+
 
 .PHONY: help
 help: ## This colourful help
@@ -39,28 +41,29 @@ help: ## This colourful help
 .DEFAULT_GOAL := help
 
 
-.PHONY: up
-.make-init:
-	$(if $(shell docker stack ls --format="{{.Name}}"),,docker swarm init)
-	@touch .make-init
+.PHONY: init up
+init: ## initializeds swarm cluster
+	$(if $(SWARM_HOSTS), \
+		, \
+		docker swarm init \
+	)
 
-up: .make-init ## Inits swarm and deploys current stack
+up: init ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, @echo Network in place \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack
-	# stops current stack
 	docker stack rm $(STACK_NAME)
 
-reset: ## stops all stacks and leaves swarm
-	# leaves swarm stopping all stacks in it
+reset: ## leaves swarm stopping all stacks in it
 	-rm -f .make-init
 	-docker swarm leave -f
 	
+
 
 .PHONY: info
 info: ## General info
@@ -71,13 +74,16 @@ info: ## General info
 		$(info $(v)=$($(v)))                                                               \
 	)
 	@echo ""
-	docker stack ls 2>/dev/null
+	docker ps
+ifneq ($(SWARM_HOSTS), )
 	@echo ""
-	docker ps 2>/dev/null
+	docker stack ls
 	@echo ""
-	docker stack ps $(STACK_NAME) 2>/dev/null
+	docker stack ps $(STACK_NAME)
 	@echo ""
-	docker stack services $(STACK_NAME) 2>/dev/null	
+	docker stack services $(STACK_NAME)
 	@echo ""
 	docker network ls
+endif
+
 
