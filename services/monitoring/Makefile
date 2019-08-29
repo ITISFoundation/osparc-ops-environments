@@ -1,3 +1,4 @@
+
 PREDEFINED_VARIABLES := $(.VARIABLES)
 
 # If you see pwd_unknown showing up, this is why. Re-calibrate your system.
@@ -6,19 +7,30 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 
-# VARIABLES
-# defaults corresponds to osparc-simcore stack
+# VARIABLES ------------------------------------------------
+#
+# - these variables parametrize the monitoring config
+# - monitoring of osparc-simcore stack
+# - defaults corresponds to osparc-simcore stack in development mode
+# - all services to monitor must be in MONITORED_NETWORK
 #
 
-# Network to monitor
-EXTERNAL_NETWORK ?= services_default
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+MONITORED_NETWORK ?= monitored_network
 
-# postgres ulr
+# postgres db ulr
 POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://simcore:simcore@postgres:5432/simcoredb?sslmode=disable
 
+# Add here more ...
 
-export EXTERNAL_NETWORK
+
+export MONITORED_NETWORK
 export POSTGRES_EXPORTER_DATA_SOURCE_NAME
+
+
+# TARGETS --------------------------------------------------
 
 .PHONY: help
 help: ## This colourful help
@@ -33,14 +45,21 @@ help: ## This colourful help
 	@touch .make-init
 
 up: .make-init ## Inits swarm and deploys current stack
+	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, @echo Network in place \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
+	)
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack
+	# stops current stack
 	docker stack rm $(STACK_NAME)
 
 reset: ## stops all stacks and leaves swarm
-	-rm .make-init; docker swarm leave -f
+	# leaves swarm stopping all stacks in it
+	-rm -f .make-init
+	-docker swarm leave -f
 	
 
 .PHONY: info

@@ -1,6 +1,12 @@
-# monitoring stack
+# monitoring stack for [osparc-simcore]
 
-Creates a stack for monitoring services based in [prometheus] and [graphana]
+Creates a stack to monitor a [osparc-simcore] stack. Uses [prometheus](prometheus/README.md) and some exporters to scrap data from these services. Then it filtered and visualized in dashboards created with [graphana].
+
+[Prometheus](prometheus/README.md) scraps data from the system or [osparc-simcore] services directy (for those instrumented with [servicelib/monitoring](https://github.com/ITISFoundation/osparc-simcore/blob/master/packages/service-library/src/servicelib/monitoring.py)) or via the following exporters:
+  - [cdavisor](cadvisor/README.md): monitors containers in every node (one instance per node)
+  - [node-exporter](node-exporter/README.md): monitors hardware (memory, filesystem, network) of every node. (one instance per node)
+  - [postgres-exporter](postgres-exporter/README.md): scraps data from a *single* postgres db service defined in ``POSTGRES_EXPORTER_DATA_SOURCE_NAME``. Currently used to monitor the one-and-only database service in osparc but can be a limitation in the future.
+- 
 
 ## Usage
 
@@ -19,7 +25,6 @@ Available web front-ends when deployed in locahost:
 
 ## References
 
-- [prometheus]
 - https://github.com/vegasbrianc/prometheus
 
 #### Makefile
@@ -31,5 +36,5 @@ Available web front-ends when deployed in locahost:
 
 <!-- References below (keep alphabetical) -->
 [grafana]:https://grafana.com
+[osparc-simcore]:https://github.com/ITISFoundation/osparc-simcore
 [PromQL]:https://prometheus.io/docs/prometheus/latest/querying/basics
-[prometheus]:https://prometheus.io/

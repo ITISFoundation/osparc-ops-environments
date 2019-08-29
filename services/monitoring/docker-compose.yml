@@ -5,10 +5,12 @@ volumes:
     grafana_data: {}
 
 networks:
-  internal-net: {}
-  external-net:
-    name: ${EXTERNAL_NETWORK}
-    external: false # WIP:
+  internal-net:
+    driver: overlay
+    attachable: true
+  monitored-net:
+    name: ${MONITORED_NETWORK}
+    external: true
 
 services:
 
@@ -28,7 +30,7 @@ services:
       - cadvisor
     networks:
       - internal-net
-      - external-net
+      - monitored-net
     #logging:
     #  driver: gelf
     #  options:
@@ -89,7 +91,7 @@ services:
       - 8080:8080
     networks:
       - internal-net
-      - external-net
+      - monitored-net
     deploy:
       mode: global
     #restart_policy:
@@ -98,10 +100,10 @@ services:
   postgres-exporter:
     image: wrouesnel/postgres_exporter
     ports:
-      - 9187:9187
+      - 9187
     networks:
       - internal-net
-      - external-net
+      - monitored-net
     environment:
       - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
     deploy:
