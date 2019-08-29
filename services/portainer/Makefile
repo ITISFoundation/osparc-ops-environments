@@ -55,9 +55,9 @@ ifneq ($(SWARM_HOSTS), )
 	@echo ""
 	docker stack ls
 	@echo ""
-	docker stack ps $(STACK_NAME)
+	-docker stack ps $(STACK_NAME)
 	@echo ""
-	docker stack services $(STACK_NAME)
+	-docker stack services $(STACK_NAME)
 	@echo ""
 	docker network ls
 endif

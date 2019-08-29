@@ -18,7 +18,11 @@ STACK_NAME = $(notdir $(PWD))
 # Network that includes all services to monitor
 #  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
 #  - by default it will create an overal attachable network called monitored_network
-MONITORED_NETWORK ?= monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
 
 # postgres db ulr
 POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://simcore:simcore@postgres:5432/simcoredb?sslmode=disable
@@ -75,11 +79,11 @@ info: ## expands all variables and relevant info on stack
 	docker ps
 ifneq ($(SWARM_HOSTS), )
 	@echo ""
-	docker stack ls
+	docker stack ls;
 	@echo ""
-	docker stack ps $(STACK_NAME)
+	-docker stack ps $(STACK_NAME);
 	@echo ""
-	docker stack services $(STACK_NAME)
+	-docker stack services $(STACK_NAME)
 	@echo ""
 	docker network ls
 endif
