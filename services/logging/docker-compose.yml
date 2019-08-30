@@ -14,7 +14,7 @@ services:
     networks:
       default:
         aliases:
-          - mongo
+          - mongo # needed because of graylog configuration
 
   # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
   elasticsearch:
@@ -79,10 +79,14 @@ services:
         condition: on-failure
   # Logspout: https://github.com/gliderlabs/logspout
   logspout:
-    image: gliderlabs/logspout:latest
+    image: vincit/logsprout-gelf
+    command: gelf://graylog:12201
+    restart: unless-stopped
+    depends_on:
+      - graylog
     init: true
     volumes:
-      - /etc/hostname:/etc/host_hostname # does not apply in windows
+      - /etc/hostname:/etc/host_hostname # does not work in windows
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       mode: global
@@ -95,6 +99,7 @@ services:
           memory: 128M
     ports:
       - 18000:80
+
 
 volumes:
   mongo_data:
