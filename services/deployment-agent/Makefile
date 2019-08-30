@@ -38,38 +38,36 @@ init: ## initialize swarm cluster
 
 .PHONY: build build-devel
 build: ## target: build, build-devel: – Builds all service images.
-	${DOCKER_COMPOSE} -f docker-compose.yml build --parallel
+	docker-compose -f docker-compose.yml build --parallel
 
 build-devel:
-	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
+	docker-compose -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
 
 .PHONY: up up-devel
-up-devel: .env deployment_config.yaml ## target: up, up-devel, down: – Starts/Stops services.
-	${DOCKER} swarm init
-	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml config > $(TEMPCOMPOSE).tmp-compose.yml
-	${DOCKER} stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml portainer
+up-devel: init .env deployment_config.yaml ## target: up, up-devel, down: – Starts/Stops services.
+	docker-compose -f docker-compose.yml -f docker-compose.devel.yaml config > $(TEMPCOMPOSE).tmp-compose.yml
+	docker stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml ${STACK_NAME}
 
-up: .env deployment_config.yaml
-	${DOCKER} swarm init
-	${DOCKER_COMPOSE} -f docker-compose.yml config > $(TEMPCOMPOSE).tmp-compose.yml ;
-	${DOCKER} stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml portainer
+up: init .env deployment_config.yaml
+	docker-compose -f docker-compose.yml config > $(TEMPCOMPOSE).tmp-compose.yml ;
+	docker stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml ${STACK_NAME}
 
 .PHONY: down reset
 down:
-	${DOCKER} swarm leave -f
+	docker stack rm ${STACK_NAME}
 
 reset: ## leaves swarm stopping all stacks in it
 	-docker swarm leave -f
 
 .PHONY: push
 push: ## target: push: – Pushes services to the registry.
-	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
-	${DOCKER} tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
-	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:latest
+	docker push ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+	docker tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
+	docker push ${DOCKER_REGISTRY}/deployment-agent:latest
 
 .PHONY: pull
 pull: ## target: pull: – Pulls services from the registry.
-	${DOCKER} pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+	docker pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
 
 # basic checks -------------------------------------
 .env: .env-devel
