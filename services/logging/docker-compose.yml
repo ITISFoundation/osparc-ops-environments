@@ -88,6 +88,8 @@ services:
     volumes:
       - /etc/hostname:/etc/host_hostname # does not work in windows
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ALLOW_TTY=true
     deploy:
       mode: global
       resources:
