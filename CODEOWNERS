@@ -2,4 +2,5 @@
 
 # files and folders recursively
 /virtual_cluster/              @ehzastrow
-/services/                      @sanderegg
+/scripts/                      @pcrespov
+/services/                     @sanderegg,@pcrespov
