@@ -79,7 +79,7 @@ services:
         condition: on-failure
   # Logspout: https://github.com/gliderlabs/logspout
   logspout:
-    image: vincit/logsprout-gelf
+    image: vincit/logspout-gelf
     command: gelf://graylog:12201
     restart: unless-stopped
     depends_on:
