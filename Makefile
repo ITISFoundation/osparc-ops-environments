@@ -1,7 +1,7 @@
 #
 # TODO: not fully windows-friendly (e.g. some tools to install or replace e.g. date, ...  )
 #
-# by Sylvain Anderegg, pcrespov
+# by sanderegg, pcrespov
 
 PREDEFINED_VARIABLES := $(.VARIABLES)
 VERSION := $(shell uname -a)
