@@ -77,6 +77,25 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+  # Logspout: https://github.com/gliderlabs/logspout
+  logspout:
+    image: gliderlabs/logspout:latest
+    init: true
+    volumes:
+      - /etc/hostname:/etc/host_hostname # does not apply in windows
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 256M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+    ports:
+      - 18000:80
+
 volumes:
   mongo_data:
   elasticsearch_data:
