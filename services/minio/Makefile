@@ -23,15 +23,21 @@ help: ## This colourful help
 .DEFAULT_GOAL := help
 
 
-.PHONY: init up
+.PHONY: init up .create-stack
 init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
 	)
 
-up: init ## Deploys or updates current stack "$(STACK_NAME)"
-	docker stack deploy -c docker-compose.yml $(STACK_NAME)
+TEMP_COMPOSE=docker-compose.yaml
+replicas?=1
+.create-stack:
+	$(info ${replicas})
+	$(shell export replicas=${replicas}; j2 docker-compose.template -o ${TEMP_COMPOSE})
+
+up: init .create-stack ## Deploys or updates current stack "$(STACK_NAME)"
+	docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack
