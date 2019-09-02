@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  adminer:
+    image: adminer
+    init: true
+    ports:
+      - 8080
+    networks:
+      - simcore_default
+
+networks:
+  simcore_default:
+    external: true
