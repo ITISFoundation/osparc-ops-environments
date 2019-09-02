@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+{%- set num_minios = replicas|int %}
+{%- for i in range(num_minios) %}
+  {%- set id = i+1 %}
+  minio{{ id|string }}:
+    image: minio/minio:RELEASE.2019-08-29T00-25-01Z
+    hostname: minio{{ id|string }}
+    volumes: ${MINIO_VOLUMES_DATA}
+    ports:
+      - "9000"
+    networks:
+      - minio_distributed
+    deploy:
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - {{ "node.labels.minio" ~ id|string ~ "==true" }}
+    command: <
+      server
+      {%- for i in range(num_minios) %}
+      {%- set entry_id = i %}
+      http://minio{{ entry_id|string }}/export
+      {%- endfor %}
+    secrets:
+      - secret_key
+      - access_key
+    healthcheck:
+      test: ["CMD", "curl", "-f", {{ "http://minio" ~ id|string ~ ":9000/minio/health/live" }} ]
+      interval: 1m30s
+      timeout: 20s
+      retries: 3
+      start_period: 3m
+{% endfor %}
+
+volumes:
+{%- for i in range(num_minios) %}
+  {{ "minio" ~ (i+1) }}:
+{%- endfor %}
+
+networks:
+  minio_distributed:
+    driver: overlay
+
+secrets:
+  secret_key:
+    external: true
+  access_key:
+    external: true
