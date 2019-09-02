@@ -46,7 +46,7 @@ services:
     # user: "1000:1001"
     volumes:
       # Mount local configuration directory into Docker container
-      - graylog_config:/usr/share/graylog/data/config
+      # - graylog_config:/usr/share/graylog/data/config
       # data persistency
       - graylog_journal:/usr/share/graylog/data/journal
     environment:
@@ -106,5 +106,5 @@ services:
 volumes:
   mongo_data:
   elasticsearch_data:
-  graylog_config:
+  # graylog_config:
   graylog_journal:
