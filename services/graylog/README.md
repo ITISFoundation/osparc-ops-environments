@@ -1,26 +1,27 @@
-# Graylog
+# Graylog loggin stack for [osparc-simcore]
 
-## configuration files - currently not in use
+Creates a stack to aggregate logs from any running stack/containers. The logs are pulled from the running container by [Logspout-GELF](https://github.com/Vincit/logspout-gelf), converted and sent to the [Graylog server](https://www.graylog.org/), which uses [MongoDB](https://www.mongodb.com/) and [elasticsearch](https://www.elastic.co/) as backends.
 
-Downloaded by executing
+## Usage
 
 ```console
-wget https://raw.githubusercontent.com/Graylog2/graylog-docker/3.0/config/graylog.conf
-wget https://raw.githubusercontent.com/Graylog2/graylog-docker/3.0/config/log4j2.xml
+make help
+make up
+make down
 ```
 
-
-## testing
+## Configuration
 
 1. Create a GELF UDP INPUT
 2. Show incoming messages
-3. Send a message following:
+3. All the docker container messages shall be visible
+4. Send a message following through the console:
 
 ```console
 echo -n '{ "version": "1.1", "host": "example.org", "short_message": "A short message", "level": 5, "_some_info": "foo" }' | nc -w0 -u localhost 12201
 ```
 
-## configure docker daemon to re-direct to gelf address
+### configure docker daemon to re-direct to gelf address
 
 This needs to be added to /etc/docker/daemon.json
 
@@ -33,11 +34,4 @@ This needs to be added to /etc/docker/daemon.json
 
 Restart the docker daemon after the modifications.
 
-**Note:** docker logs command relies on the fact that logs are in json mode. Also the Portainer seems to show some error messages because of this change.
-Maybe a look at logspout is worthwhile if we want to keep the docker logs functionality.
-Needs to be done on all docker engines in the cluster.
-
-## configuring simcore-stream to get all messages coming from the simcore-stack
-
-done using Field **container_name** and Type **match regular expression** with Value ^simcore_.*
-**Note:** this will fail with containers created by the sidecar.
+**Note:** This has the downside that all commands relying on "docker logs" will then fail.
