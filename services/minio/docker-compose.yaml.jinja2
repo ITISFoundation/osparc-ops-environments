@@ -44,7 +44,7 @@ services:
       - minio_secret_key
       - minio_access_key
     healthcheck:
-      test: ["CMD", "curl", "-f", {{ "http://minio" ~ id|string ~ ":9000/minio/health/live" }} ]
+      test: ["CMD", "curl", "-f", "{{ "http://minio" ~ id|string ~ ":9000/minio/health/live" }}" ]
       interval: 1m30s
       timeout: 20s
       retries: 3
