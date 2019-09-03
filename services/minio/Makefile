@@ -15,7 +15,7 @@ DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
 MINIO_ACCESS_KEY ?= 12345678
 MINIO_SECRET_KEY ?= 12345678
-TEMP_COMPOSE=docker-compose.yaml
+TEMP_COMPOSE=docker-compose.minio.yaml
 replicas?=1
 
 # TARGETS --------------------------------------------------
@@ -27,7 +27,7 @@ help: ## This colourful help
 .DEFAULT_GOAL := help
 
 .PHONY: init up .create-stack-file .create-secrets
-init: .venv ## initializeds swarm cluster
+init: .venv ## initialize swarm cluster and install dependencies
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
@@ -39,17 +39,19 @@ init: .venv ## initializeds swarm cluster
 	.venv/bin/pip3 install jinja2 j2cli[yaml]
 
 .create-stack-file:
-	$(info "minio stack deployed with ${replicas} services/replicas")
+	@echo "minio stack file created for ${replicas} services/replicas"
 	@export replicas=${replicas}; .venv/bin/j2 docker-compose.template -o ${TEMP_COMPOSE}
 
 .create-secrets:
 	@$(if $(DOCKER_MINIO_ACCESS_KEY), \
 		, \
+		echo ""; \
 		echo "${MINIO_ACCESS_KEY}" | docker secret create minio_access_key -  2>/dev/null; \
 		echo "created MINIO_ACCESS_KEY is ${MINIO_ACCESS_KEY}" \
 	)
 	@$(if $(DOCKER_MINIO_SECRET_KEY), \
 		,							\
+		echo ""; \
 		echo "${MINIO_SECRET_KEY}" | docker secret create minio_secret_key -  2>/dev/null; \
 		echo "created MINIO_SECRET_KEY is ${MINIO_SECRET_KEY}" \
 	)
@@ -59,7 +61,7 @@ up: init .create-stack-file .create-secrets ## Deploys or updates current stack 
 
 .PHONY: down reset
 down: ## Stops stack
-	@docker stack rm $(STACK_NAME)
+	-docker stack rm $(STACK_NAME)
 
 reset: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
