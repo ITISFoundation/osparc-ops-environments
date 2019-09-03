@@ -43,6 +43,7 @@ services:
     secrets:
       - minio_secret_key
       - minio_access_key
+    # currently minio cannot start with healthcheck on: see [issue](https://github.com/minio/minio/issues/8140)
     # healthcheck:
     #   test: ["CMD", "curl", "-f", "{{ "http://minio" ~ id|string ~ ":9000/minio/health/live" }}"]
     #   interval: 1m30s
