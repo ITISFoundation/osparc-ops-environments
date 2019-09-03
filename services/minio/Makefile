@@ -7,17 +7,17 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 
-# VARIABLES ------------------------------------------------
+# Internal VARIABLES ------------------------------------------------
 #
-# - these variables parametrize  ....
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
-MINIO_ACCESS_KEY ?= 12345678
-MINIO_SECRET_KEY ?= 12345678
 TEMP_COMPOSE=docker-compose.minio.yaml
-replicas?=1
-partitions?=1
+
+
+include .env
+# export $(shell sed 's/=.*//' .env)
+
 
 # TARGETS --------------------------------------------------
 
@@ -41,9 +41,11 @@ help: ## This colourful help
 	.venv/bin/pip3 install jinja2 j2cli[yaml]
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yaml.j2
-	@echo "minio stack file created for ${replicas} services/replicas with ${partitions} partitions"
-	@export num_minios=${replicas}; export num_partitions=${partitions}; .venv/bin/j2 $< -o $@
+${TEMP_COMPOSE}: docker-compose.yaml.j2	
+	@.venv/bin/j2 --format=env $< .env -o tmp.yaml
+	@docker-compose -f tmp.yaml config > $@
+	@rm tmp.yaml
+	@echo "minio stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 
 .create-stack-file:${TEMP_COMPOSE}
 
