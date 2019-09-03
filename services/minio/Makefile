@@ -61,8 +61,10 @@ ${TEMP_COMPOSE}: docker-compose.yaml.jinja2
 		echo "created MINIO_SECRET_KEY is ${MINIO_SECRET_KEY}" \
 	)
 
-up: .init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)"
+up: .init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
+	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
+	@echo "docker node update --label-add minioX=true" with X being from 1 to number of replicas."
 
 .PHONY: down leave
 down: ## Stops and remove stack from swarm
