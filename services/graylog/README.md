@@ -21,7 +21,7 @@ make down
 echo -n '{ "version": "1.1", "host": "example.org", "short_message": "A short message", "level": 5, "_some_info": "foo" }' | nc -w0 -u localhost 12201
 ```
 
-### configure docker daemon to re-direct to gelf address
+### alternative option: configure docker daemon to re-direct to gelf address
 
 This needs to be added to /etc/docker/daemon.json
 
@@ -34,4 +34,4 @@ This needs to be added to /etc/docker/daemon.json
 
 Restart the docker daemon after the modifications.
 
-**Note:** This has the downside that all commands relying on "docker logs" will then fail.
+**Note:** In that case logspout is not necessary, BUT the downside is that all commands relying on "docker logs" will then fail.
