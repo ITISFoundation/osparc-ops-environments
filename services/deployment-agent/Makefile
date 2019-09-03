@@ -1,98 +1,73 @@
-# author: Sylvain Anderegg
-
-VERSION := $(shell uname -a)
-ifneq (,$(findstring Microsoft,$(VERSION)))
-$(info    detected WSL)
-export DOCKER_COMPOSE=docker-compose
-export DOCKER=docker
-else ifeq ($(OS), Windows_NT)
-$(info    detected Powershell/CMD)
-export DOCKER_COMPOSE=docker-compose.exe
-export DOCKER=docker.exe
-else ifneq (,$(findstring Darwin,$(VERSION)))
-$(info    detected OSX)
-export DOCKER_COMPOSE=docker-compose
-export DOCKER=docker
-else
-$(info    detected native linux)
-export DOCKER_COMPOSE=docker-compose
-export DOCKER=docker
-endif
-
-TEMPCOMPOSE := $(shell mktemp)
-SERVICES_LIST := deployment-agent
+.DEFAULT_GOAL := help
 
 export VCS_URL:=$(shell git config --get remote.origin.url)
 export VCS_REF:=$(shell git rev-parse --short HEAD)
 export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
 export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# using ?= will only set if absent
+export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
+$(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
 
-# default to local (no registry)
-export DOCKER_REGISTRY ?= itisfoundation
-$(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
+# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
+STACK_NAME = $(notdir $(PWD))
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
+TEMPCOMPOSE := $(shell mktemp)
 
+.PHONY: help
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-## Tools ------------------------------------------------------------------------------------------------------
-#
-tools =
+.PHONY: info ## Displays some parameters of makefile environments
+info:
+	@echo '+ VCS_* '
+	@echo '  - URL                : ${VCS_URL}'
+	@echo '  - REF                : ${VCS_REF}'
+	@echo '  - (STATUS)REF_CLIENT : (${VCS_STATUS_CLIENT})'
+	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
+	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
+	@echo '+ DOCKER_IMAGE_TAG     : ${DOCKER_IMAGE_TAG}'
 
-ifeq ($(shell uname -s),Darwin)
-	SED = gsed
-else
-	SED = sed
-endif
-
-ifeq ($(shell which ${SED}),)
-	tools += $(SED)
-endif
-
-
-## ------------------------------------------------------------------------------------------------------
-.PHONY: all
-all: help info
-ifdef tools
-	$(error "Can't find tools:${tools}")
-endif
-
+.PHONY: init
+init: ## initialize swarm cluster
+	$(if $(SWARM_HOSTS),  \
+		,                 \
+		docker swarm init \
+	)
 
 .PHONY: build build-devel
-# target: build, build-devel: – Builds all service images.
-build:
-	${DOCKER_COMPOSE} -f docker-compose.yml build --parallel
+build: ## Builds all service images.
+	docker-compose -f docker-compose.yml build --parallel
 
-build-devel:
-	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
+build-devel: ## Builds all service images in development mode.
+	docker-compose -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
 
-.PHONY: up up-devel down
-# target: up, up-devel, down: – Starts/Stops services.
-up-devel: .env deployment_config.yaml
-	${DOCKER} swarm init
-	${DOCKER_COMPOSE} -f docker-compose.yml -f docker-compose.devel.yaml config > $(TEMPCOMPOSE).tmp-compose.yml
-	${DOCKER} stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml portainer
+.PHONY: up up-devel
+up-devel: init .env deployment_config.yaml ## Starts services in development mode.
+	docker-compose -f docker-compose.yml -f docker-compose.devel.yaml config > $(TEMPCOMPOSE).tmp-compose.yml
+	docker stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml ${STACK_NAME}
 
-up: .env deployment_config.yaml
-	${DOCKER} swarm init
-	${DOCKER_COMPOSE} -f docker-compose.yml config > $(TEMPCOMPOSE).tmp-compose.yml ;
-	${DOCKER} stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml portainer
+up: init .env deployment_config.yaml ## Starts services.
+	docker-compose -f docker-compose.yml config > $(TEMPCOMPOSE).tmp-compose.yml ;
+	docker stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml ${STACK_NAME}
 
-down:
-	${DOCKER} swarm leave -f
+.PHONY: down reset
+down: ## Stops services
+	docker stack rm ${STACK_NAME}
+
+reset: ## Leaves swarm stopping all services in it.
+	-docker swarm leave -f
 
 .PHONY: push
-# target: push: – Pushes services to the registry.
-push:
-	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
-	${DOCKER} tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
-	${DOCKER} push ${DOCKER_REGISTRY}/deployment-agent:latest
+push: ## Pushes service to the registry.
+	docker push ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+	docker tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
+	docker push ${DOCKER_REGISTRY}/deployment-agent:latest
 
 .PHONY: pull
-# target: pull: – Pulls services from the registry.
-pull:
-	${DOCKER} pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+pull: ## Pulls service from the registry.
+	docker pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
 
 # basic checks -------------------------------------
 .env: .env-devel
@@ -110,23 +85,12 @@ deployment_config.yaml:
 	@echo "deployment_config.yaml file is missing! Copying from tests folder..."
 	cp tests/test-config.yaml deployment_config.yaml;
 
-.PHONY: info
-# target: info – Displays some parameters of makefile environments
-info:
-	@echo '+ VCS_* '
-	@echo '  - ULR                : ${VCS_URL}'
-	@echo '  - REF                : ${VCS_REF}'
-	@echo '  - (STATUS)REF_CLIENT : (${VCS_STATUS_CLIENT})'
-	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
-	@echo '+ VERSION              : ${VERSION}'
-	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
-	@echo '+ DOCKER_IMAGE_TAG     : ${DOCKER_IMAGE_TAG}'
 
 
 ## -------------------------------
 # Virtual Environments
+venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 .venv:
-# target: .venv – Creates a python virtual environment with dev tools (pip, pylint, ...)
 	python3 -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel setuptools
 	.venv/bin/pip3 install pylint autopep8 virtualenv
@@ -136,16 +100,7 @@ info:
 # Auxiliary targets.
 
 .PHONY: clean
-# target: clean – Cleans all unversioned files in project
-clean:
+clean: ## Cleans all unversioned files in project.
 	@git clean -dxf -e .vscode/
 
 
-.PHONY: help
-# target: help – Display all callable targets
-help:
-	@echo "Make targets in osparc-simcore:"
-	@echo
-	@egrep "^\s*#\s*target\s*:\s*" [Mm]akefile \
-	| $(SED) -r "s/^\s*#\s*target\s*:\s*//g"
-	@echo
