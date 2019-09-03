@@ -7,7 +7,11 @@ services:
   minio{{ id|string }}:
     image: minio/minio:RELEASE.2019-08-29T00-25-01Z
     hostname: minio{{ id|string }}
-    volumes: ["${MINIO_VOLUMES_DATA:-{{ "minio_data" ~ id|string }}}"]
+    {%- if replicas|int > 1 %}
+    volumes: ["${MINIO_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/export" }}}"]
+    {%- else %}
+    volumes: ["${MINIO_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/data" }}}"]
+    {%- endif %}
     ports:
       - "9000"
     networks:
@@ -17,18 +21,24 @@ services:
         delay: 10s
         max_attempts: 10
         window: 60s
+      {%- if replicas|int > 1 %}
       placement:
         constraints:
           - {{ "node.labels.minio" ~ id|string ~ "==true" }}
-    command: <
+      {%- endif %}
+    command: >
       server
+      {%- if replicas|int > 1 %}
       {%- for i in range(num_minios) %}
-      {%- set entry_id = i %}
+      {%- set entry_id = i+1 %}
       http://minio{{ entry_id|string }}/export
       {%- endfor %}
+      {%- else %}
+      /data
+      {%- endif %}
     secrets:
-      - secret_key
-      - access_key
+      - minio_secret_key
+      - minio_access_key
     healthcheck:
       test: ["CMD", "curl", "-f", {{ "http://minio" ~ id|string ~ ":9000/minio/health/live" }} ]
       interval: 1m30s
@@ -36,7 +46,6 @@ services:
       retries: 3
       start_period: 3m
 {% endfor %}
-
 volumes:
 {%- for i in range(num_minios) %}
   {{ "minio_data" ~ (i+1) }}:
@@ -47,7 +56,7 @@ networks:
     driver: overlay
 
 secrets:
-  secret_key:
+  minio_secret_key:
     external: true
-  access_key:
+  minio_access_key:
     external: true

@@ -27,11 +27,13 @@ help: ## This colourful help
 .DEFAULT_GOAL := help
 
 .PHONY: init up .create-stack-file .create-secrets
-init: ## initializeds swarm cluster
+init: .venv ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
 	)
+
+.venv:
 	python3 -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel setuptools
 	.venv/bin/pip3 install jinja2 j2cli[yaml]
@@ -53,11 +55,11 @@ init: ## initializeds swarm cluster
 	)
 
 up: init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)"
-	docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
+	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack
-	docker stack rm $(STACK_NAME)
+	@docker stack rm $(STACK_NAME)
 
 reset: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
