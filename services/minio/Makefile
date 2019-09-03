@@ -43,7 +43,7 @@ help: ## This colourful help
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yaml.jinja2
 	@echo "minio stack file created for ${replicas} services/replicas with ${partitions} partitions"
-	@export replicas=${replicas}; export partitions=${partitions}; .venv/bin/j2 $< -o $@
+	@export num_minios=${replicas}; export num_partitions=${partitions}; .venv/bin/j2 $< -o $@
 
 .create-stack-file:${TEMP_COMPOSE}
 

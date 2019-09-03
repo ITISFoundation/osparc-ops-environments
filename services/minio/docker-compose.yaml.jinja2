@@ -1,13 +1,13 @@
 version: '3.7'
 services:
-{%- for i in range(replicas|int) %}
+{%- for i in range(num_minios|int) %}
   {%- set service_id = i+1 %}
   minio{{ service_id|string }}:
     image: minio/minio:RELEASE.2019-08-29T00-25-01Z
     init: true
     hostname: minio{{ service_id|string }}
     volumes: # default uses a named volume, option2 is to use the variable to set specific mount path(s)
-      {%- for j in range(partitions|int) %}
+      {%- for j in range(num_partitions|int) %}
       - "${MINIO_INTERNAL_VOLUME_DATA_PART{{ j|string }}:-{{ "minio" ~ service_id|string ~ "_data_part" ~ j|string ~ ":/data" ~ j|string }}}"
       {%- endfor %}
     ports:
@@ -22,19 +22,18 @@ services:
         delay: 10s
         max_attempts: 10
         window: 60s
-      {%- if replicas|int > 1 %}
+      {%- if num_minios|int > 1 %}
       placement:
         constraints:
           - {{ "node.labels.minio" ~ service_id|string ~ "==true" }}
       {%- endif %}
     command: >
       server
-      {%- for i in range(replicas|int) %}
-      {%- for j in range(partitions|int) %}
-      {% if replicas|int > 1 %}http://minio{{ (i+1)|string }}{% endif %}/data{{ j|string }}
+      {%- for i in range(num_minios|int) %}
+      {%- for j in range(num_partitions|int) %}
+      {% if num_minios|int > 1 %}http://minio{{ (i+1)|string }}{% endif %}/data{{ j|string }}
       {%- endfor %}
       {%- endfor %}
-      
     secrets:
       - minio_secret_key
       - minio_access_key
@@ -47,8 +46,8 @@ services:
     #   start_period: 3m
 {% endfor %}
 volumes:
-{%- for i in range(replicas|int) %}
-{%- for j in range(partitions|int) %}
+{%- for i in range(num_minios|int) %}
+{%- for j in range(num_partitions|int) %}
   minio{{ (i+1)|string }}_data_part{{ j|string }}:
 {%- endfor %}
 {%- endfor %}
