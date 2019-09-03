@@ -40,7 +40,7 @@ help: ## This colourful help
 	.venv/bin/pip3 install jinja2 j2cli[yaml]
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.template
+${TEMP_COMPOSE}: docker-compose.yaml.jinja2
 	@echo "minio stack file created for ${replicas} services/replicas"
 	@export replicas=${replicas}; .venv/bin/j2 $< -o $@
 

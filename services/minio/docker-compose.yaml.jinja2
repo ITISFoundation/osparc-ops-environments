@@ -19,6 +19,7 @@ services:
     environment:
       - MINIO_ACCESS_KEY_FILE=minio_access_key
       - MINIO_SECRET_KEY_FILE=minio_secret_key
+      - MINIO_HTTP_TRACE=/dev/stdout
     deploy:
       restart_policy:
         delay: 10s
@@ -47,7 +48,7 @@ services:
       interval: 1m30s
       timeout: 20s
       retries: 3
-      start_period: 3m
+      start_period: 1m
 {% endfor %}
 volumes:
 {%- for i in range(num_minios) %}
