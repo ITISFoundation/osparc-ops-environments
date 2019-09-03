@@ -1,5 +1,4 @@
 version: '3.7'
-
 services:
 {%- set num_minios = replicas|int %}
 {%- for i in range(num_minios) %}
@@ -9,9 +8,9 @@ services:
     init: true
     hostname: minio{{ id|string }}
     {%- if replicas|int > 1 %}
-    volumes: ["${MINIO_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/export" }}}"]
+    volumes: ["${MINIO_INTERNAL_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/export" }}}"]
     {%- else %}
-    volumes: ["${MINIO_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/data" }}}"]
+    volumes: ["${MINIO_INTERNAL_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/data" }}}"]
     {%- endif %}
     ports:
       - "9000"

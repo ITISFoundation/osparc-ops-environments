@@ -26,8 +26,9 @@ help: ## This colourful help
 
 .DEFAULT_GOAL := help
 
-.PHONY: init up .create-stack-file .create-secrets
-init: .venv ## initialize swarm cluster and install dependencies
+.PHONY: .init up .create-stack-file .create-secrets
+.init: .venv
+	# initialize swarm cluster and install dependencies
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
@@ -38,9 +39,13 @@ init: .venv ## initialize swarm cluster and install dependencies
 	.venv/bin/pip3 install --upgrade pip wheel setuptools
 	.venv/bin/pip3 install jinja2 j2cli[yaml]
 
-.create-stack-file:
+.PHONY: ${TEMP_COMPOSE}
+${TEMP_COMPOSE}: docker-compose.template
 	@echo "minio stack file created for ${replicas} services/replicas"
-	@export replicas=${replicas}; .venv/bin/j2 docker-compose.template -o ${TEMP_COMPOSE}
+	@export replicas=${replicas}; .venv/bin/j2 $< -o $@
+
+.create-stack-file:${TEMP_COMPOSE}
+
 
 .create-secrets:
 	@$(if $(DOCKER_MINIO_ACCESS_KEY), \
@@ -56,14 +61,14 @@ init: .venv ## initialize swarm cluster and install dependencies
 		echo "created MINIO_SECRET_KEY is ${MINIO_SECRET_KEY}" \
 	)
 
-up: init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)"
+up: .init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
-.PHONY: down reset
-down: ## Stops stack
+.PHONY: down leave
+down: ## Stops and remove stack from swarm
 	-docker stack rm $(STACK_NAME)
 
-reset: ## leaves swarm stopping all stacks, secrets in it
+leave: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
 
 .PHONY: clean
