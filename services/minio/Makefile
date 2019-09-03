@@ -17,6 +17,7 @@ MINIO_ACCESS_KEY ?= 12345678
 MINIO_SECRET_KEY ?= 12345678
 TEMP_COMPOSE=docker-compose.minio.yaml
 replicas?=1
+partitions?=1
 
 # TARGETS --------------------------------------------------
 
@@ -41,8 +42,8 @@ help: ## This colourful help
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yaml.jinja2
-	@echo "minio stack file created for ${replicas} services/replicas"
-	@export replicas=${replicas}; .venv/bin/j2 $< -o $@
+	@echo "minio stack file created for ${replicas} services/replicas with ${partitions} partitions"
+	@export replicas=${replicas}; export partitions=${partitions}; .venv/bin/j2 $< -o $@
 
 .create-stack-file:${TEMP_COMPOSE}
 
@@ -64,7 +65,7 @@ ${TEMP_COMPOSE}: docker-compose.yaml.jinja2
 up: .init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
-	@echo "docker node update --label-add minioX=true with X being from 1 to number of replicas."
+	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
 
 .PHONY: down leave
 down: ## Stops and remove stack from swarm

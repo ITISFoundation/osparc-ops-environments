@@ -1,16 +1,15 @@
 version: '3.7'
 services:
-{%- set num_minios = replicas|int %}
-{%- for i in range(num_minios) %}
-  {%- set id = i+1 %}
-  minio{{ id|string }}:
+{%- for i in range(replicas|int) %}
+  {%- set service_id = i+1 %}
+  minio{{ service_id|string }}:
     image: minio/minio:RELEASE.2019-08-29T00-25-01Z
     init: true
-    hostname: minio{{ id|string }}
-    volumes:
-    {%- for j in num_partitions|int  %}
-      - "${MINIO_INTERNAL_VOLUMES_DATA{{ j|string }}:-{{ "minio_data" ~ id|string ~ "_part" ~ j|string ~ ":/data" ~ j|string }}}"
-    {%- endfor %}
+    hostname: minio{{ service_id|string }}
+    volumes: # default uses a named volume, option2 is to use the variable to set specific mount path(s)
+      {%- for j in range(partitions|int) %}
+      - "${MINIO_INTERNAL_VOLUME_DATA_PART{{ j|string }}:-{{ "minio" ~ service_id|string ~ "_data_part" ~ j|string ~ ":/data" ~ j|string }}}"
+      {%- endfor %}
     ports:
       - "9000"
     networks:
@@ -18,7 +17,6 @@ services:
     environment:
       - MINIO_ACCESS_KEY_FILE=minio_access_key
       - MINIO_SECRET_KEY_FILE=minio_secret_key
-      - MINIO_HTTP_TRACE=/dev/stdout
     deploy:
       restart_policy:
         delay: 10s
@@ -27,32 +25,32 @@ services:
       {%- if replicas|int > 1 %}
       placement:
         constraints:
-          - {{ "node.labels.minio" ~ id|string ~ "==true" }}
+          - {{ "node.labels.minio" ~ service_id|string ~ "==true" }}
       {%- endif %}
     command: >
       server
-      {%- if replicas|int > 1 %}
-      {%- for i in range(num_minios) %}
-      {%- set entry_id = i+1 %}
-      http://minio{{ entry_id|string }}/export
+      {%- for i in range(replicas|int) %}
+      {%- for j in range(partitions|int) %}
+      {% if replicas|int > 1 %}http://minio{{ (i+1)|string }}{% endif %}/data{{ j|string }}
       {%- endfor %}
-      {%- else %}
-      /data
-      {%- endif %}
+      {%- endfor %}
+      
     secrets:
       - minio_secret_key
       - minio_access_key
     # currently minio cannot start with healthcheck on: see [issue](https://github.com/minio/minio/issues/8140)
     # healthcheck:
-    #   test: ["CMD", "curl", "-f", "{{ "http://minio" ~ id|string ~ ":9000/minio/health/live" }}"]
+    #   test: ["CMD", "curl", "-f", "{{ "http://minio" ~ service_id|string ~ ":9000/minio/health/live" }}"]
     #   interval: 1m30s
     #   timeout: 20s
     #   retries: 3
     #   start_period: 3m
 {% endfor %}
 volumes:
-{%- for i in range(num_minios) %}
-  {{ "minio_data" ~ (i+1) }}:
+{%- for i in range(replicas|int) %}
+{%- for j in range(partitions|int) %}
+  minio{{ (i+1)|string }}_data_part{{ j|string }}:
+{%- endfor %}
 {%- endfor %}
 
 networks:
