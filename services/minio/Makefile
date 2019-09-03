@@ -10,11 +10,15 @@ STACK_NAME = $(notdir $(PWD))
 # VARIABLES ------------------------------------------------
 #
 # - these variables parametrize  ....
-
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
+DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
+DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
+MINIO_ACCESS_KEY ?= 12345678
+MINIO_SECRET_KEY ?= 12345678
+TEMP_COMPOSE=docker-compose.yaml
+replicas?=1
 
 # TARGETS --------------------------------------------------
-SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-
 
 .PHONY: help
 help: ## This colourful help
@@ -22,35 +26,43 @@ help: ## This colourful help
 
 .DEFAULT_GOAL := help
 
-
-.PHONY: init up .create-stack
+.PHONY: init up .create-stack-file .create-secrets
 init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
 	)
 
-TEMP_COMPOSE=docker-compose.yaml
-replicas?=1
-.create-stack:
+.create-stack-file:
 	$(info ${replicas})
 	$(shell export replicas=${replicas}; j2 docker-compose.template -o ${TEMP_COMPOSE})
 
-up: init .create-stack ## Deploys or updates current stack "$(STACK_NAME)"
+.create-secrets:
+	@$(if $(DOCKER_MINIO_ACCESS_KEY), \
+		, \
+		echo "${MINIO_ACCESS_KEY}" | docker secret create minio_access_key -  2>/dev/null; \
+		echo "created MINIO_ACCESS_KEY is ${MINIO_ACCESS_KEY}" \
+	)
+	@$(if $(DOCKER_MINIO_SECRET_KEY), \
+		,							\
+		echo "${MINIO_SECRET_KEY}" | docker secret create minio_secret_key -  2>/dev/null; \
+		echo "created MINIO_SECRET_KEY is ${MINIO_SECRET_KEY}" \
+	)
+
+up: init .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)"
 	docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack
 	docker stack rm $(STACK_NAME)
 
-reset: ## leaves swarm stopping all stacks in it
+reset: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
 
 
 .PHONY: info
 info: ## expands all variables and relevant info on stack
 	$(info VARIABLES ------------)
-	$(wildcard )
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info $(v)=$($(v)))                                                               \
@@ -67,5 +79,3 @@ ifneq ($(SWARM_HOSTS), )
 	@echo ""
 	docker network ls
 endif
-
-
