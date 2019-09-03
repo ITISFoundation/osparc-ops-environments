@@ -6,6 +6,7 @@ services:
   {%- set id = i+1 %}
   minio{{ id|string }}:
     image: minio/minio:RELEASE.2019-08-29T00-25-01Z
+    init: true
     hostname: minio{{ id|string }}
     {%- if replicas|int > 1 %}
     volumes: ["${MINIO_VOLUMES_DATA:-{{ "minio_data" ~ id|string ~ ":/export" }}}"]
@@ -16,6 +17,9 @@ services:
       - "9000"
     networks:
       - minio_distributed
+    environment:
+      - MINIO_ACCESS_KEY_FILE=minio_access_key
+      - MINIO_SECRET_KEY_FILE=minio_secret_key
     deploy:
       restart_policy:
         delay: 10s
