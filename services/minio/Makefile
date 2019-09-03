@@ -32,10 +32,13 @@ init: ## initializeds swarm cluster
 		,                 \
 		docker swarm init \
 	)
+	python3 -m venv .venv
+	.venv/bin/pip3 install --upgrade pip wheel setuptools
+	.venv/bin/pip3 install jinja2 j2cli[yaml]
 
 .create-stack-file:
-	$(info ${replicas})
-	$(shell export replicas=${replicas}; j2 docker-compose.template -o ${TEMP_COMPOSE})
+	$(info "minio stack deployed with ${replicas} services/replicas")
+	@export replicas=${replicas}; .venv/bin/j2 docker-compose.template -o ${TEMP_COMPOSE}
 
 .create-secrets:
 	@$(if $(DOCKER_MINIO_ACCESS_KEY), \
@@ -58,6 +61,10 @@ down: ## Stops stack
 
 reset: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
+
+.PHONY: clean
+clean: ## Cleans unversioned files
+	@git clean -dxf
 
 
 .PHONY: info
