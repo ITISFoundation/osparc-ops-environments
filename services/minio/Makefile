@@ -1,4 +1,5 @@
 
+.DEFAULT_GOAL := help
 PREDEFINED_VARIABLES := $(.VARIABLES)
 
 # If you see pwd_unknown showing up, this is why. Re-calibrate your system.
@@ -14,18 +15,14 @@ DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
 TEMP_COMPOSE=docker-compose.minio.yaml
 
-
+# External VARIABLES
 include .env
-# export $(shell sed 's/=.*//' .env)
-
 
 # TARGETS --------------------------------------------------
-
 .PHONY: help
 help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-.DEFAULT_GOAL := help
 
 .PHONY: .init up .create-stack-file .create-secrets
 .init: .venv
@@ -48,7 +45,6 @@ ${TEMP_COMPOSE}: docker-compose.yaml.j2
 	@echo "minio stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 
 .create-stack-file:${TEMP_COMPOSE}
-
 
 .create-secrets:
 	@$(if $(DOCKER_MINIO_ACCESS_KEY), \
