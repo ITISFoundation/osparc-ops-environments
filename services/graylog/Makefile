@@ -27,7 +27,7 @@ info:	## Displays infos about defined variables
 	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
 	@echo '+ DOCKER_IMAGE_TAG     : ${DOCKER_IMAGE_TAG}'
 
-init: ## initialize swarm cluster
+init: ## Initialize swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
@@ -38,8 +38,8 @@ up: init   ## Deploys graylog stack
 	docker stack deploy -c docker-compose.yml ${STACK_NAME}
 
 .PHONY: down reset
-down:
+down: ## Removes the stack from the swarm
 	docker stack rm ${STACK_NAME}
 
-reset: ## leaves swarm stopping all stacks in it
+reset: ## Leaves swarm stopping all services in it
 	-docker swarm leave -f

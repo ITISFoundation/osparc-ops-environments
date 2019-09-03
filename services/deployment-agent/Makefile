@@ -19,7 +19,7 @@ TEMPCOMPOSE := $(shell mktemp)
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-.PHONY: info ## target: info – Displays some parameters of makefile environments
+.PHONY: info ## Displays some parameters of makefile environments
 info:
 	@echo '+ VCS_* '
 	@echo '  - URL                : ${VCS_URL}'
@@ -37,36 +37,36 @@ init: ## initialize swarm cluster
 	)
 
 .PHONY: build build-devel
-build: ## target: build, build-devel: – Builds all service images.
+build: ## Builds all service images.
 	docker-compose -f docker-compose.yml build --parallel
 
-build-devel:
+build-devel: ## Builds all service images in development mode.
 	docker-compose -f docker-compose.yml -f docker-compose.devel.yaml build --parallel
 
 .PHONY: up up-devel
-up-devel: init .env deployment_config.yaml ## target: up, up-devel, down: – Starts/Stops services.
+up-devel: init .env deployment_config.yaml ## Starts services in development mode.
 	docker-compose -f docker-compose.yml -f docker-compose.devel.yaml config > $(TEMPCOMPOSE).tmp-compose.yml
 	docker stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml ${STACK_NAME}
 
-up: init .env deployment_config.yaml
+up: init .env deployment_config.yaml ## Starts services.
 	docker-compose -f docker-compose.yml config > $(TEMPCOMPOSE).tmp-compose.yml ;
 	docker stack deploy -c $(TEMPCOMPOSE).tmp-compose.yml ${STACK_NAME}
 
 .PHONY: down reset
-down:
+down: ## Stops services
 	docker stack rm ${STACK_NAME}
 
-reset: ## leaves swarm stopping all stacks in it
+reset: ## Leaves swarm stopping all services in it.
 	-docker swarm leave -f
 
 .PHONY: push
-push: ## target: push: – Pushes services to the registry.
+push: ## Pushes service to the registry.
 	docker push ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
 	docker tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
 	docker push ${DOCKER_REGISTRY}/deployment-agent:latest
 
 .PHONY: pull
-pull: ## target: pull: – Pulls services from the registry.
+pull: ## Pulls service from the registry.
 	docker pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
 
 # basic checks -------------------------------------
@@ -89,8 +89,8 @@ deployment_config.yaml:
 
 ## -------------------------------
 # Virtual Environments
+venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 .venv:
-# target: .venv – Creates a python virtual environment with dev tools (pip, pylint, ...)
 	python3 -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel setuptools
 	.venv/bin/pip3 install pylint autopep8 virtualenv
@@ -100,8 +100,7 @@ deployment_config.yaml:
 # Auxiliary targets.
 
 .PHONY: clean
-# target: clean – Cleans all unversioned files in project
-clean:
+clean: ## Cleans all unversioned files in project.
 	@git clean -dxf -e .vscode/
 
 
