@@ -72,6 +72,6 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@$(if $(DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET), \
 		, \
 		echo ""; \
-		echo "${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
+		echo -n "${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
 		echo "created PORTAINER_ADMIN_PWD is ${PORTAINER_ADMIN_PWD}" \
 	)
