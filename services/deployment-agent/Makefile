@@ -9,7 +9,7 @@ STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
-TEMP_COMPOSE=stack.${STACK_NAME}.yaml
+TEMP_COMPOSE = stack.${STACK_NAME}.yaml
 
 # External VARIABLES
 include .env
@@ -31,7 +31,7 @@ help: ## This colourful help
 
 .PHONY: up
 up: .init ${DEPLOYMENT_AGENT_CONFIG} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker-compose -f docker-compose.yml config > $(TEMPCOMPOSE)
+	@docker-compose -f docker-compose.yml config > $(TEMP_COMPOSE)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-devel
