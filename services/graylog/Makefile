@@ -9,6 +9,7 @@ STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=stack.${STACK_NAME}.yaml
 
+$(if $(wildcard .env), , $(shell cp .env.config .env))
 # External VARIABLES
 include .env
 
@@ -18,7 +19,7 @@ help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init ${TEMP_COMPOSE}  ## Deploys graylog stack
+up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -63,6 +64,5 @@ endif
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose -f $< config > $@	
+	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
-
