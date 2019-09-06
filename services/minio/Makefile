@@ -75,7 +75,7 @@ ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
 	@.venv/bin/j2 --format=env $< .env -o tmp.yaml
 	@docker-compose -f tmp.yaml config > $@
 	@rm tmp.yaml
-	@echo "minio stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
+	@echo "${STACK_NAME} stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 
 .create-stack-file:${TEMP_COMPOSE}
 
