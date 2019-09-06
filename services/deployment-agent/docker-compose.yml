@@ -28,4 +28,4 @@ networks:
 
 configs:
   deployment_config:
-    file: ./deployment_config.yaml
+    file: ./${DEPLOYMENT_AGENT_CONFIG}
