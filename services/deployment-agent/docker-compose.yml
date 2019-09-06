@@ -13,7 +13,7 @@ services:
     image: ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
     init: true
     ports:
-      - "8888:8888"
+      - "8888"
     configs:
       - source: deployment_config
         target: /home/scu/config-prod.yaml

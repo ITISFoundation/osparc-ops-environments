@@ -1,0 +1,65 @@
+version: '3.7'
+services:
+{% set num_minios = MINIO_NUM_MINIOS %}
+{% set num_partitions = MINIO_NUM_PARTITIONS %}
+{%- for i in range(num_minios|int) %}
+  {%- set service_id = i+1 %}
+  minio{{ service_id|string }}:
+    image: minio/minio:RELEASE.2019-08-29T00-25-01Z
+    init: true
+    hostname: minio{{ service_id|string }}
+    volumes: # default uses a named volume, option2 is to use the variable to set specific mount path(s)
+      {%- for j in range(num_partitions|int) %}
+      - ${MINIO_INTERNAL_VOLUME_DATA_PART{{ j|string }}:-minio{{ service_id|string }}_data_part{{ j|string }}}:/data{{ j|string }}
+      {%- endfor %}
+    ports:
+      - "9000"
+    networks:
+      - minio_distributed
+    environment:
+      - MINIO_ACCESS_KEY_FILE=minio_access_key
+      - MINIO_SECRET_KEY_FILE=minio_secret_key
+    deploy:
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      {%- if num_minios|int > 1 %}
+      placement:
+        constraints:
+          - {{ "node.labels.minio" ~ service_id|string ~ "==true" }}
+      {%- endif %}
+    command: >
+      server
+      {%- for i in range(num_minios|int) %}
+      {%- for j in range(num_partitions|int) %}
+      {% if num_minios|int > 1 %}http://minio{{ (i+1)|string }}{% endif %}/data{{ j|string }}
+      {%- endfor %}
+      {%- endfor %}
+    secrets:
+      - minio_secret_key
+      - minio_access_key
+    # currently minio cannot start with healthcheck on: see [issue](https://github.com/minio/minio/issues/8140)
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "{{ "http://minio" ~ service_id|string ~ ":9000/minio/health/live" }}"]
+    #   interval: 1m30s
+    #   timeout: 20s
+    #   retries: 3
+    #   start_period: 3m
+{% endfor %}
+volumes:
+{%- for i in range(num_minios|int) %}
+{%- for j in range(num_partitions|int) %}
+  minio{{ (i+1)|string }}_data_part{{ j|string }}:
+{%- endfor %}
+{%- endfor %}
+
+networks:
+  minio_distributed:
+    driver: overlay
+
+secrets:
+  minio_secret_key:
+    external: true
+  minio_access_key:
+    external: true
