@@ -1,9 +1,6 @@
-# portainer stack
+# maintenance stack
 
-Stack to deploy portainer service and all agents (one per node)
-
-- https://portainer.readthedocs.io/en/stable/
-
+Stack to deploy maintenance services
 
 ## Usage
 
@@ -12,18 +9,6 @@ Stack to deploy portainer service and all agents (one per node)
     $ make info
     $ make down
 
-Available web front-ends when deployed in localhost:
-
-- protainerio: http://127.0.0.1:9000/dashboards     (set user/pass first time)
-
-
 ## Stack services
 
-### Portainer service
-![GitHub last commit](https://img.shields.io/github/last-commit/portainer/portainer?label=github%20last%20commit) [![Docker Pulls](https://img.shields.io/docker/pulls/portainer/portainer.svg)](https://hub.docker.com/r/portainer/portainer/tags) 
-
-### Agent service
-![GitHub last commit](https://img.shields.io/github/last-commit/portainer/agent?label=github%20last%20commit)
-[![Docker Pulls](https://img.shields.io/docker/pulls/portainer/agent.svg)](https://hub.docker.com/r/portainer/agent/tags)
-
-
+### Maintenance service
