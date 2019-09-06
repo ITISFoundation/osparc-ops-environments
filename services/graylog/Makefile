@@ -7,7 +7,7 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-TEMP_COMPOSE=stack.${STACK_NAME}.yaml
+TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 $(if $(wildcard .env), , $(shell cp .env.config .env))
 # External VARIABLES
