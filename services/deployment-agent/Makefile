@@ -100,4 +100,4 @@ pull: ## Pulls service from the registry.
 
 ${DEPLOYMENT_AGENT_CONFIG}: tests/test-config.yaml
 	@echo "$@ file is missing! Copying from tests folder..."
-	cp tests/test-config.yaml $@;
+	cp tests/test-config.yaml $@
