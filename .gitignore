@@ -39,3 +39,6 @@ id_ed25519*
 
 #docker
 .env
+
+# generated stack files
+.stack.*
