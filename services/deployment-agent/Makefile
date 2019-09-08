@@ -32,7 +32,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init ${DEPLOYMENT_AGENT_CONFIG} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
+up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-devel
@@ -102,7 +102,7 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 		docker swarm init \
 	)
 
-${DEPLOYMENT_AGENT_CONFIG}: tests/test-config.yaml
+${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
 	@echo "$@ file is missing! Copying from tests folder..."
 	cp tests/test-config.yaml $@
 
