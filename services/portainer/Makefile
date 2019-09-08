@@ -8,9 +8,10 @@ PWD ?= pwd_unknown
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET = $(shell docker secret inspect --format {{.Spec.Name}} portainer_admin_password 2>/dev/null)
-TEMP_COMPOSE=stack.${STACK_NAME}.yaml
+TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
+$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # TARGETS --------------------------------------------------
@@ -19,7 +20,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .create-secrets ${TEMP_COMPOSE}  ## Deploys graylog stack
+up: .init .env .create-secrets ${TEMP_COMPOSE}  ## Deploys graylog stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -64,7 +65,7 @@ endif
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose -f $< config > $@	
+	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: .create-secrets
