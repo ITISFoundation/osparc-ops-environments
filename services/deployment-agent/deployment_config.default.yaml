@@ -31,23 +31,23 @@ main:
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
     command: >
             export DOCKER_IMAGE_TAG=master-latest &&
-            export SWARM_NETWORK_NAME=simcore &&
+            export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
             cp .env-devel .env &&
             make create-stack-file output_file=stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
     excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
-      extra_hosts:
-        - "minio_ip:127.0.0.1"
+      extra_hosts: []
       environment:
-        S3_ENDPOINT: minio_ip
+        WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED: 0
+        S3_ENDPOINT: ${MINIO_HOSTNAME}:30000
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
       username: admin
       password: adminadmin
-      stack_name: simcore
+      stack_name: ${SIMCORE_STACK_NAME}
   polling_interval: 15
   notifications:
     - service: mattermost

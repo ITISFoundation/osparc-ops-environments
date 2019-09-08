@@ -25,7 +25,8 @@ export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
 $(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
-
+export MINIO_HOSTNAME ?= $(shell hostname -I | cut -d ' ' -f1)
+$(info MINIO_HOSTNAME set to ${MINIO_HOSTNAME})
 # TARGETS --------------------------------------------------
 .PHONY: help
 help: ## This colourful help
@@ -42,6 +43,7 @@ up-devel: .init .env ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} ## Deploys
 .PHONY: down
 down: ## Stops and remove stack from swarm
 	-docker stack rm $(STACK_NAME)
+	-docker stack rm ${SIMCORE_STACK_NAME}
 
 .PHONY: leave
 leave: ## leaves swarm stopping all stacks, secrets in it
@@ -104,7 +106,7 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
 	@echo "$@ file is missing! Copying from tests folder..."
-	cp tests/test-config.yaml $@
+	cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
