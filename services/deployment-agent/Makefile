@@ -9,9 +9,11 @@ STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
-TEMP_COMPOSE = stack.${STACK_NAME}.yaml
+TEMP_COMPOSE = .stack.${STACK_NAME}.yaml
+TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
 
 # External VARIABLES
+$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
@@ -31,13 +33,11 @@ help: ## This colourful help
 
 .PHONY: up
 up: .init ${DEPLOYMENT_AGENT_CONFIG} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker-compose -f docker-compose.yml config > $(TEMP_COMPOSE)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-devel
-up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker-compose -f docker-compose.yml -f docker-compose.devel.yml config > $(TEMPCOMPOSE)
-	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
+up-devel: .init .env ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
+	@docker stack deploy -c ${TEMP_COMPOSE-devel} $(STACK_NAME)
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
@@ -89,6 +89,10 @@ push: ## Pushes service to the registry.
 pull: ## Pulls service from the registry.
 	docker pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
 
+.PHONY: config
+config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
+
+
 # Helpers -------------------------------------------------
 .PHONY: .init
 .init:
@@ -101,3 +105,12 @@ pull: ## Pulls service from the registry.
 ${DEPLOYMENT_AGENT_CONFIG}: tests/test-config.yaml
 	@echo "$@ file is missing! Copying from tests folder..."
 	cp tests/test-config.yaml $@
+
+.PHONY: ${TEMP_COMPOSE}
+${TEMP_COMPOSE}: docker-compose.yml
+	@docker-compose -f $< config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
+
+${TEMP_COMPOSE-devel}: docker-compose.yml docker-compose.devel.yml
+	@docker-compose -f $< -f docker-compose.devel.yml config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
