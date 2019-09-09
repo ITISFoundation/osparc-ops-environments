@@ -1,7 +1,7 @@
 # Order is important. The last matching pattern has the most precedence.
 
 # files and folders recursively
-/ops/            @sanderegg, @pcrespov
-/services/       @sanderegg
-
-/.travis.yml     @sanderegg
+/ops/                     @sanderegg, @pcrespov
+/services/                @sanderegg
+/services/maintenance     @pcrespov
+/.travis.yml              @sanderegg
