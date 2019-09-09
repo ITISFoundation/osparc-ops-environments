@@ -17,6 +17,7 @@ install() {
 before_script() {
     pip freeze
     docker images
+    pushd services/portainer; make up; popd
     pushd services/deployment-agent; make up ; popd
     docker service ls
 }

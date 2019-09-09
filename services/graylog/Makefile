@@ -1,45 +1,68 @@
 .DEFAULT_GOAL := help
+PREDEFINED_VARIABLES := $(.VARIABLES)
 
-export VCS_URL:=$(shell git config --get remote.origin.url)
-export VCS_REF:=$(shell git rev-parse --short HEAD)
-export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
-export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-export DOCKER_REGISTRY ?= itisfoundation
-export DOCKER_IMAGE_TAG ?= latest
-
+# If you see pwd_unknown showing up, this is why. Re-calibrate your system.
+PWD ?= pwd_unknown
+# Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
-
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
+TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
+# External VARIABLES
+$(if $(wildcard .env), , $(shell cp .env.config .env))
+include .env
+
+# TARGETS --------------------------------------------------
 .PHONY: help
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-.PHONY: info
-info:	## Displays infos about defined variables
-	@echo '+ VCS_* '
-	@echo '  - URL                : ${VCS_URL}'
-	@echo '  - REF                : ${VCS_REF}'
-	@echo '  - (STATUS)REF_CLIENT : (${VCS_STATUS_CLIENT}) ${VCS_REF_CLIENT}'
-	@echo '+ BUILD_DATE           : ${BUILD_DATE}'
-	@echo '+ DOCKER_REGISTRY      : ${DOCKER_REGISTRY}'
-	@echo '+ DOCKER_IMAGE_TAG     : ${DOCKER_IMAGE_TAG}'
+.PHONY: up
+up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
-init: ## Initialize swarm cluster
+.PHONY: down
+down: ## Removes the stack from the swarm
+	docker stack rm ${STACK_NAME}
+
+.PHONY: leave
+leave: ## Leaves swarm stopping all services in it
+	-docker swarm leave -f
+
+.PHONY: clean
+clean: ## Cleans unversioned files
+	@git clean -dxf
+
+.PHONY: info
+info: ## expands all variables and relevant info on stack
+	$(info VARIABLES ------------)
+	$(foreach v,                                                                           \
+		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
+		$(info $(v)=$($(v)))                                                               \
+	)
+	@echo ""
+	docker ps
+ifneq ($(SWARM_HOSTS), )
+	@echo ""
+	docker stack ls
+	@echo ""
+	-docker stack ps $(STACK_NAME)
+	@echo ""
+	-docker stack services $(STACK_NAME)
+	@echo ""
+	docker network ls
+endif
+
+# Helpers -------------------------------------------------
+.PHONY: .init
+.init: ## Initialize swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
 	)
 
-.PHONY: up down
-up: init   ## Deploys graylog stack
-	docker stack deploy -c docker-compose.yml ${STACK_NAME}
-
-.PHONY: down reset
-down: ## Removes the stack from the swarm
-	docker stack rm ${STACK_NAME}
-
-reset: ## Leaves swarm stopping all services in it
-	-docker swarm leave -f
+.PHONY: ${TEMP_COMPOSE}
+${TEMP_COMPOSE}: docker-compose.yml
+	@docker-compose -f $< config > $@
+	@echo "${STACK_NAME} stack file created for in $@"

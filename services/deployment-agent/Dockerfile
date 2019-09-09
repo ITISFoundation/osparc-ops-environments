@@ -1,4 +1,3 @@
-# TODO: this is still not finished!!
 FROM python:3.6-alpine as base
 
 LABEL maintainer=sanderegg

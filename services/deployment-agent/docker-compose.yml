@@ -18,48 +18,19 @@ services:
       - source: deployment_config
         target: /home/scu/config-prod.yaml
     networks:
-      - agent_network
+      - portainer_agent_network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - portainer
-
-  agent:
-    image: portainer/agent
     environment:
-      # REQUIRED: Should be equal to the service name prefixed by "tasks." when
-      # deployed inside an overlay network
-      AGENT_CLUSTER_ADDR: tasks.agent
-      # AGENT_PORT: 9001
-      # LOG_LEVEL: debug
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/volumes:/var/lib/docker/volumes
-    networks:
-      - agent_network
-    deploy:
-      mode: global
-      placement:
-        constraints: [node.platform.os == linux]
+      - MINIO_HOSTNAME=${MINIO_HOSTNAME:-minio}
+      - SIMCORE_STACK_NAME=${SIMCORE_STACK_NAME:-simcore}
+      - SIMCORE_IMAGE_TAG=${SIMCORE_IMAGE_TAG:-master-latest}
 
-  portainer:
-    image: portainer/portainer
-    command: --admin-password ${DOCKER_ADMIN_PWD} -H tcp://tasks.agent:9001 --tlsskipverify
-    ports:
-      - "9000:9000"
-    networks:
-      - agent_network
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints: [node.role == manager]
 
 networks:
-  agent_network:
-    driver: overlay
-    attachable: true
+  portainer_agent_network:
+    external: true
 
 configs:
   deployment_config:
-    file: ./deployment_config.yaml
+    file: ./${DEPLOYMENT_AGENT_CONFIG}
