@@ -1,0 +1,30 @@
+#FROM nbgallery/jupyter-alpine:7.8.4
+FROM jupyter/base-notebook:python-3.7.3 AS base
+
+COPY --chown=jovyan:users scripts/healthcheck_curl_host.py $HOME/scripts/healthcheck_curl_host.py
+HEALTHCHECK --interval=10s \
+            --timeout=30s \
+            --start-period=1s \
+            --retries=3 \
+            CMD ["python3", "${HOME}/scripts/healthcheck_curl_host.py", "http://localhost:8888"]
+
+
+# enable single-user server
+RUN unset JUPYTERHUB_API_TOKEN
+
+COPY --chown=jovyan:users bin/*.sh /usr/local/bin/
+COPY --chown=jovyan:users requirements.txt /tmp/
+
+RUN pip --no-cache install --upgrade pip wheel setuptools && \
+    pip --no-cache install -r /tmp/requirements.txt &&\
+    rm /tmp/requirements.txt
+
+COPY --chown=jovyan:users work/ $HOME/work
+
+WORKDIR $HOME/work
+RUN jupyter trust notebooks/*; mkdir data
+
+
+USER root
+ENTRYPOINT ["tini", "-g", "/bin/bash", "--", "entrypoint.sh"]
+CMD [ "boot.sh" ]
