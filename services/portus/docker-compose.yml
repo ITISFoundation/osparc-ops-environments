@@ -117,7 +117,7 @@ services:
         target: /domain.crt
         mode: 0644
       # make /etc/hosts work in go
-      - source: nsswitch_conf
+      - source: registry_nsswitch_conf
         target: /etc/nsswitch.conf
         mode: 0644
 
@@ -137,14 +137,18 @@ services:
       - portus-net
     ports:
       - "6060-6061:6060-6061"
-
+    environment:
+      CLAIR_DB_HOST: clair_db
+      CLAIR_DB_PORT: 5432
+      CLAIR_DB_USER: ${CLAIR_DB_USER}
+      CLAIR_DB_PASSWORD: ${CLAIR_DB_PASSWORD}
     configs:
-      - source: portus_clair_yml
+      - source: clair_config_yaml
         target: /clair.yml
         mode: 0644
 
-    volumes:
-      - /tmp:/tmp
+    # volumes:
+    #   - /tmp:/tmp
     command: [-config, /clair.yml]
 
   clair_db:
@@ -155,10 +159,10 @@ services:
       placement:
         constraints:
           - node.labels.postgres==true
-    volumes:
-      - /tank/portus-pg:/var/lib/postgresql/data
+    # volumes:
+    #   - /tank/portus-pg:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: portus
+      POSTGRES_PASSWORD: ${CLAIR_DB_PASSWORD}
 
   portus_db:
     image: library/mariadb:10.0.23
@@ -173,19 +177,19 @@ services:
 
     networks:
       - portus-net
-    volumes:
-      - /tank/portus-maria:/var/lib/mysql
+    # volumes:
+    #   - /tank/portus-maria:/var/lib/mysql
 
 networks:
   portus-net:
     driver: overlay
 
 configs:
-  portus_clair_yml:
-    external: true
+  clair_config_yaml:
+    file: ./clair/clair_config.yaml
   portus_domain_crt:
     external: true
   portus_domain_key:
     external: true
-  nsswitch_conf:
-    external: true
+  registry_nsswitch_conf:
+    file: ./registry/nsswitch.conf
