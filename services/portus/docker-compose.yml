@@ -5,28 +5,33 @@ services:
     environment:
       # name of the registry e.g. registry.osparc.io
       PORTUS_MACHINE_FQDN_VALUE: ${MACHINE_FQDN}
-      PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
-      # PORTUS_LOG_LEVEL: debug
-      # Secrets. It can possibly be handled better with Swarm's secrets.
-      PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
-      PORTUS_PASSWORD: ${PORTUS_PASSWORD}
-      PORTUS_DELETE_ENABLED: "true"
-      # PORTUS_SECURITY_CLAIR_SERVER: http://clair:6060
 
-      # allow exploring registry
-      PORTUS_ANONYMOUS_BROWSING_ENABLED: "true"
-      PORTUS_SIGNUP_ENABLED: "true"
       # Database used by default is mariadb
       PORTUS_DB_HOST: portus_db
       PORTUS_DB_DATABASE: portus_production
       PORTUS_DB_PASSWORD: ${DATABASE_PASSWORD}
       PORTUS_DB_POOL: 5
 
-      CCONFIG_PREFIX: PORTUS
+      # Secrets. It can possibly be handled better with Swarm's secrets.
+      PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
+      PORTUS_PASSWORD: ${PORTUS_PASSWORD}
+
+      # SSL
+      PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
+
       # Since we have no nginx in insecure mode, portus have to
       # serve the static files
       RAILS_SERVE_STATIC_FILES: "true"
+
+      # Customizations ------------------------
+      PORTUS_LOG_LEVEL: debug
+      PORTUS_DELETE_ENABLED: "true"
+      # allow exploring registry
+      PORTUS_ANONYMOUS_BROWSING_ENABLED: "true"
+      PORTUS_SIGNUP_ENABLED: "true"
+      # not sure if needed
+      CCONFIG_PREFIX: PORTUS
 
     ports:
       - 3000:3000
@@ -41,32 +46,28 @@ services:
   background:
     image: opensuse/portus:2.4
     environment:
+      CCONFIG_PREFIX: PORTUS
       PORTUS_MACHINE_FQDN_VALUE: ${MACHINE_FQDN}
-      PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
-      # PORTUS_LOG_LEVEL: debug
-      # Secrets. It can possibly be handled better with Swarm's secrets.
-      PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
-      PORTUS_PASSWORD: ${PORTUS_PASSWORD}
-      #PORTUS_DELETE_ENABLED: "true"
-      # background specific
-      PORTUS_BACKGROUND: "true"
-      PORTUS_BACKGROUND_REGISTRY_ENABLED: "true"
-      PORTUS_BACKGROUND_SYNC_ENABLED: "true"
-      PORTUS_BACKGROUND_SYNC_STRATEGY: "update-delete"
-      # PORTUS_SECURITY_CLAIR_SERVER: http://clair:6060
-
       # DB: default mariadb
       PORTUS_DB_HOST: portus_db
       PORTUS_DB_DATABASE: portus_production
       PORTUS_DB_PASSWORD: ${DATABASE_PASSWORD}
       PORTUS_DB_POOL: 5
+      # Secrets. It can possibly be handled better with Swarm's secrets.
+      PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
+      PORTUS_PASSWORD: ${PORTUS_PASSWORD}
 
-      CCONFIG_PREFIX: PORTUS
-      # Since we have no nginx in insecure mode, portus have to
-      # serve the static files
-      RAILS_SERVE_STATIC_FILES: "true"
+      PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
+      PORTUS_LOG_LEVEL: debug
 
+      PORTUS_BACKGROUND: "true"
+
+      # Customizations --------------------------------
+      #PORTUS_DELETE_ENABLED: "true"
+      PORTUS_BACKGROUND_REGISTRY_ENABLED: "true"
+      PORTUS_BACKGROUND_SYNC_ENABLED: "true"
+      PORTUS_BACKGROUND_SYNC_STRATEGY: "update-delete"
     depends_on:
       - portus_db
       - portus
@@ -75,27 +76,43 @@ services:
     networks:
       - portus-net
 
+  portus_db:
+    image: library/mariadb:10.0.23
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+    environment:
+      MYSQL_DATABASE: portus_production
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+    deploy:
+      # placement:
+      #   constraints:
+      #     - node.labels.postgres==true
+
+    networks:
+      - portus-net
+    # volumes:
+    #   - /tank/portus-maria:/var/lib/mysql
+
   registry:
     image: library/registry:2.7
     environment:
       # Authentication
-      REGISTRY_AUTH_TOKEN_REALM: http://${MACHINE_FQDN}/v2/token
+      REGISTRY_AUTH_TOKEN_REALM: http://${MACHINE_FQDN}:3000/v2/token
       REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/portus_secret_cert
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
-      # REGISTRY_LOG_LEVEL: "debug"
+      REGISTRY_LOG_LEVEL: "debug"
       # there must be at least one file in the bucket or things fail ...
-      REGISTRY_STORAGE: s3
-      # this does NOT work with docker secrets!
-      REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESSKEY}
-      REGISTRY_STORAGE_S3_SECRETKEY: ${S3_SECRETKEY}
-      # this is a mandatory property, but it gets overridden in the next line
-      REGISTRY_STORAGE_S3_REGION: "us-east-1"
-      REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
-      REGISTRY_STORAGE_S3_SECURE: "false"
-      REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
-      REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
+      # REGISTRY_STORAGE: s3
+      # # this does NOT work with docker secrets!
+      # REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESSKEY}
+      # REGISTRY_STORAGE_S3_SECRETKEY: ${S3_SECRETKEY}
+      # # this is a mandatory property, but it gets overridden in the next line
+      # REGISTRY_STORAGE_S3_REGION: "us-east-1"
+      # REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
+      # REGISTRY_STORAGE_S3_SECURE: "false"
+      # REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
+      # REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
       REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
       # while s3 is empty the health check fails ...
       # or not ...
@@ -104,10 +121,10 @@ services:
       # Portus endpoint
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
-          url: http://portus:3000/v2/webhooks/events
-          timeout: 20000ms
+          url: http://${MACHINE_FQDN}:3000/v2/webhooks/events
+          timeout: 2000ms
           threshold: 5
-          backoff: 10s
+          backoff: 1s
     configs:
       # make /etc/hosts work in go
       - source: registry_nsswitch_conf
@@ -117,6 +134,7 @@ services:
       - portus_secret_cert
     ports:
       - 5000:5000
+      - 5001:5001
 
     networks:
       - portus-net
@@ -152,22 +170,6 @@ services:
     #   - /tank/portus-pg:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: some_db_password
-
-  portus_db:
-    image: library/mariadb:10.0.23
-    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
-    environment:
-      MYSQL_DATABASE: portus_production
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
-    deploy:
-      # placement:
-      #   constraints:
-      #     - node.labels.postgres==true
-
-    networks:
-      - portus-net
-    # volumes:
-    #   - /tank/portus-maria:/var/lib/mysql
 
 networks:
   portus-net:
