@@ -7,6 +7,8 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 
+# all services
+STACK_SERVICES = $(strip $(shell docker-compose config --services))
 
 # Name of the network where simcore stack is deployed
 SIMCORE_NETWORK := simcore_default
@@ -34,6 +36,18 @@ help: ## This colourful help
 .PHONY: build
 build: jupyter/Dockerfile ## builds services
 	docker-compose build
+
+.PHONY: push
+push: ## Pushes build images
+	$(foreach name, $(STACK_SERVICES), \
+		docker push ${DOCKER_REGISTRY}/$(name):${DOCKER_IMAGE_TAG}
+	docker tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
+	docker push ${DOCKER_REGISTRY}/deployment-agent:latest
+
+.PHONY: pull
+pull: ## Pulls service from the registry.
+	docker pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+
 
 .PHONY: run
 run: ## starts jupyter notebook for testing and ensures simcore network is present

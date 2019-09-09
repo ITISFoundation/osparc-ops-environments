@@ -1,8 +1,8 @@
 version: '3.7'
 
 services:
-  jupyter:
-    image: ${DOCKER_REGISTRY:-itisfoundation}/maintenance-jupyter:${DOCKER_IMAGE_TAG:-latest}
+  jupyter-diagnostics:
+    image: ${DOCKER_REGISTRY:-itisfoundation}/jupyter-diagnostics:${DOCKER_IMAGE_TAG:-latest}
     init: true
     build:
       context: ./jupyter

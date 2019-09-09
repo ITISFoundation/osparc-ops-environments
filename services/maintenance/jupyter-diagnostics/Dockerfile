@@ -8,14 +8,15 @@ RUN apt-get update && apt-get -yq dist-upgrade \
     git \
  && rm -rf /var/lib/apt/lists/*
 
-USER $NB_UID
 
 COPY --chown=jovyan:users scripts/healthcheck_curl_host.py $HOME/scripts/healthcheck_curl_host.py
-HEALTHCHECK --interval=10s \
-            --timeout=30s \
-            --start-period=1s \
+HEALTHCHECK --interval=30s \
+            --timeout=120s \
+            --start-period=30s \
             --retries=3 \
             CMD ["python3", "${HOME}/scripts/healthcheck_curl_host.py", "http://localhost:8888"]
+
+USER $NB_UID
 
 
 # enable single-user server
