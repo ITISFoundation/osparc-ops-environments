@@ -5,6 +5,8 @@ Stack to deploy maintenance services
 ## Usage
 
     $ make help
+    $ make build
+
     $ make up
     $ make info
     $ make down

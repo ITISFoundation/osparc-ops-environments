@@ -7,9 +7,18 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 
-# VARIABLES ------------------------------------------------
-#
-# - these variables parametrize  ....
+
+# Name of the network where simcore stack is deployed
+SIMCORE_NETWORK := simcore_default
+
+# version control
+export VCS_URL          := $(shell git config --get remote.origin.url)
+export VCS_REF          := $(shell git rev-parse --short HEAD)
+
+# image
+export BUILD_DATE       := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ"))
+export DOCKER_IMAGE_TAG ?= latest
+export DOCKER_REGISTRY  ?= itisfoundation
 
 
 # TARGETS --------------------------------------------------
@@ -22,15 +31,26 @@ help: ## This colourful help
 
 .DEFAULT_GOAL := help
 
+.PHONY: build
+build: jupyter/Dockerfile ## builds services
+	docker-compose build
 
-.PHONY: init up
-init: ## initializeds swarm cluster
-	$(if $(SWARM_HOSTS),  \
-		,                 \
-		docker swarm init \
+.PHONY: run
+run: ## starts jupyter notebook for testing and ensures simcore network is present
+	$(if $(filter $(SIMCORE_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(SIMCORE_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(SIMCORE_NETWORK) \
 	)
+	docker-compose run  --publish=8888:8888 jupyter
 
-up: init ## Deploys or updates current stack "$(STACK_NAME)"
+
+.PHONY: .init
+.init: ## ensures swarm cluster is initialized
+	$(if $(SWARM_HOSTS), , docker swarm init)
+
+
+.PHONY: up
+up: .init ## Deploys or updates current stack "$(STACK_NAME)"
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset
