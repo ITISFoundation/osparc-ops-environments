@@ -86,9 +86,11 @@ ${TEMP_COMPOSE}: docker-compose.yml
 		, \
 		echo ""; \
 		docker secret create portus_secret_key .portus-registry.key  2>/dev/null; \
+		rm .portus-registry.key \
 	)
 	@$(if $(DOCKER_SECRET_PORTUS_CERT), \
 		,							\
 		echo ""; \
 		docker secret create portus_secret_cert .portus-registry.crt  2>/dev/null; \
+		rm .portus-registry.crt \
 	)
