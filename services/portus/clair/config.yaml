@@ -5,7 +5,7 @@ clair:
     options:
       # PostgreSQL Connection string
       # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
-      source: host=${CLAIR_DB_HOST} port=${CLAIR_DB_PORT} user=${CLAIR_DB_USER} password=${CLAIR_DB_PASSWORD} sslmode=disable statement_timeout=60000
+      source: host=clair_db port=5432 user=postgres password=some_db_password sslmode=disable statement_timeout=60000
 
       # Number of elements kept in the cache
       # Values unlikely to change (e.g. namespaces) are cached in order to save prevent needless roundtrips to the database.

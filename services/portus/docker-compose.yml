@@ -9,7 +9,7 @@ services:
       # PORTUS_LOG_LEVEL: debug
       # Secrets. It can possibly be handled better with Swarm's secrets.
       PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      PORTUS_KEY_PATH: /domain.key
+      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
       PORTUS_PASSWORD: ${PORTUS_PASSWORD}
       PORTUS_DELETE_ENABLED: "true"
       # PORTUS_SECURITY_CLAIR_SERVER: http://clair:6060
@@ -33,10 +33,8 @@ services:
     depends_on:
       - portus_db
       - registry
-    configs:
-      - source: portus_domain_key
-        target: /domain.key
-        mode: 0644
+    secrets:
+      - portus_secret_key
     networks:
       - portus-net
 
@@ -48,7 +46,7 @@ services:
       # PORTUS_LOG_LEVEL: debug
       # Secrets. It can possibly be handled better with Swarm's secrets.
       PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      PORTUS_KEY_PATH: /domain.key
+      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
       PORTUS_PASSWORD: ${PORTUS_PASSWORD}
       #PORTUS_DELETE_ENABLED: "true"
       # background specific
@@ -72,10 +70,8 @@ services:
     depends_on:
       - portus_db
       - portus
-    configs:
-      - source: portus_domain_key
-        target: /domain.key
-        mode: 0644
+    secrets:
+      - portus_secret_key
     networks:
       - portus-net
 
@@ -86,7 +82,7 @@ services:
       REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
       REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /domain.crt
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/portus_secret_cert
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
       # REGISTRY_LOG_LEVEL: "debug"
       # there must be at least one file in the bucket or things fail ...
@@ -113,14 +109,12 @@ services:
           threshold: 5
           backoff: 10s
     configs:
-      - source: portus_domain_crt
-        target: /domain.crt
-        mode: 0644
       # make /etc/hosts work in go
       - source: registry_nsswitch_conf
         target: /etc/nsswitch.conf
         mode: 0644
-
+    secrets:
+      - portus_secret_cert
     ports:
       - 5000:5000
 
@@ -137,11 +131,6 @@ services:
       - portus-net
     ports:
       - "6060-6061:6060-6061"
-    environment:
-      CLAIR_DB_HOST: clair_db
-      CLAIR_DB_PORT: 5432
-      CLAIR_DB_USER: ${CLAIR_DB_USER}
-      CLAIR_DB_PASSWORD: ${CLAIR_DB_PASSWORD}
     configs:
       - source: clair_config_yaml
         target: /clair.yml
@@ -156,13 +145,13 @@ services:
     networks:
       - portus-net
     deploy:
-      placement:
-        constraints:
-          - node.labels.postgres==true
+      # placement:
+      #   constraints:
+      #     - node.labels.postgres==true
     # volumes:
     #   - /tank/portus-pg:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${CLAIR_DB_PASSWORD}
+      POSTGRES_PASSWORD: some_db_password
 
   portus_db:
     image: library/mariadb:10.0.23
@@ -171,9 +160,9 @@ services:
       MYSQL_DATABASE: portus_production
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
     deploy:
-      placement:
-        constraints:
-          - node.labels.postgres==true
+      # placement:
+      #   constraints:
+      #     - node.labels.postgres==true
 
     networks:
       - portus-net
@@ -186,10 +175,12 @@ networks:
 
 configs:
   clair_config_yaml:
-    file: ./clair/clair_config.yaml
-  portus_domain_crt:
-    external: true
-  portus_domain_key:
-    external: true
+    file: ./clair/config.yaml
   registry_nsswitch_conf:
     file: ./registry/nsswitch.conf
+
+secrets:
+  portus_secret_cert:
+    external: true
+  portus_secret_key:
+    external: true
