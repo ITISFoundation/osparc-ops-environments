@@ -27,5 +27,6 @@ then
     adduser jovyan $GROUPNAME
 fi
 
-echo "su --preserve-environment --command $@ jovyan"
+echo "su --command \"export PATH=${PATH}; $@\" ${NB_UID}"
 su --command "export PATH=${PATH}; $@" jovyan
+

@@ -18,9 +18,14 @@ export VCS_URL          := $(shell git config --get remote.origin.url)
 export VCS_REF          := $(shell git rev-parse --short HEAD)
 
 # image
-export BUILD_DATE       := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ"))
+export BUILD_DATE       := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 export DOCKER_IMAGE_TAG ?= latest
 export DOCKER_REGISTRY  ?= itisfoundation
+
+# VARIABLES
+$(if $(wildcard .env), , $(shell cp .env-defaults .env))
+include .env
+
 
 
 # TARGETS --------------------------------------------------
@@ -34,19 +39,24 @@ help: ## This colourful help
 .DEFAULT_GOAL := help
 
 .PHONY: build
-build: jupyter/Dockerfile ## builds services
+build: jupyter-diagnostics/Dockerfile ## builds services
 	docker-compose build
 
 .PHONY: push
-push: ## Pushes build images
-	$(foreach name, $(STACK_SERVICES), \
-		docker push ${DOCKER_REGISTRY}/$(name):${DOCKER_IMAGE_TAG}
-	docker tag ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG} ${DOCKER_REGISTRY}/deployment-agent:latest
-	docker push ${DOCKER_REGISTRY}/deployment-agent:latest
+push: ## Tags and pushes built images to registry
+	$(foreach service_name, \
+		$(STACK_SERVICES), \
+		docker push $(DOCKER_REGISTRY)/$(service_name):$(DOCKER_IMAGE_TAG) && \
+		docker tag $(DOCKER_REGISTRY)/$(service_name):$(DOCKER_IMAGE_TAG) $(DOCKER_REGISTRY)/$(service_name):latest && \
+		docker push $(DOCKER_REGISTRY)/$(service_name):latest \
+	)
 
 .PHONY: pull
-pull: ## Pulls service from the registry.
-	docker pull ${DOCKER_REGISTRY}/deployment-agent:${DOCKER_IMAGE_TAG}
+pull: ## Pulls images from registry
+	$(foreach service_name, \
+		$(STACK_SERVICES), \
+		docker pull $(DOCKER_REGISTRY)/$(service_name):$(DOCKER_IMAGE_TAG) \
+	)
 
 
 .PHONY: run
@@ -55,7 +65,7 @@ run: ## starts jupyter notebook for testing and ensures simcore network is prese
 		, docker network ls --filter="name==$(SIMCORE_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(SIMCORE_NETWORK) \
 	)
-	docker-compose run  --publish=8888:8888 jupyter
+	docker-compose run --publish=8888:8888 jupyter-diagnostics
 
 
 .PHONY: .init
@@ -71,19 +81,23 @@ up: .init ## Deploys or updates current stack "$(STACK_NAME)"
 down: ## Stops stack
 	docker stack rm $(STACK_NAME)
 
+
 reset: ## leaves swarm stopping all stacks in it
 	-docker swarm leave -f
 
 
-.PHONY: info
-info: ## expands all variables and relevant info on stack
+.PHONY: info info-more
+info: ## expands all variables 	
 	$(info VARIABLES ------------)
-	$(wildcard )
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info $(v)=$($(v)))                                                               \
 	)
 	@echo ""
+	@docker-compose config
+	@echo "---"
+
+info-more: info ## and relevant info on stack
 	docker ps
 ifneq ($(SWARM_HOSTS), )
 	@echo ""

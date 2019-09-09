@@ -5,7 +5,7 @@ services:
     image: ${DOCKER_REGISTRY:-itisfoundation}/jupyter-diagnostics:${DOCKER_IMAGE_TAG:-latest}
     init: true
     build:
-      context: ./jupyter
+      context: ./jupyter-diagnostics
       dockerfile: Dockerfile
       labels:
         org.label-schema.schema-version: "1.0"
@@ -14,6 +14,8 @@ services:
         org.label-schema.vcs-ref: "${VCS_REF}"
     ports:
       - 8888
+    env_file:
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - maintenance_data:/home/jovyan/work/data
@@ -23,7 +25,6 @@ services:
 networks:
   simcore_default:
     external: true
-
 
 volumes:
   maintenance_data: {}

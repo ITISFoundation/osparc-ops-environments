@@ -7,6 +7,13 @@ Stack to deploy maintenance services
     $ make help
     $ make build
 
+Create .env file and
+
+    $ make run
+    ...
+
+to develop or to deploy
+
     $ make up
     $ make info
     $ make down

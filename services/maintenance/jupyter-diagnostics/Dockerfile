@@ -9,12 +9,13 @@ RUN apt-get update && apt-get -yq dist-upgrade \
  && rm -rf /var/lib/apt/lists/*
 
 
-COPY --chown=jovyan:users scripts/healthcheck_curl_host.py $HOME/scripts/healthcheck_curl_host.py
-HEALTHCHECK --interval=30s \
-            --timeout=120s \
-            --start-period=30s \
-            --retries=3 \
-            CMD ["python3", "${HOME}/scripts/healthcheck_curl_host.py", "http://localhost:8888"]
+# FIXME: for the moment, healthcheck cannot be done on the root
+#COPY --chown=jovyan:users scripts/healthcheck_curl_host.py $HOME/scripts/healthcheck_curl_host.py
+#HEALTHCHECK --interval=30s \
+#            --timeout=120s \
+#            --start-period=30s \
+#            --retries=3 \
+#            CMD ["python3", "${HOME}/scripts/healthcheck_curl_host.py", "http://localhost:8888"]
 
 USER $NB_UID
 
