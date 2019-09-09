@@ -1,6 +1,15 @@
 #FROM nbgallery/jupyter-alpine:7.8.4
 FROM jupyter/base-notebook:python-3.7.3 AS base
 
+USER root
+
+RUN apt-get update && apt-get -yq dist-upgrade \
+ && apt-get install -yq --no-install-recommends \
+    git \
+ && rm -rf /var/lib/apt/lists/*
+
+USER $NB_UID
+
 COPY --chown=jovyan:users scripts/healthcheck_curl_host.py $HOME/scripts/healthcheck_curl_host.py
 HEALTHCHECK --interval=10s \
             --timeout=30s \
