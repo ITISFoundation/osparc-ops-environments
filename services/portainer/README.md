@@ -14,7 +14,7 @@ Stack to deploy portainer service and all agents (one per node)
 
 Available web front-ends when deployed in localhost:
 
-- protainerio: http://127.0.0.1:9000     (default credentials admin/adminadmin)
+- portainer io: http://127.0.0.1:9000     (default credentials admin/adminadmin)
 
 ## Stack services
 
