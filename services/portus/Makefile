@@ -7,8 +7,8 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-DOCKER_SECRET_PORTUS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} portus_secret_key 2>/dev/null)
-DOCKER_SECRET_PORTUS_CERT = $(shell docker secret inspect --format {{.Spec.Name}} portus_secret_cert 2>/dev/null)
+DOCKER_SECRET_PORTUS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} portus.key 2>/dev/null)
+DOCKER_SECRET_PORTUS_CERT = $(shell docker secret inspect --format {{.Spec.Name}} portus.crt 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
@@ -76,10 +76,10 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@echo "${STACK_NAME} stack file created for $@"
 
 .portus-registry.key:
-	openssl genrsa -out $@ 4096
+	openssl genrsa -out $@ 2048
 
 .portus-registry.crt: .portus-registry.key
-	openssl req -x509 -new -nodes -key $< -days 10000 \
+	openssl req -x509 -sha256 -new -nodes -key $< -days 10000 \
 	-subj "/C=US/ST=Denial/L=ZH/O=ITIS" -out $@
 
 .PHONY: .create-secrets
@@ -87,12 +87,10 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@$(if $(DOCKER_SECRET_PORTUS_KEY), \
 		, \
 		echo ""; \
-		docker secret create portus_secret_key .portus-registry.key  2>/dev/null; \
-		rm .portus-registry.key \
+		docker secret create portus.key .portus-registry.key  2>/dev/null; \
 	)
 	@$(if $(DOCKER_SECRET_PORTUS_CERT), \
-		,							\
+		, \
 		echo ""; \
-		docker secret create portus_secret_cert .portus-registry.crt  2>/dev/null; \
-		rm .portus-registry.crt \
+		docker secret create portus.crt .portus-registry.crt  2>/dev/null; \
 	)

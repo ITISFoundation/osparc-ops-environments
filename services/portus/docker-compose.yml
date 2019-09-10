@@ -14,15 +14,18 @@ services:
 
       # Secrets. It can possibly be handled better with Swarm's secrets.
       PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
+      PORTUS_KEY_PATH: /run/secrets/portus.key
       PORTUS_PASSWORD: ${PORTUS_PASSWORD}
 
-      # SSL
+      # SSL 
+      PORTUS_PUMA_TLS_KEY: /run/secrets/portus.key
+      PORTUS_PUMA_TLS_CERT: /run/secrets/portus.crt
+
       PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
 
       # Since we have no nginx in insecure mode, portus have to
       # serve the static files
-      RAILS_SERVE_STATIC_FILES: "true"
+      # RAILS_SERVE_STATIC_FILES: "true"
 
       # Customizations ------------------------
       PORTUS_LOG_LEVEL: debug
@@ -39,9 +42,12 @@ services:
       - portus_db
       - registry
     secrets:
-      - portus_secret_key
+      - portus.key
+      - portus.crt
     networks:
       - portus-net
+    volumes:
+      - static:/srv/Portus/public
 
   background:
     image: opensuse/portus:2.4
@@ -55,10 +61,10 @@ services:
       PORTUS_DB_POOL: 5
       # Secrets. It can possibly be handled better with Swarm's secrets.
       PORTUS_SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      PORTUS_KEY_PATH: /run/secrets/portus_secret_key
+      PORTUS_KEY_PATH: /run/secrets/portus.key
       PORTUS_PASSWORD: ${PORTUS_PASSWORD}
 
-      PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
+      # PORTUS_CHECK_SSL_USAGE_ENABLED: "false"
       PORTUS_LOG_LEVEL: debug
 
       PORTUS_BACKGROUND: "true"
@@ -72,7 +78,7 @@ services:
       - portus_db
       - portus
     secrets:
-      - portus_secret_key
+      - portus.key
     networks:
       - portus-net
 
@@ -94,12 +100,17 @@ services:
 
   registry:
     image: library/registry:2.7
+    command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       # Authentication
-      REGISTRY_AUTH_TOKEN_REALM: http://${MACHINE_FQDN}:3000/v2/token
-      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
+      REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
+      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/portus_secret_cert
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /run/secrets/portus.crt
+      # SSL
+      REGISTRY_HTTP_TLS_CERTIFICATE: /run/secrets/portus.crt
+      REGISTRY_HTTP_TLS_KEY: /run/secrets/portus.key
+
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
       REGISTRY_LOG_LEVEL: "debug"
       # there must be at least one file in the bucket or things fail ...
@@ -121,7 +132,7 @@ services:
       # Portus endpoint
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
-          url: http://${MACHINE_FQDN}:3000/v2/webhooks/events
+          url: https://${MACHINE_FQDN}/v2/webhooks/events
           timeout: 2000ms
           threshold: 5
           backoff: 1s
@@ -130,15 +141,39 @@ services:
       - source: registry_nsswitch_conf
         target: /etc/nsswitch.conf
         mode: 0644
+      - source: registry_config.yaml
+        target: /etc/docker/registry/config.yml
+        mode: 0644
+      - source: registry_init
+        target: /etc/docker/registry/init
+        mode: 755
+      
     secrets:
-      - portus_secret_cert
+      - portus.crt
+      - portus.key
     ports:
       - 5000:5000
       - 5001:5001
 
     networks:
       - portus-net
-
+  
+  nginx:
+    image: library/nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - portus-net
+    configs:
+      - source: nginx.conf
+        target: /etc/nginx/nginx.conf
+        mode: 0644
+    secrets:
+      - portus.crt
+      - portus.key
+    volumes:
+      - static:/srv/Portus/public:ro
 
   clair:
     image: quay.io/coreos/clair:v2.0.9
@@ -170,7 +205,7 @@ services:
     #   - /tank/portus-pg:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: some_db_password
-
+  
 networks:
   portus-net:
     driver: overlay
@@ -180,9 +215,18 @@ configs:
     file: ./clair/config.yaml
   registry_nsswitch_conf:
     file: ./registry/nsswitch.conf
+  registry_config.yaml:
+    file: ./registry/config.yaml
+  registry_init:
+    file: ./registry/init
+  nginx.conf:
+    file: ./nginx/nginx.conf
 
 secrets:
-  portus_secret_cert:
+  portus.crt:
     external: true
-  portus_secret_key:
+  portus.key:
     external: true
+
+volumes:
+  static:
