@@ -80,7 +80,7 @@ ${TEMP_COMPOSE}: docker-compose.yml
 
 .portus-registry.crt: .portus-registry.key
 	openssl req -x509 -sha256 -new -nodes -key $< -days 10000 \
-	-subj "/C=US/ST=Denial/L=ZH/O=ITIS" -out $@
+	-out $@
 
 .PHONY: .create-secrets
 .create-secrets: .portus-registry.key .portus-registry.crt
