@@ -1,0 +1,49 @@
+#!/bin/bash
+# as of http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
+
+before_install() {
+    bash ops/travis/helpers/install_docker_compose
+    bash ops/travis/helpers/show_system_versions
+}
+
+install() {
+    # pip3 install --upgrade pip wheel setuptools && pip3 --version
+    # pip3 install -r ops/travis/system-testing/requirements.txt
+    pushd services/maintenance; make build ; popd
+}
+
+before_script() {
+    docker images
+    pushd services/maintenance; make up; popd
+}
+
+script() {
+    # wait for a minute to let the swarm warm up...
+    # pytest --cov-append --cov=simcore_service_deployment_agent -v ops/travis/system-testing/tests
+    docker service ls
+}
+
+after_success() {
+    pushd services/maintenance; make down ; popd
+}
+
+after_failure() {
+    docker service ls
+    #docker service ps portainer_auto-deployment-agent
+    #docker service logs portainer_auto-deployment-agent
+    #docker ps
+    pushd services/maintenance; make reset ; popd
+}
+
+# Check if the function exists (bash specific)
+if declare -f "$1" > /dev/null
+then
+  # call arguments verbatim
+  "$@"
+else
+  # Show a helpful error
+  echo "'$1' is not a known function name" >&2
+  exit 1
+fi
