@@ -1,0 +1,4 @@
+# Add here all tooling 
+docker-compose
+pylint 
+autopep8

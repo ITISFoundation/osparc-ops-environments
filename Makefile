@@ -44,6 +44,6 @@ venv: .venv ## creates a python virtual environment with dev tools (pip, pylint,
 .venv:
 	python3 -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel setuptools
-	.venv/bin/pip3 install pylint autopep8
+	.venv/bin/pip3 install -r requirements.txt
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
