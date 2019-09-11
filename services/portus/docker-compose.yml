@@ -23,6 +23,9 @@ services:
       - PORTUS_PUMA_TLS_KEY=/certificates/portus.key
       - PORTUS_PUMA_TLS_CERT=/certificates/portus.crt
 
+      # Deleting
+      - PORTUS_DELETE_ENABLED=true
+
       # NGinx is serving the assets instead of Puma. If you want to change this,
       # uncomment this line.
       #- RAILS_SERVE_STATIC_FILES='true'
