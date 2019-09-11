@@ -14,7 +14,7 @@ $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
-export S3_ENDPOINT ?= $(shell hostname -I | cut -d ' ' -f1)
+export S3_ENDPOINT ?= $(shell hostname -I | cut -d ' ' -f1):30000
 $(info S3_ENDPOINT set to ${S3_ENDPOINT})
 export MACHINE_FQDN ?= $(shell hostname -I | cut -d ' ' -f1)
 $(info MACHINE_FQDN set to ${MACHINE_FQDN})

@@ -104,6 +104,22 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /secrets/portus.crt
       REGISTRY_HTTP_TLS_KEY: /secrets/portus.key
 
+      # Storage
+      REGISTRY_STORAGE: s3
+      REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESSKEY}
+      REGISTRY_STORAGE_S3_SECRETKEY: ${S3_SECRETKEY}
+      REGISTRY_STORAGE_S3_REGION: "us-east-1"
+      REGISTRY_STORAGE_S3_REGIONENDPOINT: minio:9000
+      REGISTRY_STORAGE_S3_CHUNKSIZE: 16777216
+      # REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
+      REGISTRY_STORAGE_S3_SECURE: "false"
+      REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
+      REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
+
+      REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
+
+      REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
+
       # Portus endpoint
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
@@ -116,9 +132,9 @@ services:
     networks:
       - internal
     configs:
-      - source: registry_config.yml
-        target: /etc/docker/registry/config.yml
-        mode: 0644
+      # - source: registry_config.yml
+      #   target: /etc/docker/registry/config.yml
+      #   mode: 0644
       - source: registry_init
         target: /etc/docker/registry/init
         mode: 0755
@@ -130,6 +146,19 @@ services:
       # only needed in self-signed case
       - source: rootca.crt
         target: /secrets/rootca.crt
+  minio:
+    image: minio/minio
+    init: true
+    ports: 
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: ${S3_SECRETKEY}
+      MINIO_SECRET_KEY: ${S3_ACCESSKEY}
+    command: server /data0
+    volumes:
+      - minio1_data_part0:/data0:rw
+    networks:
+      - internal
 
   nginx:
     image: library/nginx:alpine
@@ -156,10 +185,13 @@ volumes:
   portus_static_data:
   registry_data:
   mariadb_data:
+  minio1_data_part0:
 
 networks:
   default:
   internal:
+  minio_minio_distributed:
+    external: true
 
 configs:
   registry_config.yml:
