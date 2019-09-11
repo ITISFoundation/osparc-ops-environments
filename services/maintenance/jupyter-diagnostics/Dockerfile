@@ -11,7 +11,7 @@ RUN apt-get update && apt-get -yq dist-upgrade \
  && rm -rf /var/lib/apt/lists/*
 
 
-# FIXME: for the moment, healthcheck cannot be done on the root
+# FIXME: https://github.com/ITISFoundation/osparc-ops/issues/24
 #COPY --chown=jovyan:users scripts/healthcheck_curl_host.py $HOME/scripts/healthcheck_curl_host.py
 #HEALTHCHECK --interval=30s \
 #            --timeout=120s \

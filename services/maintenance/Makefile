@@ -38,9 +38,16 @@ help: ## This colourful help
 
 .DEFAULT_GOAL := help
 
+
+# Build image --
+
 .PHONY: build
 build: jupyter-diagnostics/Dockerfile ## builds services
 	docker-compose build
+
+
+
+# Registry ---
 
 .PHONY: push
 push: ## Tags and pushes built images to registry
@@ -59,19 +66,23 @@ pull: ## Pulls images from registry
 	)
 
 
-.PHONY: run
-run: ## starts jupyter notebook for testing and ensures simcore network is present
+
+# Setup & run service/containers ------
+
+.PHONY: test-network
+test-network: ## ensures test-network if `{SIMCORE_NETWORK}` is not in place
 	$(if $(filter $(SIMCORE_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(SIMCORE_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(SIMCORE_NETWORK) \
 	)
-	docker-compose run --publish=8888:8888 jupyter-diagnostics
-
 
 .PHONY: .init
 .init: ## ensures swarm cluster is initialized
 	$(if $(SWARM_HOSTS), , docker swarm init)
 
+.PHONY: run
+run: ## starts jupyter notebook for testing (use make test-network if simcore stack is not present)
+	docker-compose run --publish=8888:8888 jupyter-diagnostics
 
 .PHONY: up
 up: .init ## Deploys or updates current stack "$(STACK_NAME)"
@@ -81,10 +92,12 @@ up: .init ## Deploys or updates current stack "$(STACK_NAME)"
 down: ## Stops stack
 	docker stack rm $(STACK_NAME)
 
-
 reset: ## leaves swarm stopping all stacks in it
 	-docker swarm leave -f
 
+
+
+# Miscelaneous ------
 
 .PHONY: info info-more
 info: ## expands all variables 	
@@ -111,3 +124,6 @@ ifneq ($(SWARM_HOSTS), )
 endif
 
 
+.PHONY: clean
+clean: ## cleans tmp files
+	@git clean -Xdf
