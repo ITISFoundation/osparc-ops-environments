@@ -39,13 +39,11 @@ services:
     secrets:
       - source: portus.key
         target: /certificates/portus.key
-        mode: 0644
       - source: portus.crt
         target: /certificates/portus.crt
-        mode: 0644
+      # only needed in self-signed case
       - source: rootca.crt
         target: /certificates/rootca.crt
-        mode: 0644
 
   background:
     image: opensuse/portus:head
@@ -129,6 +127,7 @@ services:
         target: /secrets/portus.key
       - source: portus.crt
         target: /secrets/portus.crt
+      # only needed in self-signed case
       - source: rootca.crt
         target: /secrets/rootca.crt
 

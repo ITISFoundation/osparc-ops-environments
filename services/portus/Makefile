@@ -7,8 +7,6 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-DOCKER_SECRET_PORTUS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} portus.key 2>/dev/null)
-DOCKER_SECRET_PORTUS_CERT = $(shell docker secret inspect --format {{.Spec.Name}} portus.crt 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
@@ -27,7 +25,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} .create-secrets  ## Deploys graylog stack
+up: .init .env ${TEMP_COMPOSE} create-certificates  ## Deploys graylog stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -100,16 +98,3 @@ secrets/portus.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key ext
 
 .PHONY: create-certificates
 create-certificates: secrets/portus.crt secrets/portus.key secrets/rootca.crt
-
-.PHONY: .create-secrets
-.create-secrets: create-certificates
-	@$(if $(DOCKER_SECRET_PORTUS_KEY), \
-		, \
-		echo ""; \
-		docker secret create portus.key secrets/portus.key  2>/dev/null; \
-	)
-	@$(if $(DOCKER_SECRET_PORTUS_CERT), \
-		, \
-		echo ""; \
-		docker secret create portus.crt secrets/portus.crt  2>/dev/null; \
-	)
