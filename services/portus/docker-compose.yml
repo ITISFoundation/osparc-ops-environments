@@ -17,11 +17,14 @@ services:
       # Secrets. It can possibly be handled better with Swarm's secrets.
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
       - PORTUS_KEY_PATH=/certificates/portus.key
+      # - PORTUS_KEY_PATH=/run/secrets/portus.key
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
       # SSL
       - PORTUS_PUMA_TLS_KEY=/certificates/portus.key
       - PORTUS_PUMA_TLS_CERT=/certificates/portus.crt
+      # - PORTUS_PUMA_TLS_KEY=/run/secrets/portus.key
+      # - PORTUS_PUMA_TLS_CERT=/run/secrets/portus.crt
 
       # Deleting
       - PORTUS_DELETE_ENABLED=true
@@ -32,8 +35,17 @@ services:
     networks:
       - internal    
     volumes:
-      - ./secrets:/certificates:ro
       - portus_static_data:/srv/Portus/public
+    secrets:
+      - source: portus.key
+        target: /certificates/portus.key
+        mode: 0644
+      - source: portus.crt
+        target: /certificates/portus.crt
+        mode: 0644
+      - source: rootca.crt
+        target: /certificates/rootca.crt
+        mode: 0644
 
   background:
     image: opensuse/portus:head
@@ -61,8 +73,9 @@ services:
       - PORTUS_BACKGROUND=true
     networks:
       - internal
-    volumes:
-      - ./secrets:/certificates:ro
+    secrets:
+      - source: portus.key
+        target: /certificates/portus.key
 
   db:
     image: library/mariadb:10.0.23
@@ -102,7 +115,6 @@ services:
           backoff: 1s
     volumes:
       - registry_data:/var/lib/registry
-      - ./secrets:/secrets:ro
     networks:
       - internal
     configs:
@@ -112,12 +124,18 @@ services:
       - source: registry_init
         target: /etc/docker/registry/init
         mode: 0755
+    secrets:
+      - source: portus.key
+        target: /secrets/portus.key
+      - source: portus.crt
+        target: /secrets/portus.crt
+      - source: rootca.crt
+        target: /secrets/rootca.crt
 
   nginx:
     image: library/nginx:alpine
     init: true
     volumes:
-      - ./secrets:/secrets:ro
       - portus_static_data:/srv/Portus/public:ro
     ports:
       - 80:80
@@ -129,6 +147,11 @@ services:
       - source: nginx_nginx.conf
         target: /etc/nginx/nginx.conf
         mode: 0644
+    secrets:
+      - source: portus.key
+        target: /secrets/portus.key
+      - source: portus.crt
+        target: /secrets/portus.crt
 
 volumes:
   portus_static_data:
@@ -146,3 +169,10 @@ configs:
     file: ./registry/init
   nginx_nginx.conf:
     file: ./nginx/nginx.conf
+secrets:
+  portus.key:
+    file: ./secrets/portus.key
+  portus.crt:
+    file: ./secrets/portus.crt
+  rootca.crt:
+    file: ./secrets/rootca.crt
