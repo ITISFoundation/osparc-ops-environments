@@ -22,20 +22,20 @@ current_git_branch = $(git branch | grep \* | cut -d ' ' -f2)
 . $(repo_basedir)/services/portainer/env.config
 
 # Deploying portainer in the manager host
-scp -r ${repo_basedir}/services/portainer manager1:portainer
-ssh manager1 "pushd portainer; make up"
+scp -r ${repo_basedir}/services/portainer ${ENVIRONMENT_MANAGER_NODE}:portainer
+ssh ${ENVIRONMENT_MANAGER_NODE} "pushd portainer; make up"
 
 # Labeling nodes
-ssh manager1 "docker node update --label-add minio1=true manager1"
-ssh manager1 "docker node update --label-add minio2=true worker1"
-ssh manager1 "docker node update --label-add minio3=true worker2"
-ssh manager1 "docker node update --label-add minio4=true worker3"
+ssh ${ENVIRONMENT_MANAGER_NODE} "docker node update --label-add minio1=true ${ENVIRONMENT_MANAGER_NODE}"
+ssh ${ENVIRONMENT_MANAGER_NODE} "docker node update --label-add minio2=true worker1"
+ssh ${ENVIRONMENT_MANAGER_NODE} "docker node update --label-add minio3=true worker2"
+ssh ${ENVIRONMENT_MANAGER_NODE} "docker node update --label-add minio4=true worker3"
 
-ssh manager1 "docker node update --label-add postgres=true manager1"
+ssh ${ENVIRONMENT_MANAGER_NODE} "docker node update --label-add postgres=true ${ENVIRONMENT_MANAGER_NODE}"
 
 
 # Deploying stacks via the portainer
-portainer_url = manager1:9000
+portainer_url = ${ENVIRONMENT_MANAGER_NODE}:9000
 portainer_password = ${PORTAINER_ADMIN_PWD}
 portainer = ${scripts_dir}/scripts/portainer.sh
 
