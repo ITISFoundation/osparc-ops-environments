@@ -103,16 +103,20 @@ services:
     volumes:
       - registry_data:/var/lib/registry
       - ./secrets:/secrets:ro
-      - ./registry/config.yml:/etc/docker/registry/config.yml:ro
-      - ./registry/init:/etc/docker/registry/init:ro
     networks:
       - internal
+    configs:
+      - source: registry_config.yml
+        target: /etc/docker/registry/config.yml
+        mode: 0644
+      - source: registry_init
+        target: /etc/docker/registry/init
+        mode: 0755
 
   nginx:
     image: library/nginx:alpine
     init: true
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./secrets:/secrets:ro
       - portus_static_data:/srv/Portus/public:ro
     ports:
@@ -121,6 +125,10 @@ services:
     networks:
       - default
       - internal
+    configs:
+      - source: nginx_nginx.conf
+        target: /etc/nginx/nginx.conf
+        mode: 0644
 
 volumes:
   portus_static_data:
@@ -130,3 +138,11 @@ volumes:
 networks:
   default:
   internal:
+
+configs:
+  registry_config.yml:
+    file: ./registry/config.yml
+  registry_init:
+    file: ./registry/init
+  nginx_nginx.conf:
+    file: ./nginx/nginx.conf
