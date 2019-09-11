@@ -69,16 +69,17 @@ pull: ## Pulls images from registry
 
 # Setup & run service/containers ------
 
-.PHONY: test-network
-test-network: ## ensures test-network if `{SIMCORE_NETWORK}` is not in place
+.PHONY: .init
+.init: ## ensures swarm cluster is initialized
+	$(if $(SWARM_HOSTS), , docker swarm init)
+
+
+.PHONY: 
+test-network: .init ## ensures test-network if `{SIMCORE_NETWORK}` is not in place
 	$(if $(filter $(SIMCORE_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(SIMCORE_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(SIMCORE_NETWORK) \
 	)
-
-.PHONY: .init
-.init: ## ensures swarm cluster is initialized
-	$(if $(SWARM_HOSTS), , docker swarm init)
 
 .PHONY: run
 run: ## starts jupyter notebook for testing (use make test-network if simcore stack is not present)
@@ -95,6 +96,11 @@ down: ## Stops stack
 reset: ## leaves swarm stopping all stacks in it
 	-docker swarm leave -f
 
+
+# Tests ------
+# TODO: do some meaningful checks here that tests the running stack
+#test-up:
+#	$(error docker)
 
 
 # Miscelaneous ------

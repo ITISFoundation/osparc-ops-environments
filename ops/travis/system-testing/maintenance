@@ -16,12 +16,17 @@ install() {
 
 before_script() {
     docker images
-    pushd services/maintenance; make up; popd
+    
+    pushd services/maintenance; \
+        make test-network; \
+        make up; \
+    popd
 }
 
 script() {
     # wait for a minute to let the swarm warm up...
     # pytest --cov-append --cov=simcore_service_deployment_agent -v ops/travis/system-testing/tests
+    docker stack ls
     docker stack services maintenance
 }
 
