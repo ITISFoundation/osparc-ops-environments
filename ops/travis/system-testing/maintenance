@@ -22,11 +22,12 @@ before_script() {
 script() {
     # wait for a minute to let the swarm warm up...
     # pytest --cov-append --cov=simcore_service_deployment_agent -v ops/travis/system-testing/tests
-    docker service ls
+    docker stack services maintenance
 }
 
 after_success() {
-    pushd services/maintenance; make down ; popd
+    pushd services/maintenance; make down;popd
+    pushd services/maintenance; make reset;popd
 }
 
 after_failure() {

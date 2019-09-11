@@ -23,7 +23,7 @@ export DOCKER_IMAGE_TAG ?= latest
 export DOCKER_REGISTRY  ?= itisfoundation
 
 # VARIABLES
-$(if $(wildcard .env), , $(shell cp .env-defaults .env))
+$(if $(wildcard .env), , $(shell cp env.cfg .env))
 include .env
 
 
