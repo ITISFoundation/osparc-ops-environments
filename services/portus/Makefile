@@ -75,22 +75,41 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
-.portus-registry.key:
+extfile.cnf:
+	echo "subjectAltName = IP:${MACHINE_FQDN}" > $@ #You can use DNS:domain.tld too
+
+secrets/rootca.key:
 	openssl genrsa -out $@ 2048
 
-.portus-registry.crt: .portus-registry.key
-	openssl req -x509 -sha256 -new -nodes -key $< -days 10000 \
-	-subj "/C=US/ST=Denial/L=ZH/O=ITIS" -out $@
+secrets/rootca.crt: secrets/rootca.key
+	openssl req -x509 -new -nodes -key $< \
+		-subj "/C=US/ST=CA/O=Acme, Inc." \
+		-sha256 -days 1024 -out $@
+
+secrets/portus.key:
+	openssl genrsa -out $@ 2048
+
+secrets/portus.csr: secrets/portus.key
+	openssl req -new -key $< -out $@ \
+ 		-subj "/C=US/ST=CA/O=Acme, Inc./CN=${MACHINE_FQDN}"
+
+secrets/portus.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key extfile.cnf
+	openssl x509 -req -in secrets/portus.csr -CA secrets/rootca.crt -extfile \
+		extfile.cnf -CAkey secrets/rootca.key -CAcreateserial \
+		-out secrets/portus.crt -days 500 -sha256
+
+.PHONY: create-certificates
+create-certificates: secrets/portus.crt secrets/portus.key secrets/rootca.crt
 
 .PHONY: .create-secrets
-.create-secrets: .portus-registry.key .portus-registry.crt
+.create-secrets: create-certificates
 	@$(if $(DOCKER_SECRET_PORTUS_KEY), \
 		, \
 		echo ""; \
-		docker secret create portus.key .portus-registry.key  2>/dev/null; \
+		docker secret create portus.key secrets/portus.key  2>/dev/null; \
 	)
 	@$(if $(DOCKER_SECRET_PORTUS_CERT), \
 		, \
 		echo ""; \
-		docker secret create portus.crt .portus-registry.crt  2>/dev/null; \
+		docker secret create portus.crt secrets/portus.crt  2>/dev/null; \
 	)
