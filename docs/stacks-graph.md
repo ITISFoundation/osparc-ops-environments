@@ -1,4 +1,12 @@
-# Stacks
+# Design of Stacks 
+
+
+    $ cd services/$(stack-name)
+    $ make build test release
+
+    $ make up
+    $ make down
+
 
 ## deployment-agent
 
@@ -31,9 +39,14 @@ This is an example for 4 replicas and 2 partitions per service
 ![](./img/portainer.png)
 
 
+## portus (ongoing)
+
+![](./img/portus.png)
 
 
 
-> Updated Sep 12, 2019
->
-> Credits https://github.com/pmsipilot/docker-compose-viz
+---
+
+<sup>Updated Sep 12, 2019</sup>
+
+<sup>Credits https://github.com/pmsipilot/docker-compose-viz</sup>
