@@ -47,3 +47,26 @@ venv: .venv ## creates a python virtual environment with dev tools (pip, pylint,
 	.venv/bin/pip3 install pylint autopep8
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
+
+# auto doc TODO: improve
+.PHONY: doc
+docs_dir = $(realpath $(CURDIR)/docs)
+service_paths = 
+service_names = $(notdir $(wildcard $(CURDIR)/services/*))
+doc_md = $(docs_dir)/stacks-graph.md
+
+doc: ## auto-documents stack from configuration
+	mkdir -p $(docs_dir)/img
+	# generating a graph of the stack
+	@echo "# Stacks\n" >$(doc_md)
+	@for service in $(service_names); do    \
+		echo "## $$service" >>$(doc_md);  \
+		echo "" >>$(doc_md); \
+		echo "![](./img/$$service.png)" >>$(doc_md);\
+		echo "" >>$(doc_md); \
+	done
+
+	@for service in $(service_names); do    \
+		docker run --rm -it --name dcv -v $(CURDIR)/services/$$service:/input pmsipilot/docker-compose-viz render -m image; \
+		mv $(CURDIR)/services/$$service/docker-compose.png $(docs_dir)/img/$$service.png; \
+	done
