@@ -1,43 +1,30 @@
-version: '3.2'
+version: '3.7'
 
 services:
-  agent:
-    image: portainer/agent
-    environment:
-      # REQUIRED: Should be equal to the service name prefixed by "tasks." when
-      # deployed inside an overlay network
-      AGENT_CLUSTER_ADDR: tasks.agent
-      # AGENT_PORT: 9001
-      # LOG_LEVEL: debug
+  jupyter-diagnostics:
+    image: ${DOCKER_REGISTRY:-itisfoundation}/jupyter-diagnostics:${DOCKER_IMAGE_TAG:-latest}
+    init: true
+    build:
+      context: ./jupyter-diagnostics
+      dockerfile: Dockerfile
+      labels:
+        org.label-schema.schema-version: "1.0"
+        org.label-schema.build-date: "${BUILD_DATE}"
+        org.label-schema.vcs-url: "${VCS_URL}"
+        org.label-schema.vcs-ref: "${VCS_REF}"
+    ports:
+      - 8888
+    env_file:
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - maintenance_data:/home/jovyan/work/data
     networks:
-      - agent_network
-    deploy:
-      mode: global
-      placement:
-        constraints: [node.platform.os == linux]
-
-  portainer:
-    image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify
-    ports:
-      - "9000:9000"
-    volumes:
-      - portainer_data:/data
-    networks:
-      - agent_network
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints: [node.role == manager]
+      - simcore_default
 
 networks:
-  agent_network:
-    driver: overlay
-    attachable: true
+  simcore_default:
+    external: true
 
 volumes:
-  portainer_data:
+  maintenance_data: {}
