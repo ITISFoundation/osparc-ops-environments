@@ -48,14 +48,14 @@ venv: .venv ## creates a python virtual environment with dev tools (pip, pylint,
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 
-# auto doc TODO: improve
-.PHONY: doc
+# FIXME: DO NOT USE... still working on this
+.PHONY: autodoc
 docs_dir = $(realpath $(CURDIR)/docs)
 service_paths = 
 service_names = $(notdir $(wildcard $(CURDIR)/services/*))
-doc_md = $(docs_dir)/stacks-graph.md
+doc_md = $(docs_dir)/stacks-graph-auto.md
 
-doc: ## auto-documents stack from configuration
+autodoc:
 	mkdir -p $(docs_dir)/img
 	# generating a graph of the stack
 	@echo "# Stacks\n" >$(doc_md)

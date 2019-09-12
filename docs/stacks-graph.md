@@ -4,7 +4,9 @@
 
 ![](./img/deployment-agent.png)
 
-## minio
+## minio 
+
+This is an example for 4 replicas and 2 partitions per service
 
 ![](./img/minio.png)
 
@@ -28,3 +30,10 @@
 
 ![](./img/portainer.png)
 
+
+
+
+
+> Updated Sep 12, 2019
+>
+> Credits https://github.com/pmsipilot/docker-compose-viz
