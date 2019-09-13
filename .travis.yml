@@ -53,3 +53,27 @@ jobs:
           script: unbuffer bash ops/travis/deploy/deployment-agent deploy
           on:
             branch: master
+    
+    - stage: system testing, deploy to dockerhub
+      name: maintenance
+      language: python
+      python:
+        - "3.6"
+      before_install:
+        - sudo bash ops/travis/system-testing/maintenance before_install
+      install:
+        - unbuffer bash ops/travis/system-testing/maintenance install
+      before_script:
+        - unbuffer bash ops/travis/system-testing/maintenance before_script
+      script:
+        - unbuffer bash ops/travis/system-testing/maintenance script
+      after_success:
+        - unbuffer bash ops/travis/system-testing/maintenance after_success
+      after_failure:
+        - unbuffer bash ops/travis/system-testing/maintenance after_failure
+      deploy:
+        - provider: script
+          skip_cleanup: true
+          script: unbuffer bash ops/travis/deploy/maintenance deploy
+          on:
+            branch: master

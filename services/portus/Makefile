@@ -7,8 +7,6 @@ PWD ?= pwd_unknown
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-DOCKER_SECRET_PORTUS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} portus.key 2>/dev/null)
-DOCKER_SECRET_PORTUS_CERT = $(shell docker secret inspect --format {{.Spec.Name}} portus.crt 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
@@ -16,7 +14,7 @@ $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
-export S3_ENDPOINT ?= $(shell hostname -I | cut -d ' ' -f1)
+export S3_ENDPOINT ?= $(shell hostname -I | cut -d ' ' -f1):30000
 $(info S3_ENDPOINT set to ${S3_ENDPOINT})
 export MACHINE_FQDN ?= $(shell hostname -I | cut -d ' ' -f1)
 $(info MACHINE_FQDN set to ${MACHINE_FQDN})
@@ -27,7 +25,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} .create-secrets  ## Deploys graylog stack
+up: .init .env ${TEMP_COMPOSE} create-certificates  ## Deploys graylog stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -75,22 +73,28 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
-.portus-registry.key:
+extfile.cnf:
+	echo "subjectAltName = IP:${MACHINE_FQDN}" > $@ #You can use DNS:domain.tld too
+
+secrets/rootca.key:
 	openssl genrsa -out $@ 2048
 
-.portus-registry.crt: .portus-registry.key
-	openssl req -x509 -sha256 -new -nodes -key $< -days 10000 \
-	-out $@
+secrets/rootca.crt: secrets/rootca.key
+	openssl req -x509 -new -nodes -key $< \
+		-subj "/C=US/ST=CA/O=Acme, Inc." \
+		-sha256 -days 1024 -out $@
 
-.PHONY: .create-secrets
-.create-secrets: .portus-registry.key .portus-registry.crt
-	@$(if $(DOCKER_SECRET_PORTUS_KEY), \
-		, \
-		echo ""; \
-		docker secret create portus.key .portus-registry.key  2>/dev/null; \
-	)
-	@$(if $(DOCKER_SECRET_PORTUS_CERT), \
-		, \
-		echo ""; \
-		docker secret create portus.crt .portus-registry.crt  2>/dev/null; \
-	)
+secrets/portus.key:
+	openssl genrsa -out $@ 2048
+
+secrets/portus.csr: secrets/portus.key
+	openssl req -new -key $< -out $@ \
+ 		-subj "/C=US/ST=CA/O=Acme, Inc./CN=${MACHINE_FQDN}"
+
+secrets/portus.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key extfile.cnf
+	openssl x509 -req -in secrets/portus.csr -CA secrets/rootca.crt -extfile \
+		extfile.cnf -CAkey secrets/rootca.key -CAcreateserial \
+		-out secrets/portus.crt -days 500 -sha256
+
+.PHONY: create-certificates
+create-certificates: secrets/portus.crt secrets/portus.key secrets/rootca.crt
