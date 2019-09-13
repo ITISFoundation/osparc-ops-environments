@@ -44,6 +44,9 @@ This is an example for 4 replicas and 2 partitions per service
 ![](./img/portus.png)
 
 
+---
+
+Diagrams of the [osparc-simcore stack](https://github.com/pcrespov/osparc-simcore/blob/is1047/remove-minio-and-webclient-from-stack/docs/simcore-stack.md)
 
 ---
 
