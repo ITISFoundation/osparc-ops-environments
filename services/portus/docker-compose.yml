@@ -4,8 +4,10 @@ services:
   portus:
     image: opensuse/portus:head # 2.4.3 does not allow for nested images key
     init: true
+    restart: unless-stopped
     environment:
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
 
       # DB. The password for the database should definitely not be here. You are
       # probably better off with Docker Swarm secrets.
@@ -48,6 +50,7 @@ services:
   background:
     image: opensuse/portus:head
     init: true
+    restart: unless-stopped
     depends_on:
       - portus
       - db
@@ -55,6 +58,7 @@ services:
       # Theoretically not needed, but cconfig's been buggy on this...
       - CCONFIG_PREFIX=PORTUS
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
+      - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
 
       # DB. The password for the database should definitely not be here. You are
       # probably better off with Docker Swarm secrets.
@@ -78,6 +82,7 @@ services:
   db:
     image: library/mariadb:10.0.23
     init: true
+    restart: unless-stopped
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
     environment:
       - MYSQL_DATABASE=portus_production
@@ -92,6 +97,7 @@ services:
   registry:
     image: library/registry:2.7
     init: true
+    restart: unless-stopped
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       # Authentication
@@ -149,6 +155,7 @@ services:
   minio:
     image: minio/minio
     init: true
+    restart: unless-stopped
     ports:
       - "9000:9000"
     environment:
@@ -160,17 +167,41 @@ services:
     networks:
       - internal
 
+  clair:
+    image: quay.io/coreos/clair:v2.0.1
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    command: [-config, /clair.yml]
+    networks:
+      - internal
+    configs:
+      - source: clair_config.yml
+        target: /clair.yml
+        mode: 0644
+
+  postgres:
+    image: library/postgres:10-alpine
+    init: true
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: portus
+    networks:
+      - internal
+
   nginx:
     image: library/nginx:alpine
     init: true
+    restart: unless-stopped
     command:  /bin/sh -c "envsubst '\$NGINX_HOST' < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     volumes:
       - portus_static_data:/srv/Portus/public:ro
     ports:
       - 80:80
       - 443:443
-    environment:
-      NGINX_HOST: ${MACHINE_FQDN}
+    # environment:
+    #   NGINX_HOST: ${MACHINE_FQDN}
     networks:
       - default
       - internal
@@ -203,6 +234,8 @@ configs:
     file: ./registry/init
   nginx_nginx.conf:
     file: ./nginx/nginx.conf
+  clair_config.yml:
+    file: ./clair/clair.yml
 secrets:
   portus.key:
     file: ./secrets/portus.key
