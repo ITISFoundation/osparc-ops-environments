@@ -25,7 +25,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} create-certificates  ## Deploys graylog stack
+up: .init .env create-certificates ${TEMP_COMPOSE}  ## Deploys graylog stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -74,7 +74,7 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@echo "${STACK_NAME} stack file created for $@"
 
 extfile.cnf:
-	echo "subjectAltName = IP:${MACHINE_FQDN}" > $@ #You can use DNS:domain.tld too
+	echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
 
 secrets/rootca.key:
 	openssl genrsa -out $@ 2048

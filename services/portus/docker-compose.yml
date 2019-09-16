@@ -33,7 +33,7 @@ services:
       # uncomment this line.
       #- RAILS_SERVE_STATIC_FILES='true'
     networks:
-      - internal    
+      - internal
     volumes:
       - portus_static_data:/srv/Portus/public
     secrets:
@@ -149,7 +149,7 @@ services:
   minio:
     image: minio/minio
     init: true
-    ports: 
+    ports:
       - "9000:9000"
     environment:
       MINIO_ACCESS_KEY: ${S3_SECRETKEY}
@@ -163,17 +163,20 @@ services:
   nginx:
     image: library/nginx:alpine
     init: true
+    command:  /bin/sh -c "envsubst '\$NGINX_HOST' < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     volumes:
       - portus_static_data:/srv/Portus/public:ro
     ports:
       - 80:80
       - 443:443
+    environment:
+      NGINX_HOST: ${MACHINE_FQDN}
     networks:
       - default
       - internal
     configs:
       - source: nginx_nginx.conf
-        target: /etc/nginx/nginx.conf
+        target: /etc/nginx/nginx.template.conf
         mode: 0644
     secrets:
       - source: portus.key
