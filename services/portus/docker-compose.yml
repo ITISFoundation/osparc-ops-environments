@@ -19,14 +19,11 @@ services:
       # Secrets. It can possibly be handled better with Swarm's secrets.
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
       - PORTUS_KEY_PATH=/certificates/portus.key
-      # - PORTUS_KEY_PATH=/run/secrets/portus.key
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
       # SSL
       - PORTUS_PUMA_TLS_KEY=/certificates/portus.key
       - PORTUS_PUMA_TLS_CERT=/certificates/portus.crt
-      # - PORTUS_PUMA_TLS_KEY=/run/secrets/portus.key
-      # - PORTUS_PUMA_TLS_CERT=/run/secrets/portus.crt
 
       # Deleting
       - PORTUS_DELETE_ENABLED=true
