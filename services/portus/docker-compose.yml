@@ -115,9 +115,8 @@ services:
       REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESSKEY}
       REGISTRY_STORAGE_S3_SECRETKEY: ${S3_SECRETKEY}
       REGISTRY_STORAGE_S3_REGION: "us-east-1"
-      REGISTRY_STORAGE_S3_REGIONENDPOINT: minio:9000
       REGISTRY_STORAGE_S3_CHUNKSIZE: 16777216
-      # REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
+      REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
       REGISTRY_STORAGE_S3_SECURE: "false"
       REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
       REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
@@ -152,21 +151,6 @@ services:
       # only needed in self-signed case
       - source: rootca.crt
         target: /secrets/rootca.crt
-  minio:
-    image: minio/minio
-    init: true
-    restart: unless-stopped
-    ports:
-      - "9000:9000"
-    environment:
-      MINIO_ACCESS_KEY: ${S3_SECRETKEY}
-      MINIO_SECRET_KEY: ${S3_ACCESSKEY}
-    command: server /data0
-    volumes:
-      - minio1_data_part0:/data0:rw
-    networks:
-      - internal
-
   clair:
     image: quay.io/coreos/clair:v2.0.1
     init: true
@@ -219,13 +203,10 @@ volumes:
   portus_static_data:
   registry_data:
   mariadb_data:
-  minio1_data_part0:
 
 networks:
   default:
   internal:
-  minio_minio_distributed:
-    external: true
 
 configs:
   registry_config.yml:
