@@ -8,6 +8,7 @@ services:
     environment:
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
       - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
+      - PORTUS_CHECK_SSL_USAGE_ENABLED="false"
 
       # DB. The password for the database should definitely not be here. You are
       # probably better off with Docker Swarm secrets.
@@ -22,8 +23,8 @@ services:
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
       # SSL
-      - PORTUS_PUMA_TLS_KEY=/certificates/portus.key
-      - PORTUS_PUMA_TLS_CERT=/certificates/portus.crt
+      # - PORTUS_PUMA_TLS_KEY=/certificates/portus.key
+      # - PORTUS_PUMA_TLS_CERT=/certificates/portus.crt
 
       # Deleting
       - PORTUS_DELETE_ENABLED=true
@@ -56,6 +57,7 @@ services:
       - CCONFIG_PREFIX=PORTUS
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
       - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
+      - PORTUS_CHECK_SSL_USAGE_ENABLED="false"
 
       # DB. The password for the database should definitely not be here. You are
       # probably better off with Docker Swarm secrets.
@@ -104,8 +106,8 @@ services:
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/portus.crt
 
       # SSL
-      REGISTRY_HTTP_TLS_CERTIFICATE: /secrets/portus.crt
-      REGISTRY_HTTP_TLS_KEY: /secrets/portus.key
+      # REGISTRY_HTTP_TLS_CERTIFICATE: /secrets/portus.crt
+      # REGISTRY_HTTP_TLS_KEY: /secrets/portus.key
 
       # Storage
       REGISTRY_STORAGE: s3

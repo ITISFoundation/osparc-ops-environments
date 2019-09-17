@@ -15,7 +15,7 @@ edit [.env](.env)
 MACHINE_FQDN=devel.io # The machine Fully-Qualified-Domain-Name (FQDN), must be accessible from the host computer
 DATABASE_PASSWORD=portus # password to Database backend to Portus
 SECRET_KEY_BASE=b494a25faa8d22e430e843e220e424e10ac84d2ce0e64231f5b636d21251eb6d267adb042ad5884cbff0f3891bcf911bdf8abb3ce719849ccda9a4889249e5c2
-PORTUS_PASSWORD=12345678
+PORTUS_PASSWORD=12345678 # password to database backend of Portus
 S3_ACCESSKEY=12345678 # access key to S3 backend
 S3_SECRETKEY=12345678 # secret key to S3 backend
 S3_ENDPOINT=devel.io:30000 # endpoint to S3 backend
