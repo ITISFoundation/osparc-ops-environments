@@ -24,34 +24,48 @@ S3_REGISTRY_BUCKET=devel.registry.io # bucket in S3 backend where registry data 
 
 **IMPORTANT:** the S3 backend **MUST** have the bucket already created or the registry fails (this is a bug from Docker Registry)
 
-## Usage
-
 ```console
-make help
+cd ../minio
 make up
-make info
-make down
 ```
 
 ### local usage
+
+```console
+make help
+make up-local
+make info
+```
 
 Initial Portus configuration:
 
 1. Update the host system host file to redirect the FQDN to the local IP address: see __make install-full-qualified-domain-name__
 2. go to you S3 frontend according to __S3_ENDPOINT__: [http://127.0.0.1:30000](http://127.0.0.1:30000) (default credentials __S3_ACCESSKEY__/__S3_SECRETKEY__)
 3. create a bucket according to __S3_REGISTRY_BUCKET__
-4. go to frontend accoring to __MACHINE_FQDN__: [https://devel.io](https://devel.io)
+4. go to frontend according to __MACHINE_FQDN__: [https://devel.io](https://devel.io)
 5. create the base admin account
 6. connect portus to the registry using Hostname __MACHINE_FQDN__ and check __Use SSL__, press Save
 
 Registry testing:
 
-1. In case self-signed certificates were used, execute __make install-root-certificate__, restart the docker engine
-2. Execute the code below in a shell. This will push the docker image to the registry. It will be visible in Portus UI after a few seconds.
+ 1. In case self-signed certificates were used, execute __make install-root-certificate__, restart the docker engine
+ 2. Execute the code below in a shell. This will push the docker image to the registry. It will be visible in Portus UI after a few seconds.
 
-```console
-docker pull busybox:latest
-docker tag busybox:latest devel.io/busybox:latest
-docker login devel.io # use credentials defined in Portus
-docker push devel.io/busybox:latest
-```
+    ```console
+    docker pull busybox:latest
+    docker tag busybox:latest devel.io/busybox:latest
+    docker login devel.io # use credentials defined in Portus
+    docker push devel.io/busybox:latest
+    ```
+
+### deployment using valid certificates
+
+1. copy your certificates and key to secrets/portus.crt, secrets/portus.key
+
+    ```console
+    make help
+    make up
+    make info
+    ```
+
+2. then follow the same procedure as for local development

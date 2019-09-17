@@ -40,8 +40,13 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env create-certificates ${TEMP_COMPOSE}  ## Deploys graylog stack
+up: .init .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
+	# this is a copy of the certificate for use by the portus/registry services for compatibility reason with the self-signed version
+	cp secrets/portus.crt secrets/rootca.crt
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+
+.PHONY: up-local
+up-local: .init .env create-certificates ${TEMP_COMPOSE}  ## Deploys the stack using self-signed certificates created on-the-fly
 
 .PHONY: down
 down: ## Removes the stack from the swarm
@@ -93,27 +98,24 @@ secrets/rootca.key:
 	@openssl genrsa -out $@ 2048
 
 secrets/rootca.crt: secrets/rootca.key
-	@read -r -p "Provide valid certificate in secrets/rootca.crt and confirm. Otherwise a self-signed certificate will be generated [y/N]: " CONTINUE; \
-    [ $$CONTINUE = "y" ] || [ $$CONTINUE = "Y" ] || \
-	(echo "Generating self-signed certificate..."; \
-	openssl req -x509 -new -nodes -key $< \
+	@openssl req -x509 -new -nodes -key $< \
 		-subj "/C=US/ST=sparc/O=oSparc/CN=IT'IS oSparc" \
-		-sha256 -days 10000 -out $@;)
+		-sha256 -days 10000 -out $@;
 
 install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
 	$(info installing certificate in trusted root certificates, please confirm...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
 		-$(shell certutil.exe -user -addstore -f root $<),\
-		$(shell sudo cp $< /usr/local/share/ca-certicates/osparc.crt; sudo update-ca-certificates;))
+		$(shell sudo cp $< /etc/ssl/certs/osparc.crt))
 	$(info restart any browser or docker engine that should use these certificate)
 
 remove-root-certificate: ## removes the certificate from the host system
 	$(info deleting certificate from trusted root certificates, please confirm...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
 		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
-		$(shell sudo rm -f /usr/local/share/ca-certicates/osparc.crt; sudo update-ca-certificates;))
+		$(shell sudo rm -f /etc/ssl/certs/osparc.crt))
 
-# portus certicates --------------------------------------------
+# self-signed portus certicates --------------------------------------------
 extfile.cnf:
 	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
 
