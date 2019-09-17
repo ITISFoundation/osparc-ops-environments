@@ -3,10 +3,9 @@ PREDEFINED_VARIABLES := $(.VARIABLES)
 
 # Operating system
 ifeq ($(filter Windows_NT,$(OS)),)
-IS_LINUX:= $(filter Linux,$(shell uname))
-IS_OSX  := $(filter Darwin,$(shell uname))
-else
-IS_WSL  := $(filter Microsoft,$(shell uname))
+IS_WSL  := $(if $(findstring Microsoft,$(shell uname -a)),WSL,)
+IS_OSX  := $(filter Darwin,$(shell uname -a))
+IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 $(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
@@ -94,26 +93,24 @@ secrets/rootca.key:
 	@openssl genrsa -out $@ 2048
 
 secrets/rootca.crt: secrets/rootca.key
-	@while [ -z "$$CONTINUE" ]; do \
-        read -r -p "Provide valid certificate in secrets/rootca.crt and confirm. Otherwise a self-signed certificate will be generated [y/N]: " CONTINUE; \
-    done ; \
+	@read -r -p "Provide valid certificate in secrets/rootca.crt and confirm. Otherwise a self-signed certificate will be generated [y/N]: " CONTINUE; \
     [ $$CONTINUE = "y" ] || [ $$CONTINUE = "Y" ] || \
 	(echo "Generating self-signed certificate..."; \
 	openssl req -x509 -new -nodes -key $< \
 		-subj "/C=US/ST=sparc/O=oSparc/CN=IT'IS oSparc" \
 		-sha256 -days 10000 -out $@;)
 
-
-install-root-certificate: secrets/rootca.crt
-	@echo "installing certificate in trusted root certificates, please confirm..."
-	$(if $(IS_WIN), \
-		$(shell certutil.exe -user -addstore -f root $<),\
+install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
+	$(info installing certificate in trusted root certificates, please confirm...)
+	$(if $(or $(IS_WIN), $(IS_WSL)), \
+		-$(shell certutil.exe -user -addstore -f root $<),\
 		$(shell sudo cp $< /usr/local/share/ca-certicates/osparc.crt; sudo update-ca-certificates;))
+	$(info restart any browser or docker engine that should use these certificate)
 
-delete-root-certificate:
-	@echo "deleting certificate from trusted root certificates, please confirm..."
-	$(if $(IS_WIN), \
-		$(shell certutil.exe -user -delstore -f root "*sparc*"),\
+remove-root-certificate: ## removes the certificate from the host system
+	$(info deleting certificate from trusted root certificates, please confirm...)
+	$(if $(or $(IS_WIN), $(IS_WSL)), \
+		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
 		$(shell sudo rm -f /usr/local/share/ca-certicates/osparc.crt; sudo update-ca-certificates;))
 
 # portus certicates --------------------------------------------
@@ -136,7 +133,14 @@ secrets/portus.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key ext
 create-certificates: secrets/portus.crt secrets/portus.key secrets/rootca.crt
 
 # host
-install-full-qualified-name:
-	$(if $(IS_WIN), \
-		$(shell Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)"),\
-		$(shell sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;))
+install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
+	$(info )
+	$(info to install a FQDN in your host, ADMIN rights needed)
+	$(if $(or $(IS_WIN),$(IS_WSL)), \
+		$(info please run the following in a PWshell with Admin rights:)\
+		$(info Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)"),\
+		$(info please run the following in a CMD with Admin rights:)\
+		$(info echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> c:\Windows\System32\drivers\etc\hosts),\
+		$(shell sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;)\
+	)
+	$(info afterwards restart any browser or docker engine that should use these host file)
