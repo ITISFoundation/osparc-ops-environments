@@ -181,11 +181,10 @@ services:
     command:  /bin/sh -c "envsubst '\$NGINX_HOST' < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     volumes:
       - portus_static_data:/srv/Portus/public:ro
+    environment:
+      NGINX_HOST: ${MACHINE_FQDN}
     ports:
-      - 80:80
       - 443:443
-    # environment:
-    #   NGINX_HOST: ${MACHINE_FQDN}
     networks:
       - default
       - internal
