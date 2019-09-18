@@ -1,0 +1,30 @@
+log:
+  level: DEBUG
+
+api:
+  dashboard: true
+  insecure: true
+
+ping: {}
+
+metrics:
+  prometheus: {}
+
+entryPoints:
+  web:
+    address: ":80"
+
+  web-secure:
+    address: ":443"
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic_conf.yml
+  docker:
+    # swarm classic (1.12-)
+    # endpoint = "tcp://127.0.0.1:2375"
+    # docker swarm mode (1.12+)
+    # endpoint: "tcp://127.0.0.1:2377"
+    swarmMode: true
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false

@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  reverse-proxy:
+    # The official v2.0 Traefik docker image
+    image: traefik:v2.0
+    init: true
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The HTTPS port
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
+    configs:
+      - source: traefik_config.yml
+        target: /etc/traefik/traefik.yml
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    secrets:
+      - domain.key
+      - domain.crt
+
+  whoami:
+    # A container that exposes an API to show its IP address
+    image: containous/whoami
+    init: true
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.whoami.rule=Host(`devel.io`) && Path(`/whoami`)"
+        - "traefik.http.routers.whoami.entrypoints=web-secure"
+        - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
+configs:
+  traefik_config.yml:
+    file: config.yml
+
+secrets:
+  domain.key:
+    file: ./secrets/domain.key
+  domain.crt:
+    file: ./secrets/domain.crt

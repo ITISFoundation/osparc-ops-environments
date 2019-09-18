@@ -1,0 +1,10 @@
+tls:
+  certificates:
+  - certFile: /run/secrets/domain.crt
+    keyFile: /run/secrets/domain.key
+
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /run/secrets/domain.crt
+        keyFile: /run/secrets/domain.key
