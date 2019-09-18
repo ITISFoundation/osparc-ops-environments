@@ -108,14 +108,14 @@ secrets/rootca.crt: secrets/rootca.key
 		-sha256 -days 10000 -out $@;
 
 install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
-	$(info installing certificate in trusted root certificates, please confirm...)
+	$(info installing certificate in trusted root certificates...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
 		-$(shell certutil.exe -user -addstore -f root $<),\
 		$(shell sudo cp $< /etc/ssl/certs/osparc.crt))
 	$(info restart any browser or docker engine that should use these certificate)
 
 remove-root-certificate: ## removes the certificate from the host system
-	$(info deleting certificate from trusted root certificates, please confirm...)
+	$(info deleting certificate from trusted root certificates...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
 		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
 		$(shell sudo rm -f /etc/ssl/certs/osparc.crt))
