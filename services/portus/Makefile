@@ -41,12 +41,17 @@ help: ## This colourful help
 
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
-	# this is a copy of the certificate for use by the portus/registry services for compatibility reason with the self-signed version
+ifneq ("$(wildcard secrets/portus.crt) $(wildcard secrets/portus.key)", "")
 	cp secrets/portus.crt secrets/rootca.crt
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+else
+	$(error please copy your certificate to secrets/portus.crt and private key to secrets/portus.key)
+endif
+
 
 .PHONY: up-local
 up-local: .init .env create-certificates ${TEMP_COMPOSE}  ## Deploys the stack using self-signed certificates created on-the-fly
+	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
