@@ -9,8 +9,8 @@ api:
 
 ping: {}
 
-# metrics:
-#   prometheus: {}
+metrics:
+  prometheus: {}
 
 entryPoints:
   http:

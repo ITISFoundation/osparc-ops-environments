@@ -4,9 +4,8 @@ tls:
     keyFile: /run/secrets/domain.key
     stores:
     - default
-  # options:
-  #   default:
-  #     clientAuth:
-  #       caFiles:
-  #       - /run/secrets/rootca.crt
-  #       clientAuthType: RequireAndVerifyClientCert
+  stores:
+    defaultCertificate:
+      certFile: /run/secrets/domain.crt
+      keyFile: /run/secrets/domain.key
+
