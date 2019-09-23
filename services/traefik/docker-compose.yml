@@ -28,6 +28,7 @@ services:
     secrets:
       - domain.key
       - domain.crt
+      - rootca.crt
 
   whoami:
     # A container that exposes an API to show its IP address
@@ -36,9 +37,12 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.whoami.rule=Host(`devel.io`) && Path(`/whoami`)"
-        - "traefik.http.routers.whoami.entrypoints=web-secure"
+        # - "traefik.http.routers.whoami.rule=Host(`devel.io`) && Path(`/whoami`)"
+        - "traefik.http.routers.whoami.rule=Host(`devel.io`)"
+        - "traefik.http.routers.whoami.entrypoints=https"
+        # - "traefik.http.routers.whoami.tls={}"
         - "traefik.http.services.whoami.loadbalancer.server.port=80"
+        # - "traefik.http.routers.whoami.tls.certresolver=mytlschallenge"
 
 configs:
   traefik_config.yml:
@@ -49,3 +53,5 @@ secrets:
     file: ./secrets/domain.key
   domain.crt:
     file: ./secrets/domain.crt
+  rootca.crt:
+    file: ./secrets/rootca.crt

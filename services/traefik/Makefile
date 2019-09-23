@@ -80,3 +80,43 @@ endif
 ${TEMP_COMPOSE}: docker-compose.yml
 	@$(DOCKER_COMPOSE) -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
+
+
+secrets/rootca.key:
+	@openssl genrsa -out $@ 2048
+
+secrets/rootca.crt: secrets/rootca.key
+	@openssl req -x509 -new -nodes -key $< \
+		-subj "/C=US/ST=sparc/O=oSparc/CN=IT'IS oSparc" \
+		-sha256 -days 10000 -out $@;
+
+install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
+	$(info installing certificate in trusted root certificates...)
+	$(if $(or $(IS_WIN), $(IS_WSL)), \
+		-$(shell certutil.exe -user -addstore -f root $<),\
+		$(shell sudo cp $< /etc/ssl/certs/osparc.crt))
+	$(info restart any browser or docker engine that should use these certificate)
+
+remove-root-certificate: ## removes the certificate from the host system
+	$(info deleting certificate from trusted root certificates...)
+	$(if $(or $(IS_WIN), $(IS_WSL)), \
+		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
+		$(shell sudo rm -f /etc/ssl/certs/osparc.crt))
+
+extfile.cnf:
+	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
+
+secrets/domain.key:
+	@openssl genrsa -out $@ 2048
+
+secrets/domain.csr: secrets/domain.key
+	@openssl req -new -key $< -out $@ \
+ 		-subj "/C=US/ST=sparc/O=oSparc/CN=${MACHINE_FQDN}"
+
+secrets/domain.crt: secrets/domain.csr secrets/rootca.crt secrets/rootca.key extfile.cnf
+	@openssl x509 -req -in secrets/domain.csr -CA secrets/rootca.crt -extfile \
+		extfile.cnf -CAkey secrets/rootca.key -CAcreateserial \
+		-out secrets/domain.crt -days 500 -sha256
+
+.PHONY: create-certificates
+create-certificates: secrets/domain.crt secrets/domain.key secrets/rootca.crt

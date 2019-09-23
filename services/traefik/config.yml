@@ -1,20 +1,22 @@
 log:
   level: DEBUG
 
+accessLog: true
+
 api:
   dashboard: true
   insecure: true
 
 ping: {}
 
-metrics:
-  prometheus: {}
+# metrics:
+#   prometheus: {}
 
 entryPoints:
-  web:
+  http:
     address: ":80"
 
-  web-secure:
+  https:
     address: ":443"
 
 providers:
