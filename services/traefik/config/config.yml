@@ -1,0 +1,33 @@
+log:
+  level: INFO
+
+accessLog: true
+
+api:
+  dashboard: true
+  insecure: false # this allows the GUI to be accessed on port 8080
+
+ping: {}
+
+metrics:
+  prometheus: {}
+
+entryPoints:
+  http:
+    address: ":80"
+
+  https:
+    address: ":443"
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic_conf.yml
+  docker:
+    # swarm classic (1.12-)
+    # endpoint = "tcp://127.0.0.1:2375"
+    # docker swarm mode (1.12+)
+    # endpoint: "tcp://127.0.0.1:2377"
+    swarmMode: true
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: public
