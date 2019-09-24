@@ -16,6 +16,7 @@ services:
       - "{% if num_minios|int == 1 %}30000:{% endif %}9000"
     networks:
       - minio_distributed
+      - public
     environment:
       - MINIO_ACCESS_KEY_FILE=minio_access_key
       - MINIO_SECRET_KEY_FILE=minio_secret_key
@@ -29,6 +30,14 @@ services:
         constraints:
           - {{ "node.labels.minio" ~ service_id|string ~ "==true" }}
       {%- endif %}
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.minio.loadbalancer.server.port=9000
+        - traefik.http.services.minio.loadbalancer.healthcheck.path=/minio/health/ready
+        - traefik.http.routers.minio.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/minio`)
+        - traefik.http.routers.minio.entrypoints=https
+        - traefik.http.routers.minio.tls=true
+        - traefik.http.routers.minio.middlewares=gzip_compress@file
     command: >
       server
       {%- for i in range(num_minios|int) %}
@@ -57,6 +66,8 @@ volumes:
 networks:
   minio_distributed:
     driver: overlay
+  public:
+    external: true
 
 secrets:
   minio_secret_key:

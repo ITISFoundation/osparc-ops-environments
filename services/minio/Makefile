@@ -12,7 +12,6 @@ DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
-$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # TARGETS --------------------------------------------------
@@ -25,6 +24,9 @@ up: .init .env .create-stack-file .create-secrets ## Deploys or updates current 
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
+
+.PHONY: config
+config: .create-stack-file
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
