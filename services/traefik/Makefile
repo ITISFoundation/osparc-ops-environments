@@ -33,7 +33,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} secrets/domain.key secrets/domain.crt ## Deploys the stack using provided certificates
+up: .init .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
