@@ -41,7 +41,6 @@ services:
       labels:
         - "traefik.enable=false"
         - "traefik.http.routers.whoami.rule=Host(`devel.io`) && Path(`/whoami`)"
-        # - "traefik.http.routers.whoami.rule=Host(`devel.io`)"
         - "traefik.http.routers.whoami.entrypoints=https"
         - "traefik.http.routers.whoami.tls=true"
         - "traefik.http.services.whoami.loadbalancer.server.port=80"
