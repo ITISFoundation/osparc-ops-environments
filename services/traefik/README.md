@@ -45,4 +45,13 @@ make info
     make info
     ```
 
-### allow a docker service or container to be reverse-proxied
+### example configuration of a service that gets reverse-proxied
+
+```console
+make create-certificates
+make up
+cd tests
+make up
+```
+
+Then open [https://osparc.local/whoami](https://osparc.local/whoami)

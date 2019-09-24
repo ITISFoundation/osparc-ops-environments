@@ -1,11 +1,11 @@
 log:
-  level: DEBUG
+  level: INFO
 
 accessLog: true
 
 api:
   dashboard: true
-  insecure: true
+  insecure: false # this allows the GUI to be accessed on port 8080
 
 ping: {}
 
@@ -30,3 +30,4 @@ providers:
     swarmMode: true
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
+    network: public
