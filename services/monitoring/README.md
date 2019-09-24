@@ -6,7 +6,7 @@ Creates a stack to monitor a [osparc-simcore] stack. Uses [prometheus](prometheu
   - [cdavisor](cadvisor/README.md): monitors containers in every node (one instance per node)
   - [node-exporter](node-exporter/README.md): monitors hardware (memory, filesystem, network) of every node. (one instance per node)
   - [postgres-exporter](postgres-exporter/README.md): scraps data from a *single* postgres db service defined in ``POSTGRES_EXPORTER_DATA_SOURCE_NAME``. Currently used to monitor the one-and-only database service in osparc but can be a limitation in the future.
-- 
+
 
 ## Usage
 
@@ -27,9 +27,6 @@ Available web front-ends when deployed in locahost:
 
 - https://github.com/vegasbrianc/prometheus
 
-#### Makefile
-- [Docker & Makefile | X-Ops — sharing infra-as-code parts](https://itnext.io/docker-makefile-x-ops-sharing-infra-as-code-parts-ea6fa0d22946)
-- [Auto documented Makefile](https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html)
 
 
 
