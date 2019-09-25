@@ -44,6 +44,7 @@ services:
         - traefik.http.routers.minio_http.rule=Host(`${MACHINE_FQDN}`)
         - traefik.http.routers.minio_http.entrypoints=storage        
         - traefik.http.routers.minio_http.middlewares=minio_force_https
+        - traefik.docker.network=public
     command: >
       server
       {%- for i in range(num_minios|int) %}
