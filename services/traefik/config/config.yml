@@ -16,6 +16,9 @@ entryPoints:
   http:
     address: ":80"
 
+  storage:
+    address: ":10000"
+    
   https:
     address: ":443"
 

@@ -8,6 +8,8 @@ services:
     ports:
       # The HTTPS port
       - "443:443"
+      - "8080:8080"
+      - "10000:10000"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock

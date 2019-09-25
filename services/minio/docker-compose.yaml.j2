@@ -5,7 +5,7 @@ services:
 {%- for i in range(num_minios|int) %}
   {%- set service_id = i+1 %}
   minio{{ service_id|string }}:
-    image: minio/minio:RELEASE.2019-08-29T00-25-01Z
+    image: minio/minio:RELEASE.2019-09-18T21-55-05Z
     init: true
     hostname: minio{{ service_id|string }}
     volumes: # default uses a named volume, option2 is to use the variable to set specific mount path(s)
@@ -34,8 +34,8 @@ services:
         - traefik.enable=true
         - traefik.http.services.minio.loadbalancer.server.port=9000
         - traefik.http.services.minio.loadbalancer.healthcheck.path=/minio/health/ready
-        - traefik.http.routers.minio.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/minio`)
-        - traefik.http.routers.minio.entrypoints=https
+        - traefik.http.routers.minio.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.minio.entrypoints=storage
         - traefik.http.routers.minio.tls=true
         - traefik.http.routers.minio.middlewares=gzip_compress@file
     command: >
