@@ -48,11 +48,6 @@ else
 	$(error please copy your certificate to secrets/portus.crt and private key to secrets/portus.key)
 endif
 
-
-.PHONY: up-local
-up-local: .init .env create-certificates ${TEMP_COMPOSE}  ## Deploys the stack using self-signed certificates created on-the-fly
-	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
-
 .PHONY: down
 down: ## Removes the stack from the swarm
 	$(DOCKER) stack rm ${STACK_NAME}
@@ -94,7 +89,7 @@ endif
 	)
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
+${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@$(DOCKER_COMPOSE) -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
