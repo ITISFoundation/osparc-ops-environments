@@ -19,6 +19,7 @@ services:
           --entryPoints.https.address=":443"
           --entryPoints.storage.address=":10000"
           --entryPoints.registry.address=":5000"
+          --entryPoints.traefik.address=":7000"
           --providers.docker.endpoint="unix:///var/run/docker.sock"
           --providers.docker.swarmMode=true
           --providers.docker.exposedByDefault=false
@@ -36,6 +37,9 @@ services:
         mode: host
       - target: 5000
         published: 5000
+        mode: host
+      - target: 7000
+        published: 7000
         mode: host
     volumes:
       # So that Traefik can listen to the Docker events
@@ -57,10 +61,14 @@ services:
         - traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$Q4fTxJQo$$OLPpFCHXVoz6RSHWazKpl.
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)
-        - traefik.http.routers.api.entrypoints=https
+        - traefik.http.routers.api.entrypoints=traefik
         - traefik.http.routers.api.tls=true
         - traefik.http.routers.api.middlewares=auth, gzip_compress@file
         - traefik.http.services.api.loadbalancer.server.port=8080
+        # force https
+        - traefik.http.routers.api_http.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)
+        - traefik.http.routers.api_http.entrypoints=http
+        - traefik.http.routers.api_http.middlewares=to_https@file
     secrets:
       - domain.key
       - domain.crt
