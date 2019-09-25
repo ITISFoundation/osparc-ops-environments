@@ -22,20 +22,26 @@ help: ## This colourful help
 
 
 .PHONY: info
-info: ## displays some parameters of makefile environments
+
+info: ## Displays some parameters of makefile environments (debugging)
 	$(info VARIABLES: )
-	$(wildcard )
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info - $(v) = $($(v))  [in $(origin $(v))])                                      \
 	)
-	@echo ""
+	# done
 
 
-.PHONY: clean
-clean: ## cleans all unversioned files in project
-	-rm -rf .venv
+.PHONY: clean check_clean
+clean: .check_clean ## Cleans all outputs
+	# removing virtual env
+	@-rm -rf .venv
+	# removing unversioned
 	@git clean -dxf -e .vscode/
+
+.check_clean:
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
 
 .PHONY: venv
