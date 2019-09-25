@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  whoami:
+    # A container that exposes an API to show its IP address
+    image: containous/whoami
+    init: true
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.whoami.loadbalancer.server.port=80
+        # - traefik.http.routers.whoami0.rule=Host(`osparc.local`) && Path(`/whoami`)
+        # - traefik.http.routers.whoami0.entrypoints=http
+        # - traefik.http.routers.whoami0.middlewares=to_https
+        - traefik.http.routers.whoami.rule=Host(`osparc.local`) && PathPrefix(`/whoami`)
+        - traefik.http.routers.whoami.entrypoints=https
+        - traefik.http.routers.whoami.tls=true
+        - traefik.http.routers.whoami.middlewares=gzip_compress@file
+    networks:
+      - public
+networks:
+  public:
+    external: true
