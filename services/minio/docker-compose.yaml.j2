@@ -38,6 +38,12 @@ services:
         - traefik.http.routers.minio.entrypoints=storage
         - traefik.http.routers.minio.tls=true
         - traefik.http.routers.minio.middlewares=gzip_compress@file
+        # force https
+        - traefik.http.middlewares.minio_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.minio_force_https.redirectScheme.port=10000
+        - traefik.http.routers.minio_http.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.minio_http.entrypoints=storage        
+        - traefik.http.routers.minio_http.middlewares=minio_force_https
     command: >
       server
       {%- for i in range(num_minios|int) %}
