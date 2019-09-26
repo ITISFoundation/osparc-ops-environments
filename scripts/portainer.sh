@@ -7,7 +7,7 @@ IFS=$'\n\t'
 
 # Default INPUTS ---------------
 repo_url=$(git config --get remote.origin.url)
-repo_branch=sanderegg-deplyment_script_master
+repo_branch=$(git rev-parse --abbrev-ref HEAD)
 
 repo_user=undefined
 repo_password=undefined
@@ -29,7 +29,7 @@ where keys are:
     -h  show this help text
     --repo_url             (default: ${repo_url})
     --repo_branch          (default: ${repo_branch})
-    --stack_path           (default: ${stack_path})
+    --stack_path:  path to stack's docker-compose.yml's folder (default: ${stack_path})
     --repo_user            (default: ${repo_user})
     --repo_password        (default: ${repo_password})
     --portainer_url        (default: ${portainer_url})
@@ -126,7 +126,7 @@ curl \
     --header "Authorization: Bearer ${bearer_code}" \
     --header "Content-Type: application/json" \
     --data "{ \"Name\":\"${stack_name}\",  \"SwarmID\":\"${swarm_id}\", \
-        \"RepositoryURL\":\"${repo_url}\", \"RepositoryReferenceName\":\"${repo_branch}\", \"ComposeFilePathInRepository\": \"${stack_path}\",
-        \"RepositoryAuthentication\":true, \"RepositoryUsername\": \"${repo_user}\", \"RepositoryPassword\": \"${repo_password}\"}"\
+        \"RepositoryURL\":\"${repo_url}\", \"RepositoryReferenceName\":\"${repo_branch}\", \"ComposeFilePathInRepository\": \"${stack_path}/docker-compose.yml\",
+        \"RepositoryAuthentication\":false \
     --request POST "${portainer_url}/api/stacks?type=1&method=repository&endpointId=${swarm_endpoint}"
 echo "DONE"
