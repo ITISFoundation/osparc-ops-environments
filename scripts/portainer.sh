@@ -1,20 +1,25 @@
 #!/bin/bash
 
-
 # SEE http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 IFS=$'\n\t'
 
 # Default INPUTS ---------------
-repo_url=$(git config --get remote.origin.url)
-repo_branch=$(git rev-parse --abbrev-ref HEAD)
+repo_url="https://github.com/pcrespov/osparc-ops" ## TODO: $(git config --get remote.origin.url) into https
+repo_branch="refs/heads/$(git rev-parse --abbrev-ref HEAD)"
 
 repo_user=undefined
 repo_password=undefined
 
 stack_path=services/monitoring
 
-# ????
+# TODO: Environment variables?
+#   "Env": [
+#     {
+#       "name": "MYSQL_ROOT_PASSWORD",
+#       "value": "password"
+#     }
+#   ]
 env=undefined
 
 portainer_url=http://127.0.0.1:9000
@@ -26,7 +31,7 @@ usage="$(basename "$0") [-h] [--key=value]
 Request portainer to start a stack whose configuration is in a git repo
 
 where keys are:
-    -h  show this help text
+    -h, --help  show this help text
     --repo_url             (default: ${repo_url})
     --repo_branch          (default: ${repo_branch})
     --stack_path:  path to stack's docker-compose.yml's folder (default: ${stack_path})
@@ -34,8 +39,7 @@ where keys are:
     --repo_password        (default: ${repo_password})
     --portainer_url        (default: ${portainer_url})
     --portainer_user       (default: ${portainer_user})
-    --portainer_password   (default: ${portainer_password})
-    --repo_url             (default: ${repo_url})"
+    --portainer_password   (default: ${portainer_password})"
 
 # parse command line
 # SEE https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
@@ -59,7 +63,7 @@ case $i in
     repo_branch="${i#*=}"
     shift # past argument=value
     ;;
-    ##
+    ## Environment variables
     --env=*)
     env="${i#*=}"
     shift # past argument=value
@@ -91,10 +95,10 @@ done
 
 
 stack_name="${stack_path##*/}"
+stack_path=${stack_path}/docker-compose.yml
 
 # as long as we have one swarm per container??
 swarm_endpoint=1 
-
 #-------------------------------------------------------------------------
 
 
@@ -122,11 +126,49 @@ echo "Round swarm ID is ${swarm_id}"
 ## "creating new stack...""
 echo
 echo "Creating new stack ${stack_name}..."
-curl \
+echo " - Repo         : ${repo_url}"
+echo " - Branch       : ${repo_branch}"
+echo " - compose file : ${stack_path}"
+
+## SEE https://app.swaggerhub.com/apis/deviantony/Portainer/1.22.0/#/stacks/StackCreate
+# Example of body:
+#
+# {
+#   "Name": "myStack",
+#   "SwarmID": "jpofkc0i9uo9wtx1zesuk649w",
+#   "StackFileContent": "version: 3\n services:\n web:\n image:nginx",
+#   "RepositoryURL": "https://github.com/openfaas/faas",
+#   "RepositoryReferenceName": "refs/heads/master",
+#   "ComposeFilePathInRepository": "docker-compose.yml",
+#   "RepositoryAuthentication": true,
+#   "RepositoryUsername": "myGitUsername",
+#   "RepositoryPassword": "myGitPassword",
+#   "Env": [
+#     {
+#       "name": "MYSQL_ROOT_PASSWORD",
+#       "value": "password"
+#     }
+#   ]
+# }
+#
+
+JSON_STRING=$(cat <<-EOM
+{
+   "Name": "${stack_name}",
+   "SwarmID": "${swarm_id}",
+   "RepositoryURL": "${repo_url}",
+   "RepositoryReferenceName": "${repo_branch}",
+   "ComposeFilePathInRepository": "${stack_path}",
+   "RepositoryAuthentication": false
+}
+EOM
+)
+
+curl --request POST "${portainer_url}/api/stacks?type=1&method=repository&endpointId=${swarm_endpoint}" \
     --header "Authorization: Bearer ${bearer_code}" \
     --header "Content-Type: application/json" \
-    --data "{ \"Name\":\"${stack_name}\",  \"SwarmID\":\"${swarm_id}\", \
-        \"RepositoryURL\":\"${repo_url}\", \"RepositoryReferenceName\":\"${repo_branch}\", \"ComposeFilePathInRepository\": \"${stack_path}/docker-compose.yml\",
-        \"RepositoryAuthentication\":false \
-    --request POST "${portainer_url}/api/stacks?type=1&method=repository&endpointId=${swarm_endpoint}"
+    --data "$JSON_STRING"
+
+
+# TODO: query output with jq
 echo "DONE"
