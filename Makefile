@@ -32,7 +32,7 @@ info: ## Displays some parameters of makefile environments (debugging)
 	# done
 
 
-.PHONY: clean check_clean
+.PHONY: clean .check_clean
 clean: .check_clean ## Cleans all outputs
 	# removing virtual env
 	@-rm -rf .venv
