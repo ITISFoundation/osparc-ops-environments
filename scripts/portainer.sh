@@ -8,9 +8,6 @@ IFS=$'\n\t'
 repo_url="https://github.com/pcrespov/osparc-ops" ## TODO: $(git config --get remote.origin.url) into https
 repo_branch="refs/heads/$(git rev-parse --abbrev-ref HEAD)"
 
-repo_user=undefined
-repo_password=undefined
-
 stack_path=services/monitoring
 
 # TODO: Environment variables?
@@ -35,8 +32,6 @@ where keys are:
     --repo_url             (default: ${repo_url})
     --repo_branch          (default: ${repo_branch})
     --stack_path:  path to stack's docker-compose.yml's folder (default: ${stack_path})
-    --repo_user            (default: ${repo_user})
-    --repo_password        (default: ${repo_password})
     --portainer_url        (default: ${portainer_url})
     --portainer_user       (default: ${portainer_user})
     --portainer_password   (default: ${portainer_password})"
@@ -51,19 +46,14 @@ case $i in
     repo_url="${i#*=}"
     shift # past argument=value
     ;;
-    --repo_user=*)
-    repo_user="${i#*=}"
-    shift # past argument=value
-    ;;
-    --repo_password=*)
-    repo_password="${i#*=}"
-    shift # past argument=value
-    ;;
     --repo_branch=*)
     repo_branch="${i#*=}"
     shift # past argument=value
     ;;
-    ## Environment variables
+    --stack_path=*)
+    stack_path="${i#*=}"
+    shift # past argument=value
+    ;;
     --env=*)
     env="${i#*=}"
     shift # past argument=value
@@ -81,10 +71,6 @@ case $i in
     portainer_password="${i#*=}"
     shift # past argument=value
     ;;
-    --stack_path=*)
-    stack_path="${i#*=}"
-    shift # past argument=value
-    ;;
     ##
     :|*|--help|-h)
     echo "$usage" >&2
@@ -93,6 +79,15 @@ case $i in
 esac
 done
 
+
+# TODO: convert env='key=value;key2=value2' into
+#   "Env": [
+#     {
+#       "name": "MYSQL_ROOT_PASSWORD",
+#       "value": "password"
+#     }
+#   ]
+#
 
 stack_name="${stack_path##*/}"
 stack_path=${stack_path}/docker-compose.yml
