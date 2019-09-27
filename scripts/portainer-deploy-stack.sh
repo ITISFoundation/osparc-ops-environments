@@ -20,7 +20,7 @@ portainer_password=adminadmin
 
 usage="$(basename "$0") [-h] [--key=value]
 
-Request portainer to start a stack whose configuration is in a git repo
+Deploys a new stack via portainer into a Docker environment specified via the endpoint identifier.
 
 where keys are:
     -h, --help  show this help text
