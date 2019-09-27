@@ -5,8 +5,11 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Default INPUTS ---------------
-repo_url="https://github.com/pcrespov/osparc-ops" ## TODO: $(git config --get remote.origin.url) into https
+repo_url="https://github.com/pcrespov/osparc-ops" ## TODO: convert $(git config --get remote.origin.url) into https
 repo_branch="refs/heads/$(git rev-parse --abbrev-ref HEAD)"
+repo_user=undefined
+repo_password=undefined
+
 
 stack_path=services/monitoring
 
@@ -34,7 +37,11 @@ where keys are:
     --stack_path:  path to stack's docker-compose.yml's folder (default: ${stack_path})
     --portainer_url        (default: ${portainer_url})
     --portainer_user       (default: ${portainer_user})
-    --portainer_password   (default: ${portainer_password})"
+    --portainer_password   (default: ${portainer_password})
+
+    only for private repos
+    --repo_user:            (default: ${repo_user})
+    --repo_password:        (default: ${repo_password})"
 
 # parse command line
 # SEE https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
@@ -48,28 +55,37 @@ case $i in
     ;;
     --repo_branch=*)
     repo_branch="${i#*=}"
-    shift # past argument=value
+    shift 
+    ;;
+    --repo_user=*)
+    repo_user="${i#*=}"
+    shift 
+    ;;
+    --repo_password=*)
+    repo_password="${i#*=}"
+    shift 
     ;;
     --stack_path=*)
     stack_path="${i#*=}"
-    shift # past argument=value
+    shift 
     ;;
+    ##
     --env=*)
     env="${i#*=}"
-    shift # past argument=value
+    shift 
     ;;
     ##
     --portainer_url=*)
     portainer_url="${i#*=}"
-    shift # past argument=value
+    shift 
     ;;
     --portainer_user=*)
     portainer_user="${i#*=}"
-    shift # past argument=value
+    shift 
     ;;
     --portainer_password=*)
     portainer_password="${i#*=}"
-    shift # past argument=value
+    shift 
     ;;
     ##
     :|*|--help|-h)
@@ -147,6 +163,22 @@ echo " - compose file : ${stack_path}"
 # }
 #
 
+# TODO: shorten
+JSON_STRING=$(cat <<-EOM
+{
+   "Name": "${stack_name}",
+   "SwarmID": "${swarm_id}",
+   "RepositoryURL": "${repo_url}",
+   "RepositoryReferenceName": "${repo_branch}",
+   "ComposeFilePathInRepository": "${stack_path}",
+   "RepositoryAuthentication": true,
+   "RepositoryUsername":"${repo_user}",
+   "RepositoryPassword":"${repo_password}"
+}
+EOM
+)
+
+if [ "$repo_user" == undefined ]; then
 JSON_STRING=$(cat <<-EOM
 {
    "Name": "${stack_name}",
@@ -158,6 +190,8 @@ JSON_STRING=$(cat <<-EOM
 }
 EOM
 )
+fi
+
 
 curl --request POST "${portainer_url}/api/stacks?type=1&method=repository&endpointId=${swarm_endpoint}" \
     --header "Authorization: Bearer ${bearer_code}" \
