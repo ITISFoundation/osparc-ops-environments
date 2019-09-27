@@ -1,0 +1,12 @@
+tls:
+  certificates:
+  - certFile: /run/secrets/domain.crt
+    keyFile: /run/secrets/domain.key
+
+http:
+  middlewares:
+    to_https:
+      redirectScheme:
+        scheme: https
+    gzip_compress:
+      compress: {}

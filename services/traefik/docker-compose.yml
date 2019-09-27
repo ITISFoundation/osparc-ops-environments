@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+  reverse-proxy:
+    # The official v2.0 Traefik docker image
+    image: traefik:v2.0
+    init: true
+    ports:
+      # The HTTPS port
+      - "443:443"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
+    configs:
+      - source: traefik_config.yml
+        target: /etc/traefik/traefik.yml
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=false
+        - traefik.http.middlewares.to_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.gzip_compress.compress=true
+    secrets:
+      - domain.key
+      - domain.crt
+    networks:
+      - public
+
+configs:
+  traefik_config.yml:
+    file: ./config/config.yml
+
+secrets:
+  domain.key:
+    file: ./secrets/domain.key
+  domain.crt:
+    file: ./secrets/domain.crt
+
+networks:
+  public:
+    driver: overlay
+    name: public

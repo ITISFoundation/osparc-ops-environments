@@ -53,3 +53,27 @@ clean: .check_clean ## Cleans all outputs
 .check_clean:
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+
+
+# FIXME: DO NOT USE... still working on this
+.PHONY: autodoc
+docs_dir = $(realpath $(CURDIR)/docs)
+service_paths = 
+service_names = $(notdir $(wildcard $(CURDIR)/services/*))
+doc_md = $(docs_dir)/stacks-graph-auto.md
+
+autodoc: ## [UNDER DEV] creates diagrams of every stack based on docker-compose files 
+	mkdir -p $(docs_dir)/img
+	# generating a graph of the stack in $(docs_dir)
+	@echo "# Stacks\n" >$(doc_md)
+	@for service in $(service_names); do    \
+		echo "## $$service" >>$(doc_md);  \
+		echo "" >>$(doc_md); \
+		echo "![](./img/$$service.png)" >>$(doc_md);\
+		echo "" >>$(doc_md); \
+	done
+
+	@for service in $(service_names); do    \
+		docker run --rm -it --name dcv -v $(CURDIR)/services/$$service:/input pmsipilot/docker-compose-viz render -m image; \
+		mv $(CURDIR)/services/$$service/docker-compose.png $(docs_dir)/img/$$service.png; \
+	done
