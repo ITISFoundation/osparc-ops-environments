@@ -21,8 +21,19 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 
-.PHONY: info
+.PHONY: venv
+# TODO: this is not windows friendly
+venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
+.venv:
+	python3 -m venv .venv
+	.venv/bin/pip3 install --upgrade pip wheel setuptools
+	.venv/bin/pip3 install -r requirements.txt
+	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
+
+
+# Misc: info & clean
+.PHONY: info
 info: ## Displays some parameters of makefile environments (debugging)
 	$(info VARIABLES: )
 	$(foreach v,                                                                           \
@@ -42,14 +53,3 @@ clean: .check_clean ## Cleans all outputs
 .check_clean:
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-
-
-.PHONY: venv
-# TODO: this is not windows friendly
-venv: .venv ## creates a python virtual environment with dev tools (pip, pylint, ...)
-.venv:
-	python3 -m venv .venv
-	.venv/bin/pip3 install --upgrade pip wheel setuptools
-	.venv/bin/pip3 install -r requirements.txt
-	@echo "To activate the venv, execute 'source .venv/bin/activate'"
-
