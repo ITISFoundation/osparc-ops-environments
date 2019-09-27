@@ -13,14 +13,6 @@ repo_password=undefined
 
 stack_path=services/monitoring/docker-compose.yml
 
-# TODO: Environment variables?
-#   "Env": [
-#     {
-#       "name": "MYSQL_ROOT_PASSWORD",
-#       "value": "password"
-#     }
-#   ]
-env=undefined
 
 portainer_url=http://127.0.0.1:9000
 portainer_user=admin
@@ -70,11 +62,6 @@ case $i in
     shift 
     ;;
     ##
-    --env=*)
-    env="${i#*=}"
-    shift 
-    ;;
-    ##
     --portainer_url=*)
     portainer_url="${i#*=}"
     shift 
@@ -96,13 +83,6 @@ esac
 done
 
 
-# TODO: convert env='key=value;key2=value2' into
-#   "Env": [
-#     {
-#       "name": "MYSQL_ROOT_PASSWORD",
-#       "value": "password"
-#     }
-#   ]
 
 
 stack_name=$(basename $(dirname ${stack_path}))
@@ -162,6 +142,8 @@ echo " - compose file : ${stack_path}"
 #   ]
 # }
 #
+# No need for "Env": Optional, used when method equals **file** and type equals **1**.
+
 
 # TODO: shorten
 JSON_STRING=$(cat <<-EOM
