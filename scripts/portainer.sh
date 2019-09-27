@@ -11,7 +11,7 @@ repo_user=undefined
 repo_password=undefined
 
 
-stack_path=services/monitoring
+stack_path=services/monitoring/docker-compose.yml
 
 # TODO: Environment variables?
 #   "Env": [
@@ -34,7 +34,7 @@ where keys are:
     -h, --help  show this help text
     --repo_url             (default: ${repo_url})
     --repo_branch          (default: ${repo_branch})
-    --stack_path:  path to stack's docker-compose.yml's folder (default: ${stack_path})
+    --stack_path           (default: ${stack_path})
     --portainer_url        (default: ${portainer_url})
     --portainer_user       (default: ${portainer_user})
     --portainer_password   (default: ${portainer_password})
@@ -103,10 +103,9 @@ done
 #       "value": "password"
 #     }
 #   ]
-#
 
-stack_name="${stack_path##*/}"
-stack_path=${stack_path}/docker-compose.yml
+
+stack_name=$(basename $(dirname ${stack_path}))
 
 # as long as we have one swarm per container??
 swarm_endpoint=1 
@@ -133,6 +132,7 @@ swarm_id=$(curl --silent \
     --request GET ${portainer_url}/api/endpoints/${swarm_endpoint}/docker/swarm\
     | jq -r .ID)
 echo "Round swarm ID is ${swarm_id}"
+
 
 ## "creating new stack...""
 echo
