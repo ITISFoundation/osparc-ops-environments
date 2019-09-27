@@ -1,10 +1,10 @@
 PREDEFINED_VARIABLES := $(.VARIABLES)
 
-
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 SWARM_STACK_NAME = $(notdir $(PWD))
 
 # VARIABLES ------------------------------------------------
+# TODO: Add here variables or include config file ?...
 
 
 
@@ -30,35 +30,35 @@ up: .init ## Deploys or updates current stack "$(STACK_NAME)"
 
 down: ## Stops and removes stack
 	# Removing stack '$(SWARM_STACK_NAME)'
-	-$(DOCKER) stack rm $(SWARM_STACK_NAME)
+	-docker stack rm $(SWARM_STACK_NAME)
 
-leave: ## leaves swarm stopping all stacks in it
+leave: ## Leaves swarm stopping all stacks in it
 	-docker swarm leave -f
 
 
 # Misc: info & clean
 .PHONY: info info-vars info-swarm
 
-info: info-vars info-swarm ## all info
+info: info-vars info-swarm ## All info
 
-info-vars: ## expands all variables in makefile
+info-vars: ## Expands all variables in makefile
 	$(info VARIABLES ------------)
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info $(v)=$($(v)))                                                               \
 	)
-	#
+	#---------------------
 
-info-swarm: ## displays info about stacks and networks
+info-swarm: ## Displays info about stacks and networks
 ifneq ($(SWARM_HOSTS), )
 	# stacks in swarm
-	@$(DOCKER) stack ls
+	@docker stack ls
 	# containers (tasks) running in '$(SWARM_STACK_NAME)' stack
-	-@$(DOCKER) stack ps $(SWARM_STACK_NAME)
+	-@docker stack ps $(SWARM_STACK_NAME)
 	# services in '$(SWARM_STACK_NAME)' stack
-	-@$(DOCKER) stack services $(SWARM_STACK_NAME)
+	-@docker stack services $(SWARM_STACK_NAME)
 	# networks
-	@$(DOCKER) network ls
+	@docker network ls
 endif
 
 
