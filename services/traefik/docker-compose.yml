@@ -20,6 +20,7 @@ services:
           --entryPoints.storage.address=":10000"
           --entryPoints.registry.address=":5000"
           --entryPoints.traefik.address=":7000"
+          --entrypoints.portainer.address=":9000"
           --providers.docker.endpoint="unix:///var/run/docker.sock"
           --providers.docker.swarmMode=true
           --providers.docker.exposedByDefault=false
@@ -40,6 +41,9 @@ services:
         mode: host
       - target: 7000
         published: 7000
+        mode: host
+      - target: 9000
+        published: 9000
         mode: host
     volumes:
       # So that Traefik can listen to the Docker events

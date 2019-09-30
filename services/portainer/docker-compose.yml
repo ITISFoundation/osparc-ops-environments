@@ -28,11 +28,12 @@ services:
       --admin-password-file /run/secrets/portainer_admin_password
     ports:
       - "8000:8000"
-      - "9000:9000"
+      # - "9000:9000"
     volumes:
       - portainer_data:/data
     networks:
       - agent_network
+      - public
     secrets:
       - portainer_admin_password
     deploy:
@@ -40,11 +41,28 @@ services:
       replicas: 1
       placement:
         constraints: [node.role == manager]
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=public
+        - traefik.http.services.portainer.loadbalancer.server.port=9000
+        - traefik.http.routers.portainer.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.portainer.entrypoints=portainer
+        - traefik.http.routers.portainer.tls=true
+        - traefik.http.routers.portainer.middlewares=gzip_compress@file
+
+        # force https
+        - traefik.http.middlewares.portainer_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.portainer_force_https.redirectScheme.port=9000
+        - traefik.http.routers.portainer_http.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.portainer_http.entrypoints=portainer
+        - traefik.http.routers.portainer_http.middlewares=portainer_force_https
 
 networks:
   agent_network:
     driver: overlay
     attachable: true
+  public:
+    external: true
 
 volumes:
   portainer_data:

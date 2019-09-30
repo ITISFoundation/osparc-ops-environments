@@ -11,7 +11,6 @@ DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET = $(shell docker secret inspect --format 
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
-$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # TARGETS --------------------------------------------------
