@@ -11,22 +11,18 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=public
+        - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.adminer.loadbalancer.server.port=8080
-        - traefik.http.routers.adminer.rule=Host(`${MACHINE_FQDN}`)
-        - traefik.http.routers.adminer.entrypoints=adminer
+        - traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)
+        - traefik.http.routers.adminer.entrypoints=https
         - traefik.http.routers.adminer.tls=true
-        - traefik.http.routers.adminer.middlewares=gzip_compress@file
-
-        # force https
-        - traefik.http.middlewares.adminer_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.adminer_force_https.redirectScheme.port=18000
-        - traefik.http.routers.adminer_http.rule=Host(`${MACHINE_FQDN}`)
-        - traefik.http.routers.adminer_http.entrypoints=adminer
-        - traefik.http.routers.adminer_http.middlewares=adminer_force_https
+        - traefik.http.middlewares.adminer_replace_regex.replacepathregex.regex=^/portainer/?(.*)$$
+        - traefik.http.middlewares.adminer_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.adminer.middlewares=gzip_compress@file, adminer_replace_regex
 
 networks:
   simcore_default:
     external: true
   public:
     external: true
+    name: ${PUBLIC_NETWORK}
