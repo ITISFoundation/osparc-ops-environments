@@ -33,6 +33,7 @@ main:
             export DOCKER_IMAGE_TAG=master-latest &&
             export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
             cp .env-devel .env &&
+            docker-compose config
             make create-stack-file output_file=stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
     excluded_services: [webclient, minio]
