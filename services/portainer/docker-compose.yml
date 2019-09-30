@@ -43,19 +43,13 @@ services:
         constraints: [node.role == manager]
       labels:
         - traefik.enable=true
-        - traefik.docker.network=public
+        - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.portainer.loadbalancer.server.port=9000
-        - traefik.http.routers.portainer.rule=Host(`${MACHINE_FQDN}`)
-        - traefik.http.routers.portainer.entrypoints=portainer
+        - traefik.http.routers.portainer.rule=PathPrefix(`/portainer`)
+        - traefik.http.routers.portainer.entrypoints=https
         - traefik.http.routers.portainer.tls=true
-        - traefik.http.routers.portainer.middlewares=gzip_compress@file
-
-        # force https
-        - traefik.http.middlewares.portainer_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.portainer_force_https.redirectScheme.port=9000
-        - traefik.http.routers.portainer_http.rule=Host(`${MACHINE_FQDN}`)
-        - traefik.http.routers.portainer_http.entrypoints=portainer
-        - traefik.http.routers.portainer_http.middlewares=portainer_force_https
+        - traefik.http.middlewares.portainer_stripper.stripprefixregex.regex=/portainer
+        - traefik.http.routers.portainer.middlewares=gzip_compress@file, portainer_stripper
 
 networks:
   agent_network:
@@ -63,6 +57,7 @@ networks:
     attachable: true
   public:
     external: true
+    name: ${PUBLIC_NETWORK}
 
 volumes:
   portainer_data:

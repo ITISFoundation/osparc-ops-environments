@@ -17,10 +17,12 @@ services:
           --metrics.prometheus.entryPoint="metrics"
           --entryPoints.http.address=":80"
           --entryPoints.https.address=":443"
+          --entryPoints.portus.address=":5000"
           --entryPoints.storage.address=":10000"
-          --entryPoints.registry.address=":5000"
-          --entryPoints.traefik.address=":7000"
-          --entrypoints.portainer.address=":9000"
+          --entryPoints.maintenance.address=":14000"
+          --entryPoints.grafana.address=":15000"
+          --entryPoints.graylog.address=":16000"
+          --entryPoints.traefik.address=":17000"
           --entrypoints.adminer.address=":18000"
           --providers.docker.endpoint="unix:///var/run/docker.sock"
           --providers.docker.swarmMode=true
@@ -40,15 +42,16 @@ services:
       - target: 5000
         published: 5000
         mode: host
-      - target: 7000
-        published: 7000
-        mode: host
-      - target: 9000
-        published: 9000
-        mode: host
+      - target: 14000
+        published: 14000
+      - target: 15000
+        published: 15000
+      - target: 16000
+        published: 16000
+      - target: 17000
+        published: 17000
       - target: 18000
         published: 18000
-        mode: host
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
@@ -61,7 +64,33 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
-        - traefik.docker.network=public
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # force https middlewares
+        # http
+        - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.http_to_https.redirectScheme.port=5000
+        # portus
+        - traefik.http.middlewares.portus_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.portus_force_https.redirectScheme.port=5000
+        # minio
+        - traefik.http.middlewares.minio_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.minio_force_https.redirectScheme.port=10000
+        # maintenance
+        - traefik.http.middlewares.maintenance_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.maintenance_force_https.redirectScheme.port=14000
+        # grafana
+        - traefik.http.middlewares.grafana_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.grafana_force_https.redirectScheme.port=15000
+        # graylog
+        - traefik.http.middlewares.graylog_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.graylog_force_https.redirectScheme.port=16000
+        # traefik
+        - traefik.http.middlewares.traefik_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.traefik_force_https.redirectScheme.port=17000
+        # adminer
+        - traefik.http.middlewares.adminer_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.adminer_force_https.redirectScheme.port=18000
+
         # Note: all dollar signs in the hash need to be doubled for escaping.
         # To create user:password pair, it's possible to use this command:
         # docker run --rm --entrypoint htpasswd registry:2 -nb user password | sed -e s/\\$/\\$\\$/g
@@ -74,8 +103,6 @@ services:
         - traefik.http.routers.api.middlewares=auth, gzip_compress@file
         - traefik.http.services.api.loadbalancer.server.port=8080
         # force https
-        - traefik.http.middlewares.traefik_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.traefik_force_https.redirectScheme.port=7000
         - traefik.http.routers.api_http.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)
         - traefik.http.routers.api_http.entrypoints=traefik
         - traefik.http.routers.api_http.middlewares=traefik_force_https
@@ -97,5 +124,5 @@ secrets:
 
 networks:
   public:
-    driver: overlay
-    name: public
+    external: true
+    name: ${PUBLIC_NETWORK}
