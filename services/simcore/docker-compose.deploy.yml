@@ -14,7 +14,7 @@ services:
         # force https
         - traefik.http.routers.webserver_http.rule=Host(`${MACHINE_FQDN}`)
         - traefik.http.routers.webserver_http.entrypoints=http
-        - traefik.http.routers.webserver_http.middlewares=to_https@file
+        - traefik.http.routers.webserver_http.middlewares=http_to_https
     networks:
       - public
 
