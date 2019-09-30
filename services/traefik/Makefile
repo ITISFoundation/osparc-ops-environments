@@ -24,6 +24,16 @@ STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
 # Network from which services are reverse-proxied
 #  - by default it will create an overal attachable network called public_network
 ifeq ($(public_network),)

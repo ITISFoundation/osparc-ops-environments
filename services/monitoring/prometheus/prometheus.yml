@@ -84,3 +84,7 @@ scrape_configs:
   - job_name: 'storage'
     static_configs:
         - targets: ['storage:8080']
+  
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8082']

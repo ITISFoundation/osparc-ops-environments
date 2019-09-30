@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  reverse-proxy:
+  traefik:
     # The official v2.0 Traefik docker image
     image: traefik:v2.0
     init: true
@@ -111,6 +111,7 @@ services:
       - domain.crt
     networks:
       - public
+      - monitored-net
 
 configs:
   traefik_dynamic_config.yml:
@@ -126,3 +127,6 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  monitored-net:
+    name: ${MONITORED_NETWORK}
+    external: true
