@@ -5,7 +5,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=public
+        - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.webserver.loadbalancer.server.port=8080
         - traefik.http.routers.webserver.rule=Host(`${MACHINE_FQDN}`)
         - traefik.http.routers.webserver.entrypoints=https
