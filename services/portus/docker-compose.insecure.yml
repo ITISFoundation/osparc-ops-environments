@@ -158,18 +158,6 @@ services:
         target: /secrets/portus.key
       - source: portus.crt
         target: /secrets/portus.crt
-      # only needed in self-signed case
-      - source: rootca.crt
-        target: /secrets/rootca.crt
-
-  postgres:
-    image: library/postgres:10-alpine
-    init: true
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: portus
-    networks:
-      - internal
 
 volumes:
   portus_static_data:
@@ -191,5 +179,3 @@ secrets:
     file: ./secrets/portus.key
   portus.crt:
     file: ./secrets/portus.crt
-  rootca.crt:
-    file: ./secrets/rootca.crt
