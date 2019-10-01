@@ -7,7 +7,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.webserver.loadbalancer.server.port=8080
-        - traefik.http.routers.webserver.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.webserver.rule=PathPrefix(`/`)
         - traefik.http.routers.webserver.priority=1
         - traefik.http.routers.webserver.entrypoints=https
         - traefik.http.routers.webserver.tls=true

@@ -204,15 +204,15 @@ services:
         - traefik.http.middlewares.registry_headers.headers.sslredirect=true
         - traefik.http.middlewares.registry_headers.headers.sslproxyheaders=true
         - traefik.http.services.registry.loadbalancer.server.port=443
-        # - traefik.http.services.registry.loadbalancer.healthcheck.path=/minio/health/ready        
-        - traefik.http.routers.registry.rule=Host(`${MACHINE_FQDN}`)
+        # - traefik.http.services.registry.loadbalancer.healthcheck.path=/minio/health/ready
+        - traefik.http.routers.registry.rule=PathPrefix(`/`)
         - traefik.http.routers.registry.entrypoints=registry
         - traefik.http.routers.registry.tls=true
         - traefik.http.routers.registry.middlewares=registry_headers, gzip_compress@file
         # force https
         - traefik.http.middlewares.registry_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.registry_force_https.redirectScheme.port=5000        
-        - traefik.http.routers.registry_http.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.middlewares.registry_force_https.redirectScheme.port=5000
+        - traefik.http.routers.registry_http.rule=PathPrefix(`/`)
         - traefik.http.routers.registry_http.entrypoints=registry
         - traefik.http.routers.registry_http.middlewares=registry_force_https
 

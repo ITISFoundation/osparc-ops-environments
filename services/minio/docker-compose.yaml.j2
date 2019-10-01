@@ -35,7 +35,7 @@ services:
         # direct access without path (necessary for minio client it does not like /path)
         - traefik.http.services.minio.loadbalancer.server.port=9000
         - traefik.http.services.minio.loadbalancer.healthcheck.path=/minio/health/ready
-        - traefik.http.routers.minio.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.minio.rule=PathPrefix(`/`)
         - traefik.http.routers.minio.entrypoints=storage
         - traefik.http.routers.minio.tls=true
         - traefik.http.routers.minio.middlewares=gzip_compress@file

@@ -8,8 +8,8 @@ services:
     command: >
           --api=true
           --api.dashboard=true
-          --log.level="DEBUG"
-          --accesslog=true
+          --log.level="INFO"
+          --accesslog=false
           --metrics.prometheus=true
           --metrics.prometheus.addEntryPointsLabels=true
           --metrics.prometheus.addServicesLabels=true
@@ -53,19 +53,19 @@ services:
         # force https middlewares
         # http
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
-        - traefik.http.routers.http_to_https.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.http_to_https.rule=PathPrefix(`/`)
         - traefik.http.routers.http_to_https.entrypoints=http
         - traefik.http.routers.http_to_https.middlewares=http_to_https
         # portus
         - traefik.http.middlewares.portus_force_https.redirectScheme.scheme=https
         - traefik.http.middlewares.portus_force_https.redirectScheme.port=5000
-        - traefik.http.routers.portus_http_to_https.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.portus_http_to_https.rule=PathPrefix(`/`)
         - traefik.http.routers.portus_http_to_https.entrypoints=portus
         - traefik.http.routers.portus_http_to_https.middlewares=portus_force_https
         # minio
         - traefik.http.middlewares.minio_force_https.redirectScheme.scheme=https
         - traefik.http.middlewares.minio_force_https.redirectScheme.port=10000
-        - traefik.http.routers.storage_http_to_https.rule=Host(`${MACHINE_FQDN}`)
+        - traefik.http.routers.storage_http_to_https.rule=PathPrefix(`/`)
         - traefik.http.routers.storage_http_to_https.entrypoints=storage
         - traefik.http.routers.storage_http_to_https.middlewares=minio_force_https
         # # maintenance
