@@ -21,7 +21,7 @@ main:
     - id: simcore-ops-repo
       url: https://git.speag.com/oSparc/osparc-ops-environments.git
       branch: env_master
-      pull_only_files: false
+      pull_only_files: true
       paths:
         - services/simcore/docker-compose.deploy.yml
         - .env
@@ -37,20 +37,20 @@ main:
       - id: simcore-ops-repo
         paths:
           - services/simcore/docker-compose.deploy.yml
+          - services/simcore/.env
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
     command: >
             export DOCKER_IMAGE_TAG=master-latest &&
             export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
-            cp .env-devel .env &&
-            docker-compose -f services/docker-compose.yml -f services/docker-compose.prod.yml -f docker-compose.deploy.yml config > stack.yml            
+            mv .env .env.platform &&
+            cat .env-devel >> .env && cat .env.platform >> .env &&
+            docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
-    excluded_services: [webclient, minio]
+    excluded_services: [minio]
     excluded_volumes: []
     additional_parameters:
       extra_hosts: []
-      environment:
-        WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED: 0
-        S3_ENDPOINT: ${MINIO_HOSTNAME}:30000
+      environment: {}
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000

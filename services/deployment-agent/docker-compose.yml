@@ -22,7 +22,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - MINIO_HOSTNAME=${MINIO_HOSTNAME:-minio}
       - SIMCORE_STACK_NAME=${SIMCORE_STACK_NAME:-simcore}
       - SIMCORE_IMAGE_TAG=${SIMCORE_IMAGE_TAG:-master-latest}
       - PUBLIC_NETWORK=${PUBLIC_NETWORK:-public}

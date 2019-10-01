@@ -23,7 +23,6 @@ endif
 export PUBLIC_NETWORK
 
 # External VARIABLES
-$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
@@ -35,8 +34,7 @@ export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
 $(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
-export MINIO_HOSTNAME ?= $(shell hostname -I | cut -d ' ' -f1)
-$(info MINIO_HOSTNAME set to ${MINIO_HOSTNAME})
+
 # TARGETS --------------------------------------------------
 .PHONY: help
 help: ## This colourful help
@@ -119,7 +117,7 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
-	@echo "$@ file is missing! Copying from tests folder..."
+	@echo "$@ file is missing! Copying from $<..."
 	cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}
