@@ -36,8 +36,14 @@ fi
 if [[ ${SC_BOOT_MODE} == "debug" ]]
 then
   LOG_LEVEL=debug
+  simcore-service-deployment-agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
+elif [[ ${SC_BOOT_MODE} == "debug-ptvsd" ]]
+then
+  LOG_LEVEL=debug
+  echo
+  echo "PTVSD Debugger initializing in port 3000"
+  python3 -m ptvsd --host 0.0.0.0 --port 3000 -m simcore_service_deployment_agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
 else
   LOG_LEVEL=info
+  simcore-service-deployment-agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
 fi
-
-simcore-service-deployment-agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
