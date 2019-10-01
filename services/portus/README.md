@@ -71,3 +71,7 @@ Registry testing:
     ```
 
 2. then follow the same procedure as for local development
+
+### Missing feature
+
+1. Auto-configure portus using REST API
