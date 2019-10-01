@@ -18,7 +18,7 @@ services:
     deploy:
       placement:
         constraints:
-      - node.labels.postgres==true
+          - node.labels.postgres==true
 
 networks:
   public:
