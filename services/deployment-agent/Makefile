@@ -109,10 +109,11 @@ ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
 	cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
+${TEMP_COMPOSE}: docker-compose.yml .env
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
-${TEMP_COMPOSE-devel}: docker-compose.yml docker-compose.devel.yml
-	@docker-compose -f $< -f docker-compose.devel.yml config > $@
+.PHONY: ${TEMP_COMPOSE-devel}
+${TEMP_COMPOSE-devel}: docker-compose.yml docker-compose.devel.yaml  .env
+	@docker-compose -f docker-compose.yml -f docker-compose.devel.yaml config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
