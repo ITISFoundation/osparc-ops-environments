@@ -49,7 +49,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
+up: .init .env ${TEMP_COMPOSE} create-s3-bucket  ## Deploys the stack using provided certificates
 ifneq ("$(wildcard secrets/portus.crt) $(wildcard secrets/portus.key)", "")
 	cp secrets/portus.crt secrets/rootca.crt
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
@@ -105,6 +105,10 @@ endif
 ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@$(DOCKER_COMPOSE) -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
+
+create-s3-bucket:
+	-docker run -e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
+
 
 # Self-signed authority ----------------------------------
 secrets/rootca.key:
