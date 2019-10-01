@@ -23,3 +23,4 @@ services:
 networks:
   public:
     external: true
+    name: ${PUBLIC_NETWORK}
