@@ -12,6 +12,16 @@ DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 TEMP_COMPOSE = .stack.${STACK_NAME}.yaml
 TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
 
+
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
+
 # External VARIABLES
 $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
@@ -102,6 +112,10 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
+	)
+	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
