@@ -8,8 +8,8 @@ services:
     command: >
           --api=true
           --api.dashboard=true
-          --log.level="INFO"
-          --accesslog=false
+          --log.level="DEBUG"
+          --accesslog=true
           --metrics.prometheus=true
           --metrics.prometheus.addEntryPointsLabels=true
           --metrics.prometheus.addServicesLabels=true
@@ -19,7 +19,6 @@ services:
           --entryPoints.https.address=":443"
           --entryPoints.portus.address=":5000"
           --entryPoints.storage.address=":10000"
-          --entryPoints.traefik.address=":17000"
           --providers.docker.endpoint="unix:///var/run/docker.sock"
           --providers.docker.swarmMode=true
           --providers.docker.exposedByDefault=false
@@ -38,8 +37,6 @@ services:
       - target: 5000
         published: 5000
         mode: host
-      - target: 17000
-        published: 17000
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
@@ -74,12 +71,6 @@ services:
         # # maintenance
         # - traefik.http.middlewares.maintenance_force_https.redirectScheme.scheme=https
         # - traefik.http.middlewares.maintenance_force_https.redirectScheme.port=14000
-        # traefik
-        - traefik.http.middlewares.traefik_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.traefik_force_https.redirectScheme.port=17000
-        - traefik.http.routers.traefik_http_to_https.rule=Host(`${MACHINE_FQDN}`)
-        - traefik.http.routers.traefik_http_to_https.entrypoints=traefik
-        - traefik.http.routers.traefik_http_to_https.middlewares=traefik_force_https
 
         # Note: all dollar signs in the hash need to be doubled for escaping.
         # To create user:password pair, it's possible to use this command:
@@ -87,10 +78,12 @@ services:
         # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
         - traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$Q4fTxJQo$$OLPpFCHXVoz6RSHWazKpl.
         - traefik.http.routers.api.service=api@internal
-        - traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)
-        - traefik.http.routers.api.entrypoints=traefik
+        - traefik.http.routers.api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.api.entrypoints=https
         - traefik.http.routers.api.tls=true
-        - traefik.http.routers.api.middlewares=auth, gzip_compress@file
+        - traefik.http.middlewares.api_replace_regex.replacepathregex.regex=^/dashboard/?(.*)$$
+        - traefik.http.middlewares.api_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.api.middlewares=auth, api_replace_regex
         - traefik.http.services.api.loadbalancer.server.port=8080
     secrets:
       - domain.key

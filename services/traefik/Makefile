@@ -98,6 +98,10 @@ endif
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
+	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
+	)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
