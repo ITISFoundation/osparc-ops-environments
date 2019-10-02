@@ -15,11 +15,11 @@ services:
     networks:
       - public
 
-  postgres:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.postgres==true
+  # postgres:
+  #   deploy:
+  #     placement:
+  #       constraints:
+  #         - node.labels.postgres==true
 
 networks:
   public:
