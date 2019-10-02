@@ -18,8 +18,11 @@ source ${repo_basedir}/repo.config
 source ${repo_basedir}/services/portainer/.env
 
 # create certificates
-# install certificates
-# restart docker service
+make create-certificates
+# install certificates (needs to be sudo)
+sudo make install-root-certificates
+# restart docker service (needs to be sudo)
+sudo service docker restart
 
 # start portainer
 echo
@@ -32,7 +35,10 @@ popd
 echo
 echo starting traefik
 pushd ${repo_basedir}/services/traefik
-make create-certificates up
+cp ${repo_basedir}/certificates/rootca.crt secrets/rootca.crt
+cp ${repo_basedir}/certificates/domain.crt secrets/domain.crt
+cp ${repo_basedir}/certificates/domain.key secrets/domain.key
+make up
 popd
 
 echo
@@ -44,9 +50,9 @@ popd
 echo
 echo starting portus/registry
 pushd ${repo_basedir}/services/portus
-cp ${repo_basedir}/services/traefik/secrets/rootca.crt ${repo_basedir}/services/portus/secrets/rootca.crt
-cp ${repo_basedir}/services/traefik/secrets/domain.crt ${repo_basedir}/services/portus/secrets/portus.crt
-cp ${repo_basedir}/services/traefik/secrets/domain.key ${repo_basedir}/services/portus/secrets/portus.key
+cp ${repo_basedir}/certificates/rootca.crt secrets/rootca.crt
+cp ${repo_basedir}/certificates/domain.crt secrets/portus.crt
+cp ${repo_basedir}/certificates/domain.key secrets/portus.key
 make up
 popd
 
