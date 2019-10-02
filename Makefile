@@ -6,12 +6,25 @@
 PREDEFINED_VARIABLES := $(.VARIABLES)
 VERSION := $(shell uname -a)
 
+# Operating system
+ifeq ($(filter Windows_NT,$(OS)),)
+IS_WSL  := $(if $(findstring Microsoft,$(shell uname -a)),WSL,)
+IS_OSX  := $(filter Darwin,$(shell uname -a))
+IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
+endif
+IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
+$(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
+
 export VCS_URL:=$(shell git config --get remote.origin.url)
 export VCS_REF:=$(shell git rev-parse --short HEAD)
 export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
 export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 export DOCKER_REGISTRY?=itisfoundation
 
+include repo.config
+
+MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
+$(info found host IP to be ${MACHINE_IP})
 
 # TARGETS --------------------------------------------------
 .DEFAULT_GOAL := help
@@ -53,6 +66,39 @@ clean: .check_clean ## Cleans all outputs
 .check_clean:
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+
+.PHONY: create-certificates
+create-certificates: certificates/domain.crt certificates/domain.key certificates/rootca.crt ## create self-signed certificates and ca authority
+
+.PHONY: install-root-certificate
+install-root-certificate: certificates/rootca.crt ## installs a certificate in the host system
+	$(info installing certificate in trusted root certificates...)
+	$(if $(or $(IS_WIN), $(IS_WSL)), \
+		-$(shell certutil.exe -user -addstore -f root $<),\
+		$(shell sudo cp $< /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates)\
+		)
+	$(info restart any browser or docker engine that should use these certificate)
+
+.PHONY: remove-root-certificate
+remove-root-certificate: ## removes the certificate from the host system
+	$(info deleting certificate from trusted root certificates...)
+	$(if $(or $(IS_WIN), $(IS_WSL)), \
+		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
+		$(shell sudo rm -f /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates))
+
+.PHONY: install-full-qualified-domain-name
+install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
+	$(info )
+	$(info to install a FQDN in your host, ADMIN rights needed)
+	$(if $(or $(IS_WIN),$(IS_WSL)), \
+		$(info please run the following in a PWshell with Admin rights:)\
+		$(info Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)"),\
+		$(info please run the following in a CMD with Admin rights (note that wildcards are not accepted under Windows):)\
+		$(info echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> c:\Windows\System32\drivers\etc\hosts),\
+		$(shell sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;)\
+	)
+	$(info afterwards restart any browser or docker engine that should use these host file)
+
 
 
 # FIXME: DO NOT USE... still working on this
