@@ -33,6 +33,16 @@ PUBLIC_NETWORK := $(public_network)
 endif
 export PUBLIC_NETWORK
 
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
 # External VARIABLES
 $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
@@ -97,6 +107,10 @@ endif
 	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
+	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
 .PHONY: ${TEMP_COMPOSE}
