@@ -45,3 +45,7 @@ popd
 pushd ${repo_basedir}/services/monitoring
 make up
 popd
+
+pushd ${repo_basedir}/services/graylog
+make up
+popd
