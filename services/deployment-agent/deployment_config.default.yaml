@@ -24,7 +24,7 @@ main:
       pull_only_files: true
       paths:
         - services/simcore/docker-compose.deploy.yml
-        - .env
+        - services/simcore/.env
   docker_private_registries:
     # lists registries and their credentials if necessary to check for services to download from
     - url: https://index.docker.io/v1
