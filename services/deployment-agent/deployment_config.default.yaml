@@ -19,8 +19,8 @@ main:
         - services/docker-compose.yml
         - .env-devel
     - id: simcore-ops-repo
-      url: https://git.speag.com/oSparc/osparc-ops-environments.git
-      branch: env_master
+      url: https://git.speag.com/ITISFoundation/osparc-ops.git
+      branch: master
       pull_only_files: true
       paths:
         - services/simcore/docker-compose.deploy.yml
@@ -40,7 +40,7 @@ main:
           - services/simcore/.env
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
     command: >
-            export DOCKER_IMAGE_TAG=master-latest &&
+            export DOCKER_IMAGE_TAG=${SIMCORE_IMAGE_TAG} &&
             export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
             mv .env .env.platform &&
             cat .env-devel >> .env && cat .env.platform >> .env &&
