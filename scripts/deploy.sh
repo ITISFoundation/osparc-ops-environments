@@ -39,7 +39,7 @@ portainer_url = ${ENVIRONMENT_MANAGER_NODE}:9000
 portainer_password = ${PORTAINER_ADMIN_PWD}
 deploy = ${scripts_dir}/scripts/portainer-deploy-stack.sh
 
-cd osparc-ci/services/graylog
+pushd osparc-ops/services/graylog
 ${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
             --repo_branch=${current_git_branch} \
@@ -47,7 +47,7 @@ ${deploy} --repo_url=${current_git_url} \
             --portainer_password=${portainer_password} --stack_path=services/graylog/.stack.yml
 popd
 
-pushd osparc-ci/services/monitoring
+pushd osparc-ops/services/monitoring
 ${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
             --repo_branch=${current_git_branch} \
@@ -55,7 +55,7 @@ ${deploy} --repo_url=${current_git_url} \
             --portainer_password=blah --stack_path=services/monitoring/.stack.yml
 popd
 
-pushd osparc-ci/services/minio
+pushd osparc-ops/services/minio
 ${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
             --repo_branch=${current_git_branch} \
@@ -63,7 +63,7 @@ ${deploy} --repo_url=${current_git_url} \
             --portainer_password=blah --stack_path=services/minio/.stack.yml
 popd
 
-pushd osparc-ci/services/deployment-agent
+pushd osparc-ops/services/deployment-agent
 ${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
             --repo_branch=${current_git_branch} \
