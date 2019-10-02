@@ -16,6 +16,7 @@ services:
       - "{% if num_minios|int == 1 %}30000:{% endif %}9000"
     networks:
       - public
+      - monitored-net
     environment:
       - MINIO_ACCESS_KEY_FILE=minio_access_key
       - MINIO_SECRET_KEY_FILE=minio_secret_key
@@ -73,9 +74,12 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  monitored-net:
+    name: ${MONITORED_NETWORK}
+    external: true
 
 secrets:
   minio_secret_key:
     external: true
   minio_access_key:
-    external: true
+    external: true  
