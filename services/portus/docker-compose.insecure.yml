@@ -39,6 +39,12 @@ services:
     secrets:
       - source: portus.key
         target: /certificates/portus.key
+      # only needed in self-signed case
+      - source: rootca.crt
+        target: /certificates/rootca.crt
+    # only needed in self-signed case
+    extra_hosts: 
+      - "${MACHINE_FQDN}:${MACHINE_IP}"
     deploy:
       labels:
         - traefik.enable=true
@@ -106,7 +112,7 @@ services:
     image: library/registry:2.7
     init: true
     restart: unless-stopped
-    command: ["registry", "serve", "/etc/docker/registry/config.yml"]
+    command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       # Authentication
       REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}:5000/v2/token
@@ -155,14 +161,26 @@ services:
         - traefik.http.routers.registry.middlewares=gzip_compress@file
     volumes:
       - registry_data:/var/lib/registry
+    # only needed in self-signed case
+    extra_hosts: 
+      - "${MACHINE_FQDN}:${MACHINE_IP}"
+    # only needed in self-signed case
+    configs:
+      - source: registry_init
+        target: /etc/docker/registry/init
+        mode: 0755
     networks:
       - internal
       - public
+      - monitored-net
     secrets:
       - source: portus.key
         target: /secrets/portus.key
       - source: portus.crt
         target: /secrets/portus.crt
+      # only needed in self-signed case
+      - source: rootca.crt
+        target: /secrets/rootca.crt
 
 volumes:
   portus_static_data:
@@ -182,8 +200,15 @@ networks:
 configs:
   registry_config.yml:
     file: ./registry/config.yml
+  # only needed in self-signed case
+  registry_init:
+    file: ./registry/init
+
 secrets:
   portus.key:
     file: ./secrets/portus.key
   portus.crt:
     file: ./secrets/portus.crt
+  # for self-signed necessary
+  rootca.crt:
+    file: ./secrets/rootca.crt

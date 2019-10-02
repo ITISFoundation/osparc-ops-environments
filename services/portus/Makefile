@@ -48,7 +48,7 @@ $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
-MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
+export MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
 $(info MACHINE_FQDN set to ${MACHINE_FQDN})
 
 # TARGETS --------------------------------------------------
@@ -59,7 +59,7 @@ help: ## This colourful help
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE} create-s3-bucket  ## Deploys the stack using provided certificates
 ifneq ("$(wildcard secrets/portus.crt) $(wildcard secrets/portus.key)", "")
-	cp secrets/portus.crt secrets/rootca.crt
+	# cp secrets/portus.crt secrets/rootca.crt
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 else
 	$(error please copy your certificate to secrets/portus.crt and private key to secrets/portus.key)
@@ -119,7 +119,7 @@ ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@echo "${STACK_NAME} stack file created for $@"
 
 create-s3-bucket:
-	-docker run -e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
+	-docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host -e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
 
 
 # Self-signed authority ----------------------------------
