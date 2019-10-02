@@ -21,31 +21,38 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 
+.PHONY: venv
+# TODO: this is not windows friendly
+venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
+.venv:
+	python3 -m venv .venv
+	.venv/bin/pip3 install --upgrade pip wheel setuptools
+	.venv/bin/pip3 install -r requirements.txt
+	@echo "To activate the venv, execute 'source .venv/bin/activate'"
+
+
+
+# Misc: info & clean
 .PHONY: info
-info: ## displays some parameters of makefile environments
+info: ## Displays some parameters of makefile environments (debugging)
 	$(info VARIABLES: )
-	$(wildcard )
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info - $(v) = $($(v))  [in $(origin $(v))])                                      \
 	)
-	@echo ""
+	# done
 
 
-.PHONY: clean
-clean: ## cleans all unversioned files in project
-	-rm -rf .venv
+.PHONY: clean .check_clean
+clean: .check_clean ## Cleans all outputs
+	# removing virtual env
+	@-rm -rf .venv
+	# removing unversioned
 	@git clean -dxf -e .vscode/
 
-
-.PHONY: venv
-# TODO: this is not windows friendly
-venv: .venv ## creates a python virtual environment with dev tools (pip, pylint, ...)
-.venv:
-	python3 -m venv .venv
-	.venv/bin/pip3 install --upgrade pip wheel setuptools
-	.venv/bin/pip3 install pylint autopep8
-	@echo "To activate the venv, execute 'source .venv/bin/activate'"
+.check_clean:
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
 
 # FIXME: DO NOT USE... still working on this
@@ -55,9 +62,9 @@ service_paths =
 service_names = $(notdir $(wildcard $(CURDIR)/services/*))
 doc_md = $(docs_dir)/stacks-graph-auto.md
 
-autodoc:
+autodoc: ## [UNDER DEV] creates diagrams of every stack based on docker-compose files 
 	mkdir -p $(docs_dir)/img
-	# generating a graph of the stack
+	# generating a graph of the stack in $(docs_dir)
 	@echo "# Stacks\n" >$(doc_md)
 	@for service in $(service_names); do    \
 		echo "## $$service" >>$(doc_md);  \

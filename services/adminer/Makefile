@@ -42,24 +42,29 @@ leave: ## Leaves swarm stopping all services in it
 clean: ## Cleans unversioned files
 	@git clean -dxf
 
-.PHONY: info
-info: ## expands all variables and relevant info on stack
+# Misc: info & clean
+.PHONY: info info-vars info-swarm
+
+info: info-vars info-swarm ## All info
+
+info-vars: ## Expands all variables in makefile
 	$(info VARIABLES ------------)
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info $(v)=$($(v)))                                                               \
 	)
-	@echo ""
-	docker ps
+	#---------------------
+
+info-swarm: ## Displays info about stacks and networks
 ifneq ($(SWARM_HOSTS), )
-	@echo ""
-	docker stack ls
-	@echo ""
-	-docker stack ps $(STACK_NAME)
-	@echo ""
-	-docker stack services $(STACK_NAME)
-	@echo ""
-	docker network ls
+	# stacks in swarm
+	@docker stack ls
+	# containers (tasks) running in '$(SWARM_STACK_NAME)' stack
+	-@docker stack ps $(SWARM_STACK_NAME)
+	# services in '$(SWARM_STACK_NAME)' stack
+	-@docker stack services $(SWARM_STACK_NAME)
+	# networks
+	@docker network ls
 endif
 
 # Helpers -------------------------------------------------
@@ -79,3 +84,11 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
+.PHONY: clean .check_clean
+clean: .check_clean ## Cleans all outputs
+	# removing unversioned
+	@git clean -dxf -e .vscode/
+
+.check_clean:
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]

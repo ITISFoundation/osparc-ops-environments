@@ -27,8 +27,9 @@ include .env
 help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+
 .PHONY: up
-up: .init .env .create-secrets ${TEMP_COMPOSE}  ## Deploys graylog stack
+up: .init .env .secrets ${TEMP_COMPOSE}  ## Deploys graylog stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -39,9 +40,6 @@ down: ## Removes the stack from the swarm
 leave: ## Leaves swarm stopping all services in it
 	-docker swarm leave -f
 
-.PHONY: clean
-clean: ## Cleans unversioned files
-	@git clean -dxf
 
 .PHONY: info
 info: ## expands all variables and relevant info on stack
@@ -63,7 +61,18 @@ ifneq ($(SWARM_HOSTS), )
 	docker network ls
 endif
 
+
+.PHONY: clean check_clean
+clean: .check_clean ## Cleans all outputs
+	# cleaning unversioned files in $(CURDIR)
+	@git clean -dxf
+
+.check_clean:
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+
 # Helpers -------------------------------------------------
+
 .PHONY: .init
 .init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
@@ -80,8 +89,8 @@ ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
-.PHONY: .create-secrets
-.create-secrets:
+.PHONY: .secrets
+.secrets:
 	@$(if $(DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET), \
 		, \
 		echo ""; \
