@@ -2,7 +2,7 @@
 
 Stack to deploy portainer service and all agents (one per node)
 
-- https://portainer.readthedocs.io/en/stable/
+- [https://portainer.readthedocs.io/en/stable/](https://portainer.readthedocs.io/en/stable/)
 
 ## Usage
 
@@ -15,13 +15,13 @@ Stack to deploy portainer service and all agents (one per node)
 
 Available web front-ends when deployed in localhost:
 
-- portainer io: http://127.0.0.1:9000     (default credentials admin/adminadmin)
+- portainer io: [http://127.0.0.1:9000](http://127.0.0.1:9000)     (default credentials admin/adminadmin)
 
 ## Stack services
 
 ### Portainer service
 
-![GitHub last commit](https://img.shields.io/github/last-commit/portainer/portainer?label=github%20last%20commit) [![Docker Pulls](https://img.shields.io/docker/pulls/portainer/portainer.svg)](https://hub.docker.com/r/portainer/portainer/tags) 
+![GitHub last commit](https://img.shields.io/github/last-commit/portainer/portainer?label=github%20last%20commit) [![Docker Pulls](https://img.shields.io/docker/pulls/portainer/portainer.svg)](https://hub.docker.com/r/portainer/portainer/tags)
 
 ### Agent service
 
