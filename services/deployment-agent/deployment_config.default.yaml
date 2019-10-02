@@ -40,6 +40,7 @@ main:
           - services/simcore/.env
     workdir: simcore-github-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
     command: >
+            export DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY} &&
             export DOCKER_IMAGE_TAG=${SIMCORE_IMAGE_TAG} &&
             export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
             mv .env .env.platform &&
