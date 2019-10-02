@@ -3,8 +3,8 @@ services:
   adminer:
     image: adminer
     init: true
-    # ports:
-    #   - 8080
+    ports:
+      - 8080
     networks:
       - simcore_default
       - public
@@ -16,7 +16,7 @@ services:
         - traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)
         - traefik.http.routers.adminer.entrypoints=https
         - traefik.http.routers.adminer.tls=true
-        - traefik.http.middlewares.adminer_replace_regex.replacepathregex.regex=^/portainer/?(.*)$$
+        - traefik.http.middlewares.adminer_replace_regex.replacepathregex.regex=^/adminer/?(.*)$$
         - traefik.http.middlewares.adminer_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.adminer.middlewares=gzip_compress@file, adminer_replace_regex
 

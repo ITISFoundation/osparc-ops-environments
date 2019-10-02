@@ -1,21 +1,25 @@
-# portainer stack
+# adminer stack
 
-Stack to deploy portainer service and all agents (one per node)
+Stack to deploy adminer services
 
-- https://portainer.readthedocs.io/en/stable/
+- https://www.adminer.org/en/
 
+## Dependencies
+
+Needs a compatible database available on the same network.
 
 ## Usage
 
-    $ make help
-    $ make up
-    $ make info
-    $ make down
+    ```console
+    make help
+    make up
+    make info
+    make down
+    ```
 
 Available web front-ends when deployed in localhost:
 
-- protainerio: http://127.0.0.1:9000/dashboards     (set user/pass first time)
-
+- adminer UI: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 ## Stack services
 
