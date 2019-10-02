@@ -89,6 +89,9 @@ scrape_configs:
     static_configs:
       - targets: ['traefik:8082']
     
+  - job_name: 'registry'
+    static_configs:
+      - targets: ['registry:5001']
     # to generate the token use the following
     # docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host \
     #   -e MC_HOST_local="https://12345678:12345678@osparc.local:10000" \

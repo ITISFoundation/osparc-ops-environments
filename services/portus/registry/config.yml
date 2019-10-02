@@ -5,6 +5,9 @@ storage:
   delete:
     enabled: true
 http:
-  addr: 0.0.0.0:5000
+  addr: ":5000"
   debug:
-    addr: 0.0.0.0:5001
+    addr: ":5001"
+    prometheus:
+      enabled: true
+      path: "/metrics"

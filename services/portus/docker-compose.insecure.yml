@@ -113,7 +113,7 @@ services:
       REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/portus.crt
-
+      REGISTRY_LOG_LEVEL: debug
       # Storage
       REGISTRY_STORAGE: s3
       REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESSKEY}
@@ -122,11 +122,16 @@ services:
       REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
       REGISTRY_STORAGE_S3_SECURE: ${S3_SECURE}
       REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
-      REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
-
       REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
       REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
+
+      REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
+      # Metrics
+      REGISTRY_HTTP_DEBUG_ADDR: ":5001"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
+      
       # neded as it creates problems when the bucket is non existing??
       REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "false"
 
@@ -170,6 +175,9 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  monitored-net:
+    name: ${MONITORED_NETWORK}
+    external: true
 
 configs:
   registry_config.yml:
