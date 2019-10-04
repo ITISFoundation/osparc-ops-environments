@@ -68,7 +68,33 @@ clean: .check_clean ## Cleans all outputs
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
 .PHONY: create-certificates
-create-certificates: certificates/domain.crt certificates/domain.key certificates/rootca.crt ## create self-signed certificates and ca authority
+create-certificates: certificates/rootca.crt certificates/domain.crt certificates/domain.key ## create self-signed certificates and ca authority
+
+# Self-signed certificate authority
+certificates/rootca.key:
+	@mkdir -p certificates
+	@openssl genrsa -out $@ 2048
+
+certificates/rootca.crt: certificates/rootca.key
+	@openssl req -x509 -new -nodes -key $< \
+		-subj "/C=US/ST=sparc/O=oSparc/CN=IT'IS oSparc" \
+		-sha256 -days 10000 -out $@;
+
+certificates/extfile.cnf:
+	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
+
+certificates/domain.key:
+	@openssl genrsa -out $@ 2048
+
+certificates/domain.csr: certificates/domain.key
+	@openssl req -new -key $< -out $@ \
+ 		-subj "/C=US/ST=sparc/O=oSparc/CN=${MACHINE_FQDN}"
+
+certificates/domain.crt: certificates/domain.csr certificates/rootca.crt certificates/rootca.key certificates/extfile.cnf
+	@openssl x509 -req -in certificates/domain.csr -CA certificates/rootca.crt -extfile \
+		certificates/extfile.cnf -CAkey certificates/rootca.key -CAcreateserial \
+		-out certificates/domain.crt -days 500 -sha256
+
 
 .PHONY: install-root-certificate
 install-root-certificate: certificates/rootca.crt ## installs a certificate in the host system
