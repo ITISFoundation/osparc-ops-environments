@@ -104,11 +104,11 @@ install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (
 # FIXME: DO NOT USE... still working on this
 .PHONY: autodoc
 docs_dir = $(realpath $(CURDIR)/docs)
-service_paths = 
+service_paths =
 service_names = $(notdir $(wildcard $(CURDIR)/services/*))
 doc_md = $(docs_dir)/stacks-graph-auto.md
 
-autodoc: ## [UNDER DEV] creates diagrams of every stack based on docker-compose files 
+autodoc: ## [UNDER DEV] creates diagrams of every stack based on docker-compose files
 	mkdir -p $(docs_dir)/img
 	# generating a graph of the stack in $(docs_dir)
 	@echo "# Stacks\n" >$(doc_md)
