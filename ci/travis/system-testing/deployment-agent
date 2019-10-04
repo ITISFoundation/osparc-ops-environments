@@ -23,7 +23,6 @@ before_script() {
     GIT_URL=$(git config --get remote.origin.url)
     sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: ${GIT_URL}|}" deployment_config.default.yaml
     sed -i "/- id: simcore-ops-repo/{n;n;s/branch:.*/branch: ${GIT_BRANCH_NAME}/}" deployment_config.default.yaml
-    make config
     make up
     popd
     docker service ls
