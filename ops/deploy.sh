@@ -37,36 +37,36 @@ ssh ${ENVIRONMENT_MANAGER_NODE} "docker node update --label-add postgres=true ${
 # Deploying stacks via the portainer
 portainer_url = ${ENVIRONMENT_MANAGER_NODE}:9000
 portainer_password = ${PORTAINER_ADMIN_PWD}
-portainer = ${scripts_dir}/scripts/portainer.sh
+deploy = ${scripts_dir}/scripts/portainer-deploy-stack.sh
 
 cd osparc-ops/services/graylog
-${portainer} --repo_url=${current_git_url} \
+${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
-            --repo_branch=${current_git_branch} --env=.env \
+            --repo_branch=${current_git_branch} \
             --portainer_url=${portainer_url} --portainer_user=admin \
             --portainer_password=${portainer_password} --stack_path=services/graylog/.stack.yml
 popd
 
 pushd osparc-ops/services/monitoring
-${portainer} --repo_url=${current_git_url} \
+${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
-            --repo_branch=${current_git_branch} --env=.env \
+            --repo_branch=${current_git_branch} \
             --portainer_url=${portainer_url} --portainer_user=blah \
             --portainer_password=blah --stack_path=services/monitoring/.stack.yml
 popd
 
 pushd osparc-ops/services/minio
-${portainer} --repo_url=${current_git_url} \
+${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
-            --repo_branch=${current_git_branch} --env=.env \
+            --repo_branch=${current_git_branch} \
             --portainer_url=${portainer_url} --portainer_user=blah \
             --portainer_password=blah --stack_path=services/minio/.stack.yml
 popd
 
 pushd osparc-ops/services/deployment-agent
-${portainer} --repo_url=${current_git_url} \
+${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
-            --repo_branch=${current_git_branch} --env=.env \
+            --repo_branch=${current_git_branch} \
             --portainer_url=${portainer_url} --portainer_user=blah \
             --portainer_password=blah --stack_path=services/deployment-agent/.stack.yml
 popd
