@@ -111,4 +111,11 @@ deployment_config.yaml
 .make*
 
 # generated and valid certificates
-certificates/*
+*.crt
+*.key
+*.srl
+*.cnf
+*.csr
+
+
+

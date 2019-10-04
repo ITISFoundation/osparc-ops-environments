@@ -57,12 +57,14 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} create-s3-bucket  ## Deploys the stack using provided certificates
-ifneq ("$(wildcard secrets/portus.crt) $(wildcard secrets/portus.key)", "")
-	# cp secrets/portus.crt secrets/rootca.crt
+up: .init .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
+	# creating bucket
+	$(create-s3-bucket)
+ifneq ("$(wildcard secrets/domain.crt) $(wildcard secrets/domain.key)", "")
+	# cp secrets/domain.crt secrets/rootca.crt
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 else
-	$(error please copy your certificate to secrets/portus.crt and private key to secrets/portus.key)
+	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif
 
 .PHONY: down
@@ -118,8 +120,14 @@ ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@$(DOCKER_COMPOSE) -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
-create-s3-bucket:
-	-docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host -e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
+define create-s3-bucket
+	-docker run \
+		-v /etc/ssl/certs:/etc/ssl/certs:ro \
+		--network host \
+		-e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" \
+		minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
+endef
+
 
 
 # Self-signed authority ----------------------------------
@@ -148,20 +156,20 @@ remove-root-certificate: ## removes the certificate from the host system
 extfile.cnf:
 	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
 
-secrets/portus.key:
+secrets/domain.key:
 	@openssl genrsa -out $@ 2048
 
-secrets/portus.csr: secrets/portus.key
+secrets/portus.csr: secrets/domain.key
 	@openssl req -new -key $< -out $@ \
  		-subj "/C=US/ST=sparc/O=oSparc/CN=${MACHINE_FQDN}"
 
-secrets/portus.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key extfile.cnf
+secrets/domain.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key extfile.cnf
 	@openssl x509 -req -in secrets/portus.csr -CA secrets/rootca.crt -extfile \
 		extfile.cnf -CAkey secrets/rootca.key -CAcreateserial \
-		-out secrets/portus.crt -days 500 -sha256
+		-out secrets/domain.crt -days 500 -sha256
 
 .PHONY: create-certificates
-create-certificates: secrets/portus.crt secrets/portus.key secrets/rootca.crt
+create-certificates: secrets/domain.crt secrets/domain.key secrets/rootca.crt
 
 # host
 install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
