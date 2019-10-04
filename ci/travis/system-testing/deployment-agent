@@ -18,7 +18,14 @@ before_script() {
     pip freeze
     docker images
     pushd services/portainer; make up; popd
-    pushd services/deployment-agent; make up ; popd
+    pushd services/deployment-agent;
+    make config
+    GIT_BRANCH_NAME=$(exec ops/travis/helpers/get_git_branch)
+    GIT_URL=$(git config --get remote.origin.url)
+    sed -i '/- id: simcore-ops-repo/{n;s/url:.*osparc-ops.git/url: ${GIT_URL}/}' deployment_config.default.yaml
+    sed -i '/- id: simcore-ops-repo/{n;n;s/branch:.*/branch: ${GIT_BRANCH_NAME}/}' deployment_config.default.yaml
+    make up
+    popd
     docker service ls
 }
 
