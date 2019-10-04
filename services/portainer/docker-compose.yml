@@ -33,6 +33,7 @@ services:
       - portainer_data:/data
     networks:
       - agent_network
+      - public
     secrets:
       - portainer_admin_password
     deploy:
@@ -40,11 +41,24 @@ services:
       replicas: 1
       placement:
         constraints: [node.role == manager]
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.portainer.loadbalancer.server.port=9000
+        - traefik.http.routers.portainer.rule=PathPrefix(`/portainer`)
+        - traefik.http.routers.portainer.entrypoints=https
+        - traefik.http.routers.portainer.tls=true
+        - traefik.http.middlewares.portainer_replace_regex.replacepathregex.regex=^/portainer/?(.*)$$
+        - traefik.http.middlewares.portainer_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.portainer.middlewares=gzip_compress@file, portainer_replace_regex
 
 networks:
   agent_network:
     driver: overlay
     attachable: true
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
 
 volumes:
   portainer_data:

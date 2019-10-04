@@ -11,8 +11,26 @@ DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
+
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
 # External VARIABLES
-$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # TARGETS --------------------------------------------------
@@ -25,6 +43,9 @@ up: .init .env .create-stack-file .create-secrets ## Deploys or updates current 
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
+
+.PHONY: config
+config: .create-stack-file
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
@@ -65,6 +86,14 @@ endif
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
+	)
+	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
+	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 .venv:
 	python3 -m venv .venv

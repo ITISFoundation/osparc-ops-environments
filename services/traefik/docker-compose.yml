@@ -1,37 +1,103 @@
 version: '3.7'
 
 services:
-  reverse-proxy:
+  traefik:
     # The official v2.0 Traefik docker image
     image: traefik:v2.0
     init: true
+    command: >
+          --api=true
+          --api.dashboard=true
+          --log.level="INFO"
+          --accesslog=false
+          --metrics.prometheus=true
+          --metrics.prometheus.addEntryPointsLabels=true
+          --metrics.prometheus.addServicesLabels=true
+          --entryPoints.metrics.address=":8082"
+          --metrics.prometheus.entryPoint="metrics"
+          --entryPoints.http.address=":80"
+          --entryPoints.https.address=":443"
+          --entryPoints.portus.address=":5000"
+          --entryPoints.storage.address=":10000"
+          --entryPoints.traefik.address=":9001"
+          --providers.docker.endpoint="unix:///var/run/docker.sock"
+          --providers.docker.swarmMode=true
+          --providers.docker.exposedByDefault=false
+          --providers.file.filename="/etc/traefik/dynamic_conf.yml"
+
     ports:
-      # The HTTPS port
-      - "443:443"
+      - target: 80
+        published: 80
+      - target: 443
+        published: 443
+      - target: 10000
+        published: 10000
+      - target: 5000
+        published: 5000
+      - target: 9001
+        published: 9001
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
     configs:
-      - source: traefik_config.yml
-        target: /etc/traefik/traefik.yml
+      - source: traefik_dynamic_config.yml
+        target: /etc/traefik/dynamic_conf.yml
     deploy:
       placement:
         constraints:
           - node.role == manager
       labels:
-        - traefik.enable=false
-        - traefik.http.middlewares.to_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.gzip_compress.compress=true
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # force https middlewares
+        # http
+        - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
+        - traefik.http.routers.http_to_https.rule=PathPrefix(`/`)
+        - traefik.http.routers.http_to_https.entrypoints=http
+        - traefik.http.routers.http_to_https.middlewares=http_to_https
+        # portus
+        - traefik.http.middlewares.portus_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.portus_force_https.redirectScheme.port=5000
+        - traefik.http.routers.portus_http_to_https.rule=PathPrefix(`/`)
+        - traefik.http.routers.portus_http_to_https.entrypoints=portus
+        - traefik.http.routers.portus_http_to_https.middlewares=portus_force_https
+        # minio
+        - traefik.http.middlewares.minio_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.minio_force_https.redirectScheme.port=10000
+        - traefik.http.routers.storage_http_to_https.rule=PathPrefix(`/`)
+        - traefik.http.routers.storage_http_to_https.entrypoints=storage
+        - traefik.http.routers.storage_http_to_https.middlewares=minio_force_https
+        # traefik
+        - traefik.http.middlewares.traefik_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.traefik_force_https.redirectScheme.port=9001
+        - traefik.http.routers.traefik_http_to_https.rule=PathPrefix(`/`)
+        - traefik.http.routers.traefik_http_to_https.entrypoints=traefik
+        - traefik.http.routers.traefik_http_to_https.middlewares=traefik_force_https
+        # # maintenance
+        # - traefik.http.middlewares.maintenance_force_https.redirectScheme.scheme=https
+        # - traefik.http.middlewares.maintenance_force_https.redirectScheme.port=14000
+
+        # Note: all dollar signs in the hash need to be doubled for escaping.
+        # To create user:password pair, it's possible to use this command:
+        # docker run --rm --entrypoint htpasswd registry:2 -nb user password | sed -e s/\\$/\\$\\$/g
+        # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+        - traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$Q4fTxJQo$$OLPpFCHXVoz6RSHWazKpl.
+        - traefik.http.routers.api.service=api@internal
+        - traefik.http.routers.api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.api.entrypoints=traefik
+        - traefik.http.routers.api.tls=true
+        - traefik.http.routers.api.middlewares=auth
+        - traefik.http.services.api.loadbalancer.server.port=8080
     secrets:
       - domain.key
       - domain.crt
     networks:
       - public
+      - monitored-net
 
 configs:
-  traefik_config.yml:
-    file: ./config/config.yml
+  traefik_dynamic_config.yml:
+    file: ./config/dynamic_conf.yml
 
 secrets:
   domain.key:
@@ -41,5 +107,8 @@ secrets:
 
 networks:
   public:
-    driver: overlay
-    name: public
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored-net:
+    name: ${MONITORED_NETWORK}
+    external: true

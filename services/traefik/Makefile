@@ -23,6 +23,25 @@ PWD ?= pwd_unknown
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
+MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
 
 # External VARIABLES
 include .env
@@ -75,6 +94,14 @@ endif
 		,                 \
 		$(DOCKER) swarm init \
 	)
+	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
+	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
+	)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
@@ -114,7 +141,8 @@ install-root-certificate: secrets/rootca.crt ## installs a certificate in the ho
 	$(info installing certificate in trusted root certificates...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
 		-$(shell certutil.exe -user -addstore -f root $<),\
-		$(shell sudo cp $< /etc/ssl/certs/osparc.crt))
+		$(shell sudo cp $< /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates)\
+		)
 	$(info restart any browser or docker engine that should use these certificate)
 
 .PHONY: remove-root-certificate
@@ -122,7 +150,7 @@ remove-root-certificate: ## removes the certificate from the host system
 	$(info deleting certificate from trusted root certificates...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
 		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
-		$(shell sudo rm -f /etc/ssl/certs/osparc.crt))
+		$(shell sudo rm -f /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates))
 
 .PHONY: install-full-qualified-domain-name
 install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system

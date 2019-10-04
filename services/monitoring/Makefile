@@ -33,6 +33,14 @@ POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://simcore:simcore@postgres:5432
 export MONITORED_NETWORK
 export POSTGRES_EXPORTER_DATA_SOURCE_NAME
 
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
 
 # TARGETS --------------------------------------------------
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
@@ -50,6 +58,10 @@ init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
+	)
+	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
 
 up: init ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network

@@ -39,7 +39,7 @@ portainer_url = ${ENVIRONMENT_MANAGER_NODE}:9000
 portainer_password = ${PORTAINER_ADMIN_PWD}
 deploy = ${scripts_dir}/scripts/portainer-deploy-stack.sh
 
-cd osparc-ops/services/graylog
+pushd osparc-ops/services/graylog
 ${deploy} --repo_url=${current_git_url} \
             --repo_user=${REPO_USER} --repo_password=${REPO_PASSWORD} \
             --repo_branch=${current_git_branch} \

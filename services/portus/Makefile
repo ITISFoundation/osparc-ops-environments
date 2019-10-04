@@ -24,14 +24,31 @@ STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
+
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
 # External VARIABLES
 $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
-export S3_ENDPOINT ?= $(shell hostname -I | cut -d ' ' -f1):30000
-$(info S3_ENDPOINT set to ${S3_ENDPOINT})
-MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
+export MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
 $(info MACHINE_FQDN set to ${MACHINE_FQDN})
 
 # TARGETS --------------------------------------------------
@@ -40,18 +57,13 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
+up: .init .env ${TEMP_COMPOSE} create-s3-bucket  ## Deploys the stack using provided certificates
 ifneq ("$(wildcard secrets/portus.crt) $(wildcard secrets/portus.key)", "")
-	cp secrets/portus.crt secrets/rootca.crt
+	# cp secrets/portus.crt secrets/rootca.crt
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 else
 	$(error please copy your certificate to secrets/portus.crt and private key to secrets/portus.key)
 endif
-
-
-.PHONY: up-local
-up-local: .init .env create-certificates ${TEMP_COMPOSE}  ## Deploys the stack using self-signed certificates created on-the-fly
-	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
@@ -92,11 +104,23 @@ endif
 		,                 \
 		$(DOCKER) swarm init \
 	)
+	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
+	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
+	)
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
+${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@$(DOCKER_COMPOSE) -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
+
+create-s3-bucket:
+	-docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host -e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
+
 
 # Self-signed authority ----------------------------------
 secrets/rootca.key:

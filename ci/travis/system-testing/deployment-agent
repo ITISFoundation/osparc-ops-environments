@@ -4,27 +4,33 @@ set -euo pipefail
 IFS=$'\n\t'
 
 before_install() {
-    bash ops/travis/helpers/install_docker_compose
-    bash ops/travis/helpers/show_system_versions
+    bash ci/travis/helpers/install_docker_compose
+    bash ci/travis/helpers/show_system_versions
 }
 
 install() {
     pip3 install --upgrade pip wheel setuptools && pip3 --version
-    pip3 install -r ops/travis/system-testing/requirements.txt
+    pip3 install -r ci/travis/system-testing/requirements.txt
     pushd services/deployment-agent; make build ; popd
 }
 
 before_script() {
     pip freeze
     docker images
+    GIT_BRANCH_NAME=$(exec ci/travis/helpers/get_git_branch)
+    GIT_URL=$(git config --get remote.origin.url)
     pushd services/portainer; make up; popd
-    pushd services/deployment-agent; make up ; popd
+    pushd services/deployment-agent;
+    sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: ${GIT_URL}|}" deployment_config.default.yaml
+    sed -i "/- id: simcore-ops-repo/{n;n;s/branch:.*/branch: ${GIT_BRANCH_NAME}/}" deployment_config.default.yaml
+    make up
+    popd
     docker service ls
 }
 
 script() {
     # wait for a minute to let the swarm warm up...
-    pytest --cov-append --cov=simcore_service_deployment_agent -v ops/travis/system-testing/tests
+    pytest --cov-append --cov=simcore_service_deployment_agent -v ci/travis/system-testing/tests
 }
 
 after_success() {

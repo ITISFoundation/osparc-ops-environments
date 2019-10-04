@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
-      - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
+      # - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060 this seems to slow things down
       - PORTUS_CHECK_SSL_USAGE_ENABLED="false"
 
       # DB. The password for the database should definitely not be here. You are
@@ -18,33 +18,48 @@ services:
       - PORTUS_DB_POOL=5
 
       # Secrets. It can possibly be handled better with Swarm's secrets.
+      # which will be used for to encrypt and sign sessions
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      # used to generate the private key for JWT requests
       - PORTUS_KEY_PATH=/certificates/portus.key
+      # the password of the special portus user
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
-
-      # SSL
-      # - PORTUS_PUMA_TLS_KEY=/certificates/portus.key
-      # - PORTUS_PUMA_TLS_CERT=/certificates/portus.crt
 
       # Deleting
       - PORTUS_DELETE_ENABLED=true
 
-      # NGinx is serving the assets instead of Puma. If you want to change this,
-      # uncomment this line.
-      #- RAILS_SERVE_STATIC_FILES='true'
+      # Since we have no nginx in insecure mode, portus have to
+      # serve the static files
+      - RAILS_SERVE_STATIC_FILES='true'
     networks:
       - internal
+      - public
     volumes:
       - portus_static_data:/srv/Portus/public
     secrets:
       - source: portus.key
         target: /certificates/portus.key
-      - source: portus.crt
-        target: /certificates/portus.crt
       # only needed in self-signed case
       - source: rootca.crt
         target: /certificates/rootca.crt
-
+    # only needed in self-signed case
+    extra_hosts: 
+      - "${MACHINE_FQDN}:${MACHINE_IP}"
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.portus.loadbalancer.server.port=3000
+        - traefik.http.routers.portus.rule=PathPrefix(`/`)
+        - traefik.http.routers.portus.entrypoints=portus
+        - traefik.http.routers.portus.tls=true
+        - traefik.http.routers.portus.priority=10
+        - traefik.http.routers.portus.middlewares=gzip_compress@file
+        - traefik.http.routers.portus_token.rule=PathPrefix(`/v2/token`)
+        - traefik.http.routers.portus_token.entrypoints=portus
+        - traefik.http.routers.portus_token.tls=true
+        - traefik.http.routers.portus_token.priority=40
   background:
     image: opensuse/portus:head
     init: true
@@ -56,7 +71,7 @@ services:
       # Theoretically not needed, but cconfig's been buggy on this...
       - CCONFIG_PREFIX=PORTUS
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
-      - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
+      # - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060
       - PORTUS_CHECK_SSL_USAGE_ENABLED="false"
 
       # DB. The password for the database should definitely not be here. You are
@@ -100,48 +115,64 @@ services:
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       # Authentication
-      REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}/v2/token
-      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}
+      REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}:5000/v2/token
+      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/portus.crt
-
-      # SSL
-      # REGISTRY_HTTP_TLS_CERTIFICATE: /secrets/portus.crt
-      # REGISTRY_HTTP_TLS_KEY: /secrets/portus.key
-
+      # REGISTRY_LOG_LEVEL: debug
       # Storage
       REGISTRY_STORAGE: s3
       REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESSKEY}
       REGISTRY_STORAGE_S3_SECRETKEY: ${S3_SECRETKEY}
       REGISTRY_STORAGE_S3_REGION: "us-east-1"
-      REGISTRY_STORAGE_S3_CHUNKSIZE: 16777216
       REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
       REGISTRY_STORAGE_S3_SECURE: ${S3_SECURE}
       REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
-      REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
-
       REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
       REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
 
+      REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
+      # Metrics
+      REGISTRY_HTTP_DEBUG_ADDR: ":5001"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
+      
+      # neded as it creates problems when the bucket is non existing??
+      REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "false"
+
       # Portus endpoint
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
-          url: https://${MACHINE_FQDN}/v2/webhooks/events
+          url: http://portus:3000/v2/webhooks/events
           timeout: 2000ms
           threshold: 5
           backoff: 1s
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.registry.loadbalancer.server.port=5000
+        # - traefik.http.services.registry.loadbalancer.healthcheck.path=/minio/health/ready
+        - traefik.http.routers.registry.rule=PathPrefix(`/v2`)
+        - traefik.http.routers.registry.entrypoints=portus
+        - traefik.http.routers.registry.tls=true
+        - traefik.http.routers.registry.priority=20
+        - traefik.http.routers.registry.middlewares=gzip_compress@file
     volumes:
       - registry_data:/var/lib/registry
-    networks:
-      - internal
+    # only needed in self-signed case
+    extra_hosts: 
+      - "${MACHINE_FQDN}:${MACHINE_IP}"
+    # only needed in self-signed case
     configs:
-      # - source: registry_config.yml
-      #   target: /etc/docker/registry/config.yml
-      #   mode: 0644
       - source: registry_init
         target: /etc/docker/registry/init
         mode: 0755
+    networks:
+      - internal
+      - public
+      - monitored-net
     secrets:
       - source: portus.key
         target: /secrets/portus.key
@@ -150,71 +181,6 @@ services:
       # only needed in self-signed case
       - source: rootca.crt
         target: /secrets/rootca.crt
-  clair:
-    image: quay.io/coreos/clair:v2.0.1
-    init: true
-    restart: unless-stopped
-    depends_on:
-      - postgres
-    command: [-config, /clair.yml]
-    networks:
-      - internal
-    configs:
-      - source: clair_config.yml
-        target: /clair.yml
-        mode: 0644
-
-  postgres:
-    image: library/postgres:10-alpine
-    init: true
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: portus
-    networks:
-      - internal
-
-  nginx:
-    image: library/nginx:alpine
-    init: true
-    restart: unless-stopped
-    command:  /bin/sh -c "envsubst '\$NGINX_HOST' < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
-    volumes:
-      - portus_static_data:/srv/Portus/public:ro
-    environment:
-      NGINX_HOST: ${MACHINE_FQDN}
-    # ports:
-    #   - 443:443
-    networks:
-      - default
-      - internal
-      - public
-    configs:
-      - source: nginx_nginx.conf
-        target: /etc/nginx/nginx.template.conf
-        mode: 0644
-    secrets:
-      - source: portus.key
-        target: /secrets/portus.key
-      - source: portus.crt
-        target: /secrets/portus.crt
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=public
-        - traefik.http.middlewares.registry_headers.headers.sslredirect=true
-        - traefik.http.middlewares.registry_headers.headers.sslproxyheaders=true
-        - traefik.http.services.registry.loadbalancer.server.port=443
-        # - traefik.http.services.registry.loadbalancer.healthcheck.path=/minio/health/ready
-        - traefik.http.routers.registry.rule=PathPrefix(`/`)
-        - traefik.http.routers.registry.entrypoints=registry
-        - traefik.http.routers.registry.tls=true
-        - traefik.http.routers.registry.middlewares=registry_headers, gzip_compress@file
-        # force https
-        - traefik.http.middlewares.registry_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.registry_force_https.redirectScheme.port=5000
-        - traefik.http.routers.registry_http.rule=PathPrefix(`/`)
-        - traefik.http.routers.registry_http.entrypoints=registry
-        - traefik.http.routers.registry_http.middlewares=registry_force_https
 
 volumes:
   portus_static_data:
@@ -226,20 +192,23 @@ networks:
   internal:
   public:
     external: true
+    name: ${PUBLIC_NETWORK}
+  monitored-net:
+    name: ${MONITORED_NETWORK}
+    external: true
 
 configs:
   registry_config.yml:
     file: ./registry/config.yml
+  # only needed in self-signed case
   registry_init:
     file: ./registry/init
-  nginx_nginx.conf:
-    file: ./nginx/nginx.conf
-  clair_config.yml:
-    file: ./clair/clair.yml
+
 secrets:
   portus.key:
     file: ./secrets/portus.key
   portus.crt:
     file: ./secrets/portus.crt
+  # for self-signed necessary
   rootca.crt:
     file: ./secrets/rootca.crt
