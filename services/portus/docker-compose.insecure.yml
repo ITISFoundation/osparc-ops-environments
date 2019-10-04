@@ -21,7 +21,7 @@ services:
       # which will be used for to encrypt and sign sessions
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
       # used to generate the private key for JWT requests
-      - PORTUS_KEY_PATH=/certificates/portus.key
+      - PORTUS_KEY_PATH=/certificates/domain.key
       # the password of the special portus user
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
@@ -37,8 +37,8 @@ services:
     volumes:
       - portus_static_data:/srv/Portus/public
     secrets:
-      - source: portus.key
-        target: /certificates/portus.key
+      - source: domain.key
+        target: /certificates/domain.key
       # only needed in self-signed case
       - source: rootca.crt
         target: /certificates/rootca.crt
@@ -83,15 +83,15 @@ services:
 
       # Secrets. It can possibly be handled better with Swarm's secrets.
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - PORTUS_KEY_PATH=/certificates/portus.key
+      - PORTUS_KEY_PATH=/certificates/domain.key
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
       - PORTUS_BACKGROUND=true
     networks:
       - internal
     secrets:
-      - source: portus.key
-        target: /certificates/portus.key
+      - source: domain.key
+        target: /certificates/domain.key
 
   db:
     image: library/mariadb:10.0.23
@@ -118,7 +118,7 @@ services:
       REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}:5000/v2/token
       REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/portus.crt
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/domain.crt
       # REGISTRY_LOG_LEVEL: debug
       # Storage
       REGISTRY_STORAGE: s3
@@ -174,10 +174,10 @@ services:
       - public
       - monitored-net
     secrets:
-      - source: portus.key
-        target: /secrets/portus.key
-      - source: portus.crt
-        target: /secrets/portus.crt
+      - source: domain.key
+        target: /secrets/domain.key
+      - source: domain.crt
+        target: /secrets/domain.crt
       # only needed in self-signed case
       - source: rootca.crt
         target: /secrets/rootca.crt
@@ -205,10 +205,10 @@ configs:
     file: ./registry/init
 
 secrets:
-  portus.key:
-    file: ./secrets/portus.key
-  portus.crt:
-    file: ./secrets/portus.crt
+  domain.key:
+    file: ./secrets/domain.key
+  domain.crt:
+    file: ./secrets/domain.crt
   # for self-signed necessary
   rootca.crt:
     file: ./secrets/rootca.crt
