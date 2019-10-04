@@ -17,13 +17,37 @@ current_git_branch=$(git branch | grep \* | cut -d ' ' -f2)
 source ${repo_basedir}/repo.config
 source ${repo_basedir}/services/portainer/.env
 
-# create certificates
-make create-certificates
-# install certificates (needs to be sudo)
-sudo make install-root-certificates
-# restart docker service (needs to be sudo)
-sudo service docker restart
+pushd $repo_basedir;
+echo "Deploying osparc on local system..."
+echo
+echo "Do you wish to use self-signed certificates?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes | Y | y ) \
+            echo ""; \
+            echo "creating certificates..."; \
+            make create-certificates; \
+            echo "installing certificates in host"; \
+            make install-root-certificate; \
+            echo \
+            echo "Please restart docker service and press any key when done"; \
+            read -s -n 1 key; \
+            echo \
+            echo "Did you really restart docker service? (press any key when done)"; \
+            read -s -n 1 key; \
+            break;;
 
+        No ) echo ""; \
+            mkdir -p certificates; \
+            echo "Please copy your VALID certificates in $pwd/certificates and rename them to domain.crt/domain.key"; \
+            echo "Please press any key when done"; \
+            read -s -n 1 key; \
+            echo |
+            echo "Did you really put the certificate there"; \
+            read -s -n 1 key; \
+            exit;;
+    esac
+done
 # start portainer
 echo
 echo starting portainer
@@ -72,4 +96,6 @@ echo
 echo starting deployment-agent/simcore
 pushd ${repo_basedir}/services/deployment-agent
 make build up
+popd
+
 popd

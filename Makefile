@@ -14,6 +14,10 @@ IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 $(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
+$(if $(IS_WIN),$(warning Windows is not supported in all recipes. Use WSL instead. Follow instructions in README.txt),)
+
+# Makefile's shell
+SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 
 export VCS_URL:=$(shell git config --get remote.origin.url)
 export VCS_REF:=$(shell git rev-parse --short HEAD)
@@ -95,12 +99,11 @@ certificates/domain.crt: certificates/domain.csr certificates/rootca.crt certifi
 		certificates/extfile.cnf -CAkey certificates/rootca.key -CAcreateserial \
 		-out certificates/domain.crt -days 500 -sha256
 
-
 .PHONY: install-root-certificate
 install-root-certificate: certificates/rootca.crt ## installs a certificate in the host system
 	$(info installing certificate in trusted root certificates...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
-		-$(shell certutil.exe -user -addstore -f root $<),\
+		$(shell certutil.exe -user -addstore -f root $< >/dev/null),\
 		$(shell sudo cp $< /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates)\
 		)
 	$(info restart any browser or docker engine that should use these certificate)
@@ -109,7 +112,7 @@ install-root-certificate: certificates/rootca.crt ## installs a certificate in t
 remove-root-certificate: ## removes the certificate from the host system
 	$(info deleting certificate from trusted root certificates...)
 	$(if $(or $(IS_WIN), $(IS_WSL)), \
-		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
+		-$(shell certutil.exe -user -delstore -f root "*sparc*" >/dev/null),\
 		$(shell sudo rm -f /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates))
 
 .PHONY: install-full-qualified-domain-name
