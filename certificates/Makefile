@@ -1,4 +1,4 @@
-# 
+#
 #
 # by sanderegg, pcrespov
 
@@ -47,7 +47,7 @@ domain.key:
 	# Creating private key
 	@openssl genrsa -out $@ 2048
 
-domain.csr: domain.key	
+domain.csr: domain.key
 	@openssl req -new -key $< -out $@ \
  		-subj "/C=US/ST=sparc/O=oSparc/CN=${MACHINE_FQDN}"
 
@@ -84,39 +84,22 @@ remove-root-certificate: ## removes the certificate from the host system
 		sudo update-ca-certificates \
 	)
 
-.PHONY: install-full-qualified-domain-name
-install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
-	# installing qualified domain names. to install a FQDN in your host, ADMIN rights needed)
-	$(if $(IS_WSL), \
-		$(info please run the following in a PWshell with Admin rights:)\
-		$(info Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)")\
-		$(info please run the following in a CMD with Admin rights (note that wildcards are not accepted under Windows):)\
-		$(info echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> c:\Windows\System32\drivers\etc\hosts) \
-		,\
-		sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
-		echo "# restarting docker daemon";                      \
-		sudo systemctl restart docker                           \
-	)
-
-
-
-
 .PHONY: help
 help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: info
 info: ## relevant info on certificates
-	# host IP 
+	# host IP
 	@echo ${MACHINE_IP}
-	# certificates 
+	# certificates
 	@echo $(wildcard *.crt)
 	# keys
 	@echo $(wildcard *.key)
 	# configs
 	@echo $(wildcard *.cnf)
 
-	
+
 
 info-var: ## Displays some parameters of makefile environments (debugging)
 	$(info VARIABLES: )

@@ -18,20 +18,45 @@ $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL instead.
 
 # Makefile's shell
 SHELL := /bin/bash
-
-export VCS_URL:=$(shell git config --get remote.origin.url)
-export VCS_REF:=$(shell git rev-parse --short HEAD)
-export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clean')
-export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-export DOCKER_REGISTRY?=itisfoundation
+# Machine host IP
+MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
 
 include repo.config
 
-MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
-$(info found host IP to be ${MACHINE_IP})
+
 
 # TARGETS --------------------------------------------------
 .DEFAULT_GOAL := help
+
+certificates/domain.crt: certificates/domain.key
+certificates/domain.key:
+	# domain key/crt files must be located in $< and certificates/domain.crt to be used
+	echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+	$(MAKE) -C certificates/Makefile create-certificates; \
+
+.PHONY: up-local
+up-local: .install-fqdn certificates/domain.crt certificates/domain.key ## deploy osparc ops stacks and simcore
+
+
+.PHONY: .install-fqdn
+.install-fqdn:
+	## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
+	@$(if $(IS_WSL), \
+	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
+	echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+	echo "please run the following in a PWshell with Admin rights:"; \
+	echo "Add-Content c:\Windows\System32\drivers\etc\hosts '$(MACHINE_IP) $(MACHINE_FQDN)'"; \
+	echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):"; \
+	echo "echo '$(MACHINE_IP) $(MACHINE_FQDN)' >> c:\Windows\System32\drivers\etc\hosts"; \
+	fi \
+	, \
+	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
+		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+		sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
+		echo "# restarting docker daemon";                      \
+		sudo systemctl restart docker;                           \
+	fi \
+	)
 
 .PHONY: help
 help: ## This colourful help
@@ -69,82 +94,6 @@ clean: .check_clean ## Cleans all outputs
 	@git clean -ndxf
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-
-
-# TODO: replace calls $(MAKE) -C certificates/Makefile create-cre
-
-
-.PHONY: create-certificates
-create-certificates: certificates/rootca.crt certificates/domain.crt certificates/domain.key ## create self-signed certificates and ca authority
-
-certificates/rootca.key:
-	# Creating key for authority in $@
-	@mkdir -p certificates
-	@openssl genrsa -out $@ 2048
-
-certificates/rootca.crt: certificates/rootca.key
-	# Creating certificate for authority in $@ from key $< (10000 days validity)
-	@openssl req -x509 -new -nodes -key $< \
-		-subj "/C=US/ST=sparc/O=oSparc/CN=IT'IS oSparc" \
-		-sha256 -days 10000 -out $@;
-
-certificates/extfile.cnf:
-	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
-
-certificates/domain.key:
-	# Creating private key
-	@openssl genrsa -out $@ 2048
-
-certificates/domain.csr: certificates/domain.key	
-	@openssl req -new -key $< -out $@ \
- 		-subj "/C=US/ST=sparc/O=oSparc/CN=${MACHINE_FQDN}"
-
-certificates/domain.crt: certificates/domain.csr certificates/rootca.crt certificates/rootca.key certificates/extfile.cnf
-	# Creating private certificate (500 days validity)
-	@openssl x509 -req -in certificates/domain.csr \
-		-CA certificates/rootca.crt \
-		-extfile certificates/extfile.cnf \
-		-CAkey certificates/rootca.key \
-		-CAcreateserial \
-		-out certificates/domain.crt \
-		-days 500 -sha256
-
-.PHONY: install-root-certificate
-install-root-certificate: certificates/rootca.crt ## installs a certificate in the host system
-	# installing certificate in trusted root certificates and restarting docker daemon...
-	@$(if $(IS_WSL),                                            \
-		certutil.exe -user -addstore -f root $<                 \
-	,                                                           \
-		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates;                            \
-		echo "# restarting docker daemon";                      \
-		sudo systemctl restart docker                           \
-	)
-
-
-.PHONY: remove-root-certificate
-remove-root-certificate: ## removes the certificate from the host system
-	# deleting certificate from trusted root certificates...
-	-@$(if $(IS_WSL),                                           \
-		certutil.exe -user -delstore -f root "*sparc*"          \
-	,                                                           \
-		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates \
-	)
-
-.PHONY: install-full-qualified-domain-name
-install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
-	# installing qualified domain names
-	$(info to install a FQDN in your host, ADMIN rights needed)
-	$(if $(or $(IS_WIN),$(IS_WSL)), \
-		$(info please run the following in a PWshell with Admin rights:)\
-		$(info Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)")\
-		$(info please run the following in a CMD with Admin rights (note that wildcards are not accepted under Windows):)\
-		$(info echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> c:\Windows\System32\drivers\etc\hosts) \
-		,\
-		$(shell sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;)\
-	)
-	$(info afterwards restart any browser or docker engine that should use these host file)
 
 
 
