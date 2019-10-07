@@ -44,7 +44,7 @@ cp ${repo_basedir}/certificates/*.key secrets/
 # setup configuration
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 sed -i "s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
-traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb $SERVICES_USER $SERVICES_PASSWORD | cut -d ':' -f2 | sed -e "s/\\$/\\$\\$/g")
+traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb $SERVICES_USER $SERVICES_PASSWORD | cut -d ':' -f2 | sed -e "s|\\$|\\$\\$|g")
 sed -i "s/TRAEFIK_PASSWORD=.*/TRAEFIK_PASSWORD=${traefik_password}/" .env
 make up
 popd
