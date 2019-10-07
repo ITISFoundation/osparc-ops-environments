@@ -1,3 +1,4 @@
 GF_SECURITY_ADMIN_PASSWORD=adminadmin
 GF_USERS_ALLOW_SIGN_UP=false
 GF_SERVER_ROOT_URL=https://osparc.local/grafana
+GF_INSTALL_PLUGINS=grafana-piechart-panel
