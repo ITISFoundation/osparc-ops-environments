@@ -88,6 +88,18 @@ info: ## Displays some parameters of makefile environments (debugging)
 	)
 	# done
 
+.PHONY: info-local
+info-local: ## Displays the links to the different services
+	$(info Following links are accessible in local mode:)
+	# https://$(MACHINE_FQDN) - SIM-Core
+	# https://$(MACHINE_FQDN)/portainer/ - portainer
+	# https://$(MACHINE_FQDN)/minio - S3 storage
+	# https://$(MACHINE_FQDN)/grafana - monitoring
+	# https://$(MACHINE_FQDN)/graylog/ - graylog
+	#
+	# https://$(MACHINE_FQDN):5000 - docker registry
+	# https://$(MACHINE_FQDN):10000 - docker registry
+	# https://$(MACHINE_FQDN):9001/dashboard/ - traefik UI
 
 .PHONY: clean .check_clean
 clean: .check_clean ## Cleans all outputs
