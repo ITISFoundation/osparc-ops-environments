@@ -21,6 +21,11 @@ current_git_branch=$(git branch | grep \* | cut -d ' ' -f2)
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
 source ${repo_basedir}/repo.config
 
+min_pw_length = 8
+if expr length $SERVICES_PASSWORD < $min_pw_length; then
+    echo "Password length should be at least $min_pw_length characters"
+fi
+
 cd $repo_basedir;
 
 echo
@@ -36,14 +41,20 @@ pushd ${repo_basedir}/services/traefik
 # copy certificates to traefik
 cp ${repo_basedir}/certificates/*.crt secrets/
 cp ${repo_basedir}/certificates/*.key secrets/
-# set MACHINE_FQDN
+# setup configuration
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
+sed -i "s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
+traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb $SERVICES_USER $SERVICES_PASSWORD | sed -e s/\\$/\\$\\$/g)
+sed -i "s/TRAEFIK_PASSWORD=.*/TRAEFIK_PASSWORD=$traefik_password/" .env
 make up
 popd
 
 echo
 echo starting minio...
-pushd ${repo_basedir}/services/minio; make up; popd
+pushd ${repo_basedir}/services/minio;
+sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$SERVICES_PASSWORD/" .env
+sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$SERVICES_PASSWORD/" .env
+make up; popd
 echo "waiting for minio to run...don't worry..."
 while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" https://${MACHINE_FQDN}:10000/minio/health/ready) = 200 ]; do
     echo "waiting for minio to run..."
@@ -56,8 +67,10 @@ pushd ${repo_basedir}/services/portus
 # copy certificates to portus
 cp ${repo_basedir}/certificates/*.crt secrets/
 cp ${repo_basedir}/certificates/*.key secrets/
-# set MACHINE_FQDN
+# set configuration
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
+sed -i "s/S3_ACCESSKEY=.*/S3_ACCESSKEY=$SERVICES_PASSWORD/" .env
+sed -i "s/S3_SECRETKEY=.*/S3_SECRETKEY=$SERVICES_PASSWORD/" .env
 make up
 
 # auto configure portus
@@ -69,11 +82,13 @@ while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" -H "Accept: application/js
 done
 
 if [ ! -f .portus_token ]; then
+    echo
+    echo "configuring portus..."
     portus_token=$(curl -H "Accept: application/json" -H "Content-Type: application/json" -X POST \
-        -d "{\"user\":{\"username\":\"admin\",\"email\":\"devops@swiss\",\"password\":\"adminadmin\"}}" \
+        -d "{\"user\":{\"username\":\"$SERVICES_USER\",\"email\":\"devops@swiss\",\"password\":\"$SERVICES_PASSWORD\"}}" \
         https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq -r .plain_token)
     echo ${portus_token} >> .portus_token
-    curl -H "Accept: application/json" -H "Content-Type: application/json" -H "Portus-Auth: admin:${portus_token}"  -X POST \
+    curl -H "Accept: application/json" -H "Content-Type: application/json" -H "Portus-Auth: $SERVICES_USER:${portus_token}"  -X POST \
         -d "{\"registry\": {\"name\": \"$MACHINE_FQDN\", \"hostname\":\"$MACHINE_FQDN:5000\", \"use_ssl\":\"true\"}}" \
         https://$MACHINE_FQDN:5000/api/v1/registries
 fi
@@ -84,6 +99,8 @@ echo starting monitoring...
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/monitoring
 sed -i "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
+sed -i "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD" grafana/config.monitoring
+sed -i "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD" grafana/provisioning/datasources/datasource.yml
 make up
 popd
 
