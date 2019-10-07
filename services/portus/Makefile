@@ -125,7 +125,7 @@ define create-s3-bucket
 		-v /etc/ssl/certs:/etc/ssl/certs:ro \
 		--network host \
 		-e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" \
-		minio/mc mb local/$(S3_REGISTRY_BUCKET) 2>/dev/null
+		minio/mc mb --ignore-existing local/$(S3_REGISTRY_BUCKET) 2>/dev/null
 endef
 
 
@@ -143,6 +143,8 @@ install-root-certificate: secrets/rootca.crt ## installs a certificate in the ho
 	# installing certificate in trusted root certificates and restarting docker daemon...
 	@$(if $(IS_WSL),                                            \
 		certutil.exe -user -addstore -f root $<;				\
+		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates;                            \
 		echo "Please restart the DOCKER service now..." && read -n 1; \
 		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
 	,                                                           \
@@ -156,6 +158,8 @@ remove-root-certificate: ## removes the certificate from the host system
 	# deleting certificate from trusted root certificates...
 	-@$(if $(IS_WSL), \
 		certutil.exe -user -delstore -f root "*sparc*"\
+		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates \
 	,\
 		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
 		sudo update-ca-certificates \

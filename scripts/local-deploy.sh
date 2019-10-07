@@ -45,12 +45,11 @@ popd
 echo
 echo starting minio...
 pushd ${repo_basedir}/services/minio; make up; popd
-while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" ${MACHINE_FQDN}:30000/minio/health/ready) = 200 ]; do
+echo "waiting for minio to run...don't worry..."
+while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" https://${MACHINE_FQDN}:10000/minio/health/ready) = 200 ]; do
     echo "waiting for minio to run..."
     sleep 5s
 done
-echo "waiting for the sake of waiting..."
-sleep 10s
 
 echo
 echo starting portus/registry...
@@ -61,6 +60,24 @@ cp ${repo_basedir}/certificates/*.key secrets/
 # set MACHINE_FQDN
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 make up
+
+# auto configure portus
+echo
+echo "waiting for portus to run...don't worry..."
+while [ ! $(curl -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://${MACHINE_FQDN}:5000/api/v1/users) = 404 ]; do
+    echo "waiting for portus to run..."
+    sleep 5s
+done
+
+if [ ! -f .portus_token ]; then
+    portus_token=$(curl -H "Accept: application/json" -H "Content-Type: application/json" -X POST \
+        -d "{\"user\":{\"username\":\"admin\",\"email\":\"devops@swiss\",\"password\":\"adminadmin\"}}" \
+        https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq .plain_token)
+    echo ${portus_token} >> .portus_token
+    curl -H "Accept: application/json" -H "Content-Type: application/json" -H "Portus-Auth: admin:${portus_token}"  -X POST \
+        -d "{\"registry\": {\"name\": \"$MACHINE_FQDN\", \"hostname\":\"$MACHINE_FQDN:5000\", \"use_ssl\":\"true\"}}" \
+        https://$MACHINE_FQDN:5000/api/v1/registries
+fi
 popd
 
 echo
