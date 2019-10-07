@@ -20,7 +20,6 @@ current_git_branch=$(git branch | grep \* | cut -d ' ' -f2)
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
 source ${repo_basedir}/repo.config
-source ${repo_basedir}/services/portainer/.env
 
 cd $repo_basedir;
 
@@ -64,7 +63,7 @@ make up
 # auto configure portus
 echo
 echo "waiting for portus to run...don't worry..."
-while [ ! $(curl -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://${MACHINE_FQDN}:5000/api/v1/users) = 404 ]; do
+while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://${MACHINE_FQDN}:5000/api/v1/users) = 401 ]; do
     echo "waiting for portus to run..."
     sleep 5s
 done
@@ -72,7 +71,7 @@ done
 if [ ! -f .portus_token ]; then
     portus_token=$(curl -H "Accept: application/json" -H "Content-Type: application/json" -X POST \
         -d "{\"user\":{\"username\":\"admin\",\"email\":\"devops@swiss\",\"password\":\"adminadmin\"}}" \
-        https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq .plain_token)
+        https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq -r .plain_token)
     echo ${portus_token} >> .portus_token
     curl -H "Accept: application/json" -H "Content-Type: application/json" -H "Portus-Auth: admin:${portus_token}"  -X POST \
         -d "{\"registry\": {\"name\": \"$MACHINE_FQDN\", \"hostname\":\"$MACHINE_FQDN:5000\", \"use_ssl\":\"true\"}}" \
@@ -96,6 +95,6 @@ sed -i "s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$MACHIN
 make up
 popd
 
-echo
-echo "# starting deployment-agent for simcore..."
-pushd ${repo_basedir}/services/deployment-agent; make up; popd
+# echo
+# echo "# starting deployment-agent for simcore..."
+# pushd ${repo_basedir}/services/deployment-agent; make up; popd
