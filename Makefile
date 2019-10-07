@@ -13,7 +13,7 @@ IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
-$(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
+
 $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL instead. Follow instructions in README.txt),)
 
 # Makefile's shell
@@ -38,6 +38,7 @@ certificates/domain.key:
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key ## deploy osparc ops stacks and simcore
 	bash scripts/local-deploy.sh
+	@$(MAKE) info-local
 
 .PHONY: leave
 leave: ## leaves the swarm
@@ -71,35 +72,39 @@ help: ## This colourful help
 # TODO: this is not windows friendly
 venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 .venv:
-	python3 -m venv .venv
-	.venv/bin/pip3 install --upgrade pip wheel setuptools
-	.venv/bin/pip3 install -r requirements.txt
+	@python3 -m venv .venv
+	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install -r requirements.txt
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 
 
 # Misc: info & clean
-.PHONY: info
-info: ## Displays some parameters of makefile environments (debugging)
-	$(info VARIABLES: )
+.PHONY: info info-vars info-local
+info: ## Displays some important info
+	$(info - Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
+	# done
+
+info-vars: ## Displays some parameters of makefile environments (debugging)
+	$(info # variables: )
 	$(foreach v,                                                                           \
 		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
 		$(info - $(v) = $($(v))  [in $(origin $(v))])                                      \
 	)
 	# done
 
-.PHONY: info-local
-info-local: ## Displays the links to the different services
-	$(info Following links are accessible in local mode:)
-	# https://$(MACHINE_FQDN) - SIM-Core
-	# https://$(MACHINE_FQDN)/portainer/ - portainer
-	# https://$(MACHINE_FQDN)/minio - S3 storage
-	# https://$(MACHINE_FQDN)/grafana - monitoring
-	# https://$(MACHINE_FQDN)/graylog/ - graylog
-	#
-	# https://$(MACHINE_FQDN):5000 - docker registry
-	# https://$(MACHINE_FQDN):10000 - docker registry
-	# https://$(MACHINE_FQDN):9001/dashboard/ - traefik UI
+info-local: ## Displays the links to the different services e.g. 'make info-local >SITES.md'
+	# Links in local mode:
+	@echo
+	@echo "- [https://$(MACHINE_FQDN)](osparc simcore)": framework front-end
+	@echo "- [https://$(MACHINE_FQDN)/portainer/](portainer)": swarm/containers management
+	@echo "- [https://$(MACHINE_FQDN)/minio](S3 storage)": storage management
+	@echo "- [https://$(MACHINE_FQDN)/grafana](grafana)": monitoring metrics/alerts management
+	@echo "- [https://$(MACHINE_FQDN)/graylog/](graylog)": aggregated logger
+	@echo ""
+	@echo "- [https://$(MACHINE_FQDN):5000](docker registry)": images registry
+	@echo "- [https://$(MACHINE_FQDN):10000](docker registry)": images registry ??
+	@echo "- [https://$(MACHINE_FQDN):9001/dashboard/](traefik)": ui for swarm reverse proxy
 
 .PHONY: clean .check_clean
 clean: .check_clean ## Cleans all outputs

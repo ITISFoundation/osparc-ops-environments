@@ -83,7 +83,7 @@ done
 
 if [ ! -f .portus_token ]; then
     echo
-    echo "configuring portus..."
+    echo "# configuring portus via its API ..."
     portus_token=$(curl -H "Accept: application/json" -H "Content-Type: application/json" -X POST \
         -d "{\"user\":{\"username\":\"$SERVICES_USER\",\"email\":\"devops@swiss\",\"password\":\"$SERVICES_PASSWORD\"}}" \
         https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq -r .plain_token)
