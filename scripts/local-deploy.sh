@@ -131,11 +131,11 @@ curl -u $SERVICES_USER:$SERVICES_PASSWORD -H "Content-Type: application/json" -H
     https://$MACHINE_FQDN/graylog/api/system/inputs
 popd
 
-# echo
-# echo "# starting deployment-agent for simcore..."
-# pushd ${repo_basedir}/services/deployment-agent;
-# sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=$SERVICES_PASSWORD/" .env
-# sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=$SERVICES_PASSWORD/" .env
-# make up;
-# popd
+echo
+echo "# starting deployment-agent for simcore..."
+pushd ${repo_basedir}/services/deployment-agent;
+sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=$SERVICES_PASSWORD/" .env
+sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=$SERVICES_PASSWORD/" .env
+make up;
+popd
 
