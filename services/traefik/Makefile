@@ -138,29 +138,43 @@ create-certificates: secrets/domain.crt secrets/domain.key secrets/rootca.crt ##
 
 .PHONY: install-root-certificate
 install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
-	$(info installing certificate in trusted root certificates...)
-	$(if $(or $(IS_WIN), $(IS_WSL)), \
-		-$(shell certutil.exe -user -addstore -f root $<),\
-		$(shell sudo cp $< /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates)\
-		)
-	$(info restart any browser or docker engine that should use these certificate)
+	# installing certificate in trusted root certificates and restarting docker daemon...
+	@$(if $(IS_WSL),                                            \
+		certutil.exe -user -addstore -f root $<;				\
+		echo "Please restart the DOCKER service now..." && read -n 1; \
+		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
+	,                                                           \
+		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates;                            \
+		echo "# restarting docker daemon";                      \
+		sudo systemctl restart docker                           \
+	)
 
 .PHONY: remove-root-certificate
 remove-root-certificate: ## removes the certificate from the host system
-	$(info deleting certificate from trusted root certificates...)
-	$(if $(or $(IS_WIN), $(IS_WSL)), \
-		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
-		$(shell sudo rm -f /usr/local/share/ca-certificates/osparc.crt; sudo update-ca-certificates))
+	# deleting certificate from trusted root certificates...
+	-@$(if $(IS_WSL), \
+		certutil.exe -user -delstore -f root "*sparc*"\
+	,\
+		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates \
+	)
 
 .PHONY: install-full-qualified-domain-name
-install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
-	$(info )
-	$(info to install a FQDN in your host, ADMIN rights needed)
-	$(if $(or $(IS_WIN),$(IS_WSL)), \
-		$(info please run the following in a PWshell with Admin rights:)\
-		$(info Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)"),\
-		$(info please run the following in a CMD with Admin rights (note that wildcards are not accepted under Windows):)\
-		$(info echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> c:\Windows\System32\drivers\etc\hosts),\
-		$(shell sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;)\
+.install-fqdn: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
+	@$(if $(IS_WSL), \
+	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
+	echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+	echo "please run the following in a PWshell with Admin rights:"; \
+	echo "Add-Content c:\Windows\System32\drivers\etc\hosts '$(MACHINE_IP) $(MACHINE_FQDN)'"; \
+	echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):"; \
+	echo "echo '$(MACHINE_IP) $(MACHINE_FQDN)' >> c:\Windows\System32\drivers\etc\hosts"; \
+	fi \
+	, \
+	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
+		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+		sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
+		echo "# restarting docker daemon";                      \
+		sudo systemctl restart docker;                           \
+	fi \
 	)
-	$(info afterwards restart any browser or docker engine that should use these host file)

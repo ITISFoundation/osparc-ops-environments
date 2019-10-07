@@ -24,48 +24,8 @@ source ${repo_basedir}/services/portainer/.env
 
 cd $repo_basedir;
 
-machine_ip=$(hostname -I | cut -d' ' -f1)
-
-
-echo "Deploying osparc on ${MACHINE_FQDN}..."
-echo "Do you to add this name to the local host file?"
-select yn in "Yes" "No"; do
-    case $yn in
-    Yes ) \
-        echo \
-        ; \
-        echo "adding ${MACHINE_FQDN} using ${machine_ip}"; \
-        sudo make install-full-qualified-domain-name; \
-        break;;
-    No ) echo ""; \
-        echo "using $(hostname -f)"
-        break;;
-    esac
-done
-
 echo
-echo "Do you wish to use self-signed certificates?"
-select yn in "Yes" "No"; do
-    case $yn in
-        Yes  ) \
-            echo ""; \
-            echo "creating certificates..."; \
-            make create-certificates; \
-            echo "installing certificates in host"; \
-            make install-root-certificate; \
-            break;;
-
-        No ) echo ""; \
-            mkdir -p certificates; \
-            echo "Please copy your VALID certificates in $(pwd)/certificates and rename them to domain.crt/domain.key"; \
-            echo "Please press any key when done"; \
-            read -s -n 1 key; \
-            echo \
-            echo "Did you really put the certificate there"; \
-            read -s -n 1 key; \
-            break;;
-    esac
-done
+echo "Deploying osparc on ${MACHINE_FQDN}..."
 
 echo
 echo "# starting portainer..."
@@ -75,7 +35,8 @@ echo
 echo starting traefik...
 pushd ${repo_basedir}/services/traefik
 # copy certificates to traefik
-cp ${repo_basedir}/certificates/* secrets/
+cp ${repo_basedir}/certificates/*.crt secrets/
+cp ${repo_basedir}/certificates/*.key secrets/
 # set MACHINE_FQDN
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 make up
@@ -84,12 +45,17 @@ popd
 echo
 echo starting minio...
 pushd ${repo_basedir}/services/minio; make up; popd
+while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" ${MACHINE_FQDN}:30000/minio/health/ready) = 200 ]; do
+    echo "waiting for minio to run..."
+    sleep 5s
+done
 
 echo
 echo starting portus/registry...
 pushd ${repo_basedir}/services/portus
-# copy certificates to traefik
-cp ${repo_basedir}/certificates/* secrets/
+# copy certificates to portus
+cp ${repo_basedir}/certificates/*.crt secrets/
+cp ${repo_basedir}/certificates/*.key secrets/
 # set MACHINE_FQDN
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 make up
@@ -113,4 +79,4 @@ popd
 
 echo
 echo "# starting deployment-agent for simcore..."
-pushd ${repo_basedir}/services/deployment-agent; make build up; popd
+pushd ${repo_basedir}/services/deployment-agent; make up; popd

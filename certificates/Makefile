@@ -65,7 +65,9 @@ domain.crt: domain.csr rootca.crt rootca.key extfile.cnf
 install-root-certificate: rootca.crt ## installs a certificate in the host system
 	# installing certificate in trusted root certificates and restarting docker daemon...
 	@$(if $(IS_WSL),                                            \
-		certutil.exe -user -addstore -f root $<                 \
+		certutil.exe -user -addstore -f root $<;				\
+		echo "Please restart the DOCKER service now..." && read -n 1; \
+		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
 	,                                                           \
 		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
 		sudo update-ca-certificates;                            \

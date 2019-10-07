@@ -31,16 +31,20 @@ include repo.config
 certificates/domain.crt: certificates/domain.key
 certificates/domain.key:
 	# domain key/crt files must be located in $< and certificates/domain.crt to be used
-	echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ]; \
-	$(MAKE) -C certificates/Makefile create-certificates; \
+	@echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+	$(MAKE) -C certificates create-certificates; \
+	$(MAKE) -C certificates install-root-certificate;
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key ## deploy osparc ops stacks and simcore
+	bash scripts/local-deploy.sh
 
+.PHONY: leave
+leave: ## leaves the swarm
+	docker swarm leave -f
 
 .PHONY: .install-fqdn
 .install-fqdn:
-	## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
 	@$(if $(IS_WSL), \
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
 	echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
