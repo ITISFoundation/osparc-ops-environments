@@ -17,7 +17,7 @@
   "gnetId": 10906,
   "graphTooltip": 0,
   "id": 2,
-  "iteration": 1570043027251,
+  "iteration": 1570455585725,
   "links": [
     {
       "icon": "external link",
@@ -1087,8 +1087,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "webserver",
-          "value": "webserver"
+          "tags": [],
+          "text": "traefik",
+          "value": "traefik"
         },
         "datasource": "Prometheus",
         "definition": "",
@@ -1112,8 +1113,8 @@
       {
         "allValue": "traefik",
         "current": {
-          "text": "10.0.2.13",
-          "value": "10.0.2.13"
+          "text": "10.0.2.12",
+          "value": "10.0.2.12"
         },
         "datasource": "Prometheus",
         "definition": "",
