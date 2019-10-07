@@ -121,7 +121,7 @@ ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@echo "${STACK_NAME} stack file created for $@"
 
 define create-s3-bucket
-	-docker run \
+	docker run \
 		-v /etc/ssl/certs:/etc/ssl/certs:ro \
 		--network host \
 		-e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" \
