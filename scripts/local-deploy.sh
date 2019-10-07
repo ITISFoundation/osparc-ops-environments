@@ -49,6 +49,8 @@ while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" ${MACHINE_FQDN}:30000/mini
     echo "waiting for minio to run..."
     sleep 5s
 done
+echo "waiting for the sake of waiting..."
+sleep 10s
 
 echo
 echo starting portus/registry...
