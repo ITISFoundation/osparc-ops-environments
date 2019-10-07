@@ -19,8 +19,7 @@ current_git_branch=$(git branch | grep \* | cut -d ' ' -f2)
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
-# TODO: rename *.config-> *.cfg
-source ${repo_basedir}/repo.config 
+source ${repo_basedir}/repo.config
 source ${repo_basedir}/services/portainer/.env
 
 cd $repo_basedir;
@@ -107,7 +106,7 @@ popd
 echo
 echo starting graylog...
 # set MACHINE_FQDN
-pushd ${repo_basedir}/services/graylog; 
+pushd ${repo_basedir}/services/graylog;
 sed -i "s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$MACHINE_FQDN/graylog/|" .env
 make up
 popd
