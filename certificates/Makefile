@@ -82,12 +82,12 @@ install-root-certificate: rootca.crt ## installs a certificate in the host syste
 remove-root-certificate: ## removes the certificate from the host system
 	# deleting certificate from trusted root certificates...
 	-@$(if $(IS_WSL), \
-		certutil.exe -user -delstore -f root "*sparc*"\
+		certutil.exe -user -delstore -f root "*sparc*";\
 		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates \
+		sudo update-ca-certificates; \
 	,\
 		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates \
+		sudo update-ca-certificates; \
 	)
 
 .PHONY: help
