@@ -95,5 +95,5 @@ ${TEMP_COMPOSE}: docker-compose.yml
 		, \
 		echo ""; \
 		echo -n "${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
-		echo "created PORTAINER_ADMIN_PWD is ${PORTAINER_ADMIN_PWD}" \
+		echo "created PORTAINER_ADMIN_PWD secret}" \
 	)

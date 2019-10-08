@@ -83,22 +83,23 @@ endif
 .PHONY: .init .create-stack-file .create-secrets
 .init:
 	# initialize swarm cluster and install dependencies
-	$(if $(SWARM_HOSTS),  \
+	@$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
 	)
-	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
-	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 .venv:
-	python3 -m venv .venv
-	.venv/bin/pip3 install --upgrade pip wheel setuptools
-	.venv/bin/pip3 install jinja2 j2cli[yaml]
+	# creating virtual environment with tooling (jinja, etc)
+	@python3 -m venv .venv
+	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install jinja2 j2cli[yaml]
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
@@ -114,11 +115,11 @@ ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
 		, \
 		echo ""; \
 		echo "${MINIO_ACCESS_KEY}" | docker secret create minio_access_key -  2>/dev/null; \
-		echo "created MINIO_ACCESS_KEY is ${MINIO_ACCESS_KEY}" \
+		echo "created MINIO_ACCESS_KEY secret" \
 	)
 	@$(if $(DOCKER_MINIO_SECRET_KEY), \
 		,							\
 		echo ""; \
 		echo "${MINIO_SECRET_KEY}" | docker secret create minio_secret_key -  2>/dev/null; \
-		echo "created MINIO_SECRET_KEY is ${MINIO_SECRET_KEY}" \
+		echo "created MINIO_SECRET_KEY secret" \
 	)
