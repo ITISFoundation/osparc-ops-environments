@@ -63,6 +63,4 @@ main:
     - service: mattermost
       url: http://mattermost.com
       message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
-      enabled: false
-      channel_id: some_token
-      personal_token: some_token
+      header_unique_name: master

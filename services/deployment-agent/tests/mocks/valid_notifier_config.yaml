@@ -9,3 +9,4 @@ main:
       enabled: true
       channel_id: some_token
       personal_token: some_token
+      header_unique_name: master

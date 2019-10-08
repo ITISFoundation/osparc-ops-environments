@@ -50,3 +50,4 @@ main:
         enabled: true
         channel_id: dfsfdsfsf
         personal_token: some_token
+        header_unique_name: master

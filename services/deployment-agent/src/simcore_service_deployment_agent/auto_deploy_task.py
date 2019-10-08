@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import tempfile
-from enum import IntEnum
 from pathlib import Path
 from shutil import copy2
 from typing import Dict, List, Tuple
@@ -14,11 +13,12 @@ from tenacity import (before_sleep_log, retry, retry_if_exception_type,
 from yarl import URL
 
 from . import portainer
+from .app_state import State
 from .cmd_utils import run_cmd_line
 from .docker_registries_watcher import DockerRegistriesWatcher
 from .exceptions import ConfigurationError, DependencyNotReadyError
 from .git_url_watcher import GitUrlWatcher
-from .notifier import notify
+from .notifier import notify, notify_state
 from .subtask import SubTask
 
 log = logging.getLogger(__name__)
@@ -27,13 +27,6 @@ TASK_STATE = "{}_state".format(TASK_NAME)
 
 RETRY_WAIT_SECS = 2
 RETRY_COUNT = 10
-
-
-class State(IntEnum):
-    STARTING = 0
-    RUNNING = 1
-    FAILED = 2
-    STOPPED = 3
 
 
 async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
@@ -148,7 +141,7 @@ async def create_git_watch_subtask(app_config: Dict) -> SubTask:
     return git_sub_task
 
 
-async def init_task(app_config: Dict, message: str) -> List[SubTask]:
+async def init_task(app_config: Dict) -> List[SubTask]:
     log.debug("initialising task")
     subtasks = []
     # start by creating the git watcher/repos
@@ -167,8 +160,6 @@ async def init_task(app_config: Dict, message: str) -> List[SubTask]:
     # deploy to portainer
     await update_portainer_stack(app_config, stack_cfg)
     log.debug("updated portainer app")
-    # notify
-    await notify(app_config, message=message)
     log.debug("task initialised")
     return subtasks
 
@@ -208,11 +199,25 @@ async def auto_deploy(app: web.Application):
         app_config = app[APP_CONFIG_KEY]
         log.info("initialising...")
         await wait_for_dependencies(app_config)
-        subtasks = await init_task(app_config, message="Stack initialised")
+        subtasks = await init_task(app_config)
+        await notify(app_config, message="Stack initialised")
+        await notify_state(app_config, state=app[TASK_STATE], message="starting")
         log.info("initialisation completed")
-        app[TASK_STATE] = State.RUNNING
-        # loop forever to detect changes
-        while True:
+    except asyncio.CancelledError:
+        log.info("cancelling task...")
+        app[TASK_STATE] = State.STOPPED
+        raise
+    except Exception:
+        log.exception("Task closing:")
+        app[TASK_STATE] = State.FAILED
+        raise
+    finally:
+        # cleanup the subtasks
+        log.info("task completed...")
+
+    # loop forever to detect changes
+    while True:
+        try:
             log.info("checking for changes...")
             changes_detected, changes = await check_changes(subtasks)
             if changes_detected:
@@ -221,21 +226,28 @@ async def auto_deploy(app: web.Application):
                 message = "Updated stack"
                 if changes:
                     message = message + "\n{}".format(changes)
-                subtasks = await init_task(app_config, message=message)
+                subtasks = await init_task(app_config)
+                await notify(app_config, message=message)
                 log.info("stack re-deployed")
+                await notify_state(app_config, state=app[TASK_STATE], message="")
+            if app[TASK_STATE] != State.RUNNING:
+                app[TASK_STATE] = State.RUNNING
+                await notify_state(app_config, state=app[TASK_STATE], message="")
             await asyncio.sleep(app_config["main"]["polling_interval"])
-
-    except asyncio.CancelledError:
-        log.info("cancelling task...")
-        app[TASK_STATE] = State.STOPPED
-        raise
-    except:
-        log.exception("Task closing:")
-        app[TASK_STATE] = State.FAILED
-        raise
-    finally:
-        # cleanup the subtasks
-        log.info("task completed...")
+        except asyncio.CancelledError:
+            log.info("cancelling task...")
+            app[TASK_STATE] = State.STOPPED
+            raise
+        except Exception as exc:
+            # some unknown error happened, let's wait 5 min and restart
+            log.exception("Task error:")
+            if app[TASK_STATE] != State.PAUSED:
+                app[TASK_STATE] = State.PAUSED
+                await notify_state(app_config, state=app[TASK_STATE], message=exc.message)
+            await asyncio.sleep(300)
+        finally:
+            # cleanup the subtasks
+            log.info("task completed...")
 
 
 async def start(app: web.Application):
