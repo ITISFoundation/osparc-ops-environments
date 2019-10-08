@@ -57,10 +57,9 @@ help: ## This colourful help
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
 	# creating bucket
-	$(create-s3-bucket)
+	@$(create-s3-bucket)
 ifneq ("$(wildcard secrets/domain.crt) $(wildcard secrets/domain.key)", "")
-	# cp secrets/domain.crt secrets/rootca.crt
-	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	@$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 else
 	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif

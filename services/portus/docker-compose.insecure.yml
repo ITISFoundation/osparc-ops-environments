@@ -4,7 +4,6 @@ services:
   portus:
     image: opensuse/portus:head # 2.4.3 does not allow for nested images key
     init: true
-    restart: unless-stopped
     environment:
       - PORTUS_MACHINE_FQDN_VALUE=${MACHINE_FQDN}
       # - PORTUS_SECURITY_CLAIR_SERVER=http://clair:6060 this seems to slow things down
@@ -43,7 +42,7 @@ services:
       - source: rootca.crt
         target: /certificates/rootca.crt
     # only needed in self-signed case
-    extra_hosts: 
+    extra_hosts:
       - "${MACHINE_FQDN}:${MACHINE_IP}"
     deploy:
       labels:
@@ -63,7 +62,6 @@ services:
   background:
     image: opensuse/portus:head
     init: true
-    restart: unless-stopped
     depends_on:
       - portus
       - db
@@ -96,7 +94,6 @@ services:
   db:
     image: library/mariadb:10.0.23
     init: true
-    restart: unless-stopped
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
     environment:
       - MYSQL_DATABASE=portus_production
@@ -111,7 +108,6 @@ services:
   registry:
     image: library/registry:2.7
     init: true
-    restart: unless-stopped
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       # Authentication
@@ -137,7 +133,7 @@ services:
       REGISTRY_HTTP_DEBUG_ADDR: ":5001"
       REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
       REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
-      
+
       # neded as it creates problems when the bucket is non existing??
       REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "false"
 
@@ -162,7 +158,7 @@ services:
     volumes:
       - registry_data:/var/lib/registry
     # only needed in self-signed case
-    extra_hosts: 
+    extra_hosts:
       - "${MACHINE_FQDN}:${MACHINE_IP}"
     # only needed in self-signed case
     configs:

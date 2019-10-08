@@ -117,7 +117,6 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
-	@echo "$@ file is missing! Copying from $<..."
 	cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}

@@ -29,14 +29,14 @@ fi
 cd $repo_basedir;
 
 echo
-echo -e "\e[1mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
+echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
 echo
-echo -e "\e[1mstarting portainer...\e[0m"
+echo -e "\e[1;33mstarting portainer...\e[0m"
 pushd ${repo_basedir}/services/portainer; make up; popd
 
 echo
-echo -e "\e[1mstarting traefik...\e[0m"
+echo -e "\e[1;33mstarting traefik...\e[0m"
 pushd ${repo_basedir}/services/traefik
 # copy certificates to traefik
 cp ${repo_basedir}/certificates/*.crt secrets/
@@ -50,7 +50,7 @@ make up
 popd
 
 echo
-echo -e "\e[1mstarting minio...\e[0m"
+echo -e "\e[1;33mstarting minio...\e[0m"
 pushd ${repo_basedir}/services/minio;
 sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$SERVICES_PASSWORD/" .env
 sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$SERVICES_PASSWORD/" .env
@@ -62,7 +62,7 @@ while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 https://${MAC
 done
 
 echo
-echo -e "\e[1mstarting portus/registry...\e[0m"
+echo -e "\e[1;33mstarting portus/registry...\e[0m"
 pushd ${repo_basedir}/services/portus
 # copy certificates to portus
 cp ${repo_basedir}/certificates/*.crt secrets/
@@ -114,7 +114,7 @@ fi
 popd
 
 echo
-echo -e "\e[1mstarting monitoring...\e[0m"
+echo -e "\e[1;33mstarting monitoring...\e[0m"
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/monitoring
 sed -i "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
@@ -124,7 +124,7 @@ make up
 popd
 
 echo
-echo -e "\e[1mstarting graylog...\e[0m"
+echo -e "\e[1;33mstarting graylog...\e[0m"
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/graylog;
 graylog_password=$(echo -n $SERVICES_PASSWORD | sha256sum | cut -d ' ' -f1)
@@ -156,10 +156,28 @@ curl -u $SERVICES_USER:$SERVICES_PASSWORD --header "Content-Type: application/js
 popd
 
 echo
-echo "# starting deployment-agent for simcore..."
+echo -e "\e[1;33mstarting deployment-agent for simcore...\e[0m"
 pushd ${repo_basedir}/services/deployment-agent;
-sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=$SERVICES_PASSWORD/" .env
-sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=$SERVICES_PASSWORD/" .env
+
+if [[ $current_git_url == git* ]]; then
+    # it is a ssh style link let's get the organisation name and just replace this cause that conf only accepts https git repos
+    current_organisation=$(echo $current_git_url | cut -d":" -f2 | cut -d"/" -f1)
+    sed -i "s|https://github.com/ITISFoundation/osparc-ops.git|https://github.com/$current_organisation/osparc-ops.git|" deployment_config.default.yaml
+else
+    sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: $current_git_url|}" deployment_config.default.yaml
+fi
+sed -i "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
+
+# full original -> replacement
+YAML_STRING="environment:\n        S3_ENDPOINT: ${MACHINE_FQDN}:10000\n        S3_ACCESS_KEY: ${SERVICES_PASSWORD}\n        S3_SECRET_KEY: ${SERVICES_PASSWORD}"
+sed -i "s/environment: {}/$YAML_STRING/" deployment_config.default.yaml
+# update
+sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${MACHINE_FQDN}:10000/" deployment_config.default.yaml
+sed -i "s/S3_ACCESS_KEY:.*/S3_ACCESS_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
+sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
+# portainer
+sed -i "/- url: .*portainer:9000/{n;s/username:.*/username: ${SERVICES_USER}/}" deployment_config.default.yaml
+sed -i "/- url: .*portainer:9000/{n;n;s/password:.*/password: ${SERVICES_PASSWORD}/}" deployment_config.default.yaml
 make up;
 popd
 

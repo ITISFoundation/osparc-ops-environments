@@ -28,10 +28,6 @@ services:
       - transport.host=localhost
       - network.host=0.0.0.0
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     deploy:
       replicas: 1
       restart_policy:
@@ -98,7 +94,6 @@ services:
   logspout:
     image: vincit/logspout-gelf
     command: gelf://graylog:12201
-    restart: unless-stopped
     depends_on:
       - graylog
     init: true
