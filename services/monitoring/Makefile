@@ -59,16 +59,16 @@ init: ## initializeds swarm cluster
 		,                 \
 		docker swarm init \
 	)
-	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
-
-up: init ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
-	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
+
+up: init ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset

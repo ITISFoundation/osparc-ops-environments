@@ -14,7 +14,7 @@ scripts_dir=$(realpath ${repo_basedir}/scripts)
 
 # VCS info on current repo
 current_git_url=$(git config --get remote.origin.url)
-current_git_branch=$(git branch | grep \* | cut -d ' ' -f2)
+current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
 
 # Loads configurations variables
@@ -29,14 +29,14 @@ fi
 cd $repo_basedir;
 
 echo
-echo "Deploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD..."
+echo -e "\e[1mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
 echo
-echo "starting portainer..."
+echo -e "\e[1mstarting portainer...\e[0m"
 pushd ${repo_basedir}/services/portainer; make up; popd
 
 echo
-echo "starting traefik..."
+echo -e "\e[1mstarting traefik...\e[0m"
 pushd ${repo_basedir}/services/traefik
 # copy certificates to traefik
 cp ${repo_basedir}/certificates/*.crt secrets/
@@ -50,7 +50,7 @@ make up
 popd
 
 echo
-echo starting minio...
+echo -e "\e[1mstarting minio...\e[0m"
 pushd ${repo_basedir}/services/minio;
 sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$SERVICES_PASSWORD/" .env
 sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$SERVICES_PASSWORD/" .env
@@ -62,7 +62,7 @@ while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 https://${MAC
 done
 
 echo
-echo starting portus/registry...
+echo -e "\e[1mstarting portus/registry...\e[0m"
 pushd ${repo_basedir}/services/portus
 # copy certificates to portus
 cp ${repo_basedir}/certificates/*.crt secrets/
@@ -83,19 +83,38 @@ done
 
 if [ ! -f .portus_token ]; then
     echo
-    echo "# configuring portus via its API ..."
+    echo "configuring portus via its API ..."
+json_data=$(cat <<EOF
+{
+    "user": {
+        "username": "$SERVICES_USER",
+        "email": "admin@swiss",
+        "password": "$SERVICES_PASSWORD"
+    }
+}
+EOF
+)
     portus_token=$(curl -H "Accept: application/json" -H "Content-Type: application/json" -X POST \
-        -d "{\"user\":{\"username\":\"$SERVICES_USER\",\"email\":\"devops@swiss\",\"password\":\"$SERVICES_PASSWORD\"}}" \
-        https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq -r .plain_token)
+        -d "${json_data}" https://$MACHINE_FQDN:5000/api/v1/users/bootstrap | jq -r .plain_token)
     echo ${portus_token} >> .portus_token
+
+json_data=$(cat <<EOF
+{
+    "registry": {
+        "name": "$MACHINE_FQDN",
+        "hostname": "$MACHINE_FQDN:5000",
+        "use_ssl": true
+    }
+}
+EOF
+)
     curl -H "Accept: application/json" -H "Content-Type: application/json" -H "Portus-Auth: $SERVICES_USER:${portus_token}"  -X POST \
-        -d "{\"registry\": {\"name\": \"$MACHINE_FQDN\", \"hostname\":\"$MACHINE_FQDN:5000\", \"use_ssl\":\"true\"}}" \
-        https://$MACHINE_FQDN:5000/api/v1/registries
+        -d "${json_data}" https://$MACHINE_FQDN:5000/api/v1/registries
 fi
 popd
 
 echo
-echo starting monitoring...
+echo -e "\e[1mstarting monitoring...\e[0m"
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/monitoring
 sed -i "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
@@ -105,7 +124,7 @@ make up
 popd
 
 echo
-echo starting graylog...
+echo -e "\e[1mstarting graylog...\e[0m"
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/graylog;
 graylog_password=$(echo -n $SERVICES_PASSWORD | sha256sum | cut -d ' ' -f1)
@@ -119,16 +138,21 @@ while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 -H "Accept: a
     echo "waiting for graylog to run..."
     sleep 5s
 done
-curl -u $SERVICES_USER:$SERVICES_PASSWORD -H "Content-Type: application/json" -H "X-Requested-By: cli" -X POST \
-    -d "{\"title\":\"standard GELF UDP input\", \
-        \"type\":\"org.graylog2.inputs.gelf.udp.GELFUDPInput\", \
-        \"global\":\"true\", \
-        \"configuration\": { \
-            \"bind_address\":\"0.0.0.0\", \
-            \"port\":12201 \
-        } \
-        }" \
-    https://$MACHINE_FQDN/graylog/api/system/inputs
+json_data=$(cat <<EOF
+{
+"title": "standard GELF UDP input",
+    "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
+    "global": "true",
+    "configuration": {
+        "bind_address": "0.0.0.0",
+        "port":12201
+    }
+}
+EOF
+)
+curl -u $SERVICES_USER:$SERVICES_PASSWORD --header "Content-Type: application/json" \
+    --header "X-Requested-By: cli" -X POST \
+    --data "$json_data" https://$MACHINE_FQDN/graylog/api/system/inputs
 popd
 
 echo

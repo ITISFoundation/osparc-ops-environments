@@ -8,7 +8,6 @@ IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
-$(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
 
 # Makefile's shell
 SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
@@ -49,7 +48,6 @@ include .env
 
 # exports
 export MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
-$(info MACHINE_FQDN set to ${MACHINE_FQDN})
 
 # TARGETS --------------------------------------------------
 .PHONY: help
@@ -106,11 +104,11 @@ endif
 		,                 \
 		$(DOCKER) swarm init \
 	)
-	$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
-	$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
@@ -121,7 +119,7 @@ ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@echo "${STACK_NAME} stack file created for $@"
 
 define create-s3-bucket
-	docker run \
+	@docker run \
 		-v /etc/ssl/certs:/etc/ssl/certs:ro \
 		--network host \
 		-e MC_HOST_local="https://$(S3_ACCESSKEY):$(S3_SECRETKEY)@$(S3_ENDPOINT)" \

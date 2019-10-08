@@ -113,13 +113,9 @@ ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
 .create-secrets:
 	@$(if $(DOCKER_MINIO_ACCESS_KEY), \
 		, \
-		echo ""; \
 		echo "${MINIO_ACCESS_KEY}" | docker secret create minio_access_key -  2>/dev/null; \
-		echo "created MINIO_ACCESS_KEY secret" \
 	)
 	@$(if $(DOCKER_MINIO_SECRET_KEY), \
 		,							\
-		echo ""; \
 		echo "${MINIO_SECRET_KEY}" | docker secret create minio_secret_key -  2>/dev/null; \
-		echo "created MINIO_SECRET_KEY secret" \
 	)
