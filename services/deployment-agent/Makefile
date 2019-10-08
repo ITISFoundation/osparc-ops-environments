@@ -117,7 +117,7 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
-	cp $< $@
+	@cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
