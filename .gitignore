@@ -116,6 +116,8 @@ deployment_config.yaml
 *.srl
 *.cnf
 *.csr
+# token
+*_token
 
 
 
