@@ -20,7 +20,7 @@ before_script() {
     pushd services/portainer; make up; popd
     pushd services/deployment-agent;
     # use the config file for testing not the default
-    export DEPLOYMENT_AGENT_CONFIG=src/tests/mocks/valid_system_test_config.yaml
+    cp tests/mocks/valid_system_test_config.yaml deployment_config.default.yaml
     make up
     popd
     docker service ls
@@ -28,19 +28,19 @@ before_script() {
 
 script() {
     # wait for a minute to let the swarm warm up...
-    pytest --cov-append --cov=simcore_service_deployment_agent -v ci/travis/system-testing/tests
+    pytest --cov-append --cov=services/deployment-agent -v ci/travis/system-testing/tests
 }
 
 after_success() {
-    pushd services/deployment-agent; make down ; popd
+    pushd services/deployment-agent; make leave ; popd
 }
 
 after_failure() {
     docker service ls
-    docker service ps portainer_auto-deployment-agent
-    docker service logs portainer_auto-deployment-agent
+    docker service ps deployment-agent_auto-deployment-agent
+    docker service logs deployment-agent_auto-deployment-agent
     docker ps
-    pushd services/deployment-agent; make down ; popd
+    pushd services/deployment-agent; make leave ; popd
 }
 
 # Check if the function exists (bash specific)
