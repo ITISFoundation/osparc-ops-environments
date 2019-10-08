@@ -17,12 +17,10 @@ install() {
 before_script() {
     pip freeze
     docker images
-    GIT_BRANCH_NAME=$(exec ci/travis/helpers/get_git_branch)
-    GIT_URL=$(git config --get remote.origin.url)
     pushd services/portainer; make up; popd
     pushd services/deployment-agent;
-    sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: ${GIT_URL}|}" deployment_config.default.yaml
-    sed -i "/- id: simcore-ops-repo/{n;n;s/branch:.*/branch: ${GIT_BRANCH_NAME}/}" deployment_config.default.yaml
+    # use the config file for testing not the default
+    export DEPLOYMENT_AGENT_CONFIG=src/tests/mocks/valid_system_test_config.yaml
     make up
     popd
     docker service ls
