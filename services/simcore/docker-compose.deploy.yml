@@ -1,0 +1,30 @@
+# osparc-simcore stack (framework stack)
+version: '3.7'
+services:
+  webserver:
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.webserver.loadbalancer.server.port=8080
+        - traefik.http.routers.webserver.rule=PathPrefix(`/`)
+        - traefik.http.routers.webserver.priority=1
+        - traefik.http.routers.webserver.entrypoints=https
+        - traefik.http.routers.webserver.tls=true
+        - traefik.http.routers.webserver.middlewares=gzip_compress@file
+    networks:
+      - public
+  
+  # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
+      # storage:
+
+  # postgres:
+  #   deploy:
+  #     placement:
+  #       constraints:
+  #         - node.labels.postgres==true
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}

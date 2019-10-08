@@ -12,8 +12,17 @@ DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 TEMP_COMPOSE = .stack.${STACK_NAME}.yaml
 TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
 
+
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
+
 # External VARIABLES
-$(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
@@ -25,8 +34,7 @@ export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
 $(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
-export MINIO_HOSTNAME ?= $(shell hostname -I | cut -d ' ' -f1)
-$(info MINIO_HOSTNAME set to ${MINIO_HOSTNAME})
+
 # TARGETS --------------------------------------------------
 .PHONY: help
 help: ## This colourful help
@@ -103,16 +111,20 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 		,                 \
 		docker swarm init \
 	)
+	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
-	@echo "$@ file is missing! Copying from tests folder..."
 	cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
+${TEMP_COMPOSE}: docker-compose.yml .env
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
-${TEMP_COMPOSE-devel}: docker-compose.yml docker-compose.devel.yml
-	@docker-compose -f $< -f docker-compose.devel.yml config > $@
+.PHONY: ${TEMP_COMPOSE-devel}
+${TEMP_COMPOSE-devel}: docker-compose.yml docker-compose.devel.yaml  .env
+	@docker-compose -f docker-compose.yml -f docker-compose.devel.yaml config > $@
 	@echo "${STACK_NAME} stack file created for in $@"

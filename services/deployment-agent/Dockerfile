@@ -102,7 +102,10 @@ ENV SC_BOOT_MODE development
 
 # install test 3rd party packages to accelerate runtime installs
 COPY --chown=scu:scu tests/requirements.txt requirements-tests.txt
-RUN $SC_PIP install -r requirements-tests.txt
+RUN apk add --no-cache --virtual .build-deps \
+      gcc \
+      libc-dev &&\
+      $SC_PIP install -r requirements-tests.txt
 
 WORKDIR /devel
 VOLUME /devel/services/deployment-agent/

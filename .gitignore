@@ -109,3 +109,15 @@ deployment_config.yaml
 
 # all fake files from makefile
 .make*
+
+# generated and valid certificates
+*.crt
+*.key
+*.srl
+*.cnf
+*.csr
+# token
+*_token
+
+
+
