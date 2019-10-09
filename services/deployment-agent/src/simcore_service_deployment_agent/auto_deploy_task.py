@@ -191,9 +191,7 @@ async def wait_for_dependencies(app_config: Dict):
             raise DependencyNotReadyError(
                 "Portainer not ready at {}".format(url))
 
-
-async def auto_deploy(app: web.Application):
-    log.info("start autodeploy task")
+async def _init_deploy(app: web.Application) -> List[SubTask]:
     try:
         app[TASK_STATE] = State.STARTING
         app_config = app[APP_CONFIG_KEY]
@@ -203,6 +201,7 @@ async def auto_deploy(app: web.Application):
         await notify(app_config, message="Stack initialised")
         await notify_state(app_config, state=app[TASK_STATE], message="starting")
         log.info("initialisation completed")
+        return subtasks
     except asyncio.CancelledError:
         log.info("cancelling task...")
         app[TASK_STATE] = State.STOPPED
@@ -215,7 +214,8 @@ async def auto_deploy(app: web.Application):
         # cleanup the subtasks
         log.info("task completed...")
 
-    # loop forever to detect changes
+async def _deploy(app: web.Application, subtasks):
+    app_config = app[APP_CONFIG_KEY]
     while True:
         try:
             log.info("checking for changes...")
@@ -232,22 +232,28 @@ async def auto_deploy(app: web.Application):
                 await notify_state(app_config, state=app[TASK_STATE], message="")
             if app[TASK_STATE] != State.RUNNING:
                 app[TASK_STATE] = State.RUNNING
-                await notify_state(app_config, state=app[TASK_STATE], message="")
+                await notify_state(app_config, state=app[TASK_STATE], message="")        
             await asyncio.sleep(app_config["main"]["polling_interval"])
         except asyncio.CancelledError:
             log.info("cancelling task...")
             app[TASK_STATE] = State.STOPPED
             raise
-        except Exception as exc:
+        except Exception as exc: # pylint: disable=broad-except
             # some unknown error happened, let's wait 5 min and restart
             log.exception("Task error:")
             if app[TASK_STATE] != State.PAUSED:
                 app[TASK_STATE] = State.PAUSED
-                await notify_state(app_config, state=app[TASK_STATE], message=exc.message)
+                await notify_state(app_config, state=app[TASK_STATE], message=str(exc))
             await asyncio.sleep(300)
         finally:
             # cleanup the subtasks
             log.info("task completed...")
+async def auto_deploy(app: web.Application):
+    log.info("start autodeploy task")
+    subtasks = await _init_deploy(app)
+    # loop forever to detect changes
+    await _deploy(app, subtasks)
+        
 
 
 async def start(app: web.Application):

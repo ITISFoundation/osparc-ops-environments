@@ -43,14 +43,14 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
 
         header_unique_name = mattermost_config["header_unique_name"]
         date = datetime.datetime.utcnow().isoformat(timespec='seconds')
-        message = "{header_unique_name} {status_emoji} {status_message} - {date} |".format()
+        message = "{} {} {} - {} |".format(header_unique_name, status_emoji, status_message, date)
 
         personal_token = mattermost_config["personal_token"]
         channel_id = mattermost_config["channel_id"]
         headers = {"Authorization": "Bearer {}".format(personal_token)}
         async with ClientSession() as client:
             # get the current header to update it
-            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{channel_id}".format())
+            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{}".format(channel_id))
             current_header = ""
             async with client.get(url, headers=headers) as resp:
                 log.debug("requested channel description: received with code %s", resp.status)
@@ -71,7 +71,7 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
                 lastindex = current_header.find("|", start_index)
                 new_header = "{}{}{}".format(current_header[0:start_index], message, current_header[lastindex+1:])
 
-            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{channel_id}/patch".format())
+            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{}/patch".format(channel_id))
             async with client.put(url, headers=headers, data=json.dumps({"header": new_header})) as resp:
                 log.debug("requested patch channel description: response received with code %s", resp.status)
                 if resp.status == 200:

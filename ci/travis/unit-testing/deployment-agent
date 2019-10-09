@@ -17,14 +17,13 @@ install() {
     if bash ci/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         pip install --upgrade pip wheel setuptools && pip3 --version
-        pushd services/deployment-agent; pip3 install -r requirements/dev.txt; popd
-        pushd services/deployment-agent; pip3 install -r tests/requirements.txt; popd
     fi
 }
 
 before_script() {
     if bash ci/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
+        pushd services/deployment-agent; make install-test; popd
         pip freeze
         docker images
     fi
@@ -33,7 +32,7 @@ before_script() {
 script() {
     if bash ci/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
-        pytest --cov-append --cov=simcore_service_deployment_agent -v services/deployment-agent/tests
+        pushd services/deployment-agent; make unit-test; popd
     else
         echo "No changes detected. Skipping unit-testing of deployment-agent."
     fi
