@@ -16,7 +16,13 @@ services:
       - public
   
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
-      # storage:
+  storage:
+    secrets:
+      - source: rootca.crt
+        target: /usr/local/share/ca-certificates/osparc.crt
+    environment: 
+      # minio sdk uses this env to use self-signed certs
+      SSL_CERT_FILE: /usr/local/share/ca-certificates/osparc.crt
 
   # postgres:
   #   deploy:
@@ -28,3 +34,8 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+
+# self-signed only
+secrets:
+  rootca.crt:
+    external: true

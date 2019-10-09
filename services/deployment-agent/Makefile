@@ -102,6 +102,19 @@ pull: ## Pulls service from the registry.
 .PHONY: config
 config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 
+.PHONY: install-dev
+install-dev: ## install deployment agent dev
+	pip install -r requirements/dev.txt
+
+# Testing -------------------------------------------------
+.PHONY: install-test
+install-test: install-dev ## install deployment agent testing facilities
+	pip install -r tests/requirements.txt
+
+.PHONY: unit-test
+unit-test: install-test ## Execute unit tests
+	pytest --cov-append --cov=simcore_service_deployment_agent -v tests
+
 
 # Helpers -------------------------------------------------
 .PHONY: .init
@@ -117,7 +130,7 @@ config: ${DEPLOYMENT_AGENT_CONFIG} ## Create an initial configuration file.
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
-	cp $< $@
+	@cp $< $@
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env

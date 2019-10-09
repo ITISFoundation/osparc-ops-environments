@@ -44,7 +44,8 @@ app_schema = T.Dict({
             "enabled": T.Bool(),
             "channel_id": T.String(),
             "personal_token": T.String(),
-            "message": T.String()
+            "message": T.String(),
+            "header_unique_name": T.String()
     }))
 })
 

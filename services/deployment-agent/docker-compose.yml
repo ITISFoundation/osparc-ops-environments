@@ -22,10 +22,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - SIMCORE_STACK_NAME=${SIMCORE_STACK_NAME:-simcore}
-      - SIMCORE_IMAGE_TAG=${SIMCORE_IMAGE_TAG:-master-latest}
-      - SIMCORE_DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY:-itisfoundation}
-      - PUBLIC_NETWORK=${PUBLIC_NETWORK:-public}
+      - SIMCORE_STACK_NAME=${SIMCORE_STACK_NAME}
+      - SIMCORE_IMAGE_TAG=${SIMCORE_IMAGE_TAG}
+      - SIMCORE_DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY}
+      - PUBLIC_NETWORK=${PUBLIC_NETWORK}
     deploy:
       mode: replicated
       replicas: 1

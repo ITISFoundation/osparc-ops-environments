@@ -101,9 +101,9 @@ configs:
 
 secrets:
   domain.key:
-    file: ./secrets/domain.key
+    external: true    
   domain.crt:
-    file: ./secrets/domain.crt
+    external: true
 
 networks:
   public:

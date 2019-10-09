@@ -12,8 +12,9 @@ IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
-$(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
 $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL instead. Follow instructions in README.txt),)
+
+DOCKER        =$(if $(IS_WIN),docker.exe,docker)
 
 # Makefile's shell
 SHELL := /bin/bash
@@ -21,7 +22,7 @@ SHELL := /bin/bash
 include $(CURDIR)/../repo.config
 
 MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
-
+SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
 
 .DEFAULT_GOAL := help
 
@@ -29,6 +30,14 @@ MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
 
 .PHONY: create-certificates
 create-certificates: rootca.crt domain.crt domain.key ## create self-signed certificates and ca authority
+
+.PHONY: deploy
+deploy: .init domain.key domain.crt
+	@if ! $(DOCKER) secret ls | grep -w domain.crt >/dev/null; then $(DOCKER) secret create domain.crt domain.crt; fi;
+	@if ! $(DOCKER) secret ls | grep -w domain.key >/dev/null; then $(DOCKER) secret create domain.key domain.key; fi;
+	
+	@if [ ! -f rootca.crt ]; then cp domain.crt rootca.crt; fi;
+	@if ! $(DOCKER) secret ls | grep -w rootca.crt >/dev/null; then $(DOCKER) secret create rootca.crt rootca.crt; fi;
 
 rootca.key:
 	# Creating key for authority in $@
@@ -124,3 +133,9 @@ clean: .check_clean ## Cleans all outputs
 	@git clean -ndxf
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+
+.init:
+	$(if $(SWARM_HOSTS),  \
+		,                 \
+		$(DOCKER) swarm init \
+	)

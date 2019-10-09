@@ -5,12 +5,16 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import attr
+from tenacity import after_log, retry, stop_after_attempt, wait_random
 from yarl import URL
 
 from .cmd_utils import run_cmd_line
 from .subtask import SubTask
 
 log = logging.getLogger(__name__)
+
+NUMBER_OF_ATTEMPS = 5
+MAX_TIME_TO_WAIT_S = 10
 
 
 async def _git_clone_repo(repository: URL, directory: Path, branch: str, username: str = None, password: str = None):
@@ -137,6 +141,7 @@ class GitUrlWatcher(SubTask):
     async def init(self):
         await _init_repositories(self.watched_repos)
 
+    @retry(reraise=True, stop=stop_after_attempt(NUMBER_OF_ATTEMPS), wait=wait_random(min=1, max=MAX_TIME_TO_WAIT_S), after=after_log(log, logging.DEBUG))
     async def check_for_changes(self) -> Tuple[bool, str]:
         result = await _check_repositories(self.watched_repos)
         return result

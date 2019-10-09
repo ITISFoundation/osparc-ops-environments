@@ -16,13 +16,14 @@ scripts_dir=$(realpath ${repo_basedir}/scripts)
 current_git_url=$(git config --get remote.origin.url)
 current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
+machine_ip=$(hostname -I | cut -d ' ' -f1)
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
 source ${repo_basedir}/repo.config
 
 min_pw_length=8
-if expr length $SERVICES_PASSWORD < $min_pw_length; then
+if [ ${#SERVICES_PASSWORD} -lt $min_pw_length ]; then
     echo "Password length should be at least $min_pw_length characters"
 fi
 
@@ -178,6 +179,10 @@ sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_conf
 # portainer
 sed -i "/- url: .*portainer:9000/{n;s/username:.*/username: ${SERVICES_USER}/}" deployment_config.default.yaml
 sed -i "/- url: .*portainer:9000/{n;n;s/password:.*/password: ${SERVICES_PASSWORD}/}" deployment_config.default.yaml
-make up;
+# extra_hosts
+sed -i "s|extra_hosts: \[\]|extra_hosts:\n        - \"${MACHINE_FQDN}:${machine_ip}\"|" deployment_config.default.yaml
+# update
+sed -i "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
+make down up;
 popd
 
