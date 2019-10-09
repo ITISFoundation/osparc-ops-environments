@@ -22,7 +22,7 @@ current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 source ${repo_basedir}/repo.config
 
 min_pw_length=8
-if expr length $SERVICES_PASSWORD < $min_pw_length; then
+if [ ${#SERVICES_PASSWORD} -lt $min_pw_length ]; then
     echo "Password length should be at least $min_pw_length characters"
 fi
 
