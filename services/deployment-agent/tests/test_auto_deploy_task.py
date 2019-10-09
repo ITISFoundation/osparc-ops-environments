@@ -25,6 +25,15 @@ async def fake_app(test_config):
     app[APP_CONFIG_KEY] = test_config
     yield app
 
+@pytest.fixture
+async def fake_client(fake_app, aiohttp_client):
+    client = await aiohttp_client(fake_app)
+    yield client
+
+@pytest.fixture
+async def fake_app_session(fake_client):
+    return fake_client.session
+
 
 @pytest.fixture
 def valid_portainer_config(here):
@@ -32,24 +41,24 @@ def valid_portainer_config(here):
         return yaml.safe_load(fp)
 
 
-async def test_wait_for_dependencies(loop, valid_portainer_config, mocker):
+async def test_wait_for_dependencies(loop, valid_portainer_config, mocker, fake_app_session):
     mock = mocker.patch(
         "simcore_service_deployment_agent.auto_deploy_task.portainer.authenticate", return_value=Future())
     mock.return_value.set_result("")
 
-    await auto_deploy_task.wait_for_dependencies(valid_portainer_config)
+    await auto_deploy_task.wait_for_dependencies(valid_portainer_config, fake_app_session)
 
     calls = []
     for portainer_cfg in valid_portainer_config["main"]["portainer"]:
         calls.append(mocker.call(
-            URL(portainer_cfg["url"]), portainer_cfg["username"], portainer_cfg["password"]))
+            URL(portainer_cfg["url"]), fake_app_session, portainer_cfg["username"], portainer_cfg["password"]))
 
     mock.assert_has_calls(calls)
 
     mock = mocker.patch(
         "simcore_service_deployment_agent.auto_deploy_task.portainer.authenticate", side_effect=ClientError)
     with pytest.raises(RetryError):
-        await auto_deploy_task.wait_for_dependencies(valid_portainer_config)
+        await auto_deploy_task.wait_for_dependencies(valid_portainer_config, fake_app_session)
     calls = []
 
     mock.assert_called()
@@ -111,7 +120,7 @@ async def test_setup_task(loop, fake_app, mocker):
     # fake username/password for task
     fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["username"] = ""
     fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["password"] = ""
-
+    fake_app[auto_deploy_task.TASK_SESSION_NAME] = "someappsession"
     try:
         auto_deploy_task.setup(fake_app)
     except:

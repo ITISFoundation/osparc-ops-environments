@@ -30,19 +30,21 @@ async def portainer_server(loop, aiohttp_server):
         return server
     return serve
 
-
-async def test_request(loop, portainer_server):
+async def test_request(loop, portainer_server, aiohttp_client):
     routes = []
     server = await portainer_server(routes)
+    client = await aiohttp_client(server)
+
     origin = URL.build(**{ k:getattr(server, k) for k in ("scheme", "host", "port")})
     test_url = origin.with_path("/")
     test_method = "GET"
-    await portainer._portainer_request(test_url, test_method)
+
+    await portainer._portainer_request(test_url, client.session, test_method)
     with pytest.raises(exceptions.ConfigurationError):
         test_url = origin.with_path("some_fantastic_path")
-        await portainer._portainer_request(test_url, test_method)
+        await portainer._portainer_request(test_url, client.session, test_method)
 
-async def test_authenticate(loop, portainer_server):
+async def test_authenticate(loop, portainer_server, aiohttp_client):
     async def handler(request):
         return web.json_response({"jwt":"someBearerCode"})
 
@@ -52,11 +54,12 @@ async def test_authenticate(loop, portainer_server):
         "handler": handler
         }]
     server = await portainer_server(routes)
+    client = await aiohttp_client(server)
     origin = URL.build(**{ k:getattr(server, k) for k in ("scheme", "host", "port")})
-    bearer_code = await portainer.authenticate(origin, username="testuser", password="password")
+    bearer_code = await portainer.authenticate(origin, client.session, username="testuser", password="password")
     assert bearer_code == "someBearerCode"
 
-async def test_get_swarm_id(loop, portainer_server):
+async def test_get_swarm_id(loop, portainer_server, aiohttp_client):
     async def handler(request):
         return web.json_response({"ID":"someID"})
 
@@ -66,11 +69,12 @@ async def test_get_swarm_id(loop, portainer_server):
         "handler": handler
         }]
     server = await portainer_server(routes)
+    client = await aiohttp_client(server)
     origin = URL.build(**{ k:getattr(server, k) for k in ("scheme", "host", "port")})
-    swarm_id = await portainer.get_swarm_id(origin, bearer_code="mybearerCode")
+    swarm_id = await portainer.get_swarm_id(origin, client.session, bearer_code="mybearerCode")
     assert swarm_id == "someID"
 
-async def test_stacks(loop, portainer_server):
+async def test_stacks(loop, portainer_server, aiohttp_client):
     async def handler(request):
         return web.json_response([{"Name": "firstStack", "Id": "stackID"},
         {"Name": "secondStack", "Id": "secondID"}])
@@ -81,21 +85,22 @@ async def test_stacks(loop, portainer_server):
         "handler": handler
         }]
     server = await portainer_server(routes)
+    client = await aiohttp_client(server)
     origin = URL.build(**{ k:getattr(server, k) for k in ("scheme", "host", "port")})
-    stacks_list = await portainer.get_stacks_list(origin, bearer_code="mybearerCode")
+    stacks_list = await portainer.get_stacks_list(origin, client.session, bearer_code="mybearerCode")
     assert len(stacks_list) == 2
     assert stacks_list[0]["Name"] == "firstStack"
     assert stacks_list[0]["Id"] == "stackID"
     assert stacks_list[1]["Name"] == "secondStack"
     assert stacks_list[1]["Id"] == "secondID"
 
-    current_stack_id = await portainer.get_current_stack_id(origin, bearer_code="mybearerCode", stack_name="firstStack")
+    current_stack_id = await portainer.get_current_stack_id(origin, client.session, bearer_code="mybearerCode", stack_name="firstStack")
     assert current_stack_id == "stackID"
 
-    current_stack_id = await portainer.get_current_stack_id(origin, bearer_code="mybearerCode", stack_name="fakestuff")
+    current_stack_id = await portainer.get_current_stack_id(origin, client.session, bearer_code="mybearerCode", stack_name="fakestuff")
     assert not current_stack_id
 
-async def test_create_stack(loop, portainer_server, valid_docker_stack):
+async def test_create_stack(loop, portainer_server, valid_docker_stack, aiohttp_client):
     swarm_id = "1"
     stack_name = "some fake name"
     async def handler(request):
@@ -138,10 +143,11 @@ async def test_create_stack(loop, portainer_server, valid_docker_stack):
         "handler": handler_update
         }]
     server = await portainer_server(routes)
+    client = await aiohttp_client(server)
     origin = URL.build(**{ k:getattr(server, k) for k in ("scheme", "host", "port")})
     bearer_code = "mybearerCode"
-    new_stack = await portainer.post_new_stack(origin, bearer_code=bearer_code,
+    new_stack = await portainer.post_new_stack(origin, client.session, bearer_code=bearer_code,
                             swarm_id=swarm_id, stack_name=stack_name, stack_cfg=valid_docker_stack)
 
-    updated_stack = await portainer.update_stack(origin, bearer_code=bearer_code, stack_id="1", stack_cfg=valid_docker_stack)
+    updated_stack = await portainer.update_stack(origin, client.session, bearer_code=bearer_code, stack_id="1", stack_cfg=valid_docker_stack)
 
