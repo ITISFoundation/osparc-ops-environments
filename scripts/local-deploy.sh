@@ -180,9 +180,9 @@ sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_conf
 sed -i "/- url: .*portainer:9000/{n;s/username:.*/username: ${SERVICES_USER}/}" deployment_config.default.yaml
 sed -i "/- url: .*portainer:9000/{n;n;s/password:.*/password: ${SERVICES_PASSWORD}/}" deployment_config.default.yaml
 # extra_hosts
-sed -i "s/extra_hosts: []/extra_hosts:\n        - \"${MACHINE_FQDN}:${machine_ip}\"/" deployment_config.default.yaml
+sed -i "s|extra_hosts: \[\]|extra_hosts:\n        - \"${MACHINE_FQDN}:${machine_ip}\"|" deployment_config.default.yaml
 # update
-sed -i "/extra_hosts:/{n;s/- .*/\"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
-make up;
+sed -i "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
+make down up;
 popd
 
