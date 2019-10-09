@@ -112,7 +112,7 @@ install-test: install-dev ## install deployment agent testing facilities
 	pip install -r tests/requirements.txt
 
 .PHONY: unit-test
-unit-test: .install-test ## Execute unit tests
+unit-test: install-test ## Execute unit tests
 	pytest --cov-append --cov=simcore_service_deployment_agent -v tests
 
 
