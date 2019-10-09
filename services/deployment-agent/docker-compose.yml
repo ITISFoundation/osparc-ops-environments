@@ -26,8 +26,6 @@ services:
       - SIMCORE_IMAGE_TAG=${SIMCORE_IMAGE_TAG}
       - SIMCORE_DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY}
       - PUBLIC_NETWORK=${PUBLIC_NETWORK}
-      - MACHINE_FQDN=${MACHINE_FQDN}
-      - MACHINE_IP=${MACHINE_IP}
     deploy:
       mode: replicated
       replicas: 1
