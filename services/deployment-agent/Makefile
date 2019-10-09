@@ -32,6 +32,7 @@ export VCS_STATUS_CLIENT:=$(if $(shell git status -s),'modified/untracked','clea
 export BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
+export MACHINE_IP:=$(shell hostname -I | cut -d ' ' -f1)
 $(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
 
