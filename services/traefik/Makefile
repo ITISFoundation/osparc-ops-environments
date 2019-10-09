@@ -185,7 +185,8 @@ remove-root-certificate: ## removes the certificate from the host system
 
 .PHONY: .create_secrets
 .create_secrets:
-	@if ! $(DOCKER) secret ls | grep -w domain.crt >/dev/null; then $(DOCKER) secret create domain.crt secrets/domain.crt; fi;
-	@if ! $(DOCKER) secret ls | grep -w domain.key >/dev/null; then $(DOCKER) secret create domain.key secrets/domain.key; fi;
-	@if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi;
-	@if ! $(DOCKER) secret ls | grep -w rootca.crt >/dev/null; then $(DOCKER) secret create rootca.crt secrets/rootca.crt; fi;
+	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt secrets/domain.crt; fi;
+	@if [[ ! $$($(DOCKER) secret ls | grep -w domain.key) ]]; then $(DOCKER) secret create domain.key secrets/domain.key; fi;
+	@if [[ ! $$($(DOCKER) secret ls | grep -w rootca.crt) ]]; then if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi; $(DOCKER) secret create rootca.crt secrets/rootca.crt; fi;
+	
+	
