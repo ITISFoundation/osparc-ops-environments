@@ -282,9 +282,9 @@ def setup(app: web.Application):
 
 
 async def persistent_session(app):
-   app[TASK_SESSION_NAME] = session = ClientSession()
-   yield
-   await session.close()
+    app[TASK_SESSION_NAME] = session = ClientSession()
+    yield
+    await session.close()
 
 __all__ = (
     'setup'
