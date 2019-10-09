@@ -43,6 +43,8 @@ main:
             export DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY} &&
             export DOCKER_IMAGE_TAG=${SIMCORE_IMAGE_TAG} &&
             export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
+            export MACHINE_FQDN=osparc.local &&
+            export MACHINE_IP=$(hostname -I | cut -d ' ' -f1) &&
             mv .env .env.platform &&
             cat .env-devel >> .env && cat .env.platform >> .env &&
             docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
