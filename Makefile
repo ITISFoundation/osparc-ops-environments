@@ -34,6 +34,8 @@ certificates/domain.key:
 	@echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ]; \
 	$(MAKE) -C certificates create-certificates; \
 	$(MAKE) -C certificates install-root-certificate;
+	# create secrets
+	$(MAKE) -C certificates deploy
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key ## deploy osparc ops stacks and simcore

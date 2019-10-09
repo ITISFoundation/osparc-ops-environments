@@ -52,7 +52,7 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
+up: .init .create_secrets .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
 	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
@@ -101,7 +101,7 @@ endif
 	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
-	)
+	)	
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
@@ -182,3 +182,10 @@ remove-root-certificate: ## removes the certificate from the host system
 		sudo systemctl restart docker;                           \
 	fi \
 	)
+
+.PHONY: .create_secrets
+.create_secrets:
+	@if ! $(DOCKER) secret ls | grep -w domain.crt >/dev/null; then $(DOCKER) secret create domain.crt secrets/domain.crt; fi;
+	@if ! $(DOCKER) secret ls | grep -w domain.key >/dev/null; then $(DOCKER) secret create domain.key secrets/domain.key; fi;
+	@if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi;
+	@if ! $(DOCKER) secret ls | grep -w rootca.crt >/dev/null; then $(DOCKER) secret create rootca.crt secrets/rootca.crt; fi;
