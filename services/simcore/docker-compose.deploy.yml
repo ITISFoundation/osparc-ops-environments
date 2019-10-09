@@ -20,6 +20,8 @@ services:
     secrets:
       - source: rootca.crt
         target: /usr/local/share/ca-certificates/osparc.crt
+    extra_hosts: 
+      - "${MACHINE_FQDN}:${MACHINE_IP}"
 
   # postgres:
   #   deploy:
