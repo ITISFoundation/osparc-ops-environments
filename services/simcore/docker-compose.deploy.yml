@@ -18,7 +18,7 @@ services:
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
     volumes:
-      - ../../certificates/:/usr/local/share/ca-certificates/
+      - ./certificates/:/usr/local/share/ca-certificates/
 
   # postgres:
   #   deploy:
