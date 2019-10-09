@@ -53,6 +53,7 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
             url = URL(mattermost_config["url"]).with_path("api/v4/channels/{channel_id}".format())
             current_header = ""
             async with client.get(url, headers=headers) as resp:
+                log.debug("requested channel description: received with code %s", resp.status)
                 if resp.status == 404:
                     log.error("could not find route in %s", url)
                     raise ConfigurationError("Could not find channel within Mattermost app in {}:\n {}".format(url, await resp.text()))
@@ -60,6 +61,7 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
                     log.error("Unknown error")
                     raise AutoDeployAgentException("Unknown error while accessing Mattermost app in {}:\n {}".format(url, await resp.text()))
                 data = await resp.json()
+                log.debug("received data: %s", data)
                 current_header = data["header"]
 
             new_header = message
@@ -71,7 +73,7 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
 
             url = URL(mattermost_config["url"]).with_path("api/v4/channels/{channel_id}/patch".format())
             async with client.put(url, headers=headers, data=json.dumps({"header": new_header})) as resp:
-                log.debug("request response received with code %s", resp.status)
+                log.debug("requested patch channel description: response received with code %s", resp.status)
                 if resp.status == 200:
                     data = await resp.json()
                     return data
