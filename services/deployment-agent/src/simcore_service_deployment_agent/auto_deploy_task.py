@@ -6,7 +6,7 @@ from shutil import copy2
 from typing import Dict, List, Tuple
 
 import yaml
-from aiohttp import ClientError, web
+from aiohttp import ClientError, web, ClientSession
 from servicelib.application_keys import APP_CONFIG_KEY
 from tenacity import (before_sleep_log, retry, retry_if_exception_type,
                       stop_after_attempt, wait_fixed)
@@ -24,6 +24,8 @@ from .subtask import SubTask
 log = logging.getLogger(__name__)
 TASK_NAME = __name__ + "_autodeploy_task"
 TASK_STATE = "{}_state".format(TASK_NAME)
+TASK_SESSION_NAME = __name__ + "session"
+
 
 RETRY_WAIT_SECS = 2
 RETRY_COUNT = 10
@@ -32,6 +34,7 @@ RETRY_COUNT = 10
 async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
     excluded_services = app_config["main"]["docker_stack_recipe"]["excluded_services"]
     excluded_volumes = app_config["main"]["docker_stack_recipe"]["excluded_volumes"]
+    log.debug("filtering services and volumes")
     with Path(stack_file).open() as fp:
         stack_cfg = yaml.safe_load(fp)
         # remove excluded services
@@ -43,10 +46,12 @@ async def filter_services(app_config: Dict, stack_file: Path) -> Dict:
         # remove build part, useless in a stack
         for service in stack_cfg["services"].keys():
             stack_cfg["services"][service].pop("build", None)
+        log.debug("filtered services: result in %s", stack_cfg)
         return stack_cfg
 
 async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
     additional_parameters = app_config["main"]["docker_stack_recipe"]["additional_parameters"]
+    log.debug("adding parameters to stack using %s", additional_parameters)
     for key, value in additional_parameters.items():
         if isinstance(value, dict):
             for _, service_params in stack_cfg["services"].items():
@@ -114,17 +119,18 @@ async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path
 async def update_portainer_stack(app_config: Dict, stack_cfg: Dict):
     log.debug("updateing portainer stack using: %s", stack_cfg)
     portainer_cfg = app_config["main"]["portainer"]
+    app_session = app[TASK_SESSION_NAME]
     for config in portainer_cfg:
         url = URL(config["url"])
-        bearer_code = await portainer.authenticate(url, config["username"], config["password"])
-        current_stack_id = await portainer.get_current_stack_id(url, bearer_code, config["stack_name"])
+        bearer_code = await portainer.authenticate(url, app_session, config["username"], config["password"])
+        current_stack_id = await portainer.get_current_stack_id(url, app_session, bearer_code, config["stack_name"])
         if not current_stack_id:
             # stack does not exist
-            swarm_id = await portainer.get_swarm_id(url, bearer_code)
-            await portainer.post_new_stack(url, bearer_code, swarm_id, config["stack_name"], stack_cfg)
+            swarm_id = await portainer.get_swarm_id(url, app_session, bearer_code)
+            await portainer.post_new_stack(url, app_session, bearer_code, swarm_id, config["stack_name"], stack_cfg)
         else:
             log.debug("updating the configuration of the stack...")
-            await portainer.update_stack(url, bearer_code, current_stack_id, stack_cfg)
+            await portainer.update_stack(url, app_session, bearer_code, current_stack_id, stack_cfg)
 
 
 async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict) -> SubTask:
@@ -177,14 +183,14 @@ async def check_changes(subtasks: List[SubTask]) -> Tuple[bool, str]:
        stop=stop_after_attempt(RETRY_COUNT),
        before_sleep=before_sleep_log(log, logging.INFO),
        retry=retry_if_exception_type(DependencyNotReadyError))
-async def wait_for_dependencies(app_config: Dict):
+async def wait_for_dependencies(app_config: Dict, app_session: ClientSession):
     log.info("waiting for dependencies to start...")
     # wait for a portainer instance
     portainer_cfg = app_config["main"]["portainer"]
     for config in portainer_cfg:
         url = URL(config["url"])
         try:
-            await portainer.authenticate(url, config["username"], config["password"])
+            await portainer.authenticate(url, app_session, config["username"], config["password"])
             log.info("portainer at %s ready", url)
         except ClientError:
             log.exception("portainer not ready at %s", url)
@@ -195,11 +201,12 @@ async def _init_deploy(app: web.Application) -> List[SubTask]:
     try:
         app[TASK_STATE] = State.STARTING
         app_config = app[APP_CONFIG_KEY]
+        app_session = app[TASK_SESSION_NAME]
         log.info("initialising...")
-        await wait_for_dependencies(app_config)
+        await wait_for_dependencies(app_config, app_session)
         subtasks = await init_task(app_config)
-        await notify(app_config, message="Stack initialised")
-        await notify_state(app_config, state=app[TASK_STATE], message="starting")
+        await notify(app_config, app_session, message="Stack initialised")
+        await notify_state(app_config, app_session, state=app[TASK_STATE], message="starting")
         log.info("initialisation completed")
         return subtasks
     except asyncio.CancelledError:
@@ -216,6 +223,7 @@ async def _init_deploy(app: web.Application) -> List[SubTask]:
 
 async def _deploy(app: web.Application, subtasks):
     app_config = app[APP_CONFIG_KEY]
+    app_session = app[TASK_SESSION_NAME]
     while True:
         try:
             log.info("checking for changes...")
@@ -227,12 +235,12 @@ async def _deploy(app: web.Application, subtasks):
                 if changes:
                     message = message + "\n{}".format(changes)
                 subtasks = await init_task(app_config)
-                await notify(app_config, message=message)
+                await notify(app_config, app_session, message=message)
                 log.info("stack re-deployed")
-                await notify_state(app_config, state=app[TASK_STATE], message="")
+                await notify_state(app_config, app_session, state=app[TASK_STATE], message="")
             if app[TASK_STATE] != State.RUNNING:
                 app[TASK_STATE] = State.RUNNING
-                await notify_state(app_config, state=app[TASK_STATE], message="")        
+                await notify_state(app_config, app_session, state=app[TASK_STATE], message="")        
             await asyncio.sleep(app_config["main"]["polling_interval"])
         except asyncio.CancelledError:
             log.info("cancelling task...")
@@ -243,7 +251,7 @@ async def _deploy(app: web.Application, subtasks):
             log.exception("Task error:")
             if app[TASK_STATE] != State.PAUSED:
                 app[TASK_STATE] = State.PAUSED
-                await notify_state(app_config, state=app[TASK_STATE], message=str(exc))
+                await notify_state(app_config, app_session, state=app[TASK_STATE], message=str(exc))
             await asyncio.sleep(300)
         finally:
             # cleanup the subtasks
@@ -269,11 +277,16 @@ async def cleanup(app: web.Application):
 def setup(app: web.Application):
     app[TASK_NAME] = None
     app[TASK_STATE] = State.STOPPED
+    app.cleanup_ctx.append(persistent_session)
     app.on_startup.append(start)
     app.on_cleanup.append(cleanup)
 
 
+async def persistent_session(app):
+   app[TASK_SESSION_NAME] = session = ClientSession()
+   yield
+   await session.close()
+
 __all__ = (
-    'setup',
-    'State'
+    'setup'
 )
