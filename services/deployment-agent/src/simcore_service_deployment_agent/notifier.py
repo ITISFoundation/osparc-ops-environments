@@ -42,17 +42,20 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
             status_emoji = ":x:"
 
         header_unique_name = mattermost_config["header_unique_name"]
-        date = datetime.datetime.utcnow()
-        message = "{} {} {} - {} |".format(header_unique_name, status_emoji, status_message, date.isoformat(timespec='seconds'))
+        date = datetime.datetime.utcnow().isoformat(timespec='seconds')
+        message = "{header_unique_name} {status_emoji} {status_message} - {date} |".format()
 
         personal_token = mattermost_config["personal_token"]
         channel_id = mattermost_config["channel_id"]
         headers = {"Authorization": "Bearer {}".format(personal_token)}
         async with ClientSession() as client:
             # get the current header to update it
-            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{}".format(channel_id))
+            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{channel_id}".format())
             current_header = ""
             async with client.get(url, headers=headers) as resp:
+                if resp.status == 404:
+                    log.error("could not find route in %s", url)
+                    raise ConfigurationError("Could not find channel within Mattermost app in {}:\n {}".format(url, await resp.text()))
                 if not resp.status == 200:
                     log.error("Unknown error")
                     raise AutoDeployAgentException("Unknown error while accessing Mattermost app in {}:\n {}".format(url, await resp.text()))
@@ -66,7 +69,7 @@ async def notify_mattermost_header(mattermost_config: Dict, state: State, status
                 lastindex = current_header.find("|", start_index)
                 new_header = "{}{}{}".format(current_header[0:start_index], message, current_header[lastindex+1:])
 
-            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{}/patch".format(channel_id))
+            url = URL(mattermost_config["url"]).with_path("api/v4/channels/{channel_id}/patch".format())
             async with client.put(url, headers=headers, data=json.dumps({"header": new_header})) as resp:
                 log.debug("request response received with code %s", resp.status)
                 if resp.status == 200:
