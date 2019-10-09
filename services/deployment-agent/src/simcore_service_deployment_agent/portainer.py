@@ -57,7 +57,7 @@ async def get_current_stack_id(base_url: URL, app_session: ClientSession, bearer
             return stack["Id"]
     return None
 
-async def post_new_stack(base_url: URL, app_session: ClientSession, bearer_code: str, swarm_id: str, stack_name: str, stack_cfg: Dict):
+async def post_new_stack(base_url: URL, app_session: ClientSession, bearer_code: str, swarm_id: str, stack_name: str, stack_cfg: Dict): # pylint: disable=too-many-arguments
     log.debug("creating new stack %s", base_url)
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
     body_data = {

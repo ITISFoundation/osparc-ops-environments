@@ -20,18 +20,17 @@ async def notify_mattermost(mattermost_config: Dict, app_session: ClientSession,
         channel_id = mattermost_config["channel_id"]
         url = URL(mattermost_config["url"]).with_path("api/v4/posts")
 
-        headers = {"Authorization": "Bearer {}".format(personal_token)}
-        async with ClientSession() as client:
-            async with client.post(url, headers=headers, json={"channel_id": channel_id, "message": message}) as resp:
-                log.debug("request response received with code %s", resp.status)
-                if resp.status == 201:
-                    data = await resp.json()
-                    return data
-                if resp.status == 404:
-                    log.error("could not find route in %s", url)
-                    raise ConfigurationError("Could not find channel within Mattermost app in {}:\n {}".format(url, await resp.text()))
-                log.error("Unknown error")
-                raise AutoDeployAgentException("Unknown error while accessing Mattermost app in {}:\n {}".format(url, await resp.text()))
+        headers = {"Authorization": "Bearer {}".format(personal_token)}        
+        async with app_session.post(url, headers=headers, json={"channel_id": channel_id, "message": message}) as resp:
+            log.debug("request response received with code %s", resp.status)
+            if resp.status == 201:
+                data = await resp.json()
+                return data
+            if resp.status == 404:
+                log.error("could not find route in %s", url)
+                raise ConfigurationError("Could not find channel within Mattermost app in {}:\n {}".format(url, await resp.text()))
+            log.error("Unknown error")
+            raise AutoDeployAgentException("Unknown error while accessing Mattermost app in {}:\n {}".format(url, await resp.text()))
 
 async def notify_mattermost_header(mattermost_config: Dict, app_session: ClientSession, state: State, status_message: str):
     if mattermost_config["enabled"]:
