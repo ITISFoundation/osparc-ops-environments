@@ -62,7 +62,7 @@ Registry testing:
 
 ### deployment using valid certificates
 
-1. copy your certificates and key to secrets/portus.crt, secrets/portus.key
+1. copy your certificates and key to secrets/domain.crt, secrets/domain.key
 
     ```console
     make help
