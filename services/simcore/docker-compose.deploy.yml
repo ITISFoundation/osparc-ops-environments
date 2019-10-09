@@ -20,6 +20,9 @@ services:
     secrets:
       - source: rootca.crt
         target: /usr/local/share/ca-certificates/osparc.crt
+    environment: 
+      # minio sdk uses this env to use self-signed certs
+      SSL_CERT_FILE: /usr/local/share/ca-certificates/osparc.crt
     extra_hosts: 
       - "${MACHINE_FQDN}:${MACHINE_IP}"
 
