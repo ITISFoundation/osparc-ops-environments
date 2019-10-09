@@ -116,10 +116,9 @@ async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path
     return stack_file
 
 
-async def update_portainer_stack(app_config: Dict, stack_cfg: Dict):
+async def update_portainer_stack(app_config: Dict, app_session: ClientSession, stack_cfg: Dict):
     log.debug("updateing portainer stack using: %s", stack_cfg)
     portainer_cfg = app_config["main"]["portainer"]
-    app_session = app[TASK_SESSION_NAME]
     for config in portainer_cfg:
         url = URL(config["url"])
         bearer_code = await portainer.authenticate(url, app_session, config["username"], config["password"])
@@ -147,7 +146,7 @@ async def create_git_watch_subtask(app_config: Dict) -> SubTask:
     return git_sub_task
 
 
-async def init_task(app_config: Dict) -> List[SubTask]:
+async def init_task(app_config: Dict, app_session: ClientSession) -> List[SubTask]:
     log.debug("initialising task")
     subtasks = []
     # start by creating the git watcher/repos
@@ -164,7 +163,7 @@ async def init_task(app_config: Dict) -> List[SubTask]:
     # create the docker repos watchers
     subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
     # deploy to portainer
-    await update_portainer_stack(app_config, stack_cfg)
+    await update_portainer_stack(app_config, app_session, stack_cfg)
     log.debug("updated portainer app")
     log.debug("task initialised")
     return subtasks
@@ -204,7 +203,7 @@ async def _init_deploy(app: web.Application) -> List[SubTask]:
         app_session = app[TASK_SESSION_NAME]
         log.info("initialising...")
         await wait_for_dependencies(app_config, app_session)
-        subtasks = await init_task(app_config)
+        subtasks = await init_task(app_config, app_session)
         await notify(app_config, app_session, message="Stack initialised")
         await notify_state(app_config, app_session, state=app[TASK_STATE], message="starting")
         log.info("initialisation completed")
@@ -234,7 +233,7 @@ async def _deploy(app: web.Application, subtasks):
                 message = "Updated stack"
                 if changes:
                     message = message + "\n{}".format(changes)
-                subtasks = await init_task(app_config)
+                subtasks = await init_task(app_config, app_session)
                 await notify(app_config, app_session, message=message)
                 log.info("stack re-deployed")
                 await notify_state(app_config, app_session, state=app[TASK_STATE], message="")
