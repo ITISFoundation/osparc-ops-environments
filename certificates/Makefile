@@ -32,7 +32,7 @@ SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
 create-certificates: rootca.crt domain.crt domain.key ## create self-signed certificates and ca authority
 
 .PHONY: deploy
-deploy: .init domain.key domain.crt
+deploy: .init
 	@if ! $(DOCKER) secret ls | grep -w domain.crt >/dev/null; then $(DOCKER) secret create domain.crt domain.crt; fi;
 	@if ! $(DOCKER) secret ls | grep -w domain.key >/dev/null; then $(DOCKER) secret create domain.key domain.key; fi;
 	

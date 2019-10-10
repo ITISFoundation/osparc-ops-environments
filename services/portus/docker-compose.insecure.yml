@@ -174,7 +174,6 @@ services:
         target: /secrets/domain.key
       - source: domain.crt
         target: /secrets/domain.crt
-      # only needed in self-signed case
       - source: rootca.crt
         target: /secrets/rootca.crt
 
