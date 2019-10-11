@@ -27,6 +27,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.external-url=https://osparc01.speag.com/prometheus/'
     ports:
       - 9090:9090
     depends_on:
@@ -34,14 +35,28 @@ services:
     networks:
       - internal-net
       - monitored-net
+      - public
     #logging:
     #  driver: gelf
     #  options:
-    #    gelf-address: "tcp://127.0.0.1:12201" 
+    #    gelf-address: "tcp://127.0.0.1:12201"
     deploy:
       placement:
         constraints:
           - node.role==manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.prometheus.loadbalancer.server.port=9090
+        - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheus.entrypoints=https
+        - traefik.http.routers.prometheus.tls=true
+        - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
+        - traefik.http.routers.prometheus.middlewares=gzip_compress@file
+        # - traefik.http.middlewares.prometheus_replace_regex.replacepathregex.regex=^/prometheus/?(.*)$$
+        # - traefik.http.middlewares.prometheus_replace_regex.replacepathregex.replacement=/$${1}
+        # - traefik.http.routers.prometheus.middlewares=gzip_compress@file, prometheus_replace_regex
       #restart_policy:
       #  condition: on-failure
 
@@ -51,8 +66,8 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
-    command: 
-      - '--path.procfs=/host/proc' 
+    command:
+      - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
@@ -144,4 +159,3 @@ services:
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.grafana.middlewares=gzip_compress@file, grafana_replace_regex
-  
