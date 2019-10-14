@@ -27,7 +27,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=http://osparc.local/prometheus/'
+      - '--web.external-url=http://osparc.local/'
       - '--web.route-prefix=/'
     ports:
       - "9090"
