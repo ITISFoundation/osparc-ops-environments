@@ -60,7 +60,10 @@ echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICE
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-pushd ${repo_basedir}/services/portainer; make up; popd
+pushd ${repo_basedir}/services/portainer
+sed -i "s/PORTAINER_ADMIN_PWD=.*/PORTAINER_ADMIN_PWD=$SERVICES_PASSWORD/" .env
+make up
+popd
 
 # -------------------------------- TRAEFIK -------------------------------
 echo
