@@ -27,7 +27,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=https://osparc01.speag.com/prometheus/'
+      - '--web.external-url=https://osparc.local/prometheus/'
     ports:
       - 9090:9090
     depends_on:

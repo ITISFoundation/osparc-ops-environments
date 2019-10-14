@@ -32,10 +32,13 @@ cd $repo_basedir;
 echo
 echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
+
+# -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
 pushd ${repo_basedir}/services/portainer; make up; popd
 
+# -------------------------------- TRAEFIK -------------------------------
 echo
 echo -e "\e[1;33mstarting traefik...\e[0m"
 pushd ${repo_basedir}/services/traefik
@@ -50,6 +53,7 @@ sed -i "s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD=${traefik_password}|" .env
 make up
 popd
 
+# -------------------------------- MINIO -------------------------------
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"
 pushd ${repo_basedir}/services/minio;
@@ -62,6 +66,7 @@ while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 https://${MAC
     sleep 5s
 done
 
+# -------------------------------- PORTUS/REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting portus/registry...\e[0m"
 pushd ${repo_basedir}/services/portus
@@ -114,6 +119,7 @@ EOF
 fi
 popd
 
+# -------------------------------- MONITORING -------------------------------
 echo
 echo -e "\e[1;33mstarting monitoring...\e[0m"
 # set MACHINE_FQDN
@@ -121,9 +127,11 @@ pushd ${repo_basedir}/services/monitoring
 sed -i "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
 sed -i "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
 sed -i "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
+sed -i "s|--web.external-url=.*|--web.external-url=https://$MACHINE_FQDN/prometheus/|" docker-compose.yml
 make up
 popd
 
+# -------------------------------- GRAYLOG -------------------------------
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
 # set MACHINE_FQDN
@@ -156,6 +164,7 @@ curl -u $SERVICES_USER:$SERVICES_PASSWORD --header "Content-Type: application/js
     --data "$json_data" https://$MACHINE_FQDN/graylog/api/system/inputs
 popd
 
+# -------------------------------- DEPlOYMENT-AGENT -------------------------------
 echo
 echo -e "\e[1;33mstarting deployment-agent for simcore...\e[0m"
 pushd ${repo_basedir}/services/deployment-agent;
