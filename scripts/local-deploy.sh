@@ -17,6 +17,30 @@ current_git_url=$(git config --get remote.origin.url)
 current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
 machine_ip=$(hostname -I | cut -d ' ' -f1)
+devel_mode=0
+
+usage="$(basename "$0") [-h] [--key=value]
+
+Deploys all the osparc-ops stacks and the SIM-core stack on osparc.local.
+
+where keys are:
+    -h, --help  show this help text
+    --devel_mode             (default: ${devel_mode})"
+
+for i in "$@"
+do
+case $i in
+    --devel_mode=*)
+    devel_mode="${i#*=}"
+    shift # past argument=value
+    ;;
+    ##
+    :|*|--help|-h)
+    echo "$usage" >&2
+    exit 1
+    ;;
+esac
+done
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
@@ -164,34 +188,37 @@ curl -u $SERVICES_USER:$SERVICES_PASSWORD --header "Content-Type: application/js
     --data "$json_data" https://$MACHINE_FQDN/graylog/api/system/inputs
 popd
 
-# -------------------------------- DEPlOYMENT-AGENT -------------------------------
-echo
-echo -e "\e[1;33mstarting deployment-agent for simcore...\e[0m"
-pushd ${repo_basedir}/services/deployment-agent;
 
-if [[ $current_git_url == git* ]]; then
-    # it is a ssh style link let's get the organisation name and just replace this cause that conf only accepts https git repos
-    current_organisation=$(echo $current_git_url | cut -d":" -f2 | cut -d"/" -f1)
-    sed -i "s|https://github.com/ITISFoundation/osparc-ops.git|https://github.com/$current_organisation/osparc-ops.git|" deployment_config.default.yaml
-else
-    sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: $current_git_url|}" deployment_config.default.yaml
+if [ $devel_mode -eq 0 ]; then
+
+    # -------------------------------- DEPlOYMENT-AGENT -------------------------------
+    echo
+    echo -e "\e[1;33mstarting deployment-agent for simcore...\e[0m"
+    pushd ${repo_basedir}/services/deployment-agent;
+
+    if [[ $current_git_url == git* ]]; then
+        # it is a ssh style link let's get the organisation name and just replace this cause that conf only accepts https git repos
+        current_organisation=$(echo $current_git_url | cut -d":" -f2 | cut -d"/" -f1)
+        sed -i "s|https://github.com/ITISFoundation/osparc-ops.git|https://github.com/$current_organisation/osparc-ops.git|" deployment_config.default.yaml
+    else
+        sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: $current_git_url|}" deployment_config.default.yaml
+    fi
+    sed -i "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
+
+    # full original -> replacement
+    YAML_STRING="environment:\n        S3_ENDPOINT: ${MACHINE_FQDN}:10000\n        S3_ACCESS_KEY: ${SERVICES_PASSWORD}\n        S3_SECRET_KEY: ${SERVICES_PASSWORD}"
+    sed -i "s/environment: {}/$YAML_STRING/" deployment_config.default.yaml
+    # update
+    sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${MACHINE_FQDN}:10000/" deployment_config.default.yaml
+    sed -i "s/S3_ACCESS_KEY:.*/S3_ACCESS_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
+    sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
+    # portainer
+    sed -i "/- url: .*portainer:9000/{n;s/username:.*/username: ${SERVICES_USER}/}" deployment_config.default.yaml
+    sed -i "/- url: .*portainer:9000/{n;n;s/password:.*/password: ${SERVICES_PASSWORD}/}" deployment_config.default.yaml
+    # extra_hosts
+    sed -i "s|extra_hosts: \[\]|extra_hosts:\n        - \"${MACHINE_FQDN}:${machine_ip}\"|" deployment_config.default.yaml
+    # update
+    sed -i "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
+    make down up;
+    popd
 fi
-sed -i "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
-
-# full original -> replacement
-YAML_STRING="environment:\n        S3_ENDPOINT: ${MACHINE_FQDN}:10000\n        S3_ACCESS_KEY: ${SERVICES_PASSWORD}\n        S3_SECRET_KEY: ${SERVICES_PASSWORD}"
-sed -i "s/environment: {}/$YAML_STRING/" deployment_config.default.yaml
-# update
-sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${MACHINE_FQDN}:10000/" deployment_config.default.yaml
-sed -i "s/S3_ACCESS_KEY:.*/S3_ACCESS_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
-sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
-# portainer
-sed -i "/- url: .*portainer:9000/{n;s/username:.*/username: ${SERVICES_USER}/}" deployment_config.default.yaml
-sed -i "/- url: .*portainer:9000/{n;n;s/password:.*/password: ${SERVICES_PASSWORD}/}" deployment_config.default.yaml
-# extra_hosts
-sed -i "s|extra_hosts: \[\]|extra_hosts:\n        - \"${MACHINE_FQDN}:${machine_ip}\"|" deployment_config.default.yaml
-# update
-sed -i "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
-make down up;
-popd
-
