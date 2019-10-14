@@ -92,6 +92,10 @@ scrape_configs:
   - job_name: 'registry'
     static_configs:
       - targets: ['registry:5001']
+
+  - job_name: 'rabbitMQ'
+    static_configs:
+      - targets: ['rabbit:15692']
     # to generate the token use the following
     # docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host \
     #   -e MC_HOST_local="https://12345678:12345678@osparc.local:10000" \
