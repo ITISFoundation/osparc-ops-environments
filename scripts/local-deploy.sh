@@ -6,9 +6,11 @@
 
 sed_i()
 {
-	# based on https://unix.stackexchange.com/a/92907
-	sed -e "$1" "$2" > "$2.new"
-	mv -- "$2.new" "$2"
+	if [[ $OSTYPE == "darwin"* ]]; then
+        gsed -i -e "$1" "$2"
+    else
+        sed -i -e "$1" "$2"
+    fi
 }
 
 set -euo pipefail
