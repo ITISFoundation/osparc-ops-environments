@@ -21,7 +21,12 @@ SHELL := /bin/bash
 
 include $(CURDIR)/../repo.config
 
-MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
+# Machine host IP
+$(if $(IS_OSX), \
+	$(MACHINE_IP = $(shell ipconfig getifaddr en0)), \
+	$(MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)) \
+)
+
 SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
 
 .DEFAULT_GOAL := help
@@ -80,10 +85,16 @@ install-root-certificate: rootca.crt ## installs a certificate in the host syste
 		echo "Please restart the DOCKER service now..." && read -n 1; \
 		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
 	,                                                           \
+		$(if $(IS_OSX),                                             \
+			sudo security add-trusted-cert -d -k /Library/Keychains/System.keychain $<; \
+			echo "Please restart the DOCKER service now..." && read -n 1; \
+			echo "Is the DOCKER service ready? press when ready" && read -n 1; \
+		,                                                           \
 		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
 		sudo update-ca-certificates;                            \
 		echo "# restarting docker daemon";                      \
 		sudo systemctl restart docker                           \
+		) \
 	)
 
 
@@ -95,8 +106,12 @@ remove-root-certificate: ## removes the certificate from the host system
 		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
 		sudo update-ca-certificates; \
 	,\
+		$(if $(IS_OSX), \
+			sudo security remove-trusted-cert -d rootca.crt; \
+		, \
 		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
 		sudo update-ca-certificates; \
+		) \
 	)
 
 .PHONY: help

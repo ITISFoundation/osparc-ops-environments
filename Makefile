@@ -18,8 +18,12 @@ $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL instead.
 
 # Makefile's shell
 SHELL := /bin/bash
+
 # Machine host IP
-MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
+$(if $(IS_OSX), \
+	$(MACHINE_IP = $(shell ipconfig getifaddr en0)), \
+	$(MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)) \
+)
 
 include repo.config
 

@@ -47,7 +47,11 @@ $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
-export MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
+# Machine host IP
+$(if $(IS_OSX), \
+	$(export MACHINE_IP = $(shell ipconfig getifaddr en0)), \
+	$(export MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)) \
+)
 
 # TARGETS --------------------------------------------------
 .PHONY: help
