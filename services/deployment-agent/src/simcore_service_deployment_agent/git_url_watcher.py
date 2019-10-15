@@ -1,4 +1,5 @@
 import logging
+import re
 import shutil
 import tempfile
 from pathlib import Path
@@ -23,18 +24,17 @@ async def _git_clone_repo(repository: URL, directory: Path, branch: str, usernam
     await run_cmd_line(cmd)
 
 
-async def _git_checkout_files(directory: Path, paths: List[Path]):
-    cmd = "cd {directory} && git checkout HEAD {path}".format(directory=directory,
-                                                              path=" ".join(paths))
+async def _git_checkout_files(directory: Path, paths: List[Path], tag: str = "HEAD"):
+    cmd = "cd {directory} && git checkout {tag} {path}".format(directory=directory,
+                                                            tag=tag, path=" ".join(paths))
     await run_cmd_line(cmd)
 
 
-async def _git_checkout_file(directory: Path, file_path: Path):
-    await _git_checkout_files(directory, [file_path])
+async def _git_checkout_file(directory: Path, file_path: Path, tag: str = "HEAD"):
+    await _git_checkout_files(directory, [file_path], tag)
 
-
-async def _git_checkout_repo(directory: Path):
-    cmd = "cd {directory} && git checkout HEAD".format(directory=directory)
+async def _git_checkout_repo(directory: Path, tag: str = "HEAD"):
+    cmd = "cd {directory} && git checkout {tag}".format(directory=directory, tag=tag)
     await run_cmd_line(cmd)
 
 
@@ -48,11 +48,29 @@ async def _git_pull(directory: Path):
     cmd = "cd {directory} && git pull".format(directory=directory)
     await run_cmd_line(cmd)
 
-
 async def _git_fetch(directory: Path):
-    cmd = "cd {directory} && git fetch --prune".format(directory=directory)
+    cmd = "cd {directory} && git fetch --prune --tags".format(directory=directory)
     await run_cmd_line(cmd)
 
+async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> List[str]:
+    cmd = "cd {directory} && git --no-pager describe --tags --always `git rev-list --tags`".format(directory=directory)
+    all_tags = await run_cmd_line(cmd)
+    if not all_tags:
+        return []
+    list_tags = all_tags.split("\n")
+    reg_object = re.compile(regexp)
+    for tag in list_tags:
+        if reg_object.fullmatch(tag):
+            return tag
+    return ""
+
+async def _git_get_current_tag(directory: Path, regexp: str) -> str:
+    cmd = "cd {directory} && git --no-pager describe --tags --always".format(directory=directory)
+    current_tag = await run_cmd_line(cmd)
+    match = re.fullmatch(regexp, current_tag)
+    if match:
+        return current_tag
+    return ""
 
 async def _git_diff_filenames(directory: Path) -> str:
     cmd = "cd {directory} && git --no-pager diff --name-only FETCH_HEAD".format(
@@ -60,9 +78,24 @@ async def _git_diff_filenames(directory: Path) -> str:
     modified_files = await run_cmd_line(cmd)
     return modified_files
 
-async def _git_get_logs(directory: Path, branch: str) -> str:
-    cmd = "cd {directory} && git log --oneline {branch}..origin/{branch}".format(
-        directory=directory, branch=branch)
+async def _git_diff_filenames_tags(directory: Path, tag1: str, tag2: str) -> str:
+    cmd = "cd {directory} && git --no-pager diff --name-only {tag1} {tag2}".format(
+        directory=directory, tag1=tag1, tag2=tag2)
+    modified_files = await run_cmd_line(cmd)
+    return modified_files
+
+async def _git_get_logs(directory: Path, branch1: str, branch2: str) -> str:
+    cmd = "cd {directory} && git --no-pager log --oneline {branch1}..origin/{branch2}".format(
+        directory=directory, branch1=branch1, branch2=branch2)
+    logs = await run_cmd_line(cmd)
+    return logs
+
+async def _git_get_logs_tags(directory: Path, tag1: str, tag2: str) -> str:
+    cmd = "cd {directory} && git --no-pager log --oneline {tag1}{tag2}".format(
+        directory=directory,
+        tag1=tag1,
+        tag2=".." + tag2 if tag1 else tag2
+        )
     logs = await run_cmd_line(cmd)
     return logs
 
@@ -74,6 +107,7 @@ class GitRepo:  # pylint: disable=too-many-instance-attributes, too-many-argumen
     repo_id: str
     repo_url: URL
     branch: str
+    tags: str
     username: str
     password: str
     paths: List[Path]
@@ -98,22 +132,45 @@ async def _check_repositories(repos: List[GitRepo]) -> Tuple[bool, str]:
         log.debug("checking repo: %s...", repo.repo_url)
         assert repo.directory
         await _git_fetch(repo.directory)
-        modified_files = await _git_diff_filenames(repo.directory)
-        if not modified_files:
-            # no modifications
-            continue
-        # get the logs
-        changes = await _git_get_logs(repo.directory, repo.branch)
-        if repo.pull_only_files:
-            await _git_pull_files(repo.directory, repo.paths)
+
+        if repo.tags:
+            current_tag = await _git_get_current_tag(repo.directory, repo.tags)
+            latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
+            if current_tag != latest_tag:
+                log.info("New tag detected: %s, checking out...", latest_tag)
+                modified_files = await _git_diff_filenames_tags(repo.directory, current_tag, latest_tag)
+                log.debug("%s tag modified files: %s", latest_tag, modified_files)
+                changes = await _git_get_logs_tags(repo.directory, current_tag, latest_tag)
+                log.debug("%s tag changes: %s", latest_tag, changes)
+                if repo.pull_only_files:
+                    await _git_checkout_files(latest_tag, repo.paths)
+                else:
+                    await _git_checkout_repo(repo.directory, latest_tag)
+                log.info("New tag %s  checked out", latest_tag)
+                # check if a watched file has changed
+                if modified_files:
+                    common_files = set(modified_files.split()
+                                    ).intersection(set(repo.paths))
+                    if common_files:
+                        log.info("File %s changed!!", common_files)
+                        change_detected = True
         else:
-            await _git_pull(repo.directory)
-        # check if a watched file has changed
-        common_files = set(modified_files.split()
-                           ).intersection(set(repo.paths))
-        if common_files:
-            log.info("File %s changed!!", common_files)
-            change_detected = True
+            modified_files = await _git_diff_filenames(repo.directory)
+            if not modified_files:
+                # no modifications
+                continue
+            # get the logs
+            changes = await _git_get_logs(repo.directory, repo.branch, repo.branch)
+            if repo.pull_only_files:
+                await _git_pull_files(repo.directory, repo.paths)
+            else:
+                await _git_pull(repo.directory)
+            # check if a watched file has changed
+            common_files = set(modified_files.split()
+                            ).intersection(set(repo.paths))
+            if common_files:
+                log.info("File %s changed!!", common_files)
+                change_detected = True
 
     return (change_detected, changes)
 
@@ -132,6 +189,7 @@ class GitUrlWatcher(SubTask):
             repo = GitRepo(repo_id=config["id"],
                            repo_url=config["url"],
                            branch=config["branch"],
+                           tags=config["tags"],
                            pull_only_files=config["pull_only_files"],
                            username=config["username"],
                            password=config["password"],
