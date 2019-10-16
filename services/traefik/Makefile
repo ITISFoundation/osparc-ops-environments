@@ -13,15 +13,12 @@ $(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
 # Makefile's shell
 SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 
-DOCKER_COMPOSE=$(if $(IS_WIN),docker-compose.exe,docker-compose)
-DOCKER        =$(if $(IS_WIN),docker.exe,docker)
-
 # If you see pwd_unknown showing up, this is why. Re-calibrate your system.
 PWD ?= pwd_unknown
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
-SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
 # Network that includes all services to monitor
@@ -53,15 +50,15 @@ help: ## This colourful help
 
 .PHONY: up
 up: .init .create_secrets .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
-	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
-	$(DOCKER) stack rm ${STACK_NAME}
+	docker stack rm ${STACK_NAME}
 
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
-	-$(DOCKER) swarm leave -f
+	-docker swarm leave -f
 
 .PHONY: clean
 clean: ## Cleans unversioned files
@@ -75,16 +72,16 @@ info: ## expands all variables and relevant info on stack
 		$(info $(v)=$($(v)))                                                               \
 	)
 	@echo ""
-	$(DOCKER) ps
+	docker ps
 ifneq ($(SWARM_HOSTS), )
 	@echo ""
-	$(DOCKER) stack ls
+	docker stack ls
 	@echo ""
-	-$(DOCKER) stack ps $(STACK_NAME)
+	-docker stack ps $(STACK_NAME)
 	@echo ""
-	-$(DOCKER) stack services $(STACK_NAME)
+	-docker stack services $(STACK_NAME)
 	@echo ""
-	$(DOCKER) network ls
+	docker network ls
 endif
 
 # Helpers -------------------------------------------------
@@ -92,7 +89,7 @@ endif
 .init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
-		$(DOCKER) swarm init \
+		docker swarm init \
 	)
 	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
@@ -101,11 +98,11 @@ endif
 	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
-	)	
+	)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@$(DOCKER_COMPOSE) -f $< config > $@
+	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
 
@@ -186,7 +183,6 @@ remove-root-certificate: ## removes the certificate from the host system
 .PHONY: .create_secrets
 .create_secrets:
 	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt secrets/domain.crt; fi;
-	@if [[ ! $$($(DOCKER) secret ls | grep -w domain.key) ]]; then $(DOCKER) secret create domain.key secrets/domain.key; fi;
-	@if [[ ! $$($(DOCKER) secret ls | grep -w rootca.crt) ]]; then if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi; $(DOCKER) secret create rootca.crt secrets/rootca.crt; fi;
-	
-	
+	@if [[ ! $$(docker secret ls | grep -w domain.key) ]]; then docker secret create domain.key secrets/domain.key; fi;
+	@if [[ ! $$(docker secret ls | grep -w rootca.crt) ]]; then if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi; docker secret create rootca.crt secrets/rootca.crt; fi;
+

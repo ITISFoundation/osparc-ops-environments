@@ -23,8 +23,7 @@ MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
 
 include repo.config
 
-SERVICES := adminer deployment-agent graylog maintenance minio monitoring portainer portus traefik
-
+SERVICES = $(sort $(wildcard services/*))
 # TARGETS --------------------------------------------------
 .DEFAULT_GOAL := help
 
@@ -46,16 +45,13 @@ up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-
 
 .PHONY: up-devel
 up-devel: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
-	echo -n "Ensure osparc-simcore is running the very first time"
 	bash scripts/local-deploy.sh --devel_mode=1
 	@$(MAKE) info-local
 
 .PHONY: down
 down:
 	@for service in $(SERVICES); do \
-		pushd services/$$service; \
-		$(MAKE) down; \
-		popd; \
+		pushd $$service; $(MAKE) down; popd; \
 	done
 
 .PHONY: leave
