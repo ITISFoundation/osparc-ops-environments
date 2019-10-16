@@ -71,13 +71,10 @@ async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
 
     return stack_cfg
 
-async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path:
+async def generate_stack_file(app_config: Dict, git_task: GitUrlWatcher) -> Path:
     # collect repos informations
     git_repos = {}
-    for task in subtasks:
-        if isinstance(task, GitUrlWatcher):
-            # map the id
-            git_repos.update({x.repo_id: x for x in task.watched_repos})
+    git_repos.update({x.repo_id: x for x in git_task.watched_repos})
 
     stack_recipe_cfg = app_config["main"]["docker_stack_recipe"]
     # collect files in one location
@@ -132,27 +129,23 @@ async def update_portainer_stack(app_config: Dict, app_session: ClientSession, s
             await portainer.update_stack(url, app_session, bearer_code, current_stack_id, stack_cfg)
 
 
-async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict) -> SubTask:
+async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict) -> DockerRegistriesWatcher:
     log.debug("creating docker watch subtask")
     docker_subtask = DockerRegistriesWatcher(app_config, stack_cfg)
     await docker_subtask.init()
     return docker_subtask
 
 
-async def create_git_watch_subtask(app_config: Dict) -> SubTask:
+async def create_git_watch_subtask(app_config: Dict) -> GitUrlWatcher:
     log.debug("creating git repo watch subtask")
     git_sub_task = GitUrlWatcher(app_config)
     await git_sub_task.init()
     return git_sub_task
 
 
-async def init_task(app_config: Dict, app_session: ClientSession) -> List[SubTask]:
-    log.debug("initialising task")
-    subtasks = []
-    # start by creating the git watcher/repos
-    subtasks.append(await create_git_watch_subtask(app_config))
-    # then generate the stack file
-    stack_file = await generate_stack_file(app_config, subtasks)
+async def init_docker_tasks(git_task: GitUrlWatcher, app_config: Dict, app_session: ClientSession) -> DockerRegistriesWatcher:
+    # generate the stack file
+    stack_file = await generate_stack_file(app_config, git_task)
     log.debug("generated stack file in %s", stack_file.name)
     # filter the stack file if needed
     stack_cfg = await filter_services(app_config, stack_file)
@@ -161,13 +154,12 @@ async def init_task(app_config: Dict, app_session: ClientSession) -> List[SubTas
     stack_cfg = await add_parameters(app_config, stack_cfg)
     log.debug("added stack parameters")
     # create the docker repos watchers
-    subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
+    tasks = await create_docker_registries_watch_subtask(app_config, stack_cfg)
     # deploy to portainer
     await update_portainer_stack(app_config, app_session, stack_cfg)
     log.debug("updated portainer app")
     log.debug("task initialised")
-    return subtasks
-
+    return tasks
 
 async def check_changes(subtasks: List[SubTask]) -> Tuple[bool, str]:
     for task in subtasks:
@@ -196,18 +188,19 @@ async def wait_for_dependencies(app_config: Dict, app_session: ClientSession):
             raise DependencyNotReadyError(
                 "Portainer not ready at {}".format(url))
 
-async def _init_deploy(app: web.Application) -> List[SubTask]:
+async def _init_deploy(app: web.Application) -> Tuple[GitUrlWatcher, DockerRegistriesWatcher]:
     try:
         app[TASK_STATE] = State.STARTING
         app_config = app[APP_CONFIG_KEY]
         app_session = app[TASK_SESSION_NAME]
         log.info("initialising...")
         await wait_for_dependencies(app_config, app_session)
-        subtasks = await init_task(app_config, app_session)
+        git_task = await create_git_watch_subtask(app_config)
+        docker_task = await init_docker_tasks(git_task, app_config, app_session)
         await notify(app_config, app_session, message="Stack initialised")
         await notify_state(app_config, app_session, state=app[TASK_STATE], message="starting")
         log.info("initialisation completed")
-        return subtasks
+        return (git_task, docker_task)
     except asyncio.CancelledError:
         log.info("cancelling task...")
         app[TASK_STATE] = State.STOPPED
@@ -220,26 +213,26 @@ async def _init_deploy(app: web.Application) -> List[SubTask]:
         # cleanup the subtasks
         log.info("task completed...")
 
-async def _deploy(app: web.Application, subtasks):
+async def _deploy(app: web.Application, git_task: GitUrlWatcher, docker_task: DockerRegistriesWatcher):
     app_config = app[APP_CONFIG_KEY]
     app_session = app[TASK_SESSION_NAME]
     while True:
         try:
             log.info("checking for changes...")
-            changes_detected, changes = await check_changes(subtasks)
+            changes_detected, changes = await check_changes([git_task, docker_task])
             if changes_detected:
                 log.info("changes detected, redeploying the stack...")
                 log.info("changes: %s", changes)
                 message = "Updated stack"
                 if changes:
                     message = message + "\n{}".format(changes)
-                subtasks = await init_task(app_config, app_session)
+                docker_task = await init_docker_tasks(git_task, app_config, app_session)
                 await notify(app_config, app_session, message=message)
                 log.info("stack re-deployed")
                 await notify_state(app_config, app_session, state=app[TASK_STATE], message="")
             if app[TASK_STATE] != State.RUNNING:
                 app[TASK_STATE] = State.RUNNING
-                await notify_state(app_config, app_session, state=app[TASK_STATE], message="")        
+                await notify_state(app_config, app_session, state=app[TASK_STATE], message="")
             await asyncio.sleep(app_config["main"]["polling_interval"])
         except asyncio.CancelledError:
             log.info("cancelling task...")
@@ -257,10 +250,10 @@ async def _deploy(app: web.Application, subtasks):
             log.info("task completed...")
 async def auto_deploy(app: web.Application):
     log.info("start autodeploy task")
-    subtasks = await _init_deploy(app)
+    git_task, docker_task = await _init_deploy(app)
     # loop forever to detect changes
-    await _deploy(app, subtasks)
-        
+    await _deploy(app, git_task, docker_task)
+
 
 
 async def start(app: web.Application):
