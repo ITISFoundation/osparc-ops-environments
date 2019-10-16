@@ -8,18 +8,19 @@ Tools for oSPARC deployment and management (not directly part of osparc platform
 
 ### services
 
-Services used for the deployment of the oSPARC platform:
+Support services used for the deployment of the oSPARC platform:
 
-- [Traefik](services/traefik/): Reverse-proxy
 - [Portainer](services/portainer/): Docker management tool
-- [Minio](services/minio/): S3 storage
-- [Portus](services/portus/): Docker private registry
-- [Deployment agent](services/deployment-agent/): SIM-Core auto deploy tool
-- [Graylog](services/graylog): Log aggregator
-- [Adminer](services/adminer): Database management
+- [Traefik](services/traefik/): Reverse-proxy to handle secured entrypoints
+- [Minio](services/minio/): AWS compatible S3 storage
+- [Portus](services/portus/): Docker images registry
+- [Graylog](services/graylog): Logs aggregator
 - [Monitoring](services/monitoring/): Prometheus/Grafana monitoring
-- [Maintenance](services/maintenance/): Notebooks for internal maintenance
-- [Simcore](services/simcore): Configuration for Simcore deployment
+- [Adminer](services/adminer): Database management
+- [Maintenance](services/maintenance/): Notebooks for internal maintenance (in development)
+- [Deployment agent](services/deployment-agent/): SIM-Core auto deploy tool
+
+- [Simcore](services/simcore): Configuration for [osparc-simcore](https://github.com/ITISFoundation/osparc-simcore)
 
 ### usage
 
