@@ -66,7 +66,7 @@ async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> List[str
 
 async def _git_get_current_tag(directory: Path, regexp: str) -> str:
     cmd = "cd {directory} && git --no-pager describe --tags --always".format(directory=directory)
-    current_tag = await run_cmd_line(cmd)
+    current_tag = (await run_cmd_line(cmd)).strip("\n")
     match = re.fullmatch(regexp, current_tag)
     if match:
         return current_tag
