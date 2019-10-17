@@ -12,15 +12,12 @@ IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 # Makefile's shell
 SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 
-DOCKER_COMPOSE=$(if $(IS_WIN),docker-compose.exe,docker-compose)
-DOCKER        =$(if $(IS_WIN),docker.exe,docker)
-
 # If you see pwd_unknown showing up, this is why. Re-calibrate your system.
 PWD ?= pwd_unknown
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
-SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # Network from which services are reverse-proxied
@@ -59,18 +56,18 @@ up: .init .create_secrets .env ${TEMP_COMPOSE}  ## Deploys the stack using provi
 	# creating bucket
 	@$(create-s3-bucket)
 ifneq ("$(wildcard secrets/domain.crt) $(wildcard secrets/domain.key)", "")
-	@$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	@docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 else
 	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif
 
 .PHONY: down
 down: ## Removes the stack from the swarm
-	$(DOCKER) stack rm ${STACK_NAME}
+	docker stack rm ${STACK_NAME}
 
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
-	-$(DOCKER) swarm leave -f
+	-docker swarm leave -f
 
 .PHONY: clean
 clean: ## Cleans unversioned files
@@ -84,16 +81,16 @@ info: ## expands all variables and relevant info on stack
 		$(info $(v)=$($(v)))                                                               \
 	)
 	@echo ""
-	$(DOCKER) ps
+	docker ps
 ifneq ($(SWARM_HOSTS), )
 	@echo ""
-	$(DOCKER) stack ls
+	docker stack ls
 	@echo ""
-	-$(DOCKER) stack ps $(STACK_NAME)
+	-docker stack ps $(STACK_NAME)
 	@echo ""
-	-$(DOCKER) stack services $(STACK_NAME)
+	-docker stack services $(STACK_NAME)
 	@echo ""
-	$(DOCKER) network ls
+	docker network ls
 endif
 
 # Helpers -------------------------------------------------
@@ -101,7 +98,7 @@ endif
 .init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
-		$(DOCKER) swarm init \
+		docker swarm init \
 	)
 	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
@@ -114,7 +111,7 @@ endif
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.insecure.yml
-	@$(DOCKER_COMPOSE) -f $< config > $@
+	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
 define create-s3-bucket
@@ -203,7 +200,7 @@ create-certificates: secrets/domain.crt secrets/domain.key secrets/rootca.crt
 
 .PHONY: .create_secrets
 .create_secrets:
-	@if ! $(DOCKER) secret ls | grep -w domain.crt >/dev/null; then $(DOCKER) secret create domain.crt secrets/domain.crt; fi;
-	@if ! $(DOCKER) secret ls | grep -w domain.key >/dev/null; then $(DOCKER) secret create domain.key secrets/domain.key; fi;
+	@if ! docker secret ls | grep -w domain.crt >/dev/null; then docker secret create domain.crt secrets/domain.crt; fi;
+	@if ! docker secret ls | grep -w domain.key >/dev/null; then docker secret create domain.key secrets/domain.key; fi;
 	@if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi;
-	@if ! $(DOCKER) secret ls | grep -w rootca.crt >/dev/null; then $(DOCKER) secret create rootca.crt secrets/rootca.crt; fi;
+	@if ! docker secret ls | grep -w rootca.crt >/dev/null; then docker secret create rootca.crt secrets/rootca.crt; fi;
