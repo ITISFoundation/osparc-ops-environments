@@ -5,8 +5,8 @@ main:
     # all git repositories that shall be controlled
     - id: simcore-github-repo
       url: https://github.com/ITISFoundation/osparc-simcore.git
-      branch: master
-      tags: ""
+      branch: staging
+      tags: "[0-9]+.[0-9]+.[0-9]+"
       pull_only_files: false # if true will only pull the files define in paths
       paths:
         # lists the files where to look for changes in the repo
