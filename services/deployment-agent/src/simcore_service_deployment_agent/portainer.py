@@ -9,7 +9,7 @@ from .exceptions import ConfigurationError, AutoDeployAgentException
 
 log = logging.getLogger(__name__)
 
-async def _portainer_request(url: URL, app_session: ClientSession, method: str, **kwargs) -> str:    
+async def _portainer_request(url: URL, app_session: ClientSession, method: str, **kwargs) -> str:
     async with getattr(app_session, method.lower())(url, **kwargs) as resp:
         log.debug("request received with code %s", resp.status)
         if resp.status == 200:
@@ -74,7 +74,7 @@ async def update_stack(base_url: URL, app_session: ClientSession, bearer_code: s
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
     body_data = {
         "StackFileContent": json.dumps(stack_cfg, indent=2),
-        "Prune": False
+        "Prune": True
     }
     url = URL(base_url).with_path("api/stacks/{}".format(stack_id)).with_query({"endpointId":1})
     data = await _portainer_request(url, app_session, "PUT", headers=headers, json=body_data)
