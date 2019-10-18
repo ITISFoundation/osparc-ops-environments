@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import docker
 from tenacity import after_log, retry, stop_after_attempt, wait_random
