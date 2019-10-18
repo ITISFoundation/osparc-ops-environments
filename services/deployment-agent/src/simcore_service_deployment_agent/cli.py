@@ -66,5 +66,6 @@ def main(config=None):
 
     log_level = config["main"]["log_level"]
     logging.basicConfig(level=getattr(logging, log_level))
+    logging.getLogger().setLevel(getattr(logging, log_level))
 
     application.run(config)
