@@ -123,7 +123,8 @@ async def _init_repositories(repos: List[GitRepo]) -> Dict:
         latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
         await _checkout_repository(repo, latest_tag)
         sha = await _git_get_current_sha(repo.directory)
-        description[repo.repo_id] = f"{repo.repo_id}:{latest_tag}:{sha}" if latest_tag else f"{repo.repo_id}:{sha}"
+        description[repo.repo_id] = f"{repo.repo_id}:{repo.branch}:{latest_tag}:{sha}" if latest_tag \
+            else f"{repo.repo_id}:{repo.branch}:{sha}"
     return description
 
 async def _update_repo_using_tags(repo: GitRepo) -> Optional[str]:
@@ -147,7 +148,7 @@ async def _update_repo_using_tags(repo: GitRepo) -> Optional[str]:
 
     # if the tag changed, an update is needed even if no files were changed
     sha = await _git_get_current_sha(repo.directory)
-    return f"{repo.repo_id}:{latest_tag}:{sha}"
+    return f"{repo.repo_id}:{repo.branch}:{latest_tag}:{sha}"
 
 async def _update_repo_using_branch_head(repo: GitRepo) -> Optional[str]:
     modified_files = await _git_diff_filenames(repo.directory)
@@ -166,7 +167,7 @@ async def _update_repo_using_branch_head(repo: GitRepo) -> Optional[str]:
 
     log.info("File %s changed!!", common_files)
     sha = await _git_get_current_sha(repo.directory)
-    return f"{repo.repo_id}:{sha}"
+    return f"{repo.repo_id}:{repo.branch}:{sha}"
 
 async def _check_repositories(repos: List[GitRepo]) -> Dict:
     changes = {}
