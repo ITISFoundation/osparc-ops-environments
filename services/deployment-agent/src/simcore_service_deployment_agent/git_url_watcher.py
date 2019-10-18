@@ -3,7 +3,7 @@ import re
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional
 
 import attr
 from tenacity import after_log, retry, stop_after_attempt, wait_random
@@ -17,43 +17,44 @@ log = logging.getLogger(__name__)
 NUMBER_OF_ATTEMPS = 5
 MAX_TIME_TO_WAIT_S = 10
 
-
 async def _git_clone_repo(repository: URL, directory: Path, branch: str, username: str = None, password: str = None):
-    cmd = "git clone -n {repository} --depth 1 {directory} --single-branch --branch {branch}".format(
-        repository=URL(repository).with_user(username).with_password(password), directory=directory, branch=branch)
+    cmd = f"git clone -n {URL(repository).with_user(username).with_password(password)} --depth 1 {directory} --single-branch --branch {branch}"
     await run_cmd_line(cmd)
 
 
-async def _git_checkout_files(directory: Path, paths: List[Path], tag: str = "HEAD"):
-    cmd = "cd {directory} && git checkout {tag} {path}".format(directory=directory,
-                                                            tag=tag, path=" ".join(paths))
+async def _git_get_current_sha(directory: Path) -> str:
+    cmd = f"cd {directory} && git rev-parse --short HEAD"
+    sha = await run_cmd_line(cmd)
+    return sha.strip("\n")
+
+async def _git_clean_repo(directory: Path):
+    cmd = f"cd {directory} && git clean -dxf"
     await run_cmd_line(cmd)
 
-
-async def _git_checkout_file(directory: Path, file_path: Path, tag: str = "HEAD"):
-    await _git_checkout_files(directory, [file_path], tag)
-
-async def _git_checkout_repo(directory: Path, tag: str = "HEAD"):
-    cmd = "cd {directory} && git checkout {tag}".format(directory=directory, tag=tag)
+async def _git_checkout_files(directory: Path, paths: List[Path], tag: str = None):
+    if not tag:
+        tag = "HEAD"
+    cmd = f"cd {directory} && git checkout {tag} {' '.join(paths)}"
     await run_cmd_line(cmd)
 
+async def _git_checkout_repo(directory: Path, tag: str = None):
+    await _git_checkout_files(directory, [], tag)
 
 async def _git_pull_files(directory: Path, paths: List[Path]):
-    cmd = "cd {directory} && git checkout FETCH_HEAD {path}".format(directory=directory,
-                                                                    path=" ".join(paths))
+    cmd = f"cd {directory} && git checkout FETCH_HEAD {' '.join(paths)}"
     await run_cmd_line(cmd)
 
 
 async def _git_pull(directory: Path):
-    cmd = "cd {directory} && git pull".format(directory=directory)
+    cmd = f"cd {directory} && git pull"
     await run_cmd_line(cmd)
 
 async def _git_fetch(directory: Path):
-    cmd = "cd {directory} && git fetch --prune --tags".format(directory=directory)
+    cmd = f"cd {directory} && git fetch --prune --tags"
     await run_cmd_line(cmd)
 
 async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> List[str]:
-    cmd = "cd {directory} && git --no-pager describe --tags --always `git rev-list --tags`".format(directory=directory)
+    cmd = f"cd {directory} && git --no-pager describe --tags --always `git rev-list --tags`"
     all_tags = await run_cmd_line(cmd)
     if not all_tags:
         return []
@@ -64,8 +65,8 @@ async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> List[str
             return tag
     return ""
 
-async def _git_get_current_tag(directory: Path, regexp: str) -> str:
-    cmd = "cd {directory} && git --no-pager describe --tags --always".format(directory=directory)
+async def _git_get_current_matching_tag(directory: Path, regexp: str) -> str:
+    cmd = f"cd {directory} && git --no-pager describe --tags --always"
     current_tag = (await run_cmd_line(cmd)).strip("\n")
     match = re.fullmatch(regexp, current_tag)
     if match:
@@ -73,29 +74,17 @@ async def _git_get_current_tag(directory: Path, regexp: str) -> str:
     return ""
 
 async def _git_diff_filenames(directory: Path) -> str:
-    cmd = "cd {directory} && git --no-pager diff --name-only FETCH_HEAD".format(
-        directory=directory)
-    modified_files = await run_cmd_line(cmd)
-    return modified_files
-
-async def _git_diff_filenames_tags(directory: Path, tag1: str, tag2: str) -> str:
-    cmd = "cd {directory} && git --no-pager diff --name-only {tag1} {tag2}".format(
-        directory=directory, tag1=tag1, tag2=tag2)
+    cmd = f"cd {directory} && git --no-pager diff --name-only FETCH_HEAD"
     modified_files = await run_cmd_line(cmd)
     return modified_files
 
 async def _git_get_logs(directory: Path, branch1: str, branch2: str) -> str:
-    cmd = "cd {directory} && git --no-pager log --oneline {branch1}..origin/{branch2}".format(
-        directory=directory, branch1=branch1, branch2=branch2)
+    cmd = f"cd {directory} && git --no-pager log --oneline {branch1}..origin/{branch2}"
     logs = await run_cmd_line(cmd)
     return logs
 
 async def _git_get_logs_tags(directory: Path, tag1: str, tag2: str) -> str:
-    cmd = "cd {directory} && git --no-pager log --oneline {tag1}{tag2}".format(
-        directory=directory,
-        tag1=tag1,
-        tag2=".." + tag2 if tag1 else tag2
-        )
+    cmd = f"cd {directory} && git --no-pager log --oneline {tag1}{'..' + tag2 if tag1 else tag2}"
     logs = await run_cmd_line(cmd)
     return logs
 
@@ -114,65 +103,84 @@ class GitRepo:  # pylint: disable=too-many-instance-attributes, too-many-argumen
     pull_only_files: bool
     directory: str = ""
 
+async def _checkout_repository(repo: GitRepo, tag: str = None):
+    if repo.pull_only_files:
+        await _git_checkout_files(repo.directory, repo.paths, tag)
+    else:
+        await _git_checkout_repo(repo.directory, tag)
 
-async def _init_repositories(repos: List[GitRepo]):
+async def _update_repository(repo: GitRepo):
+    if repo.pull_only_files:
+        await _git_pull_files(repo.directory, repo.paths)
+    else:
+        await _git_pull(repo.directory)
+
+async def _init_repositories(repos: List[GitRepo]) -> Dict:
+    description = {}
     for repo in repos:
         repo.directory = tempfile.TemporaryDirectory().name
         await _git_clone_repo(repo.repo_url, repo.directory, repo.branch, repo.username, repo.password)
-        if repo.pull_only_files:
-            await _git_checkout_files(repo.directory, repo.paths)
-        else:
-            await _git_checkout_repo(repo.directory)
+        latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
+        await _checkout_repository(repo, latest_tag)
+        sha = await _git_get_current_sha(repo.directory)
+        description[repo.repo_id] = f"{repo.repo_id}:{latest_tag}:{sha}" if latest_tag else f"{repo.repo_id}:{sha}"
+    return description
 
+async def _update_repo_using_tags(repo: GitRepo) -> Optional[str]:
+    log.debug("checking %s using tags", repo.repo_id)
+    # check if current tag is the latest and greatest
+    current_tag = await _git_get_current_matching_tag(repo.directory, repo.tags)
+    latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
+    # there should always be a tag
+    assert latest_tag
+    if current_tag == latest_tag:
+        return
+    log.info("New tag detected: %s", latest_tag)
 
-async def _check_repositories(repos: List[GitRepo]) -> Tuple[bool, str]:
-    change_detected = False
-    changes = ""
+    # get modifications
+    logged_changes = await _git_get_logs_tags(repo.directory, current_tag, latest_tag)
+    log.debug("%s tag changes: %s", latest_tag, logged_changes)
+
+    # checkout
+    await _checkout_repository(repo, latest_tag)
+    log.info("New tag %s  checked out", latest_tag)
+
+    # if the tag changed, an update is needed even if no files were changed
+    sha = await _git_get_current_sha(repo.directory)
+    return f"{repo.repo_id}:{latest_tag}:{sha}"
+
+async def _update_repo_using_branch_head(repo: GitRepo) -> Optional[str]:
+    modified_files = await _git_diff_filenames(repo.directory)
+    if not modified_files:
+        # no modifications
+        return
+    # get the logs
+    logged_changes = await _git_get_logs(repo.directory, repo.branch, repo.branch)
+    log.debug("Changelog:\n%s", logged_changes)
+    await _update_repository(repo)
+    # check if a watched file has changed
+    common_files = set(modified_files.split()).intersection(set(repo.paths))
+    if not common_files:
+        # no change affected the watched files
+        return
+
+    log.info("File %s changed!!", common_files)
+    sha = await _git_get_current_sha(repo.directory)
+    return f"{repo.repo_id}:{sha}"
+
+async def _check_repositories(repos: List[GitRepo]) -> Dict:
+    changes = {}
     for repo in repos:
         log.debug("checking repo: %s...", repo.repo_url)
         assert repo.directory
         await _git_fetch(repo.directory)
+        await _git_clean_repo(repo.directory)
 
-        if repo.tags:
-            current_tag = await _git_get_current_tag(repo.directory, repo.tags)
-            latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
-            if current_tag != latest_tag:
-                log.info("New tag detected: %s, checking out...", latest_tag)
-                modified_files = await _git_diff_filenames_tags(repo.directory, current_tag, latest_tag)
-                log.debug("%s tag modified files: %s", latest_tag, modified_files)
-                changes = await _git_get_logs_tags(repo.directory, current_tag, latest_tag)
-                log.debug("%s tag changes: %s", latest_tag, changes)
-                if repo.pull_only_files:
-                    await _git_checkout_files(latest_tag, repo.paths)
-                else:
-                    await _git_checkout_repo(repo.directory, latest_tag)
-                log.info("New tag %s  checked out", latest_tag)
-                # check if a watched file has changed
-                if modified_files:
-                    common_files = set(modified_files.split()
-                                    ).intersection(set(repo.paths))
-                    if common_files:
-                        log.info("File %s changed!!", common_files)
-                        change_detected = True
-        else:
-            modified_files = await _git_diff_filenames(repo.directory)
-            if not modified_files:
-                # no modifications
-                continue
-            # get the logs
-            changes = await _git_get_logs(repo.directory, repo.branch, repo.branch)
-            if repo.pull_only_files:
-                await _git_pull_files(repo.directory, repo.paths)
-            else:
-                await _git_pull(repo.directory)
-            # check if a watched file has changed
-            common_files = set(modified_files.split()
-                            ).intersection(set(repo.paths))
-            if common_files:
-                log.info("File %s changed!!", common_files)
-                change_detected = True
+        repo_changes = await _update_repo_using_tags(repo) if repo.tags else await _update_repo_using_branch_head(repo)
+        if repo_changes:
+            changes[repo.repo_id] = repo_changes
 
-    return (change_detected, changes)
+    return changes
 
 
 async def _delete_repositories(repos: List[GitRepo]):
@@ -196,13 +204,13 @@ class GitUrlWatcher(SubTask):
                            paths=config["paths"])
             self.watched_repos.append(repo)
 
-    async def init(self):
-        await _init_repositories(self.watched_repos)
+    async def init(self) -> Dict:
+        description = await _init_repositories(self.watched_repos)
+        return description
 
     @retry(reraise=True, stop=stop_after_attempt(NUMBER_OF_ATTEMPS), wait=wait_random(min=1, max=MAX_TIME_TO_WAIT_S), after=after_log(log, logging.DEBUG))
-    async def check_for_changes(self) -> Tuple[bool, str]:
-        result = await _check_repositories(self.watched_repos)
-        return result
+    async def check_for_changes(self) -> Dict:
+        return await _check_repositories(self.watched_repos)
 
     async def cleanup(self):
         await _delete_repositories(self.watched_repos)

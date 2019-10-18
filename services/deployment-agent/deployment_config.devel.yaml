@@ -12,9 +12,9 @@ main:
     # all git repositories that shall be controlled
     - id: simcore-github-repo
       url: https://github.com/ITISFoundation/osparc-simcore.git
-      branch: staging
+      branch: master
       pull_only_files: false # if true will only pull the files define in paths
-      tags: ^v[0-9]+.[0-9]+.[0-9]+$
+      # tags: ^v[0-9]+.[0-9]+.[0-9]+$
       paths:
         # lists the files where to look for changes in the repo
         - services/docker-compose.yml
@@ -63,7 +63,7 @@ main:
   notifications:
     - service: mattermost
       url: https://mattermost.speag.com
-      message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
+      message: "New version out"
       enabled: true
       channel_id: pgz1nkw3f3yy9xjtj3hiiaheia
       personal_token: a957n59ahin83ba4c4dt14966w
