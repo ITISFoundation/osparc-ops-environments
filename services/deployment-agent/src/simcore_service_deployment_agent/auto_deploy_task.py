@@ -196,6 +196,7 @@ async def _init_deploy(app: web.Application) -> Tuple[GitUrlWatcher, DockerRegis
         # deploy stack to swarm
         await update_portainer_stack(app_config, app_session, stack_cfg)
         # notifications
+        app[TASK_STATE] = State.RUNNING
         await notify(app_config, app_session, message=f"Stack initialised with:\n{list(descriptions.values())}")
         main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
         await notify_state(app_config, app_session, state=app[TASK_STATE], message=descriptions[main_repo])
@@ -228,6 +229,7 @@ async def _deploy(app: web.Application, git_task: GitUrlWatcher, docker_task: Do
     log.info("redeploying the stack...")
     await update_portainer_stack(app_config, app_session, stack_cfg)
     log.info("sending notifications...")
+    app[TASK_STATE] = State.RUNNING
     await notify(app_config, app_session, message=f"Updated stack\n{list(changes.values())}")
     main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
     await notify_state(app_config, app_session, state=app[TASK_STATE], message=changes[main_repo])
