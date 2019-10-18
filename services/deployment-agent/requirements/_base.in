@@ -7,6 +7,7 @@ aiohttp-swagger
 docker
 jsonschema<3
 psycopg2-binary
+ptvsd
 semantic_version
 tenacity
 trafaret_config

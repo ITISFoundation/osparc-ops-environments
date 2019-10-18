@@ -28,10 +28,6 @@ services:
       - transport.host=localhost
       - network.host=0.0.0.0
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     deploy:
       replicas: 1
       restart_policy:
@@ -58,30 +54,46 @@ services:
     depends_on:
       - mongodb
       - elasticsearch
-    ports:
-      # Graylog web interface and REST API
-      - 19000:9000
-      # Syslog TCP
-      - 1514:1514
-      # Syslog UDP
-      - 1514:1514/udp
-      # GELF TCP
-      - 12201:12201
-      # GELF UDP
-      - 12201:12201/udp
-      # Raw/Plaintext TCP
-      - 5555:5555
-      # Raw/Plaintext UDP
-      - 5555:5555/udp
+    networks:
+      - public
+      - default
+    # ports:
+    #   # Graylog web interface and REST API
+    #   - 19000:9000
+    #   # Syslog TCP
+    #   - 1514:1514
+    #   # Syslog UDP
+    #   - 1514:1514/udp
+    #   # GELF TCP
+    #   - 12201:12201
+    #   # GELF UDP
+    #   - 12201:12201/udp
+    #   # Raw/Plaintext TCP
+    #   - 5555:5555
+    #   # Raw/Plaintext UDP
+    #   - 5555:5555/udp
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.graylog.loadbalancer.server.port=9000
+        - traefik.http.routers.graylog.rule=PathPrefix(`/graylog`)
+        - traefik.http.routers.graylog.entrypoints=https
+        - traefik.http.routers.graylog.tls=true
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.graylog.middlewares=gzip_compress@file, graylog_replace_regex
+
+
+
   # Logspout: https://github.com/gliderlabs/logspout
   logspout:
     image: vincit/logspout-gelf
     command: gelf://graylog:12201
-    restart: unless-stopped
     depends_on:
       - graylog
     init: true
@@ -99,8 +111,8 @@ services:
         reservations:
           cpus: '0.10'
           memory: 128M
-    ports:
-      - 18000:80
+    # ports:
+    #   - 18000:80
 
 
 volumes:
@@ -108,3 +120,8 @@ volumes:
   elasticsearch_data:
   # graylog_config:
   graylog_journal:
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}

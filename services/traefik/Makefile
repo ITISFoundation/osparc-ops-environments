@@ -13,16 +13,32 @@ $(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
 # Makefile's shell
 SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 
-DOCKER_COMPOSE=$(if $(IS_WIN),docker-compose.exe,docker-compose)
-DOCKER        =$(if $(IS_WIN),docker.exe,docker)
-
 # If you see pwd_unknown showing up, this is why. Re-calibrate your system.
 PWD ?= pwd_unknown
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
-SWARM_HOSTS = $(shell $(DOCKER) node ls --format={{.Hostname}} 2>/dev/null)
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
+MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
+# Network that includes all services to monitor
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
+# Network from which services are reverse-proxied
+#  - by default it will create an overal attachable network called public_network
+ifeq ($(public_network),)
+PUBLIC_NETWORK = public-network
+else
+PUBLIC_NETWORK := $(public_network)
+endif
+export PUBLIC_NETWORK
 
 # External VARIABLES
 include .env
@@ -33,16 +49,16 @@ help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
-	$(DOCKER) stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+up: .init .create_secrets .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
-	$(DOCKER) stack rm ${STACK_NAME}
+	docker stack rm ${STACK_NAME}
 
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
-	-$(DOCKER) swarm leave -f
+	-docker swarm leave -f
 
 .PHONY: clean
 clean: ## Cleans unversioned files
@@ -56,16 +72,16 @@ info: ## expands all variables and relevant info on stack
 		$(info $(v)=$($(v)))                                                               \
 	)
 	@echo ""
-	$(DOCKER) ps
+	docker ps
 ifneq ($(SWARM_HOSTS), )
 	@echo ""
-	$(DOCKER) stack ls
+	docker stack ls
 	@echo ""
-	-$(DOCKER) stack ps $(STACK_NAME)
+	-docker stack ps $(STACK_NAME)
 	@echo ""
-	-$(DOCKER) stack services $(STACK_NAME)
+	-docker stack services $(STACK_NAME)
 	@echo ""
-	$(DOCKER) network ls
+	docker network ls
 endif
 
 # Helpers -------------------------------------------------
@@ -73,12 +89,20 @@ endif
 .init: ## initializeds swarm cluster
 	$(if $(SWARM_HOSTS),  \
 		,                 \
-		$(DOCKER) swarm init \
+		docker swarm init \
+	)
+	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
+	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@$(DOCKER_COMPOSE) -f $< config > $@
+	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
 
@@ -111,28 +135,54 @@ create-certificates: secrets/domain.crt secrets/domain.key secrets/rootca.crt ##
 
 .PHONY: install-root-certificate
 install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
-	$(info installing certificate in trusted root certificates...)
-	$(if $(or $(IS_WIN), $(IS_WSL)), \
-		-$(shell certutil.exe -user -addstore -f root $<),\
-		$(shell sudo cp $< /etc/ssl/certs/osparc.crt))
-	$(info restart any browser or docker engine that should use these certificate)
+	# installing certificate in trusted root certificates and restarting docker daemon...
+	@$(if $(IS_WSL),                                            \
+		certutil.exe -user -addstore -f root $<;				\
+		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates;                            \
+		echo "Please restart the DOCKER service now..." && read -n 1; \
+		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
+	,                                                           \
+		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates;                            \
+		echo "# restarting docker daemon";                      \
+		sudo systemctl restart docker                           \
+	)
 
 .PHONY: remove-root-certificate
 remove-root-certificate: ## removes the certificate from the host system
-	$(info deleting certificate from trusted root certificates...)
-	$(if $(or $(IS_WIN), $(IS_WSL)), \
-		-$(shell certutil.exe -user -delstore -f root "*sparc*"),\
-		$(shell sudo rm -f /etc/ssl/certs/osparc.crt))
+	# deleting certificate from trusted root certificates...
+	-@$(if $(IS_WSL), \
+		certutil.exe -user -delstore -f root "*sparc*"\
+		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates \
+	,\
+		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
+		sudo update-ca-certificates \
+	)
 
 .PHONY: install-full-qualified-domain-name
-install-full-qualified-domain-name: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
-	$(info )
-	$(info to install a FQDN in your host, ADMIN rights needed)
-	$(if $(or $(IS_WIN),$(IS_WSL)), \
-		$(info please run the following in a PWshell with Admin rights:)\
-		$(info Add-Content c:\Windows\System32\drivers\etc\hosts "$(MACHINE_IP) $(MACHINE_FQDN)"),\
-		$(info please run the following in a CMD with Admin rights (note that wildcards are not accepted under Windows):)\
-		$(info echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> c:\Windows\System32\drivers\etc\hosts),\
-		$(shell sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;)\
+.install-fqdn: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
+	@$(if $(IS_WSL), \
+	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
+	echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+	echo "please run the following in a PWshell with Admin rights:"; \
+	echo "Add-Content c:\Windows\System32\drivers\etc\hosts '$(MACHINE_IP) $(MACHINE_FQDN)'"; \
+	echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):"; \
+	echo "echo '$(MACHINE_IP) $(MACHINE_FQDN)' >> c:\Windows\System32\drivers\etc\hosts"; \
+	fi \
+	, \
+	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
+		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
+		sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
+		echo "# restarting docker daemon";                      \
+		sudo systemctl restart docker;                           \
+	fi \
 	)
-	$(info afterwards restart any browser or docker engine that should use these host file)
+
+.PHONY: .create_secrets
+.create_secrets:
+	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt secrets/domain.crt; fi;
+	@if [[ ! $$(docker secret ls | grep -w domain.key) ]]; then docker secret create domain.key secrets/domain.key; fi;
+	@if [[ ! $$(docker secret ls | grep -w rootca.crt) ]]; then if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi; docker secret create rootca.crt secrets/rootca.crt; fi;
+

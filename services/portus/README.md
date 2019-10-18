@@ -19,6 +19,7 @@ PORTUS_PASSWORD=12345678 # password to database backend of Portus
 S3_ACCESSKEY=12345678 # access key to S3 backend
 S3_SECRETKEY=12345678 # secret key to S3 backend
 S3_ENDPOINT=devel.io:30000 # endpoint to S3 backend
+S3_SECURE="false" # if accessing S3 through http or https
 S3_REGISTRY_BUCKET=devel.registry.io # bucket in S3 backend where registry data is saved
 ```
 
@@ -33,7 +34,8 @@ make up
 
 ```console
 make help
-make up-local
+make create-certificates
+make up
 make info
 ```
 
@@ -60,7 +62,7 @@ Registry testing:
 
 ### deployment using valid certificates
 
-1. copy your certificates and key to secrets/portus.crt, secrets/portus.key
+1. copy your certificates and key to secrets/domain.crt, secrets/domain.key
 
     ```console
     make help
@@ -69,3 +71,7 @@ Registry testing:
     ```
 
 2. then follow the same procedure as for local development
+
+### Missing feature
+
+1. Auto-configure portus using REST API

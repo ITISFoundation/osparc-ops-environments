@@ -116,7 +116,7 @@ services:
       REGISTRY_STORAGE_S3_REGION: "us-east-1"
       REGISTRY_STORAGE_S3_CHUNKSIZE: 16777216
       REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
-      REGISTRY_STORAGE_S3_SECURE: "false"
+      REGISTRY_STORAGE_S3_SECURE: ${S3_SECURE}
       REGISTRY_STORAGE_S3_BUCKET: ${S3_REGISTRY_BUCKET}
       REGISTRY_HTTP_SECRET: ${SECRET_KEY_BASE}
 
@@ -182,11 +182,12 @@ services:
       - portus_static_data:/srv/Portus/public:ro
     environment:
       NGINX_HOST: ${MACHINE_FQDN}
-    ports:
-      - 443:443
+    # ports:
+    #   - 443:443
     networks:
       - default
       - internal
+      - public
     configs:
       - source: nginx_nginx.conf
         target: /etc/nginx/nginx.template.conf
@@ -196,6 +197,24 @@ services:
         target: /secrets/portus.key
       - source: portus.crt
         target: /secrets/portus.crt
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=public
+        - traefik.http.middlewares.registry_headers.headers.sslredirect=true
+        - traefik.http.middlewares.registry_headers.headers.sslproxyheaders=true
+        - traefik.http.services.registry.loadbalancer.server.port=443
+        # - traefik.http.services.registry.loadbalancer.healthcheck.path=/minio/health/ready
+        - traefik.http.routers.registry.rule=PathPrefix(`/`)
+        - traefik.http.routers.registry.entrypoints=registry
+        - traefik.http.routers.registry.tls=true
+        - traefik.http.routers.registry.middlewares=registry_headers, gzip_compress@file
+        # force https
+        - traefik.http.middlewares.registry_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.registry_force_https.redirectScheme.port=5000
+        - traefik.http.routers.registry_http.rule=PathPrefix(`/`)
+        - traefik.http.routers.registry_http.entrypoints=registry
+        - traefik.http.routers.registry_http.middlewares=registry_force_https
 
 volumes:
   portus_static_data:
@@ -205,6 +224,8 @@ volumes:
 networks:
   default:
   internal:
+  public:
+    external: true
 
 configs:
   registry_config.yml:

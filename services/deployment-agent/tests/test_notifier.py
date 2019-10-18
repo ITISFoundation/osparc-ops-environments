@@ -42,7 +42,7 @@ def _list_messages():
     ]
 
 @pytest.mark.parametrize("message", _list_messages())
-async def test_notify_mattermost(loop, valid_notifier_config, mattermost_server, message):
+async def test_notify_mattermost(loop, valid_notifier_config, mattermost_server, message, aiohttp_client):
 
     async def handler(request):
         assert "Authorization" in request.headers
@@ -68,4 +68,5 @@ async def test_notify_mattermost(loop, valid_notifier_config, mattermost_server,
     server = await mattermost_server(routes)
     origin = URL.build(**{ k:getattr(server, k) for k in ("scheme", "host", "port")})
     valid_notifier_config["main"]["notifications"][0]["url"] = origin
-    await notifier.notify(valid_notifier_config, message)
+    client = await aiohttp_client(server)
+    await notifier.notify(valid_notifier_config, client.session, message)

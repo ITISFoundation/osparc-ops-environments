@@ -7,7 +7,23 @@ services:
       - 8080
     networks:
       - simcore_default
+      - public
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.adminer.loadbalancer.server.port=8080
+        - traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)
+        - traefik.http.routers.adminer.entrypoints=https
+        - traefik.http.routers.adminer.tls=true
+        - traefik.http.middlewares.adminer_stripprefixregex.stripprefixregex.regex=^/adminer        
+        - traefik.http.routers.adminer.middlewares=gzip_compress@file, adminer_stripprefixregex
 
 networks:
   simcore_default:
     external: true
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
