@@ -47,7 +47,7 @@ main:
             cat .env-devel >> .env && cat .env.platform >> .env &&
             docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
-    excluded_services: [minio]
+    excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
       extra_hosts: []
