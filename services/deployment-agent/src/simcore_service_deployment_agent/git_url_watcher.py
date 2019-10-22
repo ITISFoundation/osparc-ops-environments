@@ -119,10 +119,13 @@ async def _init_repositories(repos: List[GitRepo]) -> Dict:
     description = {}
     for repo in repos:
         repo.directory = tempfile.TemporaryDirectory().name
+        log.debug("cloning %s in %s...", repo.repo_id, repo.directory)
         await _git_clone_repo(repo.repo_url, repo.directory, repo.branch, repo.username, repo.password)
         latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags) if repo.tags else None
+        log.debug("latest tag found for %s is %s, now checking out...", repo.repo_id, latest_tag)
         await _checkout_repository(repo, latest_tag)
         sha = await _git_get_current_sha(repo.directory)
+        log.debug("sha for %s is %s", repo.repo_id, sha)
         description[repo.repo_id] = f"{repo.repo_id}:{repo.branch}:{latest_tag}:{sha}" if latest_tag \
             else f"{repo.repo_id}:{repo.branch}:{sha}"
     return description
@@ -132,9 +135,11 @@ async def _update_repo_using_tags(repo: GitRepo) -> Optional[str]:
     # check if current tag is the latest and greatest
     current_tag = await _git_get_current_matching_tag(repo.directory, repo.tags)
     latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
+    log.debug("following tags found for %s, current: %s, latest: %s", repo.repo_id, current_tag, latest_tag)
     # there should always be a tag
     assert latest_tag
     if current_tag == latest_tag:
+        log.debug("no change detected")
         return
     log.info("New tag detected: %s", latest_tag)
 
