@@ -133,13 +133,14 @@ async def test_setup_task(loop, fake_app, mocker):
         auto_deploy_task.setup(fake_app)
     except:
         pytest.fail("Unexpected error")
-
+    mock_git_changes = mocker.patch.object(auto_deploy_task.GitUrlWatcher, 'check_for_changes', return_value=Future())
+    mock_git_changes.return_value.set_result({})
     try:
         gen = auto_deploy_task.background_task(fake_app)
         assert not await gen.__anext__()
         assert auto_deploy_task.TASK_NAME in fake_app
-        task = asyncio.ensure_future(fake_app[auto_deploy_task.TASK_NAME])
         assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STARTING
+        task = asyncio.ensure_future(fake_app[auto_deploy_task.TASK_NAME])        
         while fake_app[auto_deploy_task.TASK_STATE] != auto_deploy_task.State.RUNNING:
             if fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.FAILED:
                 pytest.fail("task failed to start")

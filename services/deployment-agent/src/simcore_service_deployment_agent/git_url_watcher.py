@@ -120,7 +120,7 @@ async def _init_repositories(repos: List[GitRepo]) -> Dict:
     for repo in repos:
         repo.directory = tempfile.TemporaryDirectory().name
         await _git_clone_repo(repo.repo_url, repo.directory, repo.branch, repo.username, repo.password)
-        latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
+        latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags) if repo.tags else None
         await _checkout_repository(repo, latest_tag)
         sha = await _git_get_current_sha(repo.directory)
         description[repo.repo_id] = f"{repo.repo_id}:{repo.branch}:{latest_tag}:{sha}" if latest_tag \
@@ -177,7 +177,8 @@ async def _check_repositories(repos: List[GitRepo]) -> Dict:
         await _git_fetch(repo.directory)
         await _git_clean_repo(repo.directory)
 
-        repo_changes = await _update_repo_using_tags(repo) if repo.tags else await _update_repo_using_branch_head(repo)
+        repo_changes = await _update_repo_using_tags(repo) if repo.tags \
+            else await _update_repo_using_branch_head(repo)
         if repo_changes:
             changes[repo.repo_id] = repo_changes
 

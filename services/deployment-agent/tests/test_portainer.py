@@ -128,7 +128,7 @@ async def test_create_stack(loop, portainer_server, valid_docker_stack, aiohttp_
         assert "StackFileContent" in data
         assert json.loads(data["StackFileContent"]) == valid_docker_stack
         assert "Prune" in data
-        assert not data["Prune"]
+        assert data["Prune"]
 
         return web.json_response(data["StackFileContent"])
 
