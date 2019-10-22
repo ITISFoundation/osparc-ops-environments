@@ -186,7 +186,7 @@ async def _init_deploy(app: web.Application) -> Tuple[GitUrlWatcher, DockerRegis
         app[TASK_STATE] = State.STARTING
         app_config = app[APP_CONFIG_KEY]
         app_session = app[TASK_SESSION_NAME]
-        # wait for portianer to be available
+        # wait for portainer to be available
         await wait_for_dependencies(app_config, app_session)
         # create initial stack
         git_task, descriptions = await create_git_watch_subtask(app_config)
@@ -226,7 +226,7 @@ async def _deploy(app: web.Application, git_task: GitUrlWatcher, docker_task: Do
     # deploy stack to swarm
     log.info("redeploying the stack...")
     await update_portainer_stack(app_config, app_session, stack_cfg)
-    log.info("sending notifications...")    
+    log.info("sending notifications...")
     await notify(app_config, app_session, message=f"Updated stack\n{list(changes.values())}")
     main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
     await notify_state(app_config, app_session, state=app[TASK_STATE], message=changes[main_repo])
