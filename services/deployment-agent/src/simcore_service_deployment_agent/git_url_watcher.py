@@ -10,6 +10,7 @@ from tenacity import after_log, retry, stop_after_attempt, wait_random
 from yarl import URL
 
 from .cmd_utils import run_cmd_line
+from .exceptions import ConfigurationError
 from .subtask import SubTask
 
 log = logging.getLogger(__name__)
@@ -53,25 +54,25 @@ async def _git_fetch(directory: Path):
     cmd = f"cd {directory} && git fetch --prune --tags"
     await run_cmd_line(cmd)
 
-async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> List[str]:
+async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> Optional[List[str]]:
     cmd = f"cd {directory} && git --no-pager describe --tags --always `git rev-list --tags`"
     all_tags = await run_cmd_line(cmd)
     if not all_tags:
-        return []
+        return
     list_tags = all_tags.split("\n")
     reg_object = re.compile(regexp)
     for tag in list_tags:
         if reg_object.fullmatch(tag):
             return tag
-    return ""
+    return
 
-async def _git_get_current_matching_tag(directory: Path, regexp: str) -> str:
+async def _git_get_current_matching_tag(directory: Path, regexp: str) -> Optional[str]:
     cmd = f"cd {directory} && git --no-pager describe --tags --always"
     current_tag = (await run_cmd_line(cmd)).strip("\n")
     match = re.fullmatch(regexp, current_tag)
     if match:
         return current_tag
-    return ""
+    return
 
 async def _git_diff_filenames(directory: Path) -> str:
     cmd = f"cd {directory} && git --no-pager diff --name-only FETCH_HEAD"
@@ -123,6 +124,9 @@ async def _init_repositories(repos: List[GitRepo]) -> Dict:
         await _git_clone_repo(repo.repo_url, repo.directory, repo.branch, repo.username, repo.password)
         latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags) if repo.tags else None
         log.debug("latest tag found for %s is %s, now checking out...", repo.repo_id, latest_tag)
+        if not latest_tag and repo.tags:
+            raise ConfigurationError(msg=f"no tags found in {repo.repo_id} that follows defined tags pattern {repo.tags}")
+
         await _checkout_repository(repo, latest_tag)
         sha = await _git_get_current_sha(repo.directory)
         log.debug("sha for %s is %s", repo.repo_id, sha)
@@ -135,9 +139,11 @@ async def _update_repo_using_tags(repo: GitRepo) -> Optional[str]:
     # check if current tag is the latest and greatest
     current_tag = await _git_get_current_matching_tag(repo.directory, repo.tags)
     latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags)
-    log.debug("following tags found for %s, current: %s, latest: %s", repo.repo_id, current_tag, latest_tag)
     # there should always be a tag
-    assert latest_tag
+    if not latest_tag:
+        raise ConfigurationError(msg=f"no tags found in {repo.repo_id} that follows defined tags pattern {repo.tags}")
+
+    log.debug("following tags found for %s, current: %s, latest: %s", repo.repo_id, current_tag, latest_tag)
     if current_tag == latest_tag:
         log.debug("no change detected")
         return

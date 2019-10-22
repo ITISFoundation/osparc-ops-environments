@@ -10,7 +10,7 @@ from asyncio import Future
 import pytest
 import yaml
 
-from simcore_service_deployment_agent import git_url_watcher
+from simcore_service_deployment_agent import git_url_watcher, exceptions
 
 
 def _list_valid_configs():
@@ -42,11 +42,11 @@ async def test_watcher_workflow(loop, valid_git_config, mocker):
     git_watcher = git_url_watcher.GitUrlWatcher(valid_git_config)
 
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(exceptions.ConfigurationError):
         await git_watcher.check_for_changes()
     mock_general.assert_not_called()
 
-    REPO_ID = valid_git_config['main']['watched_git_repositories'][0]['id'] 
+    REPO_ID = valid_git_config['main']['watched_git_repositories'][0]['id']
     BRANCH = valid_git_config['main']['watched_git_repositories'][0]['branch']
     TAGS = valid_git_config['main']['watched_git_repositories'][0]['tags'] if "tags" in valid_git_config['main']['watched_git_repositories'][0] else None
     description = (f"{REPO_ID}:{BRANCH}:{TAG}:{SHA}" if TAGS else f"{REPO_ID}:{BRANCH}:{SHA}")
