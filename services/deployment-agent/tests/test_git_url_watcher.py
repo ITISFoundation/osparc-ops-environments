@@ -10,7 +10,7 @@ from asyncio import Future
 import pytest
 import yaml
 
-from simcore_service_deployment_agent import git_url_watcher, exceptions
+from simcore_service_deployment_agent import git_url_watcher
 
 
 def _list_valid_configs():
@@ -42,7 +42,7 @@ async def test_watcher_workflow(loop, valid_git_config, mocker):
     git_watcher = git_url_watcher.GitUrlWatcher(valid_git_config)
 
 
-    with pytest.raises(exceptions.ConfigurationError):
+    with pytest.raises(AssertionError):
         await git_watcher.check_for_changes()
     mock_general.assert_not_called()
 
