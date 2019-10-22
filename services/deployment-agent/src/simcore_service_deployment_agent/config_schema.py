@@ -11,6 +11,7 @@ app_schema = T.Dict({
         T.Key("username", optional=True, default=""): T.String(allow_blank=True),
         T.Key("password", optional=True, default=""): T.String(allow_blank=True),
         T.Key("branch", default="master", optional=True): T.String(allow_blank=True),
+        T.Key("tags", default="", optional=True): T.String(allow_blank=True),
         "pull_only_files": T.Bool(),
         "paths": T.List(T.String()),
     }), min_length=1),

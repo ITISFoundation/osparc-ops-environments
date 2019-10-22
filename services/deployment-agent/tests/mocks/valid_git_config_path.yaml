@@ -6,6 +6,7 @@ main:
     - id: simcore-github-repo
       url: file://localhost/home/test/git_repository
       branch: master
+      tags: ""
       pull_only_files: false # if true will only pull the files define in paths
       paths:
         # lists the files where to look for changes in the repo
