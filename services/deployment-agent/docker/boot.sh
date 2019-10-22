@@ -13,7 +13,6 @@ then
   #--------------------
 
   APP_CONFIG=/home/scu/host-dev.yaml
-  LOG_LEVEL=debug
 
   cd services/deployment-agent
   $SC_PIP install --user -r requirements/dev.txt
@@ -29,20 +28,15 @@ then
 elif [[ ${SC_BUILD_TARGET} == "production" ]]
 then
   APP_CONFIG=config-prod.yaml
-  LOG_LEVEL=info
 fi
 
 
 # RUNNING application ----------------------------------------
-if [[ ${SC_BOOT_MODE} == "debug" ]]
-then
-  simcore-service-deployment-agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
-elif [[ ${SC_BOOT_MODE} == "debug-ptvsd" ]]
+if [[ ${SC_BOOT_MODE} == "debug-ptvsd" ]]
 then
   echo
   echo "PTVSD Debugger initializing in port 3000"
-  python3 -m ptvsd --host 0.0.0.0 --port 3000 -m simcore_service_deployment_agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
+  python3 -m ptvsd --host 0.0.0.0 --port 3000 -m simcore_service_deployment_agent --config $APP_CONFIG
 else
-  LOG_LEVEL=info
-  simcore-service-deployment-agent --config $APP_CONFIG --loglevel=$LOG_LEVEL
+  simcore-service-deployment-agent --config $APP_CONFIG
 fi
