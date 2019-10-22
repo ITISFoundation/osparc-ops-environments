@@ -122,10 +122,11 @@ async def _init_repositories(repos: List[GitRepo]) -> Dict:
         repo.directory = tempfile.TemporaryDirectory().name
         log.debug("cloning %s in %s...", repo.repo_id, repo.directory)
         await _git_clone_repo(repo.repo_url, repo.directory, repo.branch, repo.username, repo.password)
+        await _git_fetch(repo.directory)
         latest_tag = await _git_get_latest_matching_tag(repo.directory, repo.tags) if repo.tags else None
         log.debug("latest tag found for %s is %s, now checking out...", repo.repo_id, latest_tag)
         if not latest_tag and repo.tags:
-            raise ConfigurationError(msg=f"no tags found in {repo.repo_id} that follows defined tags pattern {repo.tags}")
+            raise ConfigurationError(msg=f"no tags found in {repo.repo_url}:{repo.branch} that follows defined tags pattern {repo.tags}: {latest_tag}")
 
         await _checkout_repository(repo, latest_tag)
         sha = await _git_get_current_sha(repo.directory)
