@@ -13,11 +13,11 @@ main:
     - id: simcore-github-repo
       url: https://github.com/ITISFoundation/osparc-simcore.git
       branch: master
+      tags: ""
       pull_only_files: false # if true will only pull the files define in paths
       paths:
         # lists the files where to look for changes in the repo
         - services/docker-compose.yml
-        - Makefile
         - .env-devel
   docker_private_registries:
     # lists registries and their credentials if necessary to check for services to download from
@@ -33,9 +33,9 @@ main:
             export DOCKER_IMAGE_TAG=staging-latest &&
             export SWARM_NETWORK_NAME=simcore &&
             cp .env-devel .env &&
-            make create-stack-file output_file=stack.yml
+            docker-compose -f services/docker-compose.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
-    excluded_services: [webclient]
+    excluded_services: [webclient, minio, storage, director]
     excluded_volumes: []
     additional_parameters:
       extra_hosts:

@@ -56,7 +56,7 @@ async def test_watcher_workflow(loop, valid_docker_config, valid_docker_stack, m
         mocked_docker_client, mocker, registry_config, valid_docker_stack)
 
     try:
-        assert await docker_watcher.check_for_changes() == (False, "")
+        assert not await docker_watcher.check_for_changes()
     except:
         pytest.fail("Unexpected error checking for changes docker watcher...")
     _assert_docker_client_calls(
@@ -67,7 +67,11 @@ async def test_watcher_workflow(loop, valid_docker_config, valid_docker_stack, m
         "from_env.return_value.images.get_registry_data.return_value.attrs": "someothersignature"
     })
     try:
-        assert await docker_watcher.check_for_changes() == (True, "image jenkins:latest changed")
+        assert await docker_watcher.check_for_changes() == \
+            {
+                'jenkins:latest': 'image signature changed',
+                'ubuntu': 'image signature changed',
+            }
     except:
         pytest.fail("Unexpected error checking for changes docker watcher...")
 

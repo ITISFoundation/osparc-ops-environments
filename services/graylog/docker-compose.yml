@@ -37,7 +37,7 @@ services:
           memory: 1G
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:3.1
+    image: graylog/graylog:3.1.2-1
     init: true
     # user: "1000:1001"
     volumes:

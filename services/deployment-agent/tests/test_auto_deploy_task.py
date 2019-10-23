@@ -117,6 +117,14 @@ async def test_setup_task(loop, fake_app, mocker):
     mock_portainer.update_stack.return_value = Future()
     mock_portainer.update_stack.return_value.set_result("")
 
+    mock_docker_watcher = mocker.patch(
+        "simcore_service_deployment_agent.auto_deploy_task.DockerRegistriesWatcher"
+    )
+    mock_docker_watcher.return_value.init.return_value = Future()
+    mock_docker_watcher.return_value.init.return_value.set_result("")
+    mock_docker_watcher.return_value.check_for_changes.return_value = Future()
+    mock_docker_watcher.return_value.check_for_changes.return_value.set_result("")
+
     # fake username/password for task
     fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["username"] = ""
     fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["password"] = ""
@@ -125,18 +133,21 @@ async def test_setup_task(loop, fake_app, mocker):
         auto_deploy_task.setup(fake_app)
     except:
         pytest.fail("Unexpected error")
-
+    mock_git_changes = mocker.patch.object(auto_deploy_task.GitUrlWatcher, 'check_for_changes', return_value=Future())
+    mock_git_changes.return_value.set_result({})
     try:
-        await auto_deploy_task.start(fake_app)
+        gen = auto_deploy_task.background_task(fake_app)
+        assert not await gen.__anext__()
         assert auto_deploy_task.TASK_NAME in fake_app
-        task = asyncio.ensure_future(fake_app[auto_deploy_task.TASK_NAME])
         assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STARTING
+        task = asyncio.ensure_future(fake_app[auto_deploy_task.TASK_NAME])        
         while fake_app[auto_deploy_task.TASK_STATE] != auto_deploy_task.State.RUNNING:
             if fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.FAILED:
                 pytest.fail("task failed to start")
             await asyncio.sleep(1)
 
-        await auto_deploy_task.cleanup(fake_app)
+        with pytest.raises(StopAsyncIteration):
+            assert not await gen.__anext__()
         await asyncio.wait({task}, timeout=30)
         assert task.cancelled()
         assert fake_app[auto_deploy_task.TASK_STATE] == auto_deploy_task.State.STOPPED

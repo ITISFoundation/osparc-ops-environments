@@ -11,5 +11,9 @@ services:
     ports:
       - "3005:3000"
     configs:
-      - source: deployment_config
+      - source: deployment_config.devel.yaml
         target: /home/scu/host-dev.yaml
+
+configs:
+  deployment_config.devel.yaml:
+    file: deployment_config.devel.yaml

@@ -14,6 +14,7 @@ main:
       url: https://github.com/ITISFoundation/osparc-simcore.git
       branch: master
       pull_only_files: false # if true will only pull the files define in paths
+      # tags: ^v[0-9]+.[0-9]+.[0-9]+$
       paths:
         # lists the files where to look for changes in the repo
         - services/docker-compose.yml
@@ -33,7 +34,7 @@ main:
   docker_stack_recipe:
     # defines the recipe to generate the docker-compose style stack file to be deployed in the swarm
     # An optional command line may be defined to that end that generate the docker-compose file.
-    files: 
+    files:
       - id: simcore-ops-repo
         paths:
           - services/simcore/docker-compose.deploy.yml
@@ -47,7 +48,7 @@ main:
             cat .env-devel >> .env && cat .env.platform >> .env &&
             docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
-    excluded_services: [minio]
+    excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
       extra_hosts: []

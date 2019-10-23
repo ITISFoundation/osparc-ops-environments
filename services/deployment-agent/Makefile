@@ -22,6 +22,16 @@ PUBLIC_NETWORK := $(public_network)
 endif
 export PUBLIC_NETWORK
 
+# Network that includes all services to monitor
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
+
 # External VARIABLES
 include .env
 
@@ -127,6 +137,10 @@ unit-test: install-test ## Execute unit tests
 	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
+	)
+	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
