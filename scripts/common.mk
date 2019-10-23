@@ -2,11 +2,41 @@
 # Basic common targets and recipes
 #
 
-.PHONY: help
-help: ## This colourful help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+# FUNCTIONS --------------------------------------------------------
+
+# $(call docker-compose-viz, stack-config)
+#  Parses stack configuration and produces png diagram
+#
+# See https://github.com/pmsipilot/docker-compose-viz
+#
+define docker-compose-viz
+	$(eval stack_config := $1)
+	$(eval png_output := img/stack.png)
+	@mkdir -p $(CURDIR)/img
+	# Parsing $(stack_config) and producing $(png_output)
+	docker run --rm -it \
+		--name dcv-$1 \
+		-v $(CURDIR):/input \
+		pmsipilot/docker-compose-viz \
+		render -m image $(stack_config) --force --output-file $(png_output)
+endef
 
 
+# $(call clean-unversioned)
+#
+#
+define clean-unversioned
+	# removing unversioned
+	@git clean -ndxf -e .vscode/
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@git clean -dxf -e .vscode/
+endef
+
+
+
+# TARGETS ---------------------------------------------------------
 .PHONY: info info-swarm
 
 info: ## displays setup information
@@ -31,33 +61,7 @@ ifneq ($(SWARM_HOSTS), )
 endif
 
 
-# $(call clean-unversioned)
-#
-#
-define clean-unversioned
-	# removing unversioned
-	@git clean -ndxf -e .vscode/
-	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-	@git clean -dxf -e .vscode/
-endef
-
-
-
-# $(call docker-compose-viz, stack-config)
-#
-#  Parses stack configuration and produces png diagram
-#
-# See https://github.com/pmsipilot/docker-compose-viz
-#
-define docker-compose-viz
-	$(eval stack_config := $1)
-	$(eval png_output := img/stack.png)
-	@mkdir -p $(CURDIR)/img
-	# Parsing $(stack_config) and producing $(png_output)
-	docker run --rm -it \
-		--name dcv-$1 \
-		-v $(CURDIR):/input \
-		pmsipilot/docker-compose-viz \
-		render -m image $(stack_config) --force --output-file $(png_output)
-endef
+.PHONY: help
+# See https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+help: ## this colourful help
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
