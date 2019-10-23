@@ -23,9 +23,6 @@
   "[makefile]": {
     "editor.insertSpaces": false
   },
-  "python.testing.pytestArgs": [
-    "services/web/server"
-  ],
   "python.testing.unittestEnabled": false,
   "python.testing.nosetestsEnabled": false,
   "python.testing.pytestEnabled": true,
