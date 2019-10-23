@@ -1,6 +1,5 @@
 
-.DEFAULT_GOAL        := help
-PREDEFINED_VARIABLES := $(.VARIABLES)
+.DEFAULT_GOAL := help
 
 # include first so common variables are overriden later
 include $(realpath $(CURDIR)/../simcore/.env)
@@ -27,7 +26,6 @@ endif
 # postgres db ulr
 POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
 
-
 export MONITORED_NETWORK
 export POSTGRES_EXPORTER_DATA_SOURCE_NAME
 
@@ -41,16 +39,9 @@ endif
 export PUBLIC_NETWORK
 
 # TARGETS --------------------------------------------------
+include $(realpath $(CURDIR)/../../scripts/common.mk)
+
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-
-include $(realpath $(CURDIR)/../../scripts/info.mk)
-
-
-.PHONY: help
-help: ## This colourful help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-
-
 
 .PHONY: .init-swarm up down leave
 .init-swarm: ## inits swarm cluster
