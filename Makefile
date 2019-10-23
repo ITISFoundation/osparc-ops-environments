@@ -23,7 +23,9 @@ MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
 
 include repo.config
 
-SERVICES = $(sort $(wildcard services/*))
+SERVICES = $(sort $(filter-out %template, $(wildcard services/*)))
+
+
 # TARGETS --------------------------------------------------
 .DEFAULT_GOAL := help
 
