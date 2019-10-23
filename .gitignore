@@ -119,5 +119,5 @@ deployment_config.yaml
 # token
 *_token
 
-
-
+# docker stack auto-generated configs
+.stack-*

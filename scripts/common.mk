@@ -31,13 +31,16 @@ ifneq ($(SWARM_HOSTS), )
 endif
 
 
-.PHONY: clean-unversioned
-clean-unversioned:
+# $(call clean-unversioned)
+#
+#
+define clean-unversioned
+	# removing unversioned
 	@git clean -ndxf -e .vscode/
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-	# removing unversioned
 	@git clean -dxf -e .vscode/
+endef
 
 
 
