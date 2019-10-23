@@ -168,7 +168,7 @@ services:
     networks:
       - internal
       - public
-      - monitored-net
+      - monitored
     secrets:
       - source: domain.key
         target: /secrets/domain.key
@@ -188,7 +188,7 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
-  monitored-net:
+  monitored:
     name: ${MONITORED_NETWORK}
     external: true
 

@@ -93,7 +93,7 @@ services:
       - domain.crt
     networks:
       - public
-      - monitored-net
+      - monitored
 
 configs:
   traefik_dynamic_config.yml:
@@ -109,6 +109,6 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
-  monitored-net:
+  monitored:
     name: ${MONITORED_NETWORK}
     external: true
