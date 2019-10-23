@@ -1,8 +1,6 @@
 .DEFAULT_GOAL := help
-PREDEFINED_VARIABLES := $(.VARIABLES)
 
-# If you see pwd_unknown showing up, this is why. Re-calibrate your system.
-PWD ?= pwd_unknown
+
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
@@ -22,9 +20,7 @@ export PUBLIC_NETWORK
 include .env
 
 # TARGETS --------------------------------------------------
-.PHONY: help
-help: ## This colourful help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack
@@ -37,35 +33,6 @@ down: ## Removes the stack from the swarm
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
 	-docker swarm leave -f
-
-.PHONY: clean
-clean: ## Cleans unversioned files
-	@git clean -dxf
-
-# Misc: info & clean
-.PHONY: info info-vars info-swarm
-
-info: info-vars info-swarm ## All info
-
-info-vars: ## Expands all variables in makefile
-	$(info VARIABLES ------------)
-	$(foreach v,                                                                           \
-		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
-		$(info $(v)=$($(v)))                                                               \
-	)
-	#---------------------
-
-info-swarm: ## Displays info about stacks and networks
-ifneq ($(SWARM_HOSTS), )
-	# stacks in swarm
-	@docker stack ls
-	# containers (tasks) running in '$(SWARM_STACK_NAME)' stack
-	-@docker stack ps $(SWARM_STACK_NAME)
-	# services in '$(SWARM_STACK_NAME)' stack
-	-@docker stack services $(SWARM_STACK_NAME)
-	# networks
-	@docker network ls
-endif
 
 # Helpers -------------------------------------------------
 .PHONY: .init

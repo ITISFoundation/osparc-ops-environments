@@ -1,8 +1,8 @@
 
-PREDEFINED_VARIABLES := $(.VARIABLES)
 
-# If you see pwd_unknown showing up, this is why. Re-calibrate your system.
-PWD ?= pwd_unknown
+
+
+
 
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
@@ -27,16 +27,10 @@ $(if $(wildcard .env), , $(shell cp env.cfg .env))
 include .env
 
 
-
 # TARGETS --------------------------------------------------
+include $(realpath $(CURDIR)/../../scripts/common.mk)
+
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-
-
-.PHONY: help
-help: ## This colourful help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-
-.DEFAULT_GOAL := help
 
 
 # Build image --
@@ -44,7 +38,6 @@ help: ## This colourful help
 .PHONY: build
 build: jupyter-diagnostics/Dockerfile ## builds services
 	docker-compose build
-
 
 
 # Registry ---
@@ -65,8 +58,6 @@ pull: ## Pulls images from registry
 		docker pull $(DOCKER_REGISTRY)/$(service_name):$(DOCKER_IMAGE_TAG) \
 	)
 
-
-
 # Setup & run service/containers ------
 
 .PHONY: .init
@@ -74,7 +65,7 @@ pull: ## Pulls images from registry
 	$(if $(SWARM_HOSTS), , docker swarm init)
 
 
-.PHONY: 
+.PHONY:
 test-network: .init ## ensures test-network if `{SIMCORE_NETWORK}` is not in place
 	$(if $(filter $(SIMCORE_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		, docker network ls --filter="name==$(SIMCORE_NETWORK)" \
@@ -101,34 +92,6 @@ reset: ## leaves swarm stopping all stacks in it
 # TODO: do some meaningful checks here that tests the running stack
 #test-up:
 #	$(error docker)
-
-
-# Miscelaneous ------
-
-.PHONY: info info-more
-info: ## expands all variables 	
-	$(info VARIABLES ------------)
-	$(foreach v,                                                                           \
-		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
-		$(info $(v)=$($(v)))                                                               \
-	)
-	@echo ""
-	@docker-compose config
-	@echo "---"
-
-info-more: info ## and relevant info on stack
-	docker ps
-ifneq ($(SWARM_HOSTS), )
-	@echo ""
-	docker stack ls
-	@echo ""
-	-docker stack ps $(STACK_NAME)
-	@echo ""
-	-docker stack services $(STACK_NAME)
-	@echo ""
-	docker network ls
-endif
-
 
 .PHONY: clean
 clean: ## cleans tmp files

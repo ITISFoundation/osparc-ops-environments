@@ -1,8 +1,8 @@
 .DEFAULT_GOAL := help
-PREDEFINED_VARIABLES := $(.VARIABLES)
 
-# If you see pwd_unknown showing up, this is why. Re-calibrate your system.
-PWD ?= pwd_unknown
+
+
+
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
@@ -33,9 +33,7 @@ export MONITORED_NETWORK
 include .env
 
 # TARGETS --------------------------------------------------
-.PHONY: help
-help: ## This colourful help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
 up: .init .env .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
@@ -57,26 +55,6 @@ leave: ## leaves swarm stopping all stacks, secrets in it
 .PHONY: clean
 clean: ## Cleans unversioned files
 	@git clean -dxf
-
-.PHONY: info
-info: ## expands all variables and relevant info on stack
-	$(info VARIABLES ------------)
-	$(foreach v,                                                                           \
-		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
-		$(info $(v)=$($(v)))                                                               \
-	)
-	@echo ""
-	docker ps
-ifneq ($(SWARM_HOSTS), )
-	@echo ""
-	docker stack ls
-	@echo ""
-	-docker stack ps $(STACK_NAME)
-	@echo ""
-	-docker stack services $(STACK_NAME)
-	@echo ""
-	docker network ls
-endif
 
 # Helpers -------------------------------------------------
 .PHONY: .init .create-stack-file .create-secrets
