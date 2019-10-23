@@ -49,8 +49,8 @@ clean:  ## Cleans outputs
 	$(call clean-unversioned)
 
 .PHONY: autodoc
-autodoc: $(STACK_CONFIG)
-	$(call docker-compose-viz,$(STACK_CONFIG_FILE))
+autodoc: $(STACK_CONFIG) ## creates stack graph
+	$(call docker-compose-viz,$(STACK_CONFIG))
 
 .PHONY: .init-swarm
 .init-swarm: ## Initialize swarm cluster

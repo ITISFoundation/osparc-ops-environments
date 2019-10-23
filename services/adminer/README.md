@@ -2,6 +2,8 @@
 
 Stack to deploy adminer services
 
+![](img/stack.png)
+
 - https://www.adminer.org/en/
 
 ## Dependencies
