@@ -26,6 +26,9 @@ services:
       SSL_CERT_FILE: /usr/local/share/ca-certificates/osparc.crt
     networks: 
       - monitored-net
+  rabbit:
+    networks: 
+      - monitored-net
 
   # postgres:
   #   deploy:
