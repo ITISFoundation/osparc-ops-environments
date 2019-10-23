@@ -1,10 +1,7 @@
 #!/bin/bash
 
-if [[ $OSTYPE == "darwin"* ]]; then
-    psed=gsed
-else
-    psed=sed
-fi
+# Using osx support functions
+source "$( dirname "${BASH_SOURCE[0]}" )/portable.sh"
 
 set -euo pipefail
 IFS=$'\n\t'

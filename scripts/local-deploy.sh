@@ -4,11 +4,8 @@
 #
 #
 
-if [[ $OSTYPE == "darwin"* ]]; then
-    psed=gsed
-else
-    psed=sed
-fi
+# Using osx support functions
+source "$( dirname "${BASH_SOURCE[0]}" )/portable.sh"
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -22,11 +19,7 @@ scripts_dir=$(realpath ${repo_basedir}/scripts)
 current_git_url=$(git config --get remote.origin.url)
 current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    machine_ip=$(ipconfig getifaddr en0)
-else
-    machine_ip=$(hostname -I | cut -d ' ' -f1)
-fi
+machine_ip=$(get_this_ip)
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
