@@ -2,6 +2,8 @@
 
 Creates a stack to aggregate logs from any running stack/containers. The logs are pulled from the running container by [Logspout-GELF](https://github.com/Vincit/logspout-gelf), converted and sent to the [Graylog server](https://www.graylog.org/), which uses [MongoDB](https://www.mongodb.com/) and [elasticsearch](https://www.elastic.co/) as backends.
 
+![](img/stack.png)
+
 ## Usage
 
 ```console

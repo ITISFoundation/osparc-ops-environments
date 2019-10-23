@@ -42,6 +42,7 @@ leave: ## Leaves swarm stopping all services in it
 clean:  ## Cleans outputs
 	$(call clean-unversioned)
 
+.PHONY: autodoc
 autodoc: ${STACK_CONFIG_FILE}
 	$(call docker-compose-viz,$(STACK_CONFIG_FILE))
 

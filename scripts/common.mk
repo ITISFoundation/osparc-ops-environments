@@ -52,7 +52,8 @@ endef
 #
 define docker-compose-viz
 	$(eval stack_config := $1)
-	$(eval png_output := $(subst yml,png,$1))
+	$(eval png_output := img/stack.png)
+	@mkdir -p $(CURDIR)/img
 	# Parsing $(stack_config) and producing $(png_output)
 	docker run --rm -it \
 		--name dcv-$1 \
