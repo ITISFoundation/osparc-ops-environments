@@ -27,8 +27,7 @@ $(if $(IS_OSX), \
 
 include repo.config
 
-
-
+SERVICES = $(sort $(wildcard services/*))
 # TARGETS --------------------------------------------------
 .DEFAULT_GOAL := help
 
@@ -37,7 +36,7 @@ certificates/domain.key:
 	# domain key/crt files must be located in $< and certificates/domain.crt to be used
 	@echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ]; \
 	$(MAKE) -C certificates create-certificates; \
-	$(MAKE) -C certificates install-root-certificate;	
+	$(MAKE) -C certificates install-root-certificate;
 
 .PHONY: .create-secrets
 .create-secrets:
@@ -47,6 +46,17 @@ certificates/domain.key:
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
 	bash scripts/local-deploy.sh
 	@$(MAKE) info-local
+
+.PHONY: up-devel
+up-devel: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
+	bash scripts/local-deploy.sh --devel_mode=1
+	@$(MAKE) info-local
+
+.PHONY: down
+down:
+	@for service in $(SERVICES); do \
+		pushd $$service; $(MAKE) down; popd; \
+	done
 
 .PHONY: leave
 leave: ## leaves the swarm
