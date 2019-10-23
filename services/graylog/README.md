@@ -37,3 +37,7 @@ This needs to be added to /etc/docker/daemon.json
 Restart the docker daemon after the modifications.
 
 **Note:** In that case logspout is not necessary, BUT the downside is that all commands relying on "docker logs" will then fail.
+
+
+<!-- links below this line -->
+[osparc-simcore]:https://github.com/ITISFoundation/osparc-simcore
