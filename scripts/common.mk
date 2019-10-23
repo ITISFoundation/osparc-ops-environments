@@ -29,3 +29,31 @@ ifneq ($(SWARM_HOSTS), )
 	# Networks
 	@docker network ls
 endif
+
+
+.PHONY: clean-unversioned
+clean-unversioned:
+	@git clean -ndxf -e .vscode/
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	# removing unversioned
+	@git clean -dxf -e .vscode/
+
+
+
+# $(call docker-compose-viz, stack-config)
+#
+#  Parses stack configuration and produces png diagram
+#
+# See https://github.com/pmsipilot/docker-compose-viz
+#
+define docker-compose-viz
+	$(eval stack_config := $1)
+	$(eval png_output := $(subst yml,png,$1))
+	# Parsing $(stack_config) and producing $(png_output)
+	docker run --rm -it \
+		--name dcv-$1 \
+		-v $(CURDIR):/input \
+		pmsipilot/docker-compose-viz \
+		render -m image $(stack_config) --force --output-file $(png_output)
+endef
