@@ -9,7 +9,7 @@ networks:
   internal-net:
     driver: overlay
     attachable: true
-  monitored-net:
+  monitored:
     name: ${MONITORED_NETWORK}
     external: true
   public:
@@ -35,7 +35,7 @@ services:
       - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=http://osparc.local/'
+      - '--web.external-url=https://osparc.local/prometheus/'
       - '--web.route-prefix=/'
     ports:
       - "9090"
@@ -43,7 +43,7 @@ services:
       - cadvisor
     networks:
       - internal-net
-      - monitored-net
+      - monitored
       - public
     #logging:
     #  driver: gelf
@@ -68,7 +68,7 @@ services:
           memory: 2048M
         reservations:
           memory: 64M
-
+  
   dockerd-exporter:
     # the docker engine(s) need to set the following in /etc/docker/daemon.json to provide prometheus metrics:
     # {"metrics-addr": "0.0.0.0:9323",
@@ -152,7 +152,7 @@ services:
       - "8080"
     networks:
       - internal-net
-      - monitored-net
+      - monitored
     deploy:
       mode: global
       resources:
@@ -167,7 +167,7 @@ services:
       - "9187"
     networks:
       - internal-net
-      - monitored-net
+      - monitored
     environment:
       - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
     deploy:
