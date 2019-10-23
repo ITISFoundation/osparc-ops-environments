@@ -26,6 +26,7 @@ services:
       - SIMCORE_IMAGE_TAG=${SIMCORE_IMAGE_TAG}
       - SIMCORE_DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY}
       - PUBLIC_NETWORK=${PUBLIC_NETWORK}
+      - MONITORED_NETWORK=${MONITORED_NETWORK}
     deploy:
       mode: replicated
       replicas: 1

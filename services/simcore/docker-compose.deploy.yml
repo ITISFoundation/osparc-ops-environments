@@ -14,6 +14,7 @@ services:
         - traefik.http.routers.webserver.middlewares=gzip_compress@file
     networks:
       - public
+      - monitored-net
   
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
@@ -23,6 +24,8 @@ services:
     environment: 
       # minio sdk uses this env to use self-signed certs
       SSL_CERT_FILE: /usr/local/share/ca-certificates/osparc.crt
+    networks: 
+      - monitored-net
 
   # postgres:
   #   deploy:
@@ -34,6 +37,10 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  monitored-net:
+    external: true
+    name: ${MONITORED_NETWORK}
+
 
 # self-signed only
 secrets:
