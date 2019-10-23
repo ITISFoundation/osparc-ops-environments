@@ -6,7 +6,7 @@ volumes:
     alertmanager_data: {}
 
 networks:
-  internal-net:
+  internal:
     driver: overlay
     attachable: true
   monitored:
@@ -42,7 +42,7 @@ services:
     depends_on:
       - cadvisor
     networks:
-      - internal-net
+      - internal
       - monitored
       - public
     #logging:
@@ -75,7 +75,7 @@ services:
     # "experimental": true}
     image: stefanprodan/caddy
     networks:
-      - internal-net
+      - internal
     environment:
       # Replace 172.18.0.1 with the docker_gwbridge address
       - DOCKER_GWBRIDGE_IP=172.18.0.1
@@ -108,7 +108,7 @@ services:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
       - '--no-collector.ipvs'
     networks:
-      - internal-net
+      - internal
     deploy:
       mode: global
       resources:
@@ -127,7 +127,7 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
     networks:
-      - internal-net
+      - internal
     configs:
       - source: alertmanager_config
         target: /etc/alertmanager/config.yml
@@ -151,7 +151,7 @@ services:
     ports:
       - "8080"
     networks:
-      - internal-net
+      - internal
       - monitored
     deploy:
       mode: global
@@ -166,7 +166,7 @@ services:
     ports:
       - "9187"
     networks:
-      - internal-net
+      - internal
       - monitored
     environment:
       - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
@@ -190,7 +190,7 @@ services:
       - ./grafana/config.monitoring
     user: "104"
     networks:
-      - internal-net
+      - internal
       - public
     deploy:
       placement:
