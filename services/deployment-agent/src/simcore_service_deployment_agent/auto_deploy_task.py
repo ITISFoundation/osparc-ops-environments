@@ -6,7 +6,7 @@ from shutil import copy2
 from typing import Dict, List, Tuple
 
 import yaml
-from aiohttp import ClientError, web, ClientSession
+from aiohttp import ClientError, ClientSession, web
 from servicelib.application_keys import APP_CONFIG_KEY
 from tenacity import (before_sleep_log, retry, retry_if_exception_type,
                       stop_after_attempt, wait_fixed)
@@ -71,13 +71,10 @@ async def add_parameters(app_config: Dict, stack_cfg: Dict) -> Dict:
 
     return stack_cfg
 
-async def generate_stack_file(app_config: Dict, subtasks: List[SubTask]) -> Path:
+async def generate_stack_file(app_config: Dict, git_task: GitUrlWatcher) -> Path:
     # collect repos informations
     git_repos = {}
-    for task in subtasks:
-        if isinstance(task, GitUrlWatcher):
-            # map the id
-            git_repos.update({x.repo_id: x for x in task.watched_repos})
+    git_repos.update({x.repo_id: x for x in git_task.watched_repos})
 
     stack_recipe_cfg = app_config["main"]["docker_stack_recipe"]
     # collect files in one location
@@ -132,50 +129,36 @@ async def update_portainer_stack(app_config: Dict, app_session: ClientSession, s
             await portainer.update_stack(url, app_session, bearer_code, current_stack_id, stack_cfg)
 
 
-async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict) -> SubTask:
+async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict) -> DockerRegistriesWatcher:
     log.debug("creating docker watch subtask")
     docker_subtask = DockerRegistriesWatcher(app_config, stack_cfg)
     await docker_subtask.init()
     return docker_subtask
 
 
-async def create_git_watch_subtask(app_config: Dict) -> SubTask:
+async def create_git_watch_subtask(app_config: Dict) -> Tuple[GitUrlWatcher, Dict]:
     log.debug("creating git repo watch subtask")
     git_sub_task = GitUrlWatcher(app_config)
-    await git_sub_task.init()
-    return git_sub_task
+    descriptions = await git_sub_task.init()
+    return (git_sub_task, descriptions)
 
-
-async def init_task(app_config: Dict, app_session: ClientSession) -> List[SubTask]:
-    log.debug("initialising task")
-    subtasks = []
-    # start by creating the git watcher/repos
-    subtasks.append(await create_git_watch_subtask(app_config))
-    # then generate the stack file
-    stack_file = await generate_stack_file(app_config, subtasks)
+async def create_stack(git_task: GitUrlWatcher, app_config: Dict) -> Dict:
+    # generate the stack file
+    stack_file = await generate_stack_file(app_config, git_task)
     log.debug("generated stack file in %s", stack_file.name)
     # filter the stack file if needed
     stack_cfg = await filter_services(app_config, stack_file)
     log.debug("filtered stack configuration")
     # add parameter to the stack file if needed
     stack_cfg = await add_parameters(app_config, stack_cfg)
-    log.debug("added stack parameters")
-    # create the docker repos watchers
-    subtasks.append(await create_docker_registries_watch_subtask(app_config, stack_cfg))
-    # deploy to portainer
-    await update_portainer_stack(app_config, app_session, stack_cfg)
-    log.debug("updated portainer app")
-    log.debug("task initialised")
-    return subtasks
+    log.debug("new stack config is\n%s", stack_file)
+    return stack_cfg
 
-
-async def check_changes(subtasks: List[SubTask]) -> Tuple[bool, str]:
+async def check_changes(subtasks: List[SubTask]) -> Dict:
+    changes = {}
     for task in subtasks:
-        changes, details = await task.check_for_changes()
-        if changes:
-            log.info("Changes detected with task %s, details: %s", task.name, details)
-            return (True, details)
-    return (False, "")
+        changes.update(await task.check_for_changes())
+    return changes
 
 
 @retry(wait=wait_fixed(RETRY_WAIT_SECS),
@@ -196,18 +179,27 @@ async def wait_for_dependencies(app_config: Dict, app_session: ClientSession):
             raise DependencyNotReadyError(
                 "Portainer not ready at {}".format(url))
 
-async def _init_deploy(app: web.Application) -> List[SubTask]:
+async def _init_deploy(app: web.Application) -> Tuple[GitUrlWatcher, DockerRegistriesWatcher]:
     try:
+        log.info("initialising...")
+        # get configs
         app[TASK_STATE] = State.STARTING
         app_config = app[APP_CONFIG_KEY]
         app_session = app[TASK_SESSION_NAME]
-        log.info("initialising...")
+        # wait for portainer to be available
         await wait_for_dependencies(app_config, app_session)
-        subtasks = await init_task(app_config, app_session)
-        await notify(app_config, app_session, message="Stack initialised")
-        await notify_state(app_config, app_session, state=app[TASK_STATE], message="starting")
+        # create initial stack
+        git_task, descriptions = await create_git_watch_subtask(app_config)
+        stack_cfg = await create_stack(git_task, app_config)
+        docker_task = await create_docker_registries_watch_subtask(app_config, stack_cfg)
+        # deploy stack to swarm
+        await update_portainer_stack(app_config, app_session, stack_cfg)
+        # notifications
+        await notify(app_config, app_session, message=f"Stack initialised with:\n{list(descriptions.values())}")
+        main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
+        await notify_state(app_config, app_session, state=app[TASK_STATE], message=descriptions[main_repo])
         log.info("initialisation completed")
-        return subtasks
+        return (git_task, docker_task)
     except asyncio.CancelledError:
         log.info("cancelling task...")
         app[TASK_STATE] = State.STOPPED
@@ -220,26 +212,37 @@ async def _init_deploy(app: web.Application) -> List[SubTask]:
         # cleanup the subtasks
         log.info("task completed...")
 
-async def _deploy(app: web.Application, subtasks):
+async def _deploy(app: web.Application, git_task: GitUrlWatcher, docker_task: DockerRegistriesWatcher):
     app_config = app[APP_CONFIG_KEY]
     app_session = app[TASK_SESSION_NAME]
+    log.info("checking for changes...")
+    changes = await check_changes([git_task, docker_task])
+    if not changes:
+        return
+
+    stack_cfg = await create_stack(git_task, app_config)
+    docker_task = await create_docker_registries_watch_subtask(app_config, stack_cfg)
+
+    # deploy stack to swarm
+    log.info("redeploying the stack...")
+    await update_portainer_stack(app_config, app_session, stack_cfg)
+    log.info("sending notifications...")
+    await notify(app_config, app_session, message=f"Updated stack\n{list(changes.values())}")
+    main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
+    await notify_state(app_config, app_session, state=app[TASK_STATE], message=changes[main_repo])
+    log.info("stack re-deployed")
+
+async def auto_deploy(app: web.Application):
+    log.info("start autodeploy task")
+    app_config = app[APP_CONFIG_KEY]
+    app_session = app[TASK_SESSION_NAME]
+    # init
+    git_task, docker_task = await _init_deploy(app)
+    # loop forever to detect changes
     while True:
         try:
-            log.info("checking for changes...")
-            changes_detected, changes = await check_changes(subtasks)
-            if changes_detected:
-                log.info("changes detected, redeploying the stack...")
-                log.info("changes: %s", changes)
-                message = "Updated stack"
-                if changes:
-                    message = message + "\n{}".format(changes)
-                subtasks = await init_task(app_config, app_session)
-                await notify(app_config, app_session, message=message)
-                log.info("stack re-deployed")
-                await notify_state(app_config, app_session, state=app[TASK_STATE], message="")
-            if app[TASK_STATE] != State.RUNNING:
-                app[TASK_STATE] = State.RUNNING
-                await notify_state(app_config, app_session, state=app[TASK_STATE], message="")        
+            app[TASK_STATE] = State.RUNNING
+            await _deploy(app, git_task, docker_task)
             await asyncio.sleep(app_config["main"]["polling_interval"])
         except asyncio.CancelledError:
             log.info("cancelling task...")
@@ -255,31 +258,17 @@ async def _deploy(app: web.Application, subtasks):
         finally:
             # cleanup the subtasks
             log.info("task completed...")
-async def auto_deploy(app: web.Application):
-    log.info("start autodeploy task")
-    subtasks = await _init_deploy(app)
-    # loop forever to detect changes
-    await _deploy(app, subtasks)
-        
-
-
-async def start(app: web.Application):
-    app[TASK_STATE] = State.STARTING
-    app[TASK_NAME] = asyncio.get_event_loop().create_task(auto_deploy(app))
-
-
-async def cleanup(app: web.Application):
-    task = app[TASK_NAME]
-    task.cancel()
-
 
 def setup(app: web.Application):
-    app[TASK_NAME] = None
-    app[TASK_STATE] = State.STOPPED
     app.cleanup_ctx.append(persistent_session)
-    app.on_startup.append(start)
-    app.on_cleanup.append(cleanup)
+    app.cleanup_ctx.append(background_task)
 
+async def background_task(app: web.Application):
+    app[TASK_STATE] = State.STARTING
+    app[TASK_NAME] = asyncio.get_event_loop().create_task(auto_deploy(app))
+    yield
+    task = app[TASK_NAME]
+    task.cancel()
 
 async def persistent_session(app):
     app[TASK_SESSION_NAME] = session = ClientSession()

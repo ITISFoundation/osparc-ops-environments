@@ -14,6 +14,7 @@ main:
       url: https://github.com/ITISFoundation/osparc-simcore.git
       branch: master
       pull_only_files: false # if true will only pull the files define in paths
+      # tags: ^v[0-9]+.[0-9]+.[0-9]+$
       paths:
         # lists the files where to look for changes in the repo
         - services/docker-compose.yml
@@ -45,9 +46,9 @@ main:
             export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
             mv .env .env.platform &&
             cat .env-devel >> .env && cat .env.platform >> .env &&
-            docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
+            docker-compose -f services/docker-compose.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
-    excluded_services: [minio]
+    excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
       extra_hosts: []
@@ -62,8 +63,8 @@ main:
   notifications:
     - service: mattermost
       url: https://mattermost.speag.com
-      message: "[A new staging version of oSparc has been deployed !!!](the_url_to_go_for/)"
+      message: "New version out"
       enabled: true
       channel_id: pgz1nkw3f3yy9xjtj3hiiaheia
       personal_token: a957n59ahin83ba4c4dt14966w
-      header_unique_name: master
+      header_unique_name: IT'IS

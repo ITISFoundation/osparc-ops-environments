@@ -3,17 +3,24 @@ version: '3.7'
 volumes:
     prometheus_data: {}
     grafana_data: {}
+    alertmanager_data: {}
 
 networks:
-  internal-net:
+  internal:
     driver: overlay
     attachable: true
-  monitored-net:
+  monitored:
     name: ${MONITORED_NETWORK}
     external: true
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+
+configs:
+  dockerd_config:
+    file: ./dockerd-exporter/Caddyfile
+  alertmanager_config:
+    file: ./alertmanager/config.yml
 
 services:
 
@@ -25,17 +32,18 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=http://osparc.local/'
+      - '--web.external-url=https://osparc.local/prometheus/'
       - '--web.route-prefix=/'
     ports:
       - "9090"
     depends_on:
       - cadvisor
     networks:
-      - internal-net
-      - monitored-net
+      - internal
+      - monitored
       - public
     #logging:
     #  driver: gelf
@@ -55,45 +63,83 @@ services:
         - traefik.http.routers.prometheus.tls=true
         - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
         - traefik.http.routers.prometheus.middlewares=gzip_compress@file, prometheus_stripprefixregex
-
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 64M
+  
+  dockerd-exporter:
+    # the docker engine(s) need to set the following in /etc/docker/daemon.json to provide prometheus metrics:
+    # {"metrics-addr": "0.0.0.0:9323",
+    # "experimental": true}
+    image: stefanprodan/caddy
+    networks:
+      - internal
+    environment:
+      # Replace 172.18.0.1 with the docker_gwbridge address
+      - DOCKER_GWBRIDGE_IP=172.18.0.1
+    configs:
+      - source: dockerd_config
+        target: /etc/caddy/Caddyfile
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   node-exporter:
-    image: prom/node-exporter
+    # special node exporter that allows setting the node name to be more human readable later on in grafana.
+    # very good description in there: https://github.com/stefanprodan/swarmprom
+    image: stefanprodan/swarmprom-node-exporter:v0.16.0
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - /etc/hostname:/etc/nodename
+    environment:
+      - NODE_ID={{.Node.ID}}
     command:
-      - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
-      - --collector.filesystem.ignored-mount-points
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
-    ports:
-      - "9100"
+      - '--path.procfs=/host/proc'
+      - '--collector.textfile.directory=/etc/node-exporter/'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--no-collector.ipvs'
     networks:
-      - internal-net
+      - internal
     deploy:
       mode: global
-    #restart_policy:
-    #    condition: on-failure
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   alertmanager:
     image: prom/alertmanager
     ports:
       - "9093"
     volumes:
-      - "./alertmanager/:/etc/alertmanager/"
+      - alertmanager_data:/alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
     networks:
-      - internal-net
+      - internal
+    configs:
+      - source: alertmanager_config
+        target: /etc/alertmanager/config.yml
     deploy:
       placement:
         constraints:
            - node.role==manager
-      #restart_policy:
-      #  condition: on-failure
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   cadvisor:
     image: google/cadvisor
@@ -105,24 +151,31 @@ services:
     ports:
       - "8080"
     networks:
-      - internal-net
-      - monitored-net
+      - internal
+      - monitored
     deploy:
       mode: global
-    #restart_policy:
-    #    condition: on-failure
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   postgres-exporter:
     image: wrouesnel/postgres_exporter
     ports:
       - "9187"
     networks:
-      - internal-net
-      - monitored-net
+      - internal
+      - monitored
     environment:
       - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
-    #deploy:
-    #  mode: global
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   grafana:
     image: grafana/grafana
@@ -137,7 +190,7 @@ services:
       - ./grafana/config.monitoring
     user: "104"
     networks:
-      - internal-net
+      - internal
       - public
     deploy:
       placement:
@@ -156,3 +209,8 @@ services:
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.grafana.middlewares=gzip_compress@file, grafana_replace_regex
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
