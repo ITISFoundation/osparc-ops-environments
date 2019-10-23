@@ -19,19 +19,19 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 # TARGETS --------------------------------------------------
-${STACK_CONFIG_FILE}: docker-compose.yml .env
+$(STACK_CONFIG_FILE): docker-compose.yml .env
 	# Creating config for stack
 	docker-compose -f $< config > $@
 
 .PHONY: up
-up: ${STACK_CONFIG_FILE} .env .init  ## Deploys graylog stack
-	# Deploying current stack '${STACK_NAME}'
-	docker stack deploy -c $< ${STACK_NAME}
+up: $(STACK_CONFIG_FILE) .env .init  ## Deploys graylog stack
+	# Deploying current stack '$(STACK_NAME)'
+	docker stack deploy -c $< $(STACK_NAME)
 
 .PHONY: down
 down: ## Removes the stack from the swarm
-	# Removing current stack '${STACK_NAME}'
-	docker stack rm ${STACK_NAME}
+	# Removing current stack '$(STACK_NAME)'
+	docker stack rm $(STACK_NAME)
 
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
@@ -43,7 +43,7 @@ clean:  ## Cleans outputs
 	$(call clean-unversioned)
 
 .PHONY: autodoc
-autodoc: ${STACK_CONFIG_FILE}
+autodoc: $(STACK_CONFIG_FILE)
 	$(call docker-compose-viz,$(STACK_CONFIG_FILE))
 
 .PHONY: .init
