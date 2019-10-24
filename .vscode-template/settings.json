@@ -1,0 +1,35 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.associations": {
+    ".*rc": "ini",
+    ".env*": "ini",
+    "Dockerfile*": "dockerfile",
+    "**/requirements/*.txt": "pip-requirements",
+    "**/requirements/*.in": "pip-requirements"
+  },
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "python.formatting.autopep8Args": [
+    "--max-line-length 140"
+  ],
+  "[python]": {
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4
+  },
+  "[makefile]": {
+    "editor.insertSpaces": false
+  },
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.pythonPath": ".venv/bin/python",
+  "restructuredtext.confPath": "",
+  "autoDocstring.docstringFormat": "sphinx",
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true,
+  "python.venvPath": ".venv"
+}

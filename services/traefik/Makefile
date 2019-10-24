@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-PREDEFINED_VARIABLES := $(.VARIABLES)
+
 
 # Operating system
 ifeq ($(filter Windows_NT,$(OS)),)
@@ -13,8 +13,8 @@ $(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
 # Makefile's shell
 SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 
-# If you see pwd_unknown showing up, this is why. Re-calibrate your system.
-PWD ?= pwd_unknown
+
+
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
@@ -47,9 +47,7 @@ export PUBLIC_NETWORK
 include .env
 
 # TARGETS --------------------------------------------------
-.PHONY: help
-help: ## This colourful help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
 up: .init .create_secrets .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
@@ -66,26 +64,6 @@ leave: ## Leaves swarm stopping all services in it
 .PHONY: clean
 clean: ## Cleans unversioned files
 	@git clean -dxf
-
-.PHONY: info
-info: ## expands all variables and relevant info on stack
-	$(info VARIABLES ------------)
-	$(foreach v,                                                                           \
-		$(filter-out $(PREDEFINED_VARIABLES) PREDEFINED_VARIABLES, $(sort $(.VARIABLES))), \
-		$(info $(v)=$($(v)))                                                               \
-	)
-	@echo ""
-	docker ps
-ifneq ($(SWARM_HOSTS), )
-	@echo ""
-	docker stack ls
-	@echo ""
-	-docker stack ps $(STACK_NAME)
-	@echo ""
-	-docker stack services $(STACK_NAME)
-	@echo ""
-	docker network ls
-endif
 
 # Helpers -------------------------------------------------
 .PHONY: .init
@@ -188,4 +166,3 @@ remove-root-certificate: ## removes the certificate from the host system
 	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt secrets/domain.crt; fi;
 	@if [[ ! $$(docker secret ls | grep -w domain.key) ]]; then docker secret create domain.key secrets/domain.key; fi;
 	@if [[ ! $$(docker secret ls | grep -w rootca.crt) ]]; then if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi; docker secret create rootca.crt secrets/rootca.crt; fi;
-
