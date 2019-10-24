@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Defines a series of util functions and aliases to be used to overcome compatibility issues with Mac
 
 # Return the current machine's IP

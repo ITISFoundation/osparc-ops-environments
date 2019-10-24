@@ -21,10 +21,7 @@ STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 # Machine host IP
-$(if $(IS_OSX), \
-	$(MACHINE_IP = $(shell ipconfig getifaddr en0)), \
-	$(MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)) \
-)
+export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && echo $$(get_this_ip))
 # Network that includes all services to monitor
 #  - by default it will create an overal attachable network called monitored_network
 ifeq ($(monitored_network),)

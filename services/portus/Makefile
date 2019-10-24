@@ -45,10 +45,7 @@ include .env
 
 # exports
 # Machine host IP
-$(if $(IS_OSX), \
-	$(export MACHINE_IP = $(shell ipconfig getifaddr en0)), \
-	$(export MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)) \
-)
+export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && echo $$(get_this_ip))
 
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.mk)
