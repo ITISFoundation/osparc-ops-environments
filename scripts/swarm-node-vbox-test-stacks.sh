@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Using osx support functions
+source "$( dirname "${BASH_SOURCE[0]}" )/portable.sh"
+
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -29,7 +33,7 @@ echo "======> Deploying graylog stack ..."
 manager_ip = docker-machine ip manager1
 docker-machine ssh manager1 "source .venv/bin/activate; \
                             cd service/graylog; \
-                            sed -i 's/127.0.0.1/${manager_ip}/g' .env.config
+                            $psed -i -e 's/127.0.0.1/${manager_ip}/g' .env.config
                             make up"
 docker-machine ssh manager1 "docker stack ls"
 
@@ -43,7 +47,7 @@ docker-machine ssh manager1 "docker node update --label-add minio4=true worker3"
 # configure .env to create 4 minios
 docker-machine ssh manager1 "source .venv/bin/activate; \
                             cd service/minio; \
-                            sed -i 's/MINIO_NUM_MINIOS=1/MINIO_NUM_MINIOS=4/g' .env.config \
+                            $psed -i -e 's/MINIO_NUM_MINIOS=1/MINIO_NUM_MINIOS=4/g' .env.config \
                             make up"
 docker-machine ssh manager1 "docker stack ls"
 
