@@ -4,6 +4,9 @@
 #
 #
 
+# Using osx support functions
+source "$( dirname "${BASH_SOURCE[0]}" )/portable.sh"
+
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -16,7 +19,8 @@ scripts_dir=$(realpath ${repo_basedir}/scripts)
 current_git_url=$(git config --get remote.origin.url)
 current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
-machine_ip=$(hostname -I | cut -d ' ' -f1)
+machine_ip=$(get_this_ip)
+
 devel_mode=0
 
 usage="$(basename "$0") [-h] [--key=value]
@@ -73,10 +77,10 @@ pushd ${repo_basedir}/services/traefik
 cp ${repo_basedir}/certificates/*.crt secrets/
 cp ${repo_basedir}/certificates/*.key secrets/
 # setup configuration
-sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
-sed -i "s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
+$psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
+$psed -i -e "s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
 traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
-sed -i "s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD=${traefik_password}|" .env
+$psed -i -e "s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD=${traefik_password}|" .env
 make up
 popd
 
@@ -84,11 +88,11 @@ popd
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"
 pushd ${repo_basedir}/services/minio;
-sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$SERVICES_PASSWORD/" .env
-sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$SERVICES_PASSWORD/" .env
+$psed -i -e "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$SERVICES_PASSWORD/" .env
+$psed -i -e "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$SERVICES_PASSWORD/" .env
 make up; popd
 echo "waiting for minio to run...don't worry..."
-while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 https://${MACHINE_FQDN}:10000/minio/health/ready) = 200 ]; do
+while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://${MACHINE_FQDN}:10000/minio/health/ready) = 200 ]; do
     echo "waiting for minio to run..."
     sleep 5s
 done
@@ -101,15 +105,15 @@ pushd ${repo_basedir}/services/portus
 cp ${repo_basedir}/certificates/*.crt secrets/
 cp ${repo_basedir}/certificates/*.key secrets/
 # set configuration
-sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
-sed -i "s/S3_ACCESSKEY=.*/S3_ACCESSKEY=$SERVICES_PASSWORD/" .env
-sed -i "s/S3_SECRETKEY=.*/S3_SECRETKEY=$SERVICES_PASSWORD/" .env
+$psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
+$psed -i -e "s/S3_ACCESSKEY=.*/S3_ACCESSKEY=$SERVICES_PASSWORD/" .env
+$psed -i -e "s/S3_SECRETKEY=.*/S3_SECRETKEY=$SERVICES_PASSWORD/" .env
 make up
 
 # auto configure portus
 echo
 echo "waiting for portus to run...don't worry..."
-while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://${MACHINE_FQDN}:5000/api/v1/users) = 401 ]; do
+while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://${MACHINE_FQDN}:5000/api/v1/users) = 401 ]; do
     echo "waiting for portus to run..."
     sleep 5s
 done
@@ -151,10 +155,10 @@ echo
 echo -e "\e[1;33mstarting monitoring...\e[0m"
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/monitoring
-sed -i "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
-sed -i "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
-sed -i "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
-sed -i "s|--web.external-url=.*|--web.external-url=https://$MACHINE_FQDN/prometheus/'|" docker-compose.yml
+$psed -i -e "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
+$psed -i -e "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
+$psed -i -e "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
+$psed -i -e "s|--web.external-url=.*|--web.external-url=https://$MACHINE_FQDN/prometheus/'|" docker-compose.yml
 make up
 popd
 
@@ -164,13 +168,13 @@ echo -e "\e[1;33mstarting graylog...\e[0m"
 # set MACHINE_FQDN
 pushd ${repo_basedir}/services/graylog;
 graylog_password=$(echo -n $SERVICES_PASSWORD | sha256sum | cut -d ' ' -f1)
-sed -i "s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$MACHINE_FQDN/graylog/|" .env
-sed -i "s|GRAYLOG_ROOT_PASSWORD_SHA2=.*|GRAYLOG_ROOT_PASSWORD_SHA2=$graylog_password|" .env
+$psed -i -e "s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$MACHINE_FQDN/graylog/|" .env
+$psed -i -e "s|GRAYLOG_ROOT_PASSWORD_SHA2=.*|GRAYLOG_ROOT_PASSWORD_SHA2=$graylog_password|" .env
 make up
 
 echo
 echo "waiting for graylog to run..."
-while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 5 -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://$MACHINE_FQDN/graylog/api/users) = 401 ]; do
+while [ ! $(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://$MACHINE_FQDN/graylog/api/users) = 401 ]; do
     echo "waiting for graylog to run..."
     sleep 5s
 done

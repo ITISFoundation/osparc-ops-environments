@@ -44,7 +44,8 @@ $(if $(wildcard .env), , $(shell cp .env.config .env))
 include .env
 
 # exports
-export MACHINE_IP = $(shell hostname -I | cut -d ' ' -f1)
+# Host machine IP
+export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
 
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.mk)

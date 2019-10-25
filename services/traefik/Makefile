@@ -20,7 +20,8 @@ SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 STACK_NAME = $(notdir $(PWD))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
-MACHINE_IP = $(shell hostname -I | cut -d' ' -f1)
+# Host machine IP
+export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
 # Network that includes all services to monitor
 #  - by default it will create an overal attachable network called monitored_network
 ifeq ($(monitored_network),)
