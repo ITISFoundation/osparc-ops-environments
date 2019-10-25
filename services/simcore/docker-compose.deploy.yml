@@ -33,6 +33,7 @@ services:
   postgres:
     networks:
       - monitored
+  # in clusters one or more nodes are typically defined as THE postgres nodes.
   #   deploy:
   #     placement:
   #       constraints:
