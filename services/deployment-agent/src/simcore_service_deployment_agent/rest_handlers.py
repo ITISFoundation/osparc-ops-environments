@@ -26,7 +26,8 @@ async def check_health(request: web.Request):
         State.STARTING: "SERVICE_STARTING",
         State.RUNNING: "SERVICE_RUNNING",
         State.FAILED: "SERVICE_FAILED",
-        State.STOPPED: "SERVICE_STOPPED"
+        State.STOPPED: "SERVICE_STOPPED",
+        State.PAUSED: "SERVICE_PAUSED"
     }
     data = {
         'name': __name__.split('.')[0],
