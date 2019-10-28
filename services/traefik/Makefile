@@ -50,6 +50,10 @@ include $(realpath $(CURDIR)/../../scripts/common.mk)
 up: .init .create_secrets .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
+.PHONY: up-no-certificates
+up-no-certificates: .init .env ${TEMP_COMPOSE} ## Deploys the stack without certificates (self-generated or let's encrypt)
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+
 .PHONY: down
 down: ## Removes the stack from the swarm
 	docker stack rm ${STACK_NAME}
