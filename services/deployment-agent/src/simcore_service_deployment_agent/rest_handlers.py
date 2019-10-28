@@ -9,7 +9,7 @@ from servicelib.rest_responses import wrap_as_envelope
 from servicelib.rest_utils import body_to_dict, extract_and_validate
 
 from . import __version__
-from .auto_deploy_task import State, TASK_STATE
+from .auto_deploy_task import TASK_STATE
 
 log = logging.getLogger(__name__)
 
