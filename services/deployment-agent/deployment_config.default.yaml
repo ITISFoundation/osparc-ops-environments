@@ -51,7 +51,7 @@ main:
     excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
-      extra_hosts: []
+      extra_hosts: {}
       environment: {}
   portainer:
     # lists the portainer instances to call upon
