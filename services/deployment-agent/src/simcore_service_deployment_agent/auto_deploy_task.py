@@ -197,7 +197,8 @@ async def _init_deploy(app: web.Application) -> Tuple[GitUrlWatcher, DockerRegis
         # notifications
         await notify(app_config, app_session, message=f"Stack initialised with:\n{list(descriptions.values())}")
         main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
-        await notify_state(app_config, app_session, state=app[TASK_STATE], message=descriptions[main_repo])
+        await notify_state(app_config, app_session, state=app[TASK_STATE],
+            message=descriptions[main_repo] if main_repo in descriptions else "" )
         log.info("initialisation completed")
         return (git_task, docker_task)
     except asyncio.CancelledError:
@@ -229,7 +230,8 @@ async def _deploy(app: web.Application, git_task: GitUrlWatcher, docker_task: Do
     log.info("sending notifications...")
     await notify(app_config, app_session, message=f"Updated stack\n{list(changes.values())}")
     main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
-    await notify_state(app_config, app_session, state=app[TASK_STATE], message=changes[main_repo])
+    if main_repo in changes:
+        await notify_state(app_config, app_session, state=app[TASK_STATE], message=changes[main_repo])
     log.info("stack re-deployed")
 
 async def auto_deploy(app: web.Application):
