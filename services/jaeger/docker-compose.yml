@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.14
+    command: >
+          --query.base-path=/jaeger
+
+    init: true
+    ports:
+      # admin, healthcheck, metrics
+      - 14269
+      # UI
+      - 16686
+    networks:
+      - public
+      - monitored
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.jaeger.loadbalancer.server.port=16686
+        - traefik.http.routers.jaeger.rule=PathPrefix(`/jaeger`)
+        - traefik.http.routers.jaeger.entrypoints=https
+        - traefik.http.routers.jaeger.tls=true
+        - traefik.http.routers.jaeger.middlewares=auth@docker, gzip_compress@file
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
