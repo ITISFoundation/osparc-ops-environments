@@ -15,6 +15,7 @@ Support services used for the deployment of the oSPARC platform:
 - [Minio](services/minio/): AWS compatible S3 storage
 - [Portus](services/portus/): Docker images registry
 - [Graylog](services/graylog): Logs aggregator
+- [Jaeger](services/jaeger): Tracing system
 - [Monitoring](services/monitoring/): Prometheus/Grafana monitoring
 - [Adminer](services/adminer): Database management
 - [Maintenance](services/maintenance/): Notebooks for internal maintenance (in development)
@@ -43,13 +44,14 @@ The services above will be deployed and pre-configured on the following endpoint
   - Portus: [https://osparc.local:5000](https://osparc.local:5000)
   - Deployment agent: no UI
   - Graylog: [https://osparc.local/graylog/](https://osparc.local/graylog/)
+  - Jaeger: [https://osparc.local/jaeger](https://osparc.local/jaeger)
   - Adminer: [https://osparc.local/adminer](https://osparc.local/adminer)
   - Monitoring: [https://osparc.local/grafana](https://osparc.local/grafana) and Prometheus: [http://osparc.local:9090](http://osparc.local:9090)
   - Maintenance: not reversed proxied yet
   - **Simcore:** **[https://osparc.local](https://osparc.local)**
 
-Default credentials are the following:  
-  user: admin  
+Default credentials are the following:
+  user: admin
   password: adminadmin
 
 

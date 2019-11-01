@@ -56,7 +56,7 @@ scrape_configs:
       - 'tasks.node-exporter'
       type: 'A'
       port: 9100
-  
+
   # monitor docker engine (https://docs.docker.com/config/thirdparty/prometheus/)
   - job_name: 'dockerd-exporter'
     dns_sd_configs:
@@ -95,6 +95,13 @@ scrape_configs:
   - job_name: 'rabbitMQ'
     static_configs:
       - targets: ['rabbit:15692']
+
+  - job_name: 'jaeger'
+    dns_sd_configs:
+    - names:
+      - 'tasks.jaeger'
+      type: 'A'
+      port: 14269
     # to generate the token use the following
     # docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host \
     #   -e MC_HOST_local="https://12345678:12345678@osparc.local:10000" \

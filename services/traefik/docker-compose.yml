@@ -24,6 +24,10 @@ services:
           --providers.docker.swarmMode=true
           --providers.docker.exposedByDefault=false
           --providers.file.filename="/etc/traefik/dynamic_conf.yml"
+          --tracing=true
+          --tracing.jaeger=true
+          --tracing.jaeger.samplingServerURL="http://jaeger:5778/sampling"
+          --tracing.jaeger.localAgentHostPort="jaeger:6831"
 
     ports:
       - target: 80
@@ -101,7 +105,7 @@ configs:
 
 secrets:
   domain.key:
-    external: true    
+    external: true
   domain.crt:
     external: true
 
