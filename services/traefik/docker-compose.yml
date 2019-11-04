@@ -29,11 +29,11 @@ services:
           --tracing.jaeger.samplingServerURL="http://jaeger:5778/sampling"
           --tracing.jaeger.localAgentHostPort="jaeger:6831"
           #  Let's encrypt use-case
-          # --certificatesresolvers.myhttpchallenge.acme.httpchallenge=true
-          # --certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=http
-          # --certificatesresolvers.myhttpchallenge.acme.email="anderegg@itis.swiss"
-          # --certificatesresolvers.myhttpchallenge.acme.storage="/letsencrypt/acme.json"
-          # --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+          # --certificatesresolvers.lehttpchallenge.acme.httpchallenge=true
+          # --certificatesresolvers.lehttpchallenge.acme.httpchallenge.entrypoint=http
+          # --certificatesresolvers.lehttpchallenge.acme.email="anderegg@itis.swiss"
+          # --certificatesresolvers.lehttpchallenge.acme.storage="/letsencrypt/acme.json"
+          # --certificatesresolvers.lehttpchallenge.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
     # uncomment the caserver when testing such that let's encrypt does not ban us
 
     ports:
@@ -100,7 +100,7 @@ services:
         - traefik.http.routers.api.entrypoints=traefik
         - traefik.http.routers.api.tls=true
         #  Let's encrypt use-case
-        # - traefik.http.routers.api.tls.certresolver=myhttpchallenge
+        # - traefik.http.routers.api.tls.certresolver=lehttpchallenge
         - traefik.http.routers.api.middlewares=auth
         - traefik.http.services.api.loadbalancer.server.port=8080
     secrets:
@@ -119,7 +119,7 @@ services:
         - traefik.http.routers.whoami.rule=Host(`staging.osparc.io`) && PathPrefix(`/whoami`)
         - traefik.http.routers.whoami.entrypoints=https
         - traefik.http.routers.whoami.tls=true
-        # - traefik.http.routers.whoami.tls.certresolver=myhttpchallenge
+        # - traefik.http.routers.whoami.tls.certresolver=lehttpchallenge
         - traefik.http.routers.whoami.middlewares=auth
     networks:
       - public

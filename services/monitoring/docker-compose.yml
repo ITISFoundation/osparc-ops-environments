@@ -62,7 +62,7 @@ services:
         - traefik.http.routers.prometheus.entrypoints=https
         - traefik.http.routers.prometheus.tls=true
         # Let's encrypt use-case
-        # - traefik.http.routers.prometheus.tls.certresolver=myhttpchallenge
+        # - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
         - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
         - traefik.http.routers.prometheus.middlewares=auth@docker, gzip_compress@file, prometheus_stripprefixregex
       resources:
