@@ -162,6 +162,14 @@ $psed -i -e "s|--web.external-url=.*|--web.external-url=https://$MACHINE_FQDN/pr
 make up
 popd
 
+# -------------------------------- JAEGER -------------------------------
+echo
+echo -e "\e[1;33mstarting jaeger...\e[0m"
+# set MACHINE_FQDN
+pushd ${repo_basedir}/services/jaeger
+make up
+popd
+
 # -------------------------------- GRAYLOG -------------------------------
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
