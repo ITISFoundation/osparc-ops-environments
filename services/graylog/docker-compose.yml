@@ -11,6 +11,9 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+      placement:
+        constraints:
+          - node.role==manager
     networks:
       default:
         aliases:
@@ -84,10 +87,14 @@ services:
         - traefik.http.routers.graylog.rule=PathPrefix(`/graylog`)
         - traefik.http.routers.graylog.entrypoints=https
         - traefik.http.routers.graylog.tls=true
+        #  Let's encrypt use case
+        # - traefik.http.routers.graylog.tls.certresolver=myhttpchallenge
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.graylog.middlewares=gzip_compress@file, graylog_replace_regex
-
+      placement:
+        constraints:
+          - node.role==manager
 
 
   # Logspout: https://github.com/gliderlabs/logspout
