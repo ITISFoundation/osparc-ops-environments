@@ -28,6 +28,13 @@ services:
           --tracing.jaeger=true
           --tracing.jaeger.samplingServerURL="http://jaeger:5778/sampling"
           --tracing.jaeger.localAgentHostPort="jaeger:6831"
+          #  Let's encrypt use-case
+          # --certificatesresolvers.myhttpchallenge.acme.httpchallenge=true
+          # --certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=http
+          # --certificatesresolvers.myhttpchallenge.acme.email="anderegg@itis.swiss"
+          # --certificatesresolvers.myhttpchallenge.acme.storage="/letsencrypt/acme.json"
+          # --certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+    # uncomment the caserver when testing such that let's encrypt does not ban us
 
     ports:
       - target: 80
@@ -41,6 +48,8 @@ services:
       - target: 9001
         published: 9001
     volumes:
+      # Let's encrypt certificates
+      - "./letsencrypt:/letsencrypt"
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
@@ -90,6 +99,8 @@ services:
         - traefik.http.routers.api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
         - traefik.http.routers.api.entrypoints=traefik
         - traefik.http.routers.api.tls=true
+        #  Let's encrypt use-case
+        # - traefik.http.routers.api.tls.certresolver=myhttpchallenge
         - traefik.http.routers.api.middlewares=auth
         - traefik.http.services.api.loadbalancer.server.port=8080
     secrets:
@@ -98,6 +109,20 @@ services:
     networks:
       - public
       - monitored
+  whoami:
+    image: "containous/whoami"
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.whoami.loadbalancer.server.port=80
+        - traefik.http.routers.whoami.rule=Host(`staging.osparc.io`) && PathPrefix(`/whoami`)
+        - traefik.http.routers.whoami.entrypoints=https
+        - traefik.http.routers.whoami.tls=true
+        # - traefik.http.routers.whoami.tls.certresolver=myhttpchallenge
+        - traefik.http.routers.whoami.middlewares=auth
+    networks:
+      - public
 
 configs:
   traefik_dynamic_config.yml:
