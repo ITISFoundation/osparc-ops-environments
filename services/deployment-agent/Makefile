@@ -6,7 +6,11 @@
 include .env
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(PREFIX_STACK_NAME)-$(notdir $(PWD))
+ifeq ($(PREFIX_STACK_NAME), "")
+STACK_NAME := $(notdir $(PWD))
+else
+STACK_NAME := $(PREFIX_STACK_NAME)-$(notdir $(PWD))
+endif
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
