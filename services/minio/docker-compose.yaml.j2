@@ -15,6 +15,7 @@ services:
     ports:
       - "{% if num_minios|int == 1 %}30000:{% endif %}9000"
     networks:
+      - default
       - public
       - monitored
     environment:
@@ -39,11 +40,15 @@ services:
         - traefik.http.routers.minio.rule=PathPrefix(`/`)
         - traefik.http.routers.minio.entrypoints=storage
         - traefik.http.routers.minio.tls=true
+        # Let's encrypt use-case
+        # - traefik.http.routers.minio.tls.certresolver=myhttpchallenge
         - traefik.http.routers.minio.middlewares=gzip_compress@file
         # easy access with path
         - traefik.http.routers.minio_ez.rule=PathPrefix(`/minio`)
         - traefik.http.routers.minio_ez.entrypoints=https
         - traefik.http.routers.minio_ez.tls=true
+        # Let's encrypt use-case
+        # - traefik.http.routers.minio.tls.certresolver=myhttpchallenge
         - traefik.http.routers.minio_ez.middlewares=gzip_compress@file
     command: >
       server
@@ -82,4 +87,4 @@ secrets:
   minio_secret_key:
     external: true
   minio_access_key:
-    external: true  
+    external: true
