@@ -18,8 +18,6 @@ services:
         - traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)
         - traefik.http.routers.adminer.entrypoints=https
         - traefik.http.routers.adminer.tls=true
-        # Let's encrypt use case
-        # - traefik.http.routers.adminer.tls.certresolver=myhttpchallenge
         - traefik.http.middlewares.adminer_stripprefixregex.stripprefixregex.regex=^/adminer
         - traefik.http.routers.adminer.middlewares=gzip_compress@file, adminer_stripprefixregex
       resources:
