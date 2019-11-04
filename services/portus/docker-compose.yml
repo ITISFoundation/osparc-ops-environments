@@ -208,7 +208,7 @@ services:
         - traefik.http.routers.registry.rule=PathPrefix(`/`)
         - traefik.http.routers.registry.entrypoints=registry
         - traefik.http.routers.registry.tls=true
-        - traefik.http.routers.registry.middlewares=registry_headers, gzip_compress@file
+        - traefik.http.routers.registry.middlewares=registry_headers, gzip@docker
         # force https
         - traefik.http.middlewares.registry_force_https.redirectScheme.scheme=https
         - traefik.http.middlewares.registry_force_https.redirectScheme.port=5000

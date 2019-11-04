@@ -81,7 +81,7 @@ $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
 traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
 $psed -i -e "s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD=${traefik_password}|" .env
-make up
+make up-local
 popd
 
 # -------------------------------- MINIO -------------------------------

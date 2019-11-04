@@ -47,12 +47,12 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
-up: .init .create_secrets .env ${TEMP_COMPOSE} ## Deploys the stack using provided certificates
-	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
+	docker stack deploy -c ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-.PHONY: up-no-certificates
-up-no-certificates: .init .env ${TEMP_COMPOSE} ## Deploys the stack without certificates (self-generated or let's encrypt)
-	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+.PHONY: up-letsencrypt
+up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt ## Deploys the stack without certificates (self-generated or let's encrypt)
+	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
@@ -82,11 +82,15 @@ clean: ## Cleans unversioned files
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
-.PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose -f $< config > $@
+.PHONY: ${TEMP_COMPOSE}-local
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
+	@docker-compose -f $< -f docker-compose.local.yml config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
+.PHONY: ${TEMP_COMPOSE}-letsencrypt
+${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
+	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
 
 # Self-signed certificate authority
 secrets/rootca.key:
