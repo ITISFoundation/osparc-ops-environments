@@ -36,7 +36,7 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
-up: .init .env .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
+up: .venv .init .env .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
