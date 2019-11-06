@@ -102,6 +102,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - ALLOW_TTY=true
+      - MULTILINE_MATCH=first
+      - MULTILINE_PATTERN='^(ERROR|WARNING|INFO|DEBUG|CRITICAL):'
+      - MULTILINE_ENABLE_DEFAULT=false
     deploy:
       mode: global
       resources:
