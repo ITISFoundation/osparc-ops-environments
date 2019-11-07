@@ -1,5 +1,6 @@
 
 # LOGSPOUT_MULTILINE is used to tell to Logspoud, which is used by GrayLog, to handle multiline support of the logs of the concerned container.
+# See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 # osparc-simcore stack (framework stack)
 version: '3.7'
 services:
