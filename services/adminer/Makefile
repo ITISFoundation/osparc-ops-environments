@@ -16,6 +16,15 @@ PUBLIC_NETWORK := $(public_network)
 endif
 export PUBLIC_NETWORK
 
+# Network that includes all services to monitor
+#  - by default it will create an overal attachable network called monitored_network
+ifeq ($(monitored_network),)
+MONITORED_NETWORK = monitored_network
+else
+MONITORED_NETWORK := $(monitored_network)
+endif
+export MONITORED_NETWORK
+
 # External VARIABLES
 include .env
 
@@ -23,8 +32,12 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack
+up: .init .env ${TEMP_COMPOSE}  ## Deploys adminer stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+
+.PHONY: up-letsencrypt
+up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt  ## Deploys adminer stack using let's encrypt
+	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
@@ -45,10 +58,19 @@ leave: ## Leaves swarm stopping all services in it
 		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
 		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
 	)
+	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
+		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
+	)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
+
+.PHONY: ${TEMP_COMPOSE}-letsencrypt
+${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
+	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: clean .check_clean

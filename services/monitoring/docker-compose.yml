@@ -61,8 +61,10 @@ services:
         - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.entrypoints=https
         - traefik.http.routers.prometheus.tls=true
+        # Let's encrypt use-case
+        # - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
         - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
-        - traefik.http.routers.prometheus.middlewares=auth@docker, gzip_compress@file, prometheus_stripprefixregex
+        - traefik.http.routers.prometheus.middlewares=auth@docker, gzip@docker, prometheus_stripprefixregex
       resources:
         limits:
           memory: 2048M
@@ -208,7 +210,7 @@ services:
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.grafana.middlewares=gzip_compress@file, grafana_replace_regex
+        - traefik.http.routers.grafana.middlewares=gzip@docker, grafana_replace_regex
       resources:
         limits:
           memory: 128M

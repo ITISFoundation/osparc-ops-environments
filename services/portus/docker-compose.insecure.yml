@@ -54,7 +54,7 @@ services:
         - traefik.http.routers.portus.entrypoints=portus
         - traefik.http.routers.portus.tls=true
         - traefik.http.routers.portus.priority=10
-        - traefik.http.routers.portus.middlewares=gzip_compress@file
+        - traefik.http.routers.portus.middlewares=gzip@docker
         - traefik.http.routers.portus_token.rule=PathPrefix(`/v2/token`)
         - traefik.http.routers.portus_token.entrypoints=portus
         - traefik.http.routers.portus_token.tls=true
@@ -154,7 +154,7 @@ services:
         - traefik.http.routers.registry.entrypoints=portus
         - traefik.http.routers.registry.tls=true
         - traefik.http.routers.registry.priority=20
-        - traefik.http.routers.registry.middlewares=gzip_compress@file
+        - traefik.http.routers.registry.middlewares=gzip@docker
     volumes:
       - registry_data:/var/lib/registry
     # only needed in self-signed case

@@ -36,13 +36,16 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 .PHONY: up
-up: .init .env .create-stack-file .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
+up: .init .env ${TEMP_COMPOSE} .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
 
-.PHONY: config
-config: .create-stack-file
+.PHONY: up-letsencrypt
+up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt .create-secrets ## Deploys minio stack using let's encrypt
+	@docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
+	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
+	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
@@ -57,7 +60,7 @@ clean: ## Cleans unversioned files
 	@git clean -dxf
 
 # Helpers -------------------------------------------------
-.PHONY: .init .create-stack-file .create-secrets
+.PHONY: .init .create-secrets
 .init:
 	# initialize swarm cluster and install dependencies
 	@$(if $(SWARM_HOSTS),  \
@@ -78,14 +81,24 @@ clean: ## Cleans unversioned files
 	@.venv/bin/pip3 install --upgrade pip wheel setuptools
 	@.venv/bin/pip3 install jinja2 j2cli[yaml]
 
+define jinja
+	@.venv/bin/j2 --format=env $(1) .env -o $(2)
+endef
+
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
-	@.venv/bin/j2 --format=env $< .env -o tmp.yaml
+	$(call jinja, $<, tmp.yaml)
 	@docker-compose -f tmp.yaml config > $@
 	@rm tmp.yaml
 	@echo "${STACK_NAME} stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 
-.create-stack-file:${TEMP_COMPOSE}
+.PHONY: ${TEMP_COMPOSE}-letsencrypt
+${TEMP_COMPOSE}-letsencrypt: docker-compose.yaml.j2 docker-compose.letsencrypt.yaml.j2 .venv
+	$(call jinja, $<, tmp.yaml)
+	$(call jinja, docker-compose.letsencrypt.yaml.j2, tmp-letsencrypt.yaml)
+	@docker-compose -f tmp.yaml -f tmp-letsencrypt.yaml config > $@
+	@rm tmp.yaml tmp-letsencrypt.yaml
+	@echo "${STACK_NAME} stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 
 .create-secrets:
 	@$(if $(DOCKER_MINIO_ACCESS_KEY), \

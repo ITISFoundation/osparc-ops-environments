@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  adminer:
+    deploy:
+      labels:
+        - traefik.http.routers.adminer.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer`)
+        - traefik.http.routers.adminer.tls.certresolver=lehttpchallenge
