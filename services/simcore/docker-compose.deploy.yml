@@ -1,4 +1,7 @@
 # osparc-simcore stack (framework stack)
+# NOTES : 
+# LOGSPOUT_MULTILINE is used to tell to Logspout, which is used by GrayLog, to handle multiline support of the logs of the concerned container. Please add with every new osparc-simcore service.
+# See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 version: '3.7'
 services:
   webserver:
@@ -15,6 +18,8 @@ services:
     networks:
       - public
       - monitored
+    environment:
+      - LOGSPOUT_MULTILINE=true
 
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
@@ -23,16 +28,35 @@ services:
         target: /usr/local/share/ca-certificates/osparc.crt
     environment:
       # minio sdk uses this env to use self-signed certs
-      SSL_CERT_FILE: /usr/local/share/ca-certificates/osparc.crt
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+      - LOGSPOUT_MULTILINE=true
+
     networks:
       - monitored
+
+  director:
+    environment:
+      - LOGSPOUT_MULTILINE=true
+  
+  apihub:
+    environment:
+      - LOGSPOUT_MULTILINE=true 
+
+  sidecar:
+    environment:
+      - LOGSPOUT_MULTILINE=true  
+
   rabbit:
     networks:
       - monitored
+    environment:
+      - LOGSPOUT_MULTILINE=true
 
   postgres:
     networks:
       - monitored
+    environment:
+      - LOGSPOUT_MULTILINE=true
   # in clusters one or more nodes are typically defined as THE postgres nodes.
   #   deploy:
   #     placement:
