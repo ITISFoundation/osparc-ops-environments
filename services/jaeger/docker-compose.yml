@@ -24,7 +24,7 @@ services:
         - traefik.http.routers.jaeger.rule=PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
         - traefik.http.routers.jaeger.tls=true
-        - traefik.http.routers.jaeger.middlewares=auth@docker, gzip_compress@file
+        - traefik.http.routers.jaeger.middlewares=auth@docker, gzip@docker
 
 networks:
   public:

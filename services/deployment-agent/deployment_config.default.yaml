@@ -43,7 +43,9 @@ main:
     command: >
             export DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY} &&
             export DOCKER_IMAGE_TAG=${SIMCORE_IMAGE_TAG} &&
-            export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
+            export SWARM_STACK_NAME=${SIMCORE_STACK_NAME} &&
+            export OPS_PUBLIC_NETWORK=${PUBLIC_NETWORK} &&
+            export OPS_MONITORED_NETWORK=${MONITORED_NETWORK} &&
             mv .env .env.platform &&
             cat .env-devel >> .env && cat .env.platform >> .env &&
             docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
@@ -51,7 +53,7 @@ main:
     excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
-      extra_hosts: []
+      extra_hosts: {}
       environment: {}
   portainer:
     # lists the portainer instances to call upon

@@ -2,8 +2,3 @@ tls:
   certificates:
   - certFile: /run/secrets/domain.crt
     keyFile: /run/secrets/domain.key
-
-http:
-  middlewares:
-    gzip_compress:
-      compress: {}
