@@ -43,16 +43,21 @@ main:
     command: >
             export DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY} &&
             export DOCKER_IMAGE_TAG=${SIMCORE_IMAGE_TAG} &&
-            export SWARM_NETWORK_NAME=${SIMCORE_STACK_NAME} &&
+            export SWARM_STACK_NAME=${SIMCORE_STACK_NAME} &&
+            export OPS_PUBLIC_NETWORK=${PUBLIC_NETWORK} &&
+            export OPS_MONITORED_NETWORK=${MONITORED_NETWORK} &&
+            export PREFIX_STACK_NAME=${PREFIX_STACK_NAME} &&
             mv .env .env.platform &&
-            cat .env-devel >> .env && cat .env.platform >> .env &&
-            docker-compose -f services/docker-compose.yml config > stack.yml
+            cat .env-devel >> .env.nosub && cat .env.platform >> .env.nosub &&
+            envsubst < .env.nosub > .env &&
+            docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
     excluded_services: [webclient, minio]
     excluded_volumes: []
     additional_parameters:
       extra_hosts: []
       environment: {}
+    services_prefix: ${PREFIX_STACK_NAME}
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000

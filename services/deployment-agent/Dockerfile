@@ -27,6 +27,7 @@ RUN apk add --no-cache \
       docker \
       make \
       bash \
+      gettext \
       git
 
 RUN apk add --no-cache --virtual .build-deps \
