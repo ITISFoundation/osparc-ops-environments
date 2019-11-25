@@ -244,7 +244,8 @@ async def _deploy(app: web.Application, git_task: GitUrlWatcher, docker_task: Do
     log.info("redeploying the stack...")
     await update_portainer_stack(app_config, app_session, stack_cfg)
     log.info("sending notifications...")
-    await notify(app_config, app_session, message=f"Updated stack\n{list(changes.values())}")
+    changes_as_texts = [f"{key}:{value}" for key, value in changes.items()]
+    await notify(app_config, app_session, message=f"Updated stack\n{changes_as_texts}")
     main_repo = app_config["main"]["docker_stack_recipe"]["workdir"]
     if main_repo in changes:
         await notify_state(app_config, app_session, state=app[TASK_STATE], message=changes[main_repo])
