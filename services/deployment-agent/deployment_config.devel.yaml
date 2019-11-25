@@ -53,6 +53,7 @@ main:
     additional_parameters:
       extra_hosts: []
       environment: {}
+    services_prefix: ${PREFIX_STACK_NAME}
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
