@@ -60,6 +60,12 @@ else
 	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif
 
+.PHONY: up-letsencrypt
+up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt  ## Deploys portainer stack using let's encrypt
+	# creating bucket
+	@$(create-s3-bucket)
+	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
+
 .PHONY: down
 down: ## Removes the stack from the swarm
 	docker stack rm ${STACK_NAME}
@@ -93,6 +99,11 @@ clean: ## Cleans unversioned files
 ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
+
+.PHONY: ${TEMP_COMPOSE}-letsencrypt
+${TEMP_COMPOSE}-letsencrypt: docker-compose.insecure.yml docker-compose.letsencrypt.yml
+	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
 
 define create-s3-bucket
 	@docker run \

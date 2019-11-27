@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  portus:
+    deploy:
+      labels:
+        - traefik.http.routers.portus.entrypoints=https
+        - traefik.http.routers.portus.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/`)
+        - traefik.http.routers.portus_token.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/v2/token`)
+        - traefik.http.routers.portus.tls.certresolver=lehttpchallenge
+
+  registry:
+    deploy:
+      labels:
+        - traefik.http.routers.registry.entrypoints=https
+        - traefik.http.routers.registry.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/v2`)
+        - traefik.http.routers.registry.tls.certresolver=lehttpchallenge
