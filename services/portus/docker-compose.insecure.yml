@@ -20,7 +20,7 @@ services:
       # which will be used for to encrypt and sign sessions
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
       # used to generate the private key for JWT requests
-      - PORTUS_KEY_PATH=/certificates/domain.key
+      - PORTUS_KEY_PATH=/certificates/portus.key
       # the password of the special portus user
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
@@ -36,27 +36,22 @@ services:
     volumes:
       - portus_static_data:/srv/Portus/public
     secrets:
-      - source: domain.key
-        target: /certificates/domain.key
-      # only needed in self-signed case
-      - source: rootca.crt
-        target: /certificates/rootca.crt
-    # only needed in self-signed case
-    extra_hosts:
-      - "${MACHINE_FQDN}:${MACHINE_IP}"
+      - source: portus.key
+        target: /certificates/portus.key
+
     deploy:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.portus.loadbalancer.server.port=3000
-        - traefik.http.routers.portus.rule=PathPrefix(`/`)
-        - traefik.http.routers.portus.entrypoints=portus
+        - traefik.http.routers.portus.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/`)
+        - traefik.http.routers.portus.entrypoints=https
         - traefik.http.routers.portus.tls=true
         - traefik.http.routers.portus.priority=10
         - traefik.http.routers.portus.middlewares=gzip@docker
-        - traefik.http.routers.portus_token.rule=PathPrefix(`/v2/token`)
-        - traefik.http.routers.portus_token.entrypoints=portus
+        - traefik.http.routers.portus_token.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/v2/token`)
+        - traefik.http.routers.portus_token.entrypoints=https
         - traefik.http.routers.portus_token.tls=true
         - traefik.http.routers.portus_token.priority=40
   background:
@@ -81,15 +76,15 @@ services:
 
       # Secrets. It can possibly be handled better with Swarm's secrets.
       - PORTUS_SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - PORTUS_KEY_PATH=/certificates/domain.key
+      - PORTUS_KEY_PATH=/certificates/portus.key
       - PORTUS_PASSWORD=${PORTUS_PASSWORD}
 
       - PORTUS_BACKGROUND=true
     networks:
       - internal
     secrets:
-      - source: domain.key
-        target: /certificates/domain.key
+      - source: portus.key
+        target: /certificates/portus.key
 
   db:
     image: library/mariadb:10.0.23
@@ -114,11 +109,13 @@ services:
     init: true
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
+      # set to true if using self-signed certificates
+      UPDATE_CERTIFICATES: "false"
       # Authentication
       REGISTRY_AUTH_TOKEN_REALM: https://${MACHINE_FQDN}:5000/v2/token
       REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
       REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/domain.crt
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/portus.crt
       # REGISTRY_LOG_LEVEL: debug
       # Storage
       REGISTRY_STORAGE: s3
@@ -145,7 +142,7 @@ services:
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: portus
           url: http://portus:3000/v2/webhooks/events
-          timeout: 2000ms
+          timeout: 5000ms
           threshold: 5
           backoff: 1s
     deploy:
@@ -154,32 +151,27 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.registry.loadbalancer.server.port=5000
         # - traefik.http.services.registry.loadbalancer.healthcheck.path=/minio/health/ready
-        - traefik.http.routers.registry.rule=PathPrefix(`/v2`)
-        - traefik.http.routers.registry.entrypoints=portus
+        - traefik.http.routers.registry.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/v2`)
+        - traefik.http.routers.registry.entrypoints=https
         - traefik.http.routers.registry.tls=true
         - traefik.http.routers.registry.priority=20
         - traefik.http.routers.registry.middlewares=gzip@docker
     volumes:
       - registry_data:/var/lib/registry
-    # only needed in self-signed case
-    extra_hosts:
-      - "${MACHINE_FQDN}:${MACHINE_IP}"
-    # only needed in self-signed case
     configs:
       - source: registry_init
         target: /etc/docker/registry/init
         mode: 0755
+      - source: nsswitch_conf
+        target: /etc/nsswitch.conf
+        mode: 0644
     networks:
       - internal
       - public
       - monitored
     secrets:
-      - source: domain.key
-        target: /secrets/domain.key
-      - source: domain.crt
-        target: /secrets/domain.crt
-      - source: rootca.crt
-        target: /secrets/rootca.crt
+      - source: portus.crt
+        target: /secrets/portus.crt
 
 volumes:
   portus_static_data:
@@ -199,15 +191,13 @@ networks:
 configs:
   registry_config.yml:
     file: ./registry/config.yml
-  # only needed in self-signed case
+  nsswitch_conf:
+    file: ./registry/nsswitch.conf
   registry_init:
     file: ./registry/init
 
 secrets:
-  domain.key:
-    external: true
-  domain.crt:
-    external: true
-  # for self-signed necessary
-  rootca.crt:
-    external: true
+  portus.key:
+    file: secrets/portus.key
+  portus.crt:
+    file: secrets/portus.crt

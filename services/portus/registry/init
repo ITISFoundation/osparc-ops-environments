@@ -2,7 +2,9 @@
 
 set -x
 
-cp /secrets/domain.crt /usr/local/share/ca-certificates
-cp /secrets/rootca.crt /usr/local/share/ca-certificates
-update-ca-certificates
+if [ ${UPDATE_CERTIFICATES} ]; then
+    cp /secrets/domain.crt /usr/local/share/ca-certificates
+    cp /secrets/rootca.crt /usr/local/share/ca-certificates
+    update-ca-certificates
+fi
 registry serve /etc/docker/registry/config.yml
