@@ -50,12 +50,12 @@ export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.s
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
-.PHONY: up
-up: .init .create_secrets .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
+.PHONY: up-self-signed
+up-self-signed: .init .create_secrets .env ${TEMP_COMPOSE}-self-signed  ## Deploys the stack using provided certificates
 	# creating bucket
 	@$(create-s3-bucket)
 ifneq ("$(wildcard secrets/domain.crt) $(wildcard secrets/domain.key)", "")
-	@docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	@docker stack deploy -c ${TEMP_COMPOSE}-self-signed ${STACK_NAME}
 else
 	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif
@@ -95,9 +95,9 @@ clean: ## Cleans unversioned files
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
-.PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.insecure.yml
-	@docker-compose -f $< config > $@
+.PHONY: ${TEMP_COMPOSE}-self-signed
+${TEMP_COMPOSE}: docker-compose.insecure.yml docker-compose.self-signed.yml
+	@docker-compose -f $< -f docker-compose.self-signed.yml config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt

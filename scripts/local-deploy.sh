@@ -108,7 +108,7 @@ cp ${repo_basedir}/certificates/*.key secrets/
 $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/S3_ACCESSKEY=.*/S3_ACCESSKEY=$SERVICES_PASSWORD/" .env
 $psed -i -e "s/S3_SECRETKEY=.*/S3_SECRETKEY=$SERVICES_PASSWORD/" .env
-make up
+make up-self-signed
 
 # auto configure portus
 echo

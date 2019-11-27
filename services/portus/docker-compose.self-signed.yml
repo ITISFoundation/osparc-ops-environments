@@ -17,7 +17,7 @@ services:
       labels:
         - traefik.http.routers.registry.entrypoints=portus
     extra_hosts:
-      - "storage.osparc.io:10.44.13.11"
+      - "${MACHINE_FQDN}:${MACHINE_IP}"
     secrets:
       - source: domain.key
         target: /secrets/domain.key
