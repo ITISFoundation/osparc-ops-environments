@@ -31,7 +31,7 @@ up: .init .env .secrets ${TEMP_COMPOSE}  ## Deploys portainer stack
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-letsencrypt
-up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt  ## Deploys portainer stack using let's encrypt
+up-letsencrypt: .init .env .secrets ${TEMP_COMPOSE}-letsencrypt  ## Deploys portainer stack using let's encrypt
 	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: down
