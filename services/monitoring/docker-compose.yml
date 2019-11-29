@@ -118,6 +118,22 @@ services:
           memory: 128M
         reservations:
           memory: 64M
+          
+  nvidia-exporter:
+    image: mindprince/nvidia_gpu_prometheus_exporter:0.1
+    networks:
+      - internal
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+          generic_resources:
+            - discrete_resource_spec:
+                kind: 'VRAM'
+                value: 1
 
   alertmanager:
     image: prom/alertmanager
