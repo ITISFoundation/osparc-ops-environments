@@ -104,6 +104,10 @@ services:
       - mariadb_data:/var/lib/mysql
     networks:
       - internal
+    # deploy:
+    #   placement:
+    #     constraints:
+    #       - node.labels.postgres==true
 
   registry:
     image: library/registry:2.7
