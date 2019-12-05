@@ -69,7 +69,7 @@ async def post_new_stack(base_url: URL, app_session: ClientSession, bearer_code:
     data = await _portainer_request(url, app_session, "POST", headers=headers, json=body_data)
     log.debug("created new stack: %s", data)
 
-async def update_stack(base_url: URL, app_session: ClientSession, bearer_code: str, stack_id: str, endpoint_id: int, stack_cfg: Dict):
+async def update_stack(base_url: URL, app_session: ClientSession, bearer_code: str, stack_id: str, endpoint_id: int, stack_cfg: Dict): # pylint: disable=too-many-arguments
     log.debug("updating stack %s", base_url)
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
     body_data = {
