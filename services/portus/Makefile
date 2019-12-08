@@ -60,6 +60,12 @@ else
 	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif
 
+.PHONY: up-no-certs
+up-no-certs: .init .create-key-cert-pair .env ${TEMP_COMPOSE}  ## Deploys portainer stack using no certificates OR a valid certificate
+	# creating bucket
+	@$(create-s3-bucket)
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+
 .PHONY: up-letsencrypt
 up-letsencrypt: .init .create-key-cert-pair .env ${TEMP_COMPOSE}-letsencrypt  ## Deploys portainer stack using let's encrypt
 	# creating bucket
@@ -95,8 +101,13 @@ clean: ## Cleans unversioned files
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
+.PHONY: ${TEMP_COMPOSE}
+${TEMP_COMPOSE}: docker-compose.insecure.yml
+	@docker-compose -f $< config > $@
+	@echo "${STACK_NAME} stack file created for $@"
+
 .PHONY: ${TEMP_COMPOSE}-self-signed
-${TEMP_COMPOSE}: docker-compose.insecure.yml docker-compose.self-signed.yml
+${TEMP_COMPOSE}-self-signed: docker-compose.insecure.yml docker-compose.self-signed.yml
 	@docker-compose -f $< -f docker-compose.self-signed.yml config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
