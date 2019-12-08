@@ -84,7 +84,7 @@ clair:
 
     http:
       # Optional endpoint that will receive notifications via POST requests
-      endpoint:
+      endpoint_id:
 
       # Optional PKI configuration
       # If you want to easily generate client certificates and CAs, try the following projects:
