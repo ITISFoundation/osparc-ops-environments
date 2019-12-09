@@ -35,6 +35,7 @@ app_schema = T.Dict({
     }),
     "portainer": T.List(T.Dict({
         "url": T.String(),
+        T.Key("endpoint_id", optional=True, default=1): T.Int(),
         T.Key("username", optional=True, default=""): T.String(allow_blank=True),
         T.Key("password", optional=True, default=""): T.String(allow_blank=True),
         "stack_name": T.String(),

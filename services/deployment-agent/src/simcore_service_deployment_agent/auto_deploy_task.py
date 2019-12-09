@@ -134,11 +134,11 @@ async def update_portainer_stack(app_config: Dict, app_session: ClientSession, s
         current_stack_id = await portainer.get_current_stack_id(url, app_session, bearer_code, config["stack_name"])
         if not current_stack_id:
             # stack does not exist
-            swarm_id = await portainer.get_swarm_id(url, app_session, bearer_code)
-            await portainer.post_new_stack(url, app_session, bearer_code, swarm_id, config["stack_name"], stack_cfg)
+            swarm_id = await portainer.get_swarm_id(url, app_session, bearer_code, config["endpoint_id"])
+            await portainer.post_new_stack(url, app_session, bearer_code, swarm_id, config["endpoint_id"], config["stack_name"], stack_cfg)
         else:
             log.debug("updating the configuration of the stack...")
-            await portainer.update_stack(url, app_session, bearer_code, current_stack_id, stack_cfg)
+            await portainer.update_stack(url, app_session, bearer_code, current_stack_id, config["endpoint_id"], stack_cfg)
 
 
 async def create_docker_registries_watch_subtask(app_config: Dict, stack_cfg: Dict) -> DockerRegistriesWatcher:

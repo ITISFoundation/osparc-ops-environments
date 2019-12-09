@@ -32,10 +32,10 @@ async def authenticate(base_url: URL, app_session: ClientSession, username: str,
     log.debug("authenticated with portainer in %s", base_url)
     return bearer_code
 
-async def get_swarm_id(base_url: URL, app_session: ClientSession, bearer_code: str) -> str:
+async def get_swarm_id(base_url: URL, app_session: ClientSession, bearer_code: str, endpoint: int) -> str:
     log.debug("getting swarm id %s", base_url)
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
-    url = base_url.with_path("api/endpoints/1/docker/swarm")
+    url = base_url.with_path(f"api/endpoints/{endpoint}/docker/swarm")
     data = await _portainer_request(url, app_session, "GET", headers=headers)
     log.debug("received swarm details: %s", data)
     swarm_id = data["ID"]
@@ -57,7 +57,7 @@ async def get_current_stack_id(base_url: URL, app_session: ClientSession, bearer
             return stack["Id"]
     return None
 
-async def post_new_stack(base_url: URL, app_session: ClientSession, bearer_code: str, swarm_id: str, stack_name: str, stack_cfg: Dict): # pylint: disable=too-many-arguments
+async def post_new_stack(base_url: URL, app_session: ClientSession, bearer_code: str, swarm_id: str, endpoint_id: int, stack_name: str, stack_cfg: Dict): # pylint: disable=too-many-arguments
     log.debug("creating new stack %s", base_url)
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
     body_data = {
@@ -65,17 +65,17 @@ async def post_new_stack(base_url: URL, app_session: ClientSession, bearer_code:
         "SwarmID": swarm_id,
         "StackFileContent": json.dumps(stack_cfg, indent=2)
     }
-    url = base_url.with_path("api/stacks").with_query({"type": 1, "method": "string", "endpointId": 1})
+    url = base_url.with_path("api/stacks").with_query({"type": 1, "method": "string", "endpointId": endpoint_id})
     data = await _portainer_request(url, app_session, "POST", headers=headers, json=body_data)
     log.debug("created new stack: %s", data)
 
-async def update_stack(base_url: URL, app_session: ClientSession, bearer_code: str, stack_id: str, stack_cfg: Dict):
+async def update_stack(base_url: URL, app_session: ClientSession, bearer_code: str, stack_id: str, endpoint_id: int, stack_cfg: Dict): # pylint: disable=too-many-arguments
     log.debug("updating stack %s", base_url)
     headers = {"Authorization": "Bearer {}".format(bearer_code)}
     body_data = {
         "StackFileContent": json.dumps(stack_cfg, indent=2),
         "Prune": True
     }
-    url = URL(base_url).with_path("api/stacks/{}".format(stack_id)).with_query({"endpointId":1})
+    url = URL(base_url).with_path("api/stacks/{}".format(stack_id)).with_query({"endpointId":endpoint_id})
     data = await _portainer_request(url, app_session, "PUT", headers=headers, json=body_data)
     log.debug("updated stack: %s", data)
