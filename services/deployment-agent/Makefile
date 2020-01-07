@@ -104,7 +104,7 @@ install-test: install-dev ## install deployment agent testing facilities
 
 .PHONY: unit-test
 unit-test: install-test ## Execute unit tests
-	pytest --cov-append --cov=simcore_service_deployment_agent -v tests
+	pytest --cov-append --color=yes --cov-report=term-missing --cov-report=xml --cov=simcore_service_deployment_agent -v tests
 
 
 # Helpers -------------------------------------------------
