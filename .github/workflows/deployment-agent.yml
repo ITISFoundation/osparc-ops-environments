@@ -28,11 +28,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: setup-docker
-      uses: ./
+      uses: docker-practice/actions-setup-docker@0.0.1
       with:
         docker_version: ${{ matrix.docker_version }}
         docker_channel: ${{ matrix.docker_channel }}
-    #   uses: docker-practice/actions-setup-docker@0.0.1
     - name: setup docker-compose
       run: sudo ./ci/github/helpers/setup_docker_compose.sh
     - name: setup python environment
@@ -63,11 +62,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: setup-docker
-      uses: ./
+      uses: docker-practice/actions-setup-docker@0.0.1
       with:
         docker_version: ${{ matrix.docker_version }}
         docker_channel: ${{ matrix.docker_channel }}
-    #   uses: docker-practice/actions-setup-docker@0.0.1
     - name: setup docker-compose
       run: sudo ./ci/github/helpers/setup_docker_compose.sh
     - name: setup python environment
