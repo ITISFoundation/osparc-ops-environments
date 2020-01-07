@@ -1,4 +1,4 @@
-name: Github-CI Unit-testing
+name: Deployment-agent
 
 on:
   push:
