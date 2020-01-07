@@ -25,8 +25,8 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v1
-    # - name: setup-docker
-    #   uses: docker-practice/actions-setup-docker@0.0.1
+    - name: setup-docker
+      uses: docker-practice/actions-setup-docker@0.0.1
     - name: setup docker-compose
       run: sudo ./ci/github/helpers/setup_docker_compose.sh
     - name: setup python environment
@@ -54,8 +54,8 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v1
-    # - name: setup-docker
-    #   uses: docker-practice/actions-setup-docker@0.0.1
+    - name: setup-docker
+      uses: docker-practice/actions-setup-docker@0.0.1
     - name: setup docker-compose
       run: sudo ./ci/github/helpers/setup_docker_compose.sh
     - name: setup python environment
