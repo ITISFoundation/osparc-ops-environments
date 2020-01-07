@@ -38,7 +38,7 @@ main:
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
-      endpoint_id: 1
+      endpoint_id: -1
       username: admin
       password: adminadmin
       stack_name: ${SIMCORE_STACK_NAME}
