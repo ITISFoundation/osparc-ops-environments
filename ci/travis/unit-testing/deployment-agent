@@ -16,7 +16,7 @@ before_install() {
 install() {
     if bash ci/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
-        bash ci/helpers/ensure_pip
+        bash ci/helpers/ensure_python_pip
     fi
 }
 
