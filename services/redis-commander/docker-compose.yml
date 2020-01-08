@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    init: true
+    restart: always
+    ports:
+      - 8081
+    networks:
+      - monitored
+      - public
+    environment:
+      REDIS_HOSTS: redis
+      URL_PREFIX: /redis
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.redis.loadbalancer.server.port=8081
+        - traefik.http.routers.redis.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/redis`)
+        - traefik.http.routers.redis.entrypoints=https
+        - traefik.http.routers.redis.tls=true
+        - traefik.http.middlewares.redis_stripprefixregex.stripprefixregex.regex=^/redis
+        - traefik.http.routers.redis.middlewares=auth@docker, gzip@docker
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
