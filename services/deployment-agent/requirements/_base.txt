@@ -6,7 +6,7 @@
 #
 aiohttp==3.6.2
 async-timeout==3.0.1      # via aiohttp
-attrs==19.3.0             # via aiohttp, jsonschema, openapi-core
+attrs==17.4.0
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via aiohttp, requests
 docker==4.1.0
