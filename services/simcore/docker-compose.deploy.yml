@@ -1,5 +1,5 @@
 # osparc-simcore stack (framework stack)
-# NOTES : 
+# NOTES :
 # LOGSPOUT_MULTILINE is used to tell to Logspout, which is used by GrayLog, to handle multiline support of the logs of the concerned container. Please add with every new osparc-simcore service.
 # See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 version: '3.7'
@@ -37,14 +37,10 @@ services:
   director:
     environment:
       - LOGSPOUT_MULTILINE=true
-  
-  apihub:
-    environment:
-      - LOGSPOUT_MULTILINE=true 
 
   sidecar:
     environment:
-      - LOGSPOUT_MULTILINE=true  
+      - LOGSPOUT_MULTILINE=true
 
   rabbit:
     networks:
