@@ -15,3 +15,7 @@ schema = T.Dict({
     "version": T.Enum("v0"),
     "location": T.Or(T.String, T.URL),   # either path or url should contain version in it
 })
+
+__all__ = [
+    'APP_OPENAPI_SPECS_KEY'
+]
