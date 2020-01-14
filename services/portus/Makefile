@@ -50,15 +50,27 @@ export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.s
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
-.PHONY: up
-up: .init .create_secrets .env ${TEMP_COMPOSE}  ## Deploys the stack using provided certificates
+.PHONY: up-self-signed
+up-self-signed: .init .create_secrets .env ${TEMP_COMPOSE}-self-signed  ## Deploys the stack using provided certificates
 	# creating bucket
 	@$(create-s3-bucket)
 ifneq ("$(wildcard secrets/domain.crt) $(wildcard secrets/domain.key)", "")
-	@docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	@docker stack deploy -c ${TEMP_COMPOSE}-self-signed ${STACK_NAME}
 else
 	$(error please copy your certificate to secrets/domain.crt and private key to secrets/domain.key)
 endif
+
+.PHONY: up-no-certs
+up-no-certs: .init .create-key-cert-pair .env ${TEMP_COMPOSE}  ## Deploys portainer stack using no certificates OR a valid certificate
+	# creating bucket
+	@$(create-s3-bucket)
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+
+.PHONY: up-letsencrypt
+up-letsencrypt: .init .create-key-cert-pair .env ${TEMP_COMPOSE}-letsencrypt  ## Deploys portainer stack using let's encrypt
+	# creating bucket
+	# @$(create-s3-bucket)
+	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: down
 down: ## Removes the stack from the swarm
@@ -94,6 +106,16 @@ ${TEMP_COMPOSE}: docker-compose.insecure.yml
 	@docker-compose -f $< config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
+.PHONY: ${TEMP_COMPOSE}-self-signed
+${TEMP_COMPOSE}-self-signed: docker-compose.insecure.yml docker-compose.self-signed.yml
+	@docker-compose -f $< -f docker-compose.self-signed.yml config > $@
+	@echo "${STACK_NAME} stack file created for $@"
+
+.PHONY: ${TEMP_COMPOSE}-letsencrypt
+${TEMP_COMPOSE}-letsencrypt: docker-compose.insecure.yml docker-compose.letsencrypt.yml
+	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
+
 define create-s3-bucket
 	@docker run \
 		-v /etc/ssl/certs:/etc/ssl/certs:ro \
@@ -102,85 +124,26 @@ define create-s3-bucket
 		minio/mc mb --ignore-existing local/$(S3_REGISTRY_BUCKET) 2>/dev/null
 endef
 
+secrets/portus.key:
+	# generating private key
+	@openssl genrsa 4096 \
+		-keyout $@
 
+secrets/portus.crt: secrets/portus.key
+	# generating pub key
+	@openssl req \
+		-key $< \
+		-new \
+		-subj "/C=US/ST=sparc/O=osparc/CN=IT'IS oSparc" \
+		-x509 -days 3650 -sha256 -out $@
 
-# Self-signed authority ----------------------------------
-secrets/rootca.key:
-	@openssl genrsa -out $@ 2048
-
-secrets/rootca.crt: secrets/rootca.key
-	@openssl req -x509 -new -nodes -key $< \
-		-subj "/C=US/ST=sparc/O=oSparc/CN=IT'IS oSparc" \
-		-sha256 -days 10000 -out $@;
-
-install-root-certificate: secrets/rootca.crt ## installs a certificate in the host system
-	# installing certificate in trusted root certificates and restarting docker daemon...
-	@$(if $(IS_WSL),                                            \
-		certutil.exe -user -addstore -f root $<;				\
-		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates;                            \
-		echo "Please restart the DOCKER service now..." && read -n 1; \
-		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
-	,                                                           \
-		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates;                            \
-		echo "# restarting docker daemon";                      \
-		sudo systemctl restart docker                           \
-	)
-
-remove-root-certificate: ## removes the certificate from the host system
-	# deleting certificate from trusted root certificates...
-	-@$(if $(IS_WSL), \
-		certutil.exe -user -delstore -f root "*sparc*"\
-		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates \
-	,\
-		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates \
-	)
-
-# self-signed portus certicates --------------------------------------------
-extfile.cnf:
-	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
-
-secrets/domain.key:
-	@openssl genrsa -out $@ 2048
-
-secrets/portus.csr: secrets/domain.key
-	@openssl req -new -key $< -out $@ \
- 		-subj "/C=US/ST=sparc/O=oSparc/CN=${MACHINE_FQDN}"
-
-secrets/domain.crt: secrets/portus.csr secrets/rootca.crt secrets/rootca.key extfile.cnf
-	@openssl x509 -req -in secrets/portus.csr -CA secrets/rootca.crt -extfile \
-		extfile.cnf -CAkey secrets/rootca.key -CAcreateserial \
-		-out secrets/domain.crt -days 500 -sha256
-
-.PHONY: create-certificates
-create-certificates: secrets/domain.crt secrets/domain.key secrets/rootca.crt
-
-# host
-.PHONY: .install-fqdn
-.install-fqdn: ## installs the Full Qualified Domain Name (FQDN) as a host file in the host system
-	@$(if $(IS_WSL), \
-	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
-	echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
-	echo "please run the following in a PWshell with Admin rights:"; \
-	echo "Add-Content c:\Windows\System32\drivers\etc\hosts '$(MACHINE_IP) $(MACHINE_FQDN)'"; \
-	echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):"; \
-	echo "echo '$(MACHINE_IP) $(MACHINE_FQDN)' >> c:\Windows\System32\drivers\etc\hosts"; \
-	fi \
-	, \
-	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
-		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
-		sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
-		echo "# restarting docker daemon";                      \
-		sudo systemctl restart docker;                           \
-	fi \
-	)
+.PHONY: .create-key-cert-pair
+.create-key-cert-pair: secrets/portus.crt
 
 .PHONY: .create_secrets
-.create_secrets:
+.create_secrets: .create-key-cert-pair
 	@if ! docker secret ls | grep -w domain.crt >/dev/null; then docker secret create domain.crt secrets/domain.crt; fi;
 	@if ! docker secret ls | grep -w domain.key >/dev/null; then docker secret create domain.key secrets/domain.key; fi;
 	@if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi;
 	@if ! docker secret ls | grep -w rootca.crt >/dev/null; then docker secret create rootca.crt secrets/rootca.crt; fi;
+

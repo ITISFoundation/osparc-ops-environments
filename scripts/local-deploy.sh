@@ -81,7 +81,7 @@ $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
 traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
 $psed -i -e "s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD=${traefik_password}|" .env
-make up
+make up-local
 popd
 
 # -------------------------------- MINIO -------------------------------
@@ -108,7 +108,7 @@ cp ${repo_basedir}/certificates/*.key secrets/
 $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/S3_ACCESSKEY=.*/S3_ACCESSKEY=$SERVICES_PASSWORD/" .env
 $psed -i -e "s/S3_SECRETKEY=.*/S3_SECRETKEY=$SERVICES_PASSWORD/" .env
-make up
+make up-self-signed
 
 # auto configure portus
 echo
@@ -159,6 +159,14 @@ $psed -i -e "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/gr
 $psed -i -e "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
 $psed -i -e "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
 $psed -i -e "s|--web.external-url=.*|--web.external-url=https://$MACHINE_FQDN/prometheus/'|" docker-compose.yml
+make up
+popd
+
+# -------------------------------- JAEGER -------------------------------
+echo
+echo -e "\e[1;33mstarting jaeger...\e[0m"
+# set MACHINE_FQDN
+pushd ${repo_basedir}/services/jaeger
 make up
 popd
 

@@ -20,7 +20,7 @@ $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL instead.
 SHELL := /bin/bash
 
 # Host machine IP
-export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
+export MACHINE_IP = $(shell source $(realpath $(CURDIR)/scripts/portable.sh) && get_this_ip)
 
 include repo.config
 

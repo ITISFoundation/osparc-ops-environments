@@ -129,6 +129,7 @@ async def test_setup_task(loop, fake_app, mocker):
     fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["username"] = ""
     fake_app[APP_CONFIG_KEY]["main"]["watched_git_repositories"][0]["password"] = ""
     fake_app[auto_deploy_task.TASK_SESSION_NAME] = "someappsession"
+    fake_app[APP_CONFIG_KEY]["main"]["portainer"][0]["endpoint_id"] = 1
     try:
         auto_deploy_task.setup(fake_app)
     except:

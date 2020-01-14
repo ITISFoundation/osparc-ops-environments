@@ -40,6 +40,7 @@ main:
     additional_parameters:
       extra_hosts:
         - "osparc.io:183.123.39.23"
+    services_prefix: ""
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
