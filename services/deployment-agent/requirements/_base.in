@@ -3,9 +3,8 @@
 #
 
 aiohttp
-aiohttp-swagger
+openapi-core
 docker
-jsonschema<3
 psycopg2-binary
 ptvsd
 semantic_version
