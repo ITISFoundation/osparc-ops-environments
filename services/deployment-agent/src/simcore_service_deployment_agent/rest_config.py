@@ -4,10 +4,7 @@
     - config-file schema
 """
 import trafaret as T
-
 from servicelib.application_keys import APP_OPENAPI_SPECS_KEY
-
-APP_OPENAPI_SPECS_KEY = APP_OPENAPI_SPECS_KEY
 
 CONFIG_SECTION_NAME = 'rest'
 
