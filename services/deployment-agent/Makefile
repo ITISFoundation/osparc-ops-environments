@@ -100,7 +100,7 @@ install-dev: ## install deployment agent dev
 # Testing -------------------------------------------------
 .PHONY: install-test
 install-test: install-dev ## install deployment agent testing facilities
-	pip install -r tests/requirements.txt
+	pip install -r requirements/ci.txt
 
 .PHONY: unit-test
 unit-test: install-test ## Execute unit tests

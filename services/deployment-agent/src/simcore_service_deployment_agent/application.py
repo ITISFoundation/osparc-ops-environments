@@ -7,7 +7,6 @@ import logging
 import platform
 
 from aiohttp import web
-from aiohttp_swagger import setup_swagger
 from servicelib.application_keys import APP_CONFIG_KEY
 
 from .auto_deploy_task import setup as setup_auto_deploy_task
@@ -19,12 +18,11 @@ def create(config, loop):
     log.debug("Initializing ... ")
     app = web.Application(loop=loop)
     app[APP_CONFIG_KEY] = config
-    
+
     # TODO: here goes every package/plugin setups
     setup_rest(app)
-    setup_swagger(app)    
     setup_auto_deploy_task(app)
-    
+
     return app
 
 def run(config, app=None):
@@ -36,8 +34,8 @@ def run(config, app=None):
 
     if not app:
         app = create(config, loop)
-    
-    
-    web.run_app(app, 
-        host=config["main"]["host"], 
+
+
+    web.run_app(app,
+        host=config["main"]["host"],
         port=config["main"]["port"])
