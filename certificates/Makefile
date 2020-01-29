@@ -20,7 +20,7 @@ SHELL := /bin/bash
 include $(CURDIR)/../repo.config
 
 # Host machine IP
-export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
+export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../scripts/portable.sh) && get_this_ip)
 
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 
