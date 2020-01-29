@@ -104,6 +104,9 @@ pushd ${repo_basedir}/services/portus
 # copy certificates to portus
 cp ${repo_basedir}/certificates/*.crt secrets/
 cp ${repo_basedir}/certificates/*.key secrets/
+mv secrets/domain.crt secrets/portus.crt
+mv secrets/domain.key secrets/portus.key
+
 # set configuration
 $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/S3_ACCESSKEY=.*/S3_ACCESSKEY=$SERVICES_PASSWORD/" .env

@@ -8,6 +8,7 @@ RUN apt-get update && apt-get -yq dist-upgrade \
     git \
     curl \
     iputils-ping \
+    python3-pip \
  && rm -rf /var/lib/apt/lists/*
 
 
@@ -28,8 +29,8 @@ RUN unset JUPYTERHUB_API_TOKEN
 COPY --chown=jovyan:users bin/*.sh /usr/local/bin/
 COPY --chown=jovyan:users requirements.txt /tmp/
 
-RUN pip --no-cache install --upgrade pip wheel setuptools && \
-    pip --no-cache install -r /tmp/requirements.txt &&\
+RUN pip3 --no-cache install --upgrade pip wheel setuptools && \
+    pip3 --no-cache install -r /tmp/requirements.txt &&\
     rm /tmp/requirements.txt
 
 COPY --chown=jovyan:users work/ $HOME/work
