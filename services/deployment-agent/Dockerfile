@@ -102,7 +102,7 @@ ENV SC_BUILD_TARGET development
 ENV SC_BOOT_MODE development
 
 # install test 3rd party packages to accelerate runtime installs
-COPY --chown=scu:scu tests/requirements.txt requirements-tests.txt
+COPY --chown=scu:scu requirements/_test.txt requirements-tests.txt
 RUN apk add --no-cache --virtual .build-deps \
       gcc \
       libc-dev &&\
