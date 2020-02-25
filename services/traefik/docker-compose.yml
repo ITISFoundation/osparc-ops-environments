@@ -41,6 +41,8 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
+        # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
+        - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
         # redirect http to https
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
         - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
