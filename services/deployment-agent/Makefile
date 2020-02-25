@@ -6,7 +6,7 @@
 include .env
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-ifeq ($(PREFIX_STACK_NAME), "")
+ifeq ($(PREFIX_STACK_NAME),)
 STACK_NAME := $(notdir $(PWD))
 else
 STACK_NAME := $(PREFIX_STACK_NAME)-$(notdir $(PWD))
