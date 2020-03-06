@@ -38,7 +38,7 @@ async def test_watcher_workflow(loop, valid_docker_config, valid_docker_stack, m
     docker_registries_watcher.NUMBER_OF_ATTEMPS = 1
     mocked_docker_client = mocker.patch(
         "simcore_service_deployment_agent.docker_registries_watcher.docker",
-        **{"from_env.return_value.images.get_registry_data.return_value.attrs": "somesignature",
+        **{"from_env.return_value.images.get_registry_data.return_value.attrs": {"Descriptor":"somesignature"},
            "errors.APIError": BaseException})
     docker_watcher = docker_registries_watcher.DockerRegistriesWatcher(
         valid_docker_config, valid_docker_stack)
@@ -64,7 +64,7 @@ async def test_watcher_workflow(loop, valid_docker_config, valid_docker_stack, m
 
     # generate a change
     mocked_docker_client.configure_mock(**{
-        "from_env.return_value.images.get_registry_data.return_value.attrs": "someothersignature"
+        "from_env.return_value.images.get_registry_data.return_value.attrs": {"Descriptor":"someothersignature"}
     })
     try:
         assert await docker_watcher.check_for_changes() == \
