@@ -67,7 +67,7 @@ class DockerRegistriesWatcher(SubTask):
             for repo in self.watched_repos:
                 try:
                     registry_data = client.images.get_registry_data(repo["image"])
-                    if repo["registry_data_attrs"] != registry_data.attrs:
+                    if repo["registry_data_attrs"]['Descriptor'] != registry_data.attrs['Descriptor']:
                         log.info("docker image %s signature changed from %s to %s!", repo["image"], repo["registry_data_attrs"], registry_data.attrs)
                         changes[repo['image']] = "image signature changed"
                 except docker.errors.APIError:
