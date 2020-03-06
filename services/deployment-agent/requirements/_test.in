@@ -16,6 +16,8 @@ pytest-aiohttp  # incompatible with pytest-asyncio. See https://github.com/pytes
 pytest-cov
 pytest-mock
 pytest-runner
+pytest-instafail
+pytest-sugar
 
 # fixtures
 Faker
