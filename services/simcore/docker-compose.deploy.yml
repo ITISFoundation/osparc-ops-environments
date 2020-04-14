@@ -18,12 +18,12 @@ services:
 
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
-    # secrets:
-    #   - source: rootca.crt
-    #     target: /usr/local/share/ca-certificates/osparc.crt
+    secrets:
+      - source: rootca.crt
+        target: /usr/local/share/ca-certificates/osparc.crt
     environment:
       # minio sdk uses this env to use self-signed certs
-      # - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
       - LOGSPOUT_MULTILINE=true
 
     networks:
@@ -76,7 +76,8 @@ networks:
   monitored:
     external: true
     name: ${MONITORED_NETWORK}
+
 # self-signed only
-# secrets:
-#   rootca.crt:
-#     external: true
+secrets:
+  rootca.crt:
+    external: true
