@@ -102,10 +102,9 @@ echo
 echo -e "\e[1;33mstarting portus/registry...\e[0m"
 pushd "${repo_basedir}"/services/portus
 # copy certificates to portus
-cp "${repo_basedir}"/certificates/*.crt secrets/
-cp "${repo_basedir}"/certificates/*.key secrets/
-mv secrets/domain.crt secrets/portus.crt
-mv secrets/domain.key secrets/portus.key
+cp -u "${repo_basedir}"/certificates/domain.crt secrets/portus.crt
+cp -u "${repo_basedir}"/certificates/domain.key secrets/portus.key
+cp -u "${repo_basedir}"/certificates/rootca.crt secrets/rootca.crt
 
 # set configuration
 $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
