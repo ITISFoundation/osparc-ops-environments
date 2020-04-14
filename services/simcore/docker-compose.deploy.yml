@@ -2,7 +2,7 @@
 # NOTES :
 # LOGSPOUT_MULTILINE is used to tell to Logspout, which is used by GrayLog, to handle multiline support of the logs of the concerned container. Please add with every new osparc-simcore service.
 # See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
-version: '3.7'
+version: "3.7"
 services:
   webserver:
     networks:
@@ -18,12 +18,12 @@ services:
 
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
-    secrets:
-      - source: rootca.crt
-        target: /usr/local/share/ca-certificates/osparc.crt
+    # secrets:
+    #   - source: rootca.crt
+    #     target: /usr/local/share/ca-certificates/osparc.crt
     environment:
       # minio sdk uses this env to use self-signed certs
-      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+      # - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
       - LOGSPOUT_MULTILINE=true
 
     networks:
@@ -76,9 +76,7 @@ networks:
   monitored:
     external: true
     name: ${MONITORED_NETWORK}
-
-
 # self-signed only
-secrets:
-  rootca.crt:
-    external: true
+# secrets:
+#   rootca.crt:
+#     external: true
