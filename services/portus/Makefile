@@ -142,8 +142,7 @@ secrets/portus.crt: secrets/portus.key
 
 .PHONY: .create_secrets
 .create_secrets: .create-key-cert-pair
-	@if ! docker secret ls | grep -w domain.crt >/dev/null; then docker secret create domain.crt secrets/domain.crt; fi;
-	@if ! docker secret ls | grep -w domain.key >/dev/null; then docker secret create domain.key secrets/domain.key; fi;
-	@if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi;
-	@if ! docker secret ls | grep -w rootca.crt >/dev/null; then docker secret create rootca.crt secrets/rootca.crt; fi;
+	@if ! $$(docker secret ls | grep -w domain.crt >/dev/null); then docker secret create domain.crt secrets/portus.crt; fi;
+	@if ! $$(docker secret ls | grep -w domain.key >/dev/null); then docker secret create domain.key secrets/portus.key; fi;	
+	@if ! $$(docker secret ls | grep -w rootca.crt >/dev/null); then docker secret create rootca.crt secrets/rootca.crt; fi;
 
