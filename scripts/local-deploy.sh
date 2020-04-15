@@ -222,13 +222,15 @@ if [ $devel_mode -eq 0 ]; then
     fi
     sed -i "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
 
+    secret_id=$(docker secret inspect --format="{{ .ID  }}" rootca.crt)
     # full original -> replacement
-    YAML_STRING="environment:\n        S3_ENDPOINT: ${MACHINE_FQDN}:10000\n        S3_ACCESS_KEY: ${SERVICES_PASSWORD}\n        S3_SECRET_KEY: ${SERVICES_PASSWORD}"
+    YAML_STRING="environment:\n        S3_ENDPOINT: ${MACHINE_FQDN}:10000\n        S3_ACCESS_KEY: ${SERVICES_PASSWORD}\n        S3_SECRET_KEY: ${SERVICES_PASSWORD}\n        DIRECTOR_SELF_SIGNED_SSL_SECRET_ID: ${secret_id}"
     sed -i "s/environment: {}/$YAML_STRING/" deployment_config.default.yaml
     # update
     sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${MACHINE_FQDN}:10000/" deployment_config.default.yaml
     sed -i "s/S3_ACCESS_KEY:.*/S3_ACCESS_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
     sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
+    sed -i "s/DIRECTOR_SELF_SIGNED_SSL_SECRET_ID:.*/DIRECTOR_SELF_SIGNED_SSL_SECRET_ID: ${secret_id}/" deployment_config.default.yaml
     # portainer
     sed -i "/- url: .*portainer:9000/{n;s/username:.*/username: ${SERVICES_USER}/}" deployment_config.default.yaml
     sed -i "/- url: .*portainer:9000/{n;n;s/password:.*/password: ${SERVICES_PASSWORD}/}" deployment_config.default.yaml
