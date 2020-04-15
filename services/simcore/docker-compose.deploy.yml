@@ -34,7 +34,8 @@ services:
       - LOGSPOUT_MULTILINE=true
       # needed to pass the self-signed certificate to the spawned services
       - DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
-      - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=rootca.crt
+      # - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=some_id
+      - DIRECTOR_SELF_SIGNED_SSL_SECRET_NAME=rootca.crt
 
   sidecar:
     environment:
