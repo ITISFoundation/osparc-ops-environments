@@ -113,6 +113,13 @@ services:
         # docker run --rm --entrypoint htpasswd registry:2 -nb user password
         # admin:adminadmin
         - traefik.http.middlewares.${SWARM_STACK_NAME}_auth.basicauth.users=admin:$apr1$TmDFxy/V$r9XNO9a5ap9JQRKzjhkdc1
+        # traefik UI
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.service=api@internal
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_api.loadbalancer.server.port=8080
 
 networks:
   public:
