@@ -58,6 +58,12 @@ jobs:
         os: [ubuntu-18.04]
       fail-fast: false
     steps:
+      - name: set PR default variables
+        # only pushes have access to the docker credentials, use a default
+        if: github.event_name == 'pull_request'
+        run: |
+          export TMP_DOCKER_REGISTRY=${GITHUB_REPOSITORY%/*}
+          echo ::set-env name=DOCKER_REGISTRY::${TMP_DOCKER_REGISTRY,,}
       - uses: actions/checkout@v2
       - name: setup python environment
         uses: actions/setup-python@v1.1.1
