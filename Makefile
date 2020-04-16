@@ -120,6 +120,7 @@ info-local: ## Displays the links to the different services e.g. 'make info-loca
 	@echo "- [https://$(MACHINE_FQDN)/minio](S3 storage)": storage management
 	@echo "- [https://$(MACHINE_FQDN)/grafana](grafana)": monitoring metrics/alerts management
 	@echo "- [https://$(MACHINE_FQDN)/graylog/](graylog)": aggregated logger
+	@echo "- [https://$(MACHINE_FQDN)/adminer/](adminer)": postgres adminer
 	@echo ""
 	@echo "- [https://$(MACHINE_FQDN):5000](docker registry)": images registry
 	@echo "- [https://$(MACHINE_FQDN):10000](docker registry)": images registry ??
