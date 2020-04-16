@@ -13,9 +13,9 @@ on:
 env:
   # secrets can be set in settings/secrets on github
   DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  #enable buildkit
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
+  #no buildkit right now since the labels from docker-compsoe are not used (bug that will be fixed soon)
+  # DOCKER_BUILDKIT: 1
+  # COMPOSE_DOCKER_CLI_BUILD: 1
 
 jobs:
   unit-test-deployment-agent:
