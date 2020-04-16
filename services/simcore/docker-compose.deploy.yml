@@ -86,6 +86,7 @@ services:
       - public
     deploy:
       labels:
+        # external traefik
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.${SWARM_STACK_NAME}_traefik.loadbalancer.server.port=80
@@ -99,13 +100,19 @@ services:
     image: "containous/whoami"
     deploy:
       labels:
+        # internal traefik
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         - traefik.enable=true
         - traefik.http.services.${SWARM_STACK_NAME}_whoami.loadbalancer.server.port=80
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=hostregexp(`{host:.+}`) && PathPrefix(`/whoami`)
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
-        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=gzip@docker
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@docker,gzip@docker
+        # basic authentication
+        # To create user:password pair, it's possible to use this command:
+        # docker run --rm --entrypoint htpasswd registry:2 -nb user password
+        # admin:adminadmin
+        - traefik.http.middlewares.${SWARM_STACK_NAME}_auth.basicauth.users=admin:$apr1$TmDFxy/V$r9XNO9a5ap9JQRKzjhkdc1
 
 networks:
   public:
