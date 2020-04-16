@@ -205,6 +205,12 @@ curl -u "$SERVICES_USER":"$SERVICES_PASSWORD" --header "Content-Type: applicatio
     --data "$json_data" https://"$MACHINE_FQDN"/graylog/api/system/inputs
 popd
 
+# -------------------------------- ADMINER -------------------------------
+echo
+echo -e "\e[1;33mstarting adminer...\e[0m"
+pushd "${repo_basedir}"/services/adminer;
+make up
+popd
 
 if [ $devel_mode -eq 0 ]; then
 
