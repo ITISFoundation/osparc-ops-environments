@@ -76,6 +76,7 @@ WORKDIR /build/services/deployment-agent
 RUN apk add --no-cache --virtual .build-deps \
       gcc \
       libc-dev &&\
+      libstdc++ &&\
       $SC_PIP install -r requirements/prod.txt &&\
       mkdir -p /home/scu/services/deployment-agent &&\
       chown scu:scu /home/scu/services/deployment-agent &&\
