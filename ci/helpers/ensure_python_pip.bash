@@ -9,14 +9,14 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Pin pip version to a compatible release https://www.python.org/dev/peps/pep-0440/#compatible-release
-PIP_VERSION=19.1.0
+PIP_VERSION=19.3.1
 
-echo "INFO:" $(python --version) "@" $(which python)
+echo "INFO:" "$(python --version)" "@" "$(command -v python)"
 
 # installs pip if not in place
 python -m ensurepip
 
-echo "INFO:" $(pip --version) "@" $(which pip)
+echo "INFO:" "$(pip --version)" "@" "$(command -v pip)"
 
 pip3 install --upgrade \
   pip~=$PIP_VERSION \

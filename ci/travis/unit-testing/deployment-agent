@@ -9,14 +9,14 @@ before_install() {
     if bash ci/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
         bash ci/travis/helpers/install_docker_compose
-        bash ci/helpers/show_system_versions
+        bash ci/helpers/show_system_versions.bash
     fi
 }
 
 install() {
     if bash ci/travis/helpers/test_for_changes "${FOLDER_CHECKS[@]}";
     then
-        bash ci/helpers/ensure_python_pip
+        bash ci/helpers/ensure_python_pip.bash
     fi
 }
 
