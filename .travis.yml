@@ -11,49 +11,6 @@ addons:
       - expect-dev # for unbuffer: brings color back into travis logs
 jobs:
   include:
-    - stage: unit testing
-      name: deployment-agent
-      language: python
-      python:
-        - "3.6"
-        - "3.7"
-      cache: pip
-      before_install:
-        - sudo bash ci/travis/unit-testing/deployment-agent before_install
-      install:
-        - unbuffer bash ci/travis/unit-testing/deployment-agent install
-      before_script:
-        - unbuffer bash ci/travis/unit-testing/deployment-agent before_script
-      script:
-        - unbuffer bash ci/travis/unit-testing/deployment-agent script
-      after_success:
-        - unbuffer bash ci/travis/unit-testing/deployment-agent after_success
-
-    - stage: system testing, deploy to dockerhub
-      name: deployment-agent
-      language: python
-      python:
-        - "3.6"
-        - "3.7"
-      before_install:
-        - sudo bash ci/travis/system-testing/deployment-agent before_install
-      install:
-        - unbuffer bash ci/travis/system-testing/deployment-agent install
-      before_script:
-        - unbuffer bash ci/travis/system-testing/deployment-agent before_script
-      script:
-        - unbuffer bash ci/travis/system-testing/deployment-agent script
-      after_success:
-        - unbuffer bash ci/travis/system-testing/deployment-agent after_success
-      after_failure:
-        - unbuffer bash ci/travis/system-testing/deployment-agent after_failure
-      deploy:
-        - provider: script
-          skip_cleanup: true
-          script: unbuffer bash ci/travis/deploy/deployment-agent deploy
-          on:
-            branch: master
-    
     - stage: system testing, deploy to dockerhub
       name: maintenance
       language: python

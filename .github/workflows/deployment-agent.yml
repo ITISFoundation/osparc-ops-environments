@@ -42,9 +42,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: install deployment-agent
-        run: ./ci/github/unit-testing/deployment-agent install
+        run: ./ci/github/unit-testing/deployment-agent.bash install
       - name: test
-        run: ./ci/github/unit-testing/deployment-agent test
+        run: ./ci/github/unit-testing/deployment-agent.bash test
       - uses: codecov/codecov-action@v1
         with:
           flags: unittests #optional
@@ -79,9 +79,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: install deployment-agent
-        run: ./ci/github/system-testing/deployment-agent install
+        run: ./ci/github/system-testing/deployment-agent.bash install
       - name: test
-        run: ./ci/github/system-testing/deployment-agent test
+        run: ./ci/github/system-testing/deployment-agent.bash test
       - uses: codecov/codecov-action@v1
         with:
           flags: unittests #optional
+      - name: set owner variable
+        run: echo ::set-env name=OWNER::${GITHUB_REPOSITORY%/*}
+      - name: deploy master
+        if: github.ref == 'refs/heads/master'
+        env:
+          TAG_PREFIX: master-github
+        run: |
+          ./ci/deploy/deployment-agent.bash
