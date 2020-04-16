@@ -88,23 +88,23 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
-        - traefik.http.services.simcore_traefik.loadbalancer.server.port=80
-        - traefik.http.routers.simcore_traefik.rule=PathPrefix(`/`)
-        - traefik.http.routers.simcore_traefik.entrypoints=https
-        - traefik.http.routers.simcore_traefik.priority=1
-        - traefik.http.routers.simcore_traefik.tls=true
-        - traefik.http.routers.simcore_traefik.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_traefik.loadbalancer.server.port=80
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.rule=PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.middlewares=gzip@docker, sslheader@docker
 
-  internal-whoami:
+  whoami:
     image: "containous/whoami"
     deploy:
       labels:
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         - traefik.enable=true
-        - traefik.http.services.internal-whoami.loadbalancer.server.port=80
-        - traefik.http.routers.internal-whoami.rule=hostregexp(`{host:.+}`) && PathPrefix(`/whoami`)
-        - traefik.http.routers.internal-whoami.entrypoints=http
-        - traefik.http.routers.internal-whoami.middlewares=gzip@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_whoami.loadbalancer.server.port=80
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=hostregexp(`{host:.+}`) && PathPrefix(`/whoami`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=auth@docker, gzip@docker
 
 networks:
   public:
