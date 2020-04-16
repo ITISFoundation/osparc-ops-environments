@@ -104,6 +104,7 @@ services:
         # internal traefik
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         # traefik UI
+        - traefik.enable=true
         - traefik.http.routers.${SWARM_STACK_NAME}_api.service=api@internal
         - traefik.http.routers.${SWARM_STACK_NAME}_api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
         - traefik.http.routers.${SWARM_STACK_NAME}_api.entrypoints=http
