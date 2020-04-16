@@ -97,6 +97,8 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik.middlewares=gzip@docker, sslheader@docker
 
   traefik_api:
+    # NOTE: this is a trick to allow to access the internal traefik REST API
+    # list router like so: curl https://domain/api/http/routers | jq
     image: busybox:latest
     command: top
     deploy:
@@ -114,6 +116,7 @@ services:
 
   whoami:
     image: "containous/whoami"
+    # NOTE: this service allow to better understand how the host gets forwarded inside the simcore stack
     deploy:
       labels:
         # internal traefik
