@@ -1,30 +1,31 @@
-version: '3.7'
+version: "3.7"
 
 services:
   traefik:
     command:
-      - '--api=true'
-      - '--api.dashboard=true'
-      - '--log.level=INFO'
-      - '--accesslog=false'
-      - '--metrics.prometheus=true'
-      - '--metrics.prometheus.addEntryPointsLabels=true'
-      - '--metrics.prometheus.addServicesLabels=true'
-      - '--entryPoints.metrics.address=:8082'
-      - '--metrics.prometheus.entryPoint=metrics'
-      - '--entryPoints.http.address=:80'
-      - '--entryPoints.https.address=:443'
-      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
-      - '--providers.docker.swarmMode=true'
-      - '--providers.docker.exposedByDefault=false'
-      - '--tracing=true'
-      - '--tracing.jaeger=true'
-      - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
-      - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
-      - '--entryPoints.portus.address=:5000'
-      - '--entryPoints.storage.address=:10000'
-      - '--entryPoints.traefik.address=:9001'
-      - '--providers.file.filename=/etc/traefik/dynamic_conf.yml'
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--log.level=INFO"
+      - "--accesslog=false"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.https.address=:443"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `*`)"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--entryPoints.portus.address=:5000"
+      - "--entryPoints.storage.address=:10000"
+      - "--entryPoints.traefik.address=:9001"
+      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
     ports:
       # additional ports for services
       - target: 10000

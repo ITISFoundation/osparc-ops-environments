@@ -71,10 +71,14 @@ leave: ## leaves the swarm
 	fi \
 	, \
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
-		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
-		sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
-		echo "# restarting docker daemon";                      \
-		sudo systemctl restart docker;                           \
+		echo -n "Do you wish to install the following host? [y/N] ";\
+			read ans;\
+			ans=$${ans:-N};\
+			if [ $${ans} = "y" ]; then\
+				sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
+				echo -n "restarting docker daemon...";                      \
+				sudo systemctl restart docker;                           \
+			fi\
 	fi \
 	)
 
@@ -111,15 +115,16 @@ info-vars: ## Displays some parameters of makefile environments (debugging)
 info-local: ## Displays the links to the different services e.g. 'make info-local >SITES.md'
 	# Links in local mode:
 	@echo
-	@echo "- [https://$(MACHINE_FQDN)](osparc simcore)": framework front-end
-	@echo "- [https://$(MACHINE_FQDN)/portainer/](portainer)": swarm/containers management
-	@echo "- [https://$(MACHINE_FQDN)/minio](S3 storage)": storage management
-	@echo "- [https://$(MACHINE_FQDN)/grafana](grafana)": monitoring metrics/alerts management
-	@echo "- [https://$(MACHINE_FQDN)/graylog/](graylog)": aggregated logger
+	@echo "- https://$(MACHINE_FQDN) (osparc simcore)": framework front-end
+	@echo "- https://$(MACHINE_FQDN)/portainer/ (portainer)": swarm/containers management
+	@echo "- https://$(MACHINE_FQDN)/minio (S3 storage)": storage management
+	@echo "- https://$(MACHINE_FQDN)/grafana (grafana)": monitoring metrics/alerts management
+	@echo "- https://$(MACHINE_FQDN)/graylog/ (graylog)": aggregated logger
+	@echo "- https://$(MACHINE_FQDN)/adminer/ (adminer)": postgres adminer
 	@echo ""
-	@echo "- [https://$(MACHINE_FQDN):5000](docker registry)": images registry
-	@echo "- [https://$(MACHINE_FQDN):10000](docker registry)": images registry ??
-	@echo "- [https://$(MACHINE_FQDN):9001/dashboard/](traefik)": ui for swarm reverse proxy
+	@echo "- https://$(MACHINE_FQDN):5000 (docker registry)": images registry
+	@echo "- https://$(MACHINE_FQDN):10000 (docker registry)": images registry ??
+	@echo "- https://$(MACHINE_FQDN):9001/dashboard/ (traefik)": ui for swarm reverse proxy
 
 .PHONY: clean .check_clean
 clean: .check_clean ## Cleans all outputs

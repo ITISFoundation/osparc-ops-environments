@@ -1,38 +1,38 @@
 #!/bin/sh
-#
+set -o errexit
+set -o nounset
+
+IFS=$(printf '\n\t')
+
+INFO="INFO: [$(basename "$0")] "
 
 # BOOTING application ---------------------------------------------
-echo "Booting in ${SC_BOOT_MODE} mode ..."
-echo "  User    :`id $(whoami)`"
-echo "  Workdir :`pwd`"
+echo "$INFO" "Booting in ${SC_BOOT_MODE} mode ..."
+echo "  User    :$(id "$(whoami)")"
+echo "  Workdir :$(pwd)"
 
-if [[ ${SC_BUILD_TARGET} == "development" ]]
+APP_CONFIG=config-prod.yaml
+if [ "${SC_BUILD_TARGET}" = "development" ]
 then
-  echo "  Environment :"
+  echo "$INFO" "Environment :"
   printenv  | sed 's/=/: /' | sed 's/^/    /' | sort
-  #--------------------
+  echo "$INFO" "Python :"
+  python --version | sed 's/^/    /'
+  command -v python | sed 's/^/    /'
 
   APP_CONFIG=/home/scu/host-dev.yaml
 
-  cd services/deployment-agent
-  $SC_PIP install --user -r requirements/dev.txt
-  cd /devel
+  cd services/deployment-agent || exit 1
+  pip --no-cache-dir install -r requirements/dev.txt
+  cd - || exit 1
 
-  #--------------------
-  echo "  Python :"
-  python --version | sed 's/^/    /'
-  which python | sed 's/^/    /'
-  echo "  PIP :"
-  $SC_PIP list | sed 's/^/    /'
-
-elif [[ ${SC_BUILD_TARGET} == "production" ]]
-then
-  APP_CONFIG=config-prod.yaml
+  echo "$INFO" "PIP :"
+  pip list | sed 's/^/    /'
 fi
 
 
 # RUNNING application ----------------------------------------
-if [[ ${SC_BOOT_MODE} == "debug-ptvsd" ]]
+if [ "${SC_BOOT_MODE}" = "debug-ptvsd" ]
 then
   echo
   echo "PTVSD Debugger initializing in port 3000"

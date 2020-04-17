@@ -3,11 +3,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-FOLDER_CHECKS=(deployment-agent/ .travis.yml)
-
 install() {
-    bash ci/helpers/ensure_python_pip
-    pip3 install -r ci/travis/system-testing/requirements.txt
+    bash ci/helpers/ensure_python_pip.bash
+    pip3 install -r ci/github/system-testing/requirements.txt
     pushd services/deployment-agent; make build ; popd
     pip list -v
     docker images
@@ -22,7 +20,7 @@ install() {
 }
 
 test() {
-    pytest --cov-append --color=yes --cov-report=term-missing --cov-report=xml --cov=services/deployment-agent -v ci/travis/system-testing/tests
+    pytest --cov-append --color=yes --cov-report=term-missing --cov-report=xml --cov=services/deployment-agent -v ci/github/system-testing/tests
 }
 
 # Check if the function exists (bash specific)

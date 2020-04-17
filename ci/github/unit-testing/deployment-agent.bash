@@ -3,10 +3,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-FOLDER_CHECKS=(deployment-agent/ .travis.yml)
-
 install() {
-    bash ci/helpers/ensure_python_pip
+    bash ci/helpers/ensure_python_pip.bash
     pushd services/deployment-agent; make install-test; popd
     pip list -v
 }

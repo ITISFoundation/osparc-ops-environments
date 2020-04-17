@@ -2,24 +2,19 @@
 # NOTES :
 # LOGSPOUT_MULTILINE is used to tell to Logspout, which is used by GrayLog, to handle multiline support of the logs of the concerned container. Please add with every new osparc-simcore service.
 # See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
-version: '3.7'
+version: "3.7"
 services:
   webserver:
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
-        - traefik.http.services.webserver.loadbalancer.server.port=8080
-        - traefik.http.routers.webserver.rule=PathPrefix(`/`)
-        - traefik.http.routers.webserver.priority=1
-        - traefik.http.routers.webserver.entrypoints=https
-        - traefik.http.routers.webserver.tls=true
-        - traefik.http.routers.webserver.middlewares=gzip@docker
     networks:
       - public
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
+    deploy:
+      labels:
+        # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
+        # NOTE: in deploy mode with SSL they must be set to https!
+        - traefik.http.middlewares.simcore_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
 
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
@@ -37,6 +32,10 @@ services:
   director:
     environment:
       - LOGSPOUT_MULTILINE=true
+      # needed to pass the self-signed certificate to the spawned services
+      - DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
+      # - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=some_id
+      - DIRECTOR_SELF_SIGNED_SSL_SECRET_NAME=rootca.crt
 
   sidecar:
     environment:
@@ -59,6 +58,60 @@ services:
   #       constraints:
   #         - node.labels.postgres==true
 
+  traefik:
+    networks:
+      - monitored
+      - public
+    deploy:
+      labels:
+        # external traefik
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.${SWARM_STACK_NAME}_traefik.loadbalancer.server.port=80
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.rule=PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.middlewares=gzip@docker, sslheader@docker
+
+  traefik_api:
+    # NOTE: this is a trick to allow to access the internal traefik REST API
+    # list router like so: curl https://domain/api/http/routers | jq
+    image: busybox:latest
+    command: top
+    deploy:
+      labels:
+        # internal traefik
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        # traefik UI
+        - traefik.enable=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.service=api@internal
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_api.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_api.loadbalancer.server.port=8080
+
+  whoami:
+    image: "containous/whoami"
+    # NOTE: this service allow to better understand how the host gets forwarded inside the simcore stack
+    deploy:
+      labels:
+        # internal traefik
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        # basic authentication
+        # To create user:password pair, it's possible to use this command:
+        # docker run --rm --entrypoint htpasswd registry:2 -nb user password
+        # admin:adminadmin
+        - traefik.http.middlewares.${SWARM_STACK_NAME}_auth.basicauth.users=admin:$$apr1$$aaX0W.4I$$sNk3knnThfi7fHTXQa0Wx.
+        # whoami
+        - traefik.enable=true
+        - traefik.http.services.${SWARM_STACK_NAME}_whoami.loadbalancer.server.port=80
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=hostregexp(`{host:.+}`) && PathPrefix(`/whoami`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@docker,gzip@docker
+
 networks:
   public:
     external: true
@@ -66,7 +119,6 @@ networks:
   monitored:
     external: true
     name: ${MONITORED_NETWORK}
-
 
 # self-signed only
 secrets:

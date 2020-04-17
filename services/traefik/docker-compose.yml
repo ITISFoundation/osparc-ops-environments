@@ -1,29 +1,30 @@
-version: '3.7'
+version: "3.7"
 
 services:
   traefik:
-    # The official v2.0 Traefik docker image
-    image: traefik:v2.0
+    image: traefik:v2.2.0
     init: true
     command:
-          - '--api=true'
-          - '--api.dashboard=true'
-          - '--log.level=INFO'
-          - '--accesslog=false'
-          - '--metrics.prometheus=true'
-          - '--metrics.prometheus.addEntryPointsLabels=true'
-          - '--metrics.prometheus.addServicesLabels=true'
-          - '--entryPoints.metrics.address=:8082'
-          - '--metrics.prometheus.entryPoint=metrics'
-          - '--entryPoints.http.address=:80'
-          - '--entryPoints.https.address=:443'
-          - '--providers.docker.endpoint=unix:///var/run/docker.sock'
-          - '--providers.docker.swarmMode=true'
-          - '--providers.docker.exposedByDefault=false'
-          - '--tracing=true'
-          - '--tracing.jaeger=true'
-          - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
-          - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--log.level=INFO"
+      - "--accesslog=false"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.https.address=:443"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      # so that internal services are not picked up
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `*`)"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
 
     ports:
       - target: 80
@@ -41,6 +42,8 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
+        # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
+        - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
         # redirect http to https
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
         - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)

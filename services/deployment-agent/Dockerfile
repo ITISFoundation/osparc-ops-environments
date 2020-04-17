@@ -1,7 +1,6 @@
-FROM python:3.6-alpine as base
-
-LABEL maintainer=sanderegg
-
+ARG PYTHON_VERSION="3.6.10"
+FROM python:${PYTHON_VERSION}-slim as base
+#
 #  USAGE:
 #     cd sercices/deployment-agent
 #     docker build -f Dockerfile -t deployment-agent:prod --target production ../../
@@ -9,81 +8,108 @@ LABEL maintainer=sanderegg
 #
 #  REQUIRED: context expected at ``osparc-simcore/`` folder because we need access to osparc-simcore/packages
 
+LABEL maintainer=sanderegg
+
 # simcore-user uid=8004(scu) gid=8004(scu) groups=8004(scu)
-RUN adduser -D -u 8004 -s /bin/sh -h /home/scu scu
+ENV SC_USER_ID=8004 \
+      SC_USER_NAME=scu \
+      SC_BUILD_TARGET=base \
+      SC_BOOT_MODE=default
 
-RUN apk add --no-cache \
-      su-exec
+RUN adduser \
+      --uid ${SC_USER_ID} \
+      --disabled-password \
+      --gecos "" \
+      --shell /bin/sh \
+      --home /home/${SC_USER_NAME} \
+      ${SC_USER_NAME}
 
-ENV PATH "/home/scu/.local/bin:$PATH"
-
-# All SC_ variables are customized
-ENV SC_PIP pip3 --no-cache-dir
-ENV SC_BUILD_TARGET base
+# Sets utf-8 encoding for Python et al
+ENV LANG=C.UTF-8
+# Turns off writing .pyc files; superfluous on an ephemeral container.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+      VIRTUAL_ENV=/home/scu/.venv
+# Ensures that the python and pip executables used
+# in the image will be those from our virtualenv.
+ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 
 EXPOSE 8888
 
-RUN apk add --no-cache \
+
+# necessary tools for running deployment-agent
+RUN apt-get update &&\
+      apt-get install -y --no-install-recommends \
       docker \
       make \
       bash \
       gettext \
       git
 
-RUN apk add --no-cache --virtual .build-deps \
-      gcc \
-      libc-dev \
-      openssl-dev \
-      libffi-dev &&\
-      $SC_PIP install --upgrade \
-      pip \
-      wheel \
-      setuptools \
-      docker-compose &&\
-      apk --purge del .build-deps
+
 # -------------------------- Build stage -------------------
 # Installs build/package management tools and third party dependencies
 #
 # + /build             WORKDIR
 #
-
 FROM base as build
 
-ENV SC_BUILD_TARGET build
+ENV SC_BUILD_TARGET=build
 
-# install base 3rd party packages to accelerate runtime installs
-WORKDIR /build
-COPY --chown=scu:scu requirements/_base.txt requirements-base.txt
+RUN apt-get update &&\
+      apt-get install -y --no-install-recommends \
+      build-essential
 
-RUN apk add --no-cache --virtual .build-deps \
-      gcc \
-      libc-dev \
-      musl-dev \
-      postgresql-dev &&\
-      $SC_PIP install \
-      -r requirements-base.txt && \
-      apk --purge del .build-deps
 
-# --------------------------Production stage -------------------
-FROM build as production
+# NOTE: python virtualenv is used here such that installed packages may be moved to production image easily by copying the venv
+RUN python -m venv "${VIRTUAL_ENV}"
 
-ENV SC_BUILD_TARGET production
-ENV SC_BOOT_MODE production
+ARG DOCKER_COMPOSE_VERSION="1.25.4"
+RUN pip --no-cache-dir install --upgrade \
+      pip~=20.0.2  \
+      wheel \
+      setuptools \
+      docker-compose~=${DOCKER_COMPOSE_VERSION}
+
+# All SC_ variables are customized
+ENV SC_PIP pip3 --no-cache-dir
+ENV SC_BUILD_TARGET base
 
 COPY --chown=scu:scu . /build/services/deployment-agent
-WORKDIR /build/services/deployment-agent
+# install base 3rd party dependencies (NOTE: this speeds up devel mode)
+RUN pip --no-cache-dir install -r /build/services/deployment-agent/requirements/_base.txt
 
-RUN apk add --no-cache --virtual .build-deps \
-      gcc \
-      libc-dev &&\
-      $SC_PIP install -r requirements/prod.txt &&\
-      mkdir -p /home/scu/services/deployment-agent &&\
-      chown scu:scu /home/scu/services/deployment-agent &&\
-      mv /build/services/deployment-agent/docker /home/scu/services/deployment-agent/docker &&\
-      rm -rf /build &&\
-      apk --purge del .build-deps
+
+# --------------------------Cache stage -------------------
+# CI in master buils & pushes this target to speed-up image build
+#
+#  + /build
+#    + services/sidecar [scu:scu] WORKDIR
+#
+FROM build as cache
+
+WORKDIR /build/services/deployment-agent
+ENV SC_BUILD_TARGET=cache
+RUN pip --no-cache-dir install -r /build/services/deployment-agent/requirements/prod.txt
+
+# --------------------------Production stage -------------------
+# Final cleanup up to reduce image size and startup setup
+# Runs as scu (non-root user)
+#
+#  + /home/scu     $HOME = WORKDIR
+#    + services/sidecar [scu:scu]
+#
+FROM build as production
+
+ENV SC_BUILD_TARGET=production \
+      SC_BOOT_MODE=production
+ENV PYTHONOPTIMIZE=TRUE
 
 WORKDIR /home/scu
+
+# bring installed package without build tools
+COPY --from=cache --chown=scu:scu ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+# copy docker entrypoint and boot scripts
+COPY --chown=scu:scu docker services/deployment-agent/docker
 
 HEALTHCHECK --interval=30s \
       --timeout=60s \
@@ -96,21 +122,18 @@ CMD ["/bin/sh", "services/deployment-agent/docker/boot.sh"]
 
 
 # --------------------------Development stage -------------------
+# Source code accessible in host but runs in container
+# Runs as scu with same gid/uid as host
+# Placed at the end to speed-up the build if images targeting production
+#
+#  + /devel         WORKDIR
+#    + services  (mounted volume)
+#
 FROM build as development
 
-ENV SC_BUILD_TARGET development
-ENV SC_BOOT_MODE development
-
-# install test 3rd party packages to accelerate runtime installs
-COPY --chown=scu:scu tests/requirements.txt requirements-tests.txt
-RUN apk add --no-cache --virtual .build-deps \
-      gcc \
-      libc-dev &&\
-      $SC_PIP install -r requirements-tests.txt
+ENV SC_BUILD_TARGET=development
 
 WORKDIR /devel
-VOLUME /devel/services/deployment-agent/
-
-
+RUN chown -R scu:scu "${VIRTUAL_ENV}"
 ENTRYPOINT [ "/bin/sh", "services/deployment-agent/docker/entrypoint.sh" ]
 CMD ["/bin/sh", "services/deployment-agent/docker/boot.sh"]
