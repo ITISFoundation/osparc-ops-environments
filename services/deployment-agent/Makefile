@@ -77,11 +77,6 @@ down: ## Stops and remove stack from swarm
 leave: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
 
-.PHONY: clean
-clean: ## Cleans unversioned files
-	@git clean -dxf
-
-
 .PHONY: push
 push: ## Pushes service to the registry.
 	docker push ${DOCKER_REGISTRY}/$(APP_NAME):${DOCKER_IMAGE_TAG}
@@ -108,6 +103,36 @@ install-test: install-dev ## install deployment agent testing facilities
 unit-test: install-test ## Execute unit tests
 	pytest --cov-append --color=yes --cov-report=term-missing --cov-report=xml --cov=simcore_service_deployment_agent -v tests
 
+
+## PYTHON -------------------------------
+.PHONY: pylint
+
+PY_PIP = $(if $(IS_WIN),cd .venv/Scripts && pip.exe,.venv/bin/pip3)
+
+pylint: ## Runs python linter framework's wide
+	# See exit codes and command line https://pylint.readthedocs.io/en/latest/user_guide/run.html#exit-codes
+	# TODO: NOT windows friendly
+	/bin/bash -c "pylint --jobs=0 --rcfile=.pylintrc $(strip $(shell find services packages -iname '*.py' \
+											-not -path "*egg*" \
+											-not -path "*migration*" \
+											-not -path "*contrib*" \
+											-not -path "*-sdk/python*" \
+											-not -path "*generated_code*" \
+											-not -path "*datcore.py" \
+											-not -path "*web/server*"))"
+
+.PHONY: devenv devenv-all
+
+.venv:
+	python3 -m venv $@
+	$@/bin/pip3 install --upgrade \
+		pip \
+		wheel \
+		setuptools
+
+devenv: .venv ## create a python virtual environment with dev tools (e.g. linters, etc)
+	$</bin/pip3 install -r requirements.txt
+	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 # Helpers -------------------------------------------------
 .PHONY: .init
