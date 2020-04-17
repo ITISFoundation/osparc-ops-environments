@@ -45,6 +45,7 @@ RUN apt-get update &&\
       gettext \
       git
 
+
 # -------------------------- Build stage -------------------
 # Installs build/package management tools and third party dependencies
 #
@@ -65,7 +66,8 @@ RUN python -m venv "${VIRTUAL_ENV}"
 RUN pip --no-cache-dir install --upgrade \
       pip~=20.0.2  \
       wheel \
-      setuptools
+      setuptools \
+      docker-compose
 
 # All SC_ variables are customized
 ENV SC_PIP pip3 --no-cache-dir
