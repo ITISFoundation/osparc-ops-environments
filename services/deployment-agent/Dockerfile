@@ -63,11 +63,12 @@ RUN apt-get update &&\
 # NOTE: python virtualenv is used here such that installed packages may be moved to production image easily by copying the venv
 RUN python -m venv "${VIRTUAL_ENV}"
 
+ARG DOCKER_COMPOSE_VERSION="1.25.4"
 RUN pip --no-cache-dir install --upgrade \
       pip~=20.0.2  \
       wheel \
       setuptools \
-      docker-compose
+      docker-compose~=${DOCKER_COMPOSE_VERSION}
 
 # All SC_ variables are customized
 ENV SC_PIP pip3 --no-cache-dir
