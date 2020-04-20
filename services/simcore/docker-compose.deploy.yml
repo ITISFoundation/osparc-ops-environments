@@ -78,7 +78,7 @@ services:
     # NOTE: this is a trick to allow to access the internal traefik REST API
     # list router like so: curl https://domain/api/http/routers | jq
     image: busybox:latest
-    command: top
+    command: sleep 900000d
     deploy:
       labels:
         # internal traefik
