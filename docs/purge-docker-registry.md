@@ -10,6 +10,13 @@ This document explains the steps necessary to purge a docker registry.
 
 ## Usage
 
+
+0. Restart the registry in read-only mode using the following flag
+    
+    ```console
+    REGISTRY_STORAGE_MAINTENANCE_READONLY = {"enabled":true}
+    ```
+
 1. Listing repositories, images, etc...
 
     ```console
