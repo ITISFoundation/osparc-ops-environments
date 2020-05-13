@@ -24,7 +24,7 @@ export MACHINE_IP = $(shell source $(realpath $(CURDIR)/scripts/portable.sh) && 
 
 include repo.config
 
-SERVICES = $(sort $(wildcard services/*))
+SERVICES = $(sort $(dir $(wildcard services/*/.)))
 # TARGETS --------------------------------------------------
 .DEFAULT_GOAL := help
 
