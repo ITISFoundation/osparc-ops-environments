@@ -5,29 +5,16 @@
 
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(PWD))
+STACK_NAME = $(notdir $(shell pwd))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
 DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
-# Network from which services are reverse-proxied
-#  - by default it will create an overal attachable network called public_network
-ifeq ($(public_network),)
-PUBLIC_NETWORK = public-network
-else
-PUBLIC_NETWORK := $(public_network)
-endif
-export PUBLIC_NETWORK
 
-# Network that includes all services to monitor
-#  - by default it will create an overal attachable network called monitored_network
-ifeq ($(monitored_network),)
-MONITORED_NETWORK = monitored_network
-else
-MONITORED_NETWORK := $(monitored_network)
-endif
-export MONITORED_NETWORK
+# Makefile including function used by every services
+include ../Makefile
+
 
 # External VARIABLES
 include .env
@@ -46,18 +33,6 @@ up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt .create-secrets ## Deploy
 	@docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
-
-.PHONY: down
-down: ## Stops and remove stack from swarm
-	-docker stack rm $(STACK_NAME)
-
-.PHONY: leave
-leave: ## leaves swarm stopping all stacks, secrets in it
-	-docker swarm leave -f
-
-.PHONY: clean
-clean: ## Cleans unversioned files
-	@git clean -dxf
 
 # Helpers -------------------------------------------------
 .PHONY: .init .create-secrets

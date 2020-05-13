@@ -96,6 +96,13 @@ $psed -i -e "s/S3_BUCKET_NAME=.*/S3_BUCKET_NAME=$S3_BUCKET/" .env
 $psed -i -e "s/S3_ENDPOINT=.*/S3_ENDPOINT=$S3_ENDPOINT/" .env
 $psed -i -e "s/S3_SECURE=.*/S3_SECURE=$S3_SECURE/" .env
 
+
+# mail
+$psed -i -e "s/SMTP_HOST=.*/SMTP_HOST=$SMTP_HOST/" .env
+$psed -i -e "s/SMTP_PORT=.*/SMTP_PORT=$SMTP_PORT/" .env
+$psed -i -e "s/SMTP_USERNAME=.*/SMTP_USERNAME=$SMTP_USERNAME=/" .env
+$psed -i -e "s/SMTP_PASSWORD=.*/SMTP_PASSWORD==$SMTP_PASSWORD=/" .env
+
 # docker-compose-simcore
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' docker-compose.deploy.yml
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' docker-compose.deploy.yml
