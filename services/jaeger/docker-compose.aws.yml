@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  jaeger:
+    deploy:
+      labels:
+        - traefik.http.routers.jaeger.tls=false
+        - traefik.http.routers.jaeger.entrypoints=http

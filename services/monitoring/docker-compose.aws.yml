@@ -1,0 +1,24 @@
+version: '3.7'
+services:
+  prometheus:
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.external-url=https://${MONITORING_DOMAIN}/prometheus/'
+      - '--web.route-prefix=/'
+    deploy:
+      labels:
+        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheus.tls=false
+        - traefik.http.routers.prometheus.entrypoints=http
+
+  grafana:
+    deploy:
+      labels:
+        # direct access through port
+        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
+        - traefik.http.routers.grafana.tls=false
+        - traefik.http.routers.grafana.entrypoints=http

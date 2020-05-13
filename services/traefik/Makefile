@@ -17,28 +17,12 @@ SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
 
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(PWD))
+STACK_NAME = $(notdir $(shell pwd))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 # Host machine IP
 export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
-# Network that includes all services to monitor
-#  - by default it will create an overal attachable network called monitored_network
-ifeq ($(monitored_network),)
-MONITORED_NETWORK = monitored_network
-else
-MONITORED_NETWORK := $(monitored_network)
-endif
-export MONITORED_NETWORK
 
-# Network from which services are reverse-proxied
-#  - by default it will create an overal attachable network called public_network
-ifeq ($(public_network),)
-PUBLIC_NETWORK = public-network
-else
-PUBLIC_NETWORK := $(public_network)
-endif
-export PUBLIC_NETWORK
 
 # External VARIABLES
 include .env
@@ -46,41 +30,30 @@ include .env
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
+# Makefile including function used by every services
+include ../Makefile
+
 .PHONY: up
 up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
 	docker stack deploy -c ${TEMP_COMPOSE}-local ${STACK_NAME}
+
+.PHONY: up-aws
+up-aws: .env ${TEMP_COMPOSE}-aws ## Deploys the stack aws 
+	@echo "test"
+	@echo "$(shell pwd)"
+	docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-letsencrypt
 up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt ## Deploys the stack without certificates (self-generated or let's encrypt)
 	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
-.PHONY: down
-down: ## Removes the stack from the swarm
-	docker stack rm ${STACK_NAME}
+.PHONY: up-no-certificates
+up-no-certificates: .init .env ${TEMP_COMPOSE} ## Deploys the stack without certificates (self-generated or let's encrypt)
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
 
-.PHONY: leave
-leave: ## Leaves swarm stopping all services in it
-	-docker swarm leave -f
-
-.PHONY: clean
-clean: ## Cleans unversioned files
-	@git clean -dxf
 
 # Helpers -------------------------------------------------
-.PHONY: .init
-.init: ## initializeds swarm cluster
-	$(if $(SWARM_HOSTS),  \
-		,                 \
-		docker swarm init \
-	)
-	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
-	)
-	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
-	)
+
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
@@ -90,6 +63,11 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
+
+.PHONY: ${TEMP_COMPOSE}-aws
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
+	@docker-compose -f $< -f docker-compose.aws.yml config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
 # Self-signed certificate authority

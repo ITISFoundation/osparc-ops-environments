@@ -37,12 +37,6 @@ services:
     deploy:
       labels:
         # redirect http to https
-        # portus
-        - traefik.http.middlewares.portus_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.portus_force_https.redirectScheme.port=5000
-        - traefik.http.routers.portus_http_to_https.rule=hostregexp(`{host:.+}`)
-        - traefik.http.routers.portus_http_to_https.entrypoints=portus
-        - traefik.http.routers.portus_http_to_https.middlewares=portus_force_https
         # minio
         - traefik.http.middlewares.minio_force_https.redirectScheme.scheme=https
         - traefik.http.middlewares.minio_force_https.redirectScheme.port=10000

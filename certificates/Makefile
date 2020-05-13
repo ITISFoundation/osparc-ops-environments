@@ -50,7 +50,7 @@ rootca.crt: rootca.key
 		-sha256 -days 10000 -out $@;
 
 extfile.cnf:
-	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
+	@echo "subjectAltName = DNS:${MACHINE_FQDN}, DNS:${MONITORING_DOMAIN}, DNS:${STORAGE_DOMAIN}, DNS:${REGISTRY_DOMAIN}, DNS:${PORTAINER_DOMAIN}" > $@ #You can use IP:your_IP or DNS:host_name
 
 domain.key:
 	# Creating private key

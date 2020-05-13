@@ -1,0 +1,20 @@
+version: '3.7'
+services:
+  registry:
+      image: registry:2
+      environment:
+        REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
+        REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
+        REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
+        REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      networks:
+          - public
+      deploy:
+          labels:
+            - traefik.http.routers.registry.tls=false
+            - traefik.http.routers.registry.entrypoints=http
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}

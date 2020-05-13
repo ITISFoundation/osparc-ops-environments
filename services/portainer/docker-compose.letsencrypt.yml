@@ -3,5 +3,4 @@ services:
   portainer:
     deploy:
       labels:
-        - traefik.http.routers.portainer.rule=Host(`MONITORING_DOMAIN`) && PathPrefix(`/portainer`)
         - traefik.http.routers.portainer.tls.certresolver=lehttpchallenge

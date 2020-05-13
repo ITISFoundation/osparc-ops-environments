@@ -49,6 +49,11 @@ up-devel: .install-fqdn certificates/domain.crt certificates/domain.key .create-
 	bash scripts/local-deploy.sh --devel_mode=1
 	@$(MAKE) info-local
 
+.PHONY: up-aws
+up-aws:
+	bash scripts/aws-deploy.sh
+
+
 .PHONY: down
 down:
 	@for service in $(SERVICES); do \
@@ -62,26 +67,33 @@ leave: ## leaves the swarm
 .PHONY: .install-fqdn
 .install-fqdn:
 	@$(if $(IS_WSL), \
-	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
-	echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ]; \
-	echo "please run the following in a PWshell with Admin rights:"; \
-	echo "Add-Content c:\Windows\System32\drivers\etc\hosts '$(MACHINE_IP) $(MACHINE_FQDN)'"; \
-	echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):"; \
-	echo "echo '$(MACHINE_IP) $(MACHINE_FQDN)' >> c:\Windows\System32\drivers\etc\hosts"; \
-	fi \
-	, \
+		if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
+		echo -n "Do you wish to install the following host on the Windows host ? [y/N]" && read ans && [ $${ans:-N} = y ] &&  \
+		( echo "please run the following in a PWshell with Admin rights:" && \
+		echo "Add-Content c:\Windows\System32\drivers\etc\hosts \"\`r\`$(MACHINE_IP) $(MACHINE_FQDN)\`r\`$(MACHINE_IP) $(MONITORING_DOMAIN)\`r\`$(MACHINE_IP) $(REGISTRY_DOMAIN)\`r\`$(MACHINE_IP) $(PORTAINER_DOMAIN)\`r\`$(MACHINE_IP) $(STORAGE_DOMAIN)\"" && \
+		echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):" && \
+		echo "echo $(MACHINE_IP) $(MACHINE_FQDN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(MONITORING_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(PORTAINER_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(REGISTRY_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(STORAGE_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts") \
+		|| [ 42 ]; \
+		fi \
+	,\
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
-		echo -n "Do you wish to install the following host? [y/N] ";\
-			read ans;\
-			ans=$${ans:-N};\
-			if [ $${ans} = "y" ]; then\
-				sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts;\
-				echo -n "restarting docker daemon...";                      \
-				sudo systemctl restart docker;                           \
-			fi\
+		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		( sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts && \
+		echo "# restarting docker daemon" && \
+		sudo systemctl restart docker ) \
+		|| [ 42]; \
 	fi \
 	)
 
+	@$(if $(IS_WSL), \
+	if ! sudo grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
+		echo -n "Do you wish to install the following host in WSL? [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		( printf  "Adding\n" && \
+		printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" | sudo tee -a /etc/hosts && \
+		printf  "to /etc/hosts\n" ) \
+		|| [ 42 ]; \
+	fi \
+	,)
 .PHONY: help
 help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -136,6 +148,15 @@ clean: .check_clean ## Cleans all outputs
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
+
+.PHONY: full-clean
+full-clean: ## Make down, Leave the swarm, prune volumes,  images/network/stopped containers/build cache
+	@echo -n "Are you sure ? All volumes (including S3 and the database in local deployment) will be deleted. [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@make down
+	@make leave
+	-docker system prune -a -f
+	-docker volume prune -f
 
 
 # FIXME: DO NOT USE... still working on this

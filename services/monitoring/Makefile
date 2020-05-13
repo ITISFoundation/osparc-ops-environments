@@ -17,13 +17,6 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 # - all services to monitor must be in MONITORED_NETWORK
 #
 
-# Network that includes all services to monitor
-#  - by default it will create an overal attachable network called monitored_network
-ifeq ($(monitored_network),)
-MONITORED_NETWORK = monitored_network
-else
-MONITORED_NETWORK := $(monitored_network)
-endif
 
 # postgres db ulr
 POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
@@ -31,49 +24,25 @@ POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://${POSTGRES_USER}:${POSTGRES_P
 export MONITORED_NETWORK
 export POSTGRES_EXPORTER_DATA_SOURCE_NAME
 
-# Network from which services are reverse-proxied
-#  - by default it will create an overal attachable network called public_network
-ifeq ($(public_network),)
-PUBLIC_NETWORK = public-network
-else
-PUBLIC_NETWORK := $(public_network)
-endif
-export PUBLIC_NETWORK
 
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
+# Makefile including function used by every services
+include ../Makefile
 
-
-.PHONY: .init-swarm up down leave
-.init-swarm: ## inits swarm cluster
-	# ensures swarm is initialized
-	$(if $(SWARM_HOSTS),,docker swarm init)
-	# ensures networks are created
-	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
-	)
-	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
-	)
-
-up: .init-swarm ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+.PHONY: up
+up: .init ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	# Deploying stack '$(STACK_NAME)'
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-letsencrypt
-up-letsencrypt: .init-swarm ${TEMP_COMPOSE}-letsencrypt .env  ## Deploys or updates current stack "$(STACK_NAME)" using let's encrypt
+up-letsencrypt: .init ${TEMP_COMPOSE}-letsencrypt .env  ## Deploys or updates current stack "$(STACK_NAME)" using let's encrypt
 	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
-down: ## Stops stack
-	# Removing stack '$(STACK_NAME)'
-	@docker stack rm $(STACK_NAME)
-
-leave: ## leaves swarm stopping all stacks in it
-	# Forcing to leave swarm
-	-@docker swarm leave -f
+.PHONY: up-aws
+up-aws: .init ${TEMP_COMPOSE}-aws .env  ## Deploys or updates current stack "$(STACK_NAME)" in AWS
+	docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
@@ -83,4 +52,9 @@ ${TEMP_COMPOSE}: docker-compose.yml
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
+
+.PHONY: ${TEMP_COMPOSE}-aws
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
+	@docker-compose -f $< -f docker-compose.aws.yml config > $@
 	@echo "${STACK_NAME} stack file created for in $@"

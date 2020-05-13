@@ -1,23 +1,10 @@
-version: "3.7"
-
+version: '3.7'
 services:
-  portus:
-    extra_hosts:
-      - "${MACHINE_FQDN}:${MACHINE_IP}"
-    deploy:
-      labels:
-        - traefik.http.routers.portus.entrypoints=portus
-        - traefik.http.routers.portus_token.entrypoints=portus
-
   registry:
+    command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       # set to true if using self-signed certificates
       UPDATE_CERTIFICATES: "true"
-    deploy:
-      labels:
-        - traefik.http.routers.registry.entrypoints=portus
-    extra_hosts:
-      - "${MACHINE_FQDN}:${MACHINE_IP}"
     secrets:
       - source: domain.key
         target: /secrets/domain.key
@@ -25,6 +12,11 @@ services:
         target: /secrets/domain.crt
       - source: rootca.crt
         target: /secrets/rootca.crt
+
+    configs:
+      - source: registry_init
+        target: /etc/docker/registry/init
+        mode: 0755
 
 secrets:
   # private key
@@ -36,3 +28,7 @@ secrets:
   # root authority
   rootca.crt:
     external: true
+
+configs:
+  registry_init:
+    file: ./init

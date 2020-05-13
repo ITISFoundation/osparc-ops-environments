@@ -35,7 +35,7 @@ services:
       - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=https://osparc.local/prometheus/'
+      - '--web.external-url=https://${MONITORING_DOMAIN}/prometheus/'
       - '--web.route-prefix=/'
     ports:
       - "9090"
@@ -58,7 +58,7 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
-        - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.entrypoints=https
         - traefik.http.routers.prometheus.tls=true
         # Let's encrypt use-case
@@ -100,7 +100,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
-      - /etc/hostname:/etc/nodename
+      - /etc/hostname:/etc/nodename # don't work with windows
     environment:
       - NODE_ID={{.Node.ID}}
     command:
@@ -196,6 +196,8 @@ services:
           memory: 64M
 
   grafana:
+    dns:
+      8.8.8.8
     image: grafana/grafana
     depends_on:
       - prometheus
@@ -221,7 +223,7 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
+        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
         - traefik.http.routers.grafana.entrypoints=https
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$

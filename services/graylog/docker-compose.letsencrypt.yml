@@ -3,5 +3,4 @@ services:
   graylog:
     deploy:
       labels:
-        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)
         - traefik.http.routers.graylog.tls.certresolver=lehttpchallenge

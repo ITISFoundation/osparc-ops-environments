@@ -1,0 +1,30 @@
+.DEFAULT_GOAL := help
+
+
+# Internal VARIABLES ------------------------------------------------
+# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
+STACK_NAME = $(notdir $(shell pwd))
+SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
+TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
+
+
+# External VARIABLES
+include .env
+
+# TARGETS --------------------------------------------------
+include $(realpath $(CURDIR)/../../scripts/common.mk)
+
+# Makefile including function used by every services
+include ../Makefile
+
+.PHONY: up-aws
+up-aws: .env ${TEMP_COMPOSE}  ## Deploys jaeger stack in aws
+	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+
+
+# Helpers -------------------------------------------------
+
+.PHONY: ${TEMP_COMPOSE}
+${TEMP_COMPOSE}: docker-compose.yml
+	@docker-compose -f $< config > $@
+	@echo "${STACK_NAME} stack file created for in $@"
