@@ -247,6 +247,11 @@ sed -i "s~S3_SECRET_KEY:.*~S3_SECRET_KEY: ${SECRET_ACCESS_KEY}~" deployment_conf
 
 # We don't use Minio and postgresql with AWS
 sed -i "s~excluded_services:.*~excluded_services: [webclient, minio, postgres]~" deployment_config.default.yaml
-
+# Prefix stack name
+$psed -i -e "s/PREFIX_STACK_NAME=.*/PREFIX_STACK_NAME=$PREFIX_STACK_NAME/" .env
+# defines the simcore stack name
+$psed -i -e "s/SIMCORE_STACK_NAME=.*/SIMCORE_STACK_NAME=$SIMCORE_STACK_NAME/" .env
+# set the image tag to be used from dockerhub
+$psed -i -e "s/SIMCORE_IMAGE_TAG=.*/SIMCORE_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
 make down up-aws;
 popd

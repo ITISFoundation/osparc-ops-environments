@@ -309,6 +309,12 @@ if [ $devel_mode -eq 0 ]; then
     sed -i "s|extra_hosts: \[\]|extra_hosts:\n        - \"${MACHINE_FQDN}:${machine_ip}\"|" deployment_config.default.yaml
     # AWS don't use Minio and Postgresql. We need to use them again in local.
     sed -i "s~excluded_services:.*~excluded_services: [webclient]~" deployment_config.default.yaml
+    # Prefix stack name
+    $psed -i -e "s/PREFIX_STACK_NAME=.*/PREFIX_STACK_NAME=$PREFIX_STACK_NAME/" .env
+    # defines the simcore stack name
+    $psed -i -e "s/SIMCORE_STACK_NAME=.*/SIMCORE_STACK_NAME=$SIMCORE_STACK_NAME/" .env
+    # set the image tag to be used from dockerhub
+    $psed -i -e "s/SIMCORE_IMAGE_TAG=.*/SIMCORE_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
     # update
     sed -i "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
     make down up;
