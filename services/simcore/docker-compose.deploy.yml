@@ -112,6 +112,25 @@ services:
       max_attempts: 3
       window: 120s
 
+  redis:
+    networks:
+      - monitored
+    environment:
+      - LOGSPOUT_MULTILINE=true
+    update_config:
+      parallelism: 2
+      order: start-first
+      failure_action: rollback
+      delay: 10s
+    rollback_config:
+      parallelism: 0
+      order: stop-first
+    restart_policy:
+      condition: any
+      delay: 5s
+      max_attempts: 3
+      window: 120s
+
   postgres:
     networks:
       - monitored
