@@ -78,7 +78,7 @@ leave: ## leaves the swarm
 	,\
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
 		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ] && \
-		( sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)" >> /etc/hosts && \
+		( sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" >> /etc/hosts && \
 		echo "# restarting docker daemon" && \
 		sudo systemctl restart docker ) \
 		|| [ 42]; \
