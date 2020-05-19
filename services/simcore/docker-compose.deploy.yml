@@ -41,19 +41,20 @@ services:
 
     networks:
       - monitored
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   director:
     environment:
@@ -62,74 +63,78 @@ services:
       - DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
       # - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=some_id
       - DIRECTOR_SELF_SIGNED_SSL_SECRET_NAME=rootca.crt
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   sidecar:
     environment:
       - LOGSPOUT_MULTILINE=true
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   rabbit:
     networks:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   redis:
     networks:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   postgres:
     networks:
@@ -141,19 +146,20 @@ services:
   #     placement:
   #       constraints:
   #         - node.labels.postgres==true
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   traefik:
     networks:
@@ -170,19 +176,19 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik.priority=1
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik.middlewares=gzip@docker, sslheader@docker
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   traefik_api:
     # NOTE: this is a trick to allow to access the internal traefik REST API
@@ -201,19 +207,19 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_api.priority=2
         - traefik.http.routers.${SWARM_STACK_NAME}_api.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
         - traefik.http.services.${SWARM_STACK_NAME}_api.loadbalancer.server.port=8080
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   whoami:
     image: "containous/whoami"
@@ -234,19 +240,19 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@docker,gzip@docker
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 networks:
   public:
