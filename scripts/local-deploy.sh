@@ -70,6 +70,9 @@ echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICE
 
 pushd ${repo_basedir}/services/simcore;
 
+# Set the image tag to be used from dockerhub
+$psed -i -e "s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=.$SIMCORE_IMAGE_TAG/" .env
+
 # Hostnames
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=.$MACHINE_FQDN/" .env
 $psed -i -e "s/PUBLISHED_HOST_NAME=.*/PUBLISHED_HOST_NAME=$MACHINE_FQDN/" .env
@@ -97,11 +100,29 @@ $psed -i -e "s/S3_ENDPOINT=.*/S3_ENDPOINT=$S3_ENDPOINT/" .env
 $psed -i -e "s/S3_SECURE=.*/S3_SECURE=$S3_SECURE/" .env
 
 
-# mail
+# Mail
 $psed -i -e "s/SMTP_HOST=.*/SMTP_HOST=$SMTP_HOST/" .env
 $psed -i -e "s/SMTP_PORT=.*/SMTP_PORT=$SMTP_PORT/" .env
 $psed -i -e "s/SMTP_USERNAME=.*/SMTP_USERNAME=$SMTP_USERNAME/" .env
 $psed -i -e "s/SMTP_PASSWORD=.*/SMTP_PASSWORD=$SMTP_PASSWORD/" .env
+
+# Osparc config
+$psed -i -e "s/WEBSERVER_LOGIN_REGISTRATION_CONFIRMATION_REQUIRED=.*/WEBSERVER_LOGIN_REGISTRATION_CONFIRMATION_REQUIRED=$WEBSERVER_LOGIN_REGISTRATION_CONFIRMATION_REQUIRED/" .env
+$psed -i -e "s/WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED=.*/WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED=$WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED/" .env
+$psed -i -e "s/WEBSERVER_STUDIES_ACCESS_ENABLED=.*/WEBSERVER_STUDIES_ACCESS_ENABLED=$WEBSERVER_STUDIES_ACCESS_ENABLED/" .env
+
+# Rabbit
+$psed -i -e "s/RABBIT_PORT=.*/RABBIT_PORT=$RABBIT_PORT/" .env
+$psed -i -e "s/RABBIT_HOST=.*/RABBIT_HOST=$RABBIT_HOST/" .env
+$psed -i -e "s/RABBIT_LOG_CHANNEL=.*/RABBIT_LOG_CHANNEL=$RABBIT_LOG_CHANNEL/" .env
+$psed -i -e "s/RABBIT_PROGRESS_CHANNEL=.*/RABBIT_PROGRESS_CHANNEL=$RABBIT_PROGRESS_CHANNEL/" .env
+$psed -i -e "s/RABBIT_USER=.*/RABBIT_USER=$RABBIT_USER/" .env
+$psed -i -e "s/RABBIT_PASSWORD=.*/RRABBIT_PASSWORD=$RABBIT_PASSWORD/" .env
+
+# Reddis
+$psed -i -e "s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/" .env
+$psed -i -e "s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env
+
 
 # docker-compose-simcore
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' docker-compose.deploy.yml
@@ -298,7 +319,7 @@ if [ $devel_mode -eq 0 ]; then
     YAML_STRING="environment:\n        S3_ENDPOINT: ${STORAGE_DOMAIN}:10000\n        S3_ACCESS_KEY: ${SERVICES_PASSWORD}\n        S3_SECRET_KEY: ${SERVICES_PASSWORD}"
     sed -i "s/environment: {}/$YAML_STRING/" deployment_config.default.yaml
     # update
-    sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${STORAGE_DOMAIN}:10000/" deployment_config.default.yaml
+    sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${STORAGE_DOMAIN}/" deployment_config.default.yaml
     sed -i "s/S3_ACCESS_KEY:.*/S3_ACCESS_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
     sed -i "s/S3_SECRET_KEY:.*/S3_SECRET_KEY: ${SERVICES_PASSWORD}/" deployment_config.default.yaml
     sed -i "s/DIRECTOR_SELF_SIGNED_SSL_SECRET_ID:.*/DIRECTOR_SELF_SIGNED_SSL_SECRET_ID: ${secret_id}/" deployment_config.default.yaml
