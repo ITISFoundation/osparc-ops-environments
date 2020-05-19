@@ -70,11 +70,13 @@ echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICE
 
 pushd ${repo_basedir}/services/simcore;
 
+ori_env_simcore=`cat .env`
+
 # Set the image tag to be used from dockerhub
 $psed -i -e "s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
 
 # Hostnames
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=.$MACHINE_FQDN/" .env
+$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 $psed -i -e "s/PUBLISHED_HOST_NAME=.*/PUBLISHED_HOST_NAME=$MACHINE_FQDN/" .env
 
 # PGSQL
@@ -125,6 +127,8 @@ $psed -i -e "s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env
 
 
 # docker-compose-simcore
+ori_compose_simcore=`cat docker-compose.deploy.yml`
+
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' docker-compose.deploy.yml
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' docker-compose.deploy.yml
 
@@ -134,6 +138,16 @@ $psed -i -e 's/\s\s\s\s#secrets:/    secrets:/' docker-compose.deploy.yml
 $psed -i -e 's/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' docker-compose.deploy.yml
 $psed -i -e "s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" docker-compose.deploy.yml
 $psed -i -e 's~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' docker-compose.deploy.yml
+
+new_compose_simcore=`cat docker-compose.deploy.yml`
+new_env_simcore=`cat .env`
+if [ "$ori_env_simcore" = "$new_env_simcore" ] && [ "$ori_compose_simcore" = "$new_compose_simcore" ]; then
+    echo "Simcore service ready for deployment"
+else
+    echo "Some values weren't up to to date in Simcore service (.env and/or docker-compose.deploy). They have been updated, please push them to github and restart the script"
+    exit
+fi
+
 
 popd
 
