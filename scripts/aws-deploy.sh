@@ -32,7 +32,7 @@ echo $SMTP_HOST | grep -Eo "([^.*.*]+)"
 pushd ${repo_basedir}/services/simcore;
 
 # Set the image tag to be used from dockerhub
-$psed -i -e "s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=.$SIMCORE_IMAGE_TAG/" .env
+$psed -i -e "s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
 
 # Hostnames
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=.$MACHINE_FQDN/" .env
