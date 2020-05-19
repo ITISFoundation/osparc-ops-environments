@@ -15,19 +15,19 @@ services:
         # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
         # NOTE: in deploy mode with SSL they must be set to https!
         - traefik.http.middlewares.simcore_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
-    update_config:
-      parallelism: 2
-      order: start-first
-      failure_action: rollback
-      delay: 10s
-    rollback_config:
-      parallelism: 0
-      order: stop-first
-    restart_policy:
-      condition: any
-      delay: 5s
-      max_attempts: 3
-      window: 120s
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   storage:
