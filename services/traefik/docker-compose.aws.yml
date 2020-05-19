@@ -21,6 +21,7 @@ services:
       - '--tracing.jaeger=true'
       - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
       - '--tracing.jaeger.localAgentHostPort=jaeger:6831'   
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `*`)"
     deploy:
       labels:
         - traefik.http.routers.api.tls=false

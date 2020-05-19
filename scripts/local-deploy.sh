@@ -117,7 +117,7 @@ $psed -i -e "s/RABBIT_HOST=.*/RABBIT_HOST=$RABBIT_HOST/" .env
 $psed -i -e "s/RABBIT_LOG_CHANNEL=.*/RABBIT_LOG_CHANNEL=$RABBIT_LOG_CHANNEL/" .env
 $psed -i -e "s/RABBIT_PROGRESS_CHANNEL=.*/RABBIT_PROGRESS_CHANNEL=$RABBIT_PROGRESS_CHANNEL/" .env
 $psed -i -e "s/RABBIT_USER=.*/RABBIT_USER=$RABBIT_USER/" .env
-$psed -i -e "s/RABBIT_PASSWORD=.*/RRABBIT_PASSWORD=$RABBIT_PASSWORD/" .env
+$psed -i -e "s/RABBIT_PASSWORD=.*/RABBIT_PASSWORD=$RABBIT_PASSWORD/" .env
 
 # Reddis
 $psed -i -e "s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/" .env
@@ -144,6 +144,7 @@ echo -e "\e[1;33mstarting portainer...\e[0m"
 pushd "${repo_basedir}"/services/portainer
 sed -i "s/PORTAINER_ADMIN_PWD=.*/PORTAINER_ADMIN_PWD=$SERVICES_PASSWORD/" .env
 sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
+$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 make up
 popd
 
