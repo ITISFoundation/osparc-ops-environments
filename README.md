@@ -31,6 +31,23 @@ cd osparc-ops
 make help
 ```
 
+### WSL deployement
+
+If you are using WSL1, clone the repository under the Windows filesystem and access it in WSL. You need to ensure [Ensure Volume Mounts Work](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly) (Section Volume Mounts Work)
+
+Do not clone the repo directly in your WSL1 filesystem. 
+
+eg : Do not clone here
+```console 
+pwd
+/home/alexandre
+```
+But here
+```console 
+pwd
+/c/Users/Alexandre/
+```
+
 #### local deployment
   ```console
   make up-local
@@ -38,15 +55,14 @@ make help
 A self-signed certificate may be generated. The system host file may be modified using the default **osparc.local** fully qualified domain name (FQDN) to point to the local machine.
 
 The services above will be deployed and pre-configured on the following endpoints:
-  - Traefik: [https://osparc.local:9001/dashboard/](https://osparc.local:9001/dashboard/)
-  - Portainer: [https://osparc.local/portainer/](https://osparc.local/portainer/)
-  - Minio: [https://osparc.local/minio](https://osparc.local/minio) and [https://osparc.local:10000](https://osparc.local:10000)
-  - Portus: [https://osparc.local:5000](https://osparc.local:5000)
+  - Traefik: [https://monitoring.osparc.local/dashboard/#/](https://monitoring.osparc.local/dashboard/#/)
+  - Portainer: [https://monitoring.osparc.local/portainer/](https://monitoring.osparc.local/portainer/)
+  - Minio: [https://storage.osparc.local/minio/](https://storage.osparc.local/minio/)
   - Deployment agent: no UI
-  - Graylog: [https://osparc.local/graylog/](https://osparc.local/graylog/)
-  - Jaeger: [https://osparc.local/jaeger](https://osparc.local/jaeger)
-  - Adminer: [https://osparc.local/adminer](https://osparc.local/adminer)
-  - Monitoring: [https://osparc.local/grafana](https://osparc.local/grafana) and Prometheus: [http://osparc.local:9090](http://osparc.local:9090)
+  - Graylog: [https://monitoring.osparc.local/graylog/](https://monitoring.osparc.local/graylog/)
+  - Jaeger: [https://monitoring.osparc.local/jaeger/](https://monitoring.osparc.local/jaeger/)
+  - Adminer: [https://monitoring.osparc.local/adminer](https://monitoring.osparc.local/adminer?server=simcore_postgres%3A5432&username=scu&db=simcoredb)
+  - Monitoring: [https://monitoring.osparc.local/grafana/](https://monitoring.osparc.local/grafana/) and Prometheus: [https://monitoring.osparc.local/prometheus/](https://monitoring.osparc.local/prometheus/)
   - Maintenance: not reversed proxied yet
   - **Simcore:** **[https://osparc.local](https://osparc.local)**
 
@@ -65,3 +81,11 @@ Each service may be configured and deployed according to the needs. Please see e
 
 - Deploy a virtual cluster to your own host.  Suitable as an infrastructure plaform for oSPARC Simcore.
 
+### FAQ
+
+The auto-generated ssl certificates are detected as invalid in my brower ?
+
+You need to do a full cleaning of your installation.
+```console
+make reset-prune
+```
