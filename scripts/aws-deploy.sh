@@ -12,7 +12,7 @@ source "$( dirname "${BASH_SOURCE[0]}" )/portable.sh"
 
 # Paths
 this_script_dir=$(dirname "$0")
-repo_basedir=$(realpath ${this_script_dir}/../)
+repo_basedir=$(realpath "${this_script_dir}"/../)
 
 # VCS info on current repo
 current_git_url=$(git config --get remote.origin.url)
@@ -21,17 +21,17 @@ current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
-source ${repo_basedir}/repo.config
+source "${repo_basedir}"/repo.config
 
 # Mails host and login/password
 
-echo $SMTP_HOST | grep -Eo "([^.*.*]+)"
+echo "$SMTP_HOST" | grep -Eo "([^.*.*]+)"
 
 # -------------------------------- Simcore -------------------------------
 
-pushd ${repo_basedir}/services/simcore;
+pushd "${repo_basedir}"/services/simcore;
 
-ori_env_simcore=`cat .env`
+ori_env_simcore=$(cat .env)
 
 # Set the image tag to be used from dockerhub
 $psed -i -e "s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
@@ -87,7 +87,7 @@ $psed -i -e "s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env
 
 
 # docker-compose-simcore
-ori_compose_simcore=`cat docker-compose.deploy.yml`
+ori_compose_simcore=$(cat docker-compose.deploy.yml)
 
 # Traefik does not use https
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=http/' docker-compose.deploy.yml
@@ -99,8 +99,8 @@ $psed -i -e 's/\s\s\s\s\s\s- source: rootca.crt/      #- source: rootca.crt/' do
 $psed -i -e "s~\s\s\s\s\s\s\s\starget: /usr/local/share/ca-certificates/osparc.crt~        #target: /usr/local/share/ca-certificates/osparc.crt~" docker-compose.deploy.yml
 $psed -i -e 's~\s\s\s\s\s\s- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      #- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' docker-compose.deploy.yml
 
-new_compose_simcore=`cat docker-compose.deploy.yml`
-new_env_simcore=`cat .env`
+new_compose_simcore=$(cat docker-compose.deploy.yml)
+new_env_simcore=$(cat .env)
 if [ "$ori_env_simcore" = "$new_env_simcore" ] && [ "$ori_compose_simcore" = "$new_compose_simcore" ]; then
     echo "Simcore service ready for deployment"
 else
@@ -114,7 +114,7 @@ popd
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-pushd ${repo_basedir}/services/portainer
+pushd "${repo_basedir}"/services/portainer
 $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 make up-aws
@@ -125,7 +125,7 @@ popd
 # -------------------------------- TRAEFIK -------------------------------
 echo
 echo -e "\e[1;33mstarting traefik...\e[0m"
-pushd ${repo_basedir}/services/traefik
+pushd "${repo_basedir}"/services/traefik
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 $psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 make up-aws
@@ -136,7 +136,7 @@ popd
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-pushd ${repo_basedir}/services/registry
+pushd "${repo_basedir}"/services/registry
 $psed -i -e "s/REGISTRY_DOMAIN=.*/REGISTRY_DOMAIN=$REGISTRY_DOMAIN/" .env
 $psed -i -e "s/S3_ACCESS_KEY_ID=.*/S3_ACCESS_KEY_ID=$REGISTRY_S3_ACCESS_KEY_ID/" .env
 $psed -i -e "s~S3_SECRET_ACCESS_KEY=.*~S3_SECRET_ACCESS_KEY=$REGISTRY_S3_SECRET_ACCESS_KEY~" .env
@@ -155,14 +155,14 @@ echo
 echo -e "\e[1;33mstarting monitoring...\e[0m"
 
 # grafana config
-pushd ${repo_basedir}/services/monitoring/grafana
+pushd "${repo_basedir}"/services/monitoring/grafana
 
 $psed -i -e "s/GF_SERVER_DOMAIN=.*/GF_SERVER_DOMAIN=$MONITORING_DOMAIN/"  config.monitoring
 $psed -i -e "s~GF_SERVER_ROOT_URL=.*~GF_SERVER_ROOT_URL=https://$MONITORING_DOMAIN/grafana~"  config.monitoring
 popd
 
 # monitoring config
-pushd ${repo_basedir}/services/monitoring
+pushd "${repo_basedir}"/services/monitoring
 # if  WSL, we comment - /etc/hostname:/etc/host_hostname
 
 if grep -qF  "#- /etc/hostname:/etc/nodename # don't work with windows" docker-compose.yml
@@ -179,7 +179,7 @@ popd
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
-pushd ${repo_basedir}/services/jaeger
+pushd "${repo_basedir}"/services/jaeger
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 make up-aws
 popd
@@ -187,7 +187,7 @@ popd
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
-pushd ${repo_basedir}/services/adminer
+pushd "${repo_basedir}"/services/adminer
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 $psed -i -e "s/PG_HOST=.*/PG_HOST=$POSTGRES_ENDPOINT/" .env
 make up-aws
@@ -196,7 +196,7 @@ popd
 # -------------------------------- Mail -------------------------------
 echo
 echo -e "\e[1;33mstarting mail server...\e[0m"
-pushd ${repo_basedir}/services/mail
+pushd "${repo_basedir}"/services/mail
 
 
 
@@ -214,7 +214,7 @@ popd
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
 
-pushd ${repo_basedir}/services/graylog;
+pushd "${repo_basedir}"/services/graylog;
 
 # Uncomment - /etc/hostname:/etc/host_hostname - In local for WSL, the script for the local deployement commment it automatically
 
@@ -258,10 +258,10 @@ popd
 # -------------------------------- DEPlOYMENT-AGENT -------------------------------
 echo
 echo -e "\e[1;33mstarting deployment-agent for simcore...\e[0m"
-pushd ${repo_basedir}/services/deployment-agent;
+pushd "${repo_basedir}"/services/deployment-agent;
 if [[ $current_git_url == git* ]]; then
     # it is a ssh style link let's get the organisation name and just replace this cause that conf only accepts https git repos
-    current_organisation=$(echo $current_git_url | cut -d":" -f2 | cut -d"/" -f1)
+    current_organisation=$(echo "$current_git_url" | cut -d":" -f2 | cut -d"/" -f1)
     sed -i "s|https://github.com/ITISFoundation/osparc-ops.git|https://github.com/$current_organisation/osparc-ops.git|" deployment_config.default.yaml
 else
     sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: $current_git_url|}" deployment_config.default.yaml

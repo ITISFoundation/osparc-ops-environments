@@ -19,7 +19,7 @@ is_WSL=$?
 # Paths
 this_script_dir=$(dirname "$0")
 repo_basedir=$(realpath "${this_script_dir}"/../)
-scripts_dir=$(realpath ${repo_basedir}/scripts)
+scripts_dir=$(realpath "${repo_basedir}"/scripts)
 
 # VCS info on current repo
 current_git_url=$(git config --get remote.origin.url)
@@ -68,9 +68,9 @@ echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICE
 
 # -------------------------------- Simcore -------------------------------
 
-pushd ${repo_basedir}/services/simcore;
+pushd "${repo_basedir}"/services/simcore;
 
-ori_env_simcore=`cat .env`
+ori_env_simcore=$(cat .env)
 
 # Set the image tag to be used from dockerhub
 $psed -i -e "s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
@@ -127,7 +127,7 @@ $psed -i -e "s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env
 
 
 # docker-compose-simcore
-ori_compose_simcore=`cat docker-compose.deploy.yml`
+ori_compose_simcore=$(cat docker-compose.deploy.yml)
 
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' docker-compose.deploy.yml
 $psed -i -e 's/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' docker-compose.deploy.yml
@@ -139,8 +139,8 @@ $psed -i -e 's/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' do
 $psed -i -e "s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" docker-compose.deploy.yml
 $psed -i -e 's~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' docker-compose.deploy.yml
 
-new_compose_simcore=`cat docker-compose.deploy.yml`
-new_env_simcore=`cat .env`
+new_compose_simcore=$(cat docker-compose.deploy.yml)
+new_env_simcore=$(cat .env)
 if [ "$ori_env_simcore" = "$new_env_simcore" ] && [ "$ori_compose_simcore" = "$new_compose_simcore" ]; then
     echo "Simcore service ready for deployment"
 else
@@ -200,7 +200,7 @@ done
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-pushd ${repo_basedir}/services/registry
+pushd "${repo_basedir}"/services/registry
 
 # set configuration
 $psed -i -e "s/REGISTRY_DOMAIN=.*/REGISTRY_DOMAIN=$REGISTRY_DOMAIN/" .env
@@ -251,7 +251,7 @@ popd
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
-pushd ${repo_basedir}/services/adminer
+pushd "${repo_basedir}"/services/adminer
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 $psed -i -e "s/PG_HOST=.*/PG_HOST=$POSTGRES_ENDPOINT/" .env
 make up
