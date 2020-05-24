@@ -149,14 +149,17 @@ clean: .check_clean ## Cleans all outputs
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
 
-.PHONY: full-clean
-full-clean: ## Make down, Leave the swarm, prune volumes,  images/network/stopped containers/build cache
+.PHONY: reset-prune
+reset-prune: ## Make down, Leave the swarm, prune volumes,  images/network/stopped containers/build cache
 	@echo -n "Are you sure ? All volumes (including S3 and the database in local deployment) will be deleted. [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@git clean -ndxf
 	@make down
 	@make leave
 	-docker system prune -a -f
 	-docker volume prune -f
+	-docker networks prune -f
+	-cd certificates/ && $(MAKE) remove-root-certificate
 
 
 # FIXME: DO NOT USE... still working on this
