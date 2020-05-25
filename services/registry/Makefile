@@ -32,7 +32,7 @@ export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.s
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 # Makefile including function used by every services
-include ../Makefile
+include ../common.Makefile
 
 
 .PHONY: up

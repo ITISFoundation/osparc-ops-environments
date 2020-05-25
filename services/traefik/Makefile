@@ -31,7 +31,7 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 # Makefile including function used by every services
-include ../Makefile
+include ../common.Makefile
 
 .PHONY: up
 up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates

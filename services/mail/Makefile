@@ -15,7 +15,7 @@ include .env
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 # Makefile including function used by every services
-include ../Makefile
+include ../common.Makefile
 
 .PHONY: up-aws
 up-aws: .env ${TEMP_COMPOSE}  ## Deploys jaeger stack in aws

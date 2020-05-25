@@ -29,7 +29,7 @@ export POSTGRES_EXPORTER_DATA_SOURCE_NAME
 include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 # Makefile including function used by every services
-include ../Makefile
+include ../common.Makefile
 
 .PHONY: up
 up: .init ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network

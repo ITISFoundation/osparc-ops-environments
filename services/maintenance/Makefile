@@ -1,9 +1,3 @@
-
-
-
-
-
-
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 
