@@ -18,7 +18,7 @@ include $(realpath $(CURDIR)/../../scripts/common.mk)
 
 
 # Makefile including function used by every services
-include ../Makefile
+include ../common.Makefile
 
 .PHONY: up
 up: .init .env .secrets ${TEMP_COMPOSE}  ## Deploys portainer stack

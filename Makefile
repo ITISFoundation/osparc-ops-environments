@@ -150,7 +150,7 @@ clean: .check_clean ## Cleans all outputs
 
 
 .PHONY: reset-prune
-reset-prune: ## Make down, Leave the swarm, prune volumes,  images/network/stopped containers/build cache
+reset-prune: ## resets docker swarm, removes all images, volumes, networks, certificates, clean git repo
 	@echo -n "Are you sure ? All volumes (including S3 and the database in local deployment) will be deleted. [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@git clean -ndxf

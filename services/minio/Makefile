@@ -13,7 +13,7 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 
 # Makefile including function used by every services
-include ../Makefile
+include ../common.Makefile
 
 
 # External VARIABLES
