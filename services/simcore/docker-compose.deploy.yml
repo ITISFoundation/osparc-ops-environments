@@ -30,6 +30,9 @@ services:
       - monitored
 
   director:
+    secrets:
+      - source: rootca.crt
+        target: /usr/local/share/ca-certificates/osparc.crt
     environment:
       - LOGSPOUT_MULTILINE=true
       # needed to pass the self-signed certificate to the spawned services
