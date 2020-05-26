@@ -39,6 +39,7 @@ services:
       - DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
       # - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=some_id
       - DIRECTOR_SELF_SIGNED_SSL_SECRET_NAME=rootca.crt
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
 
   sidecar:
     environment:
