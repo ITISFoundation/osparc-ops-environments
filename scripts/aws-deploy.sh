@@ -115,7 +115,6 @@ popd
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
 pushd "${repo_basedir}"/services/portainer
-$psed -i -e "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 make up-aws
 popd
@@ -165,10 +164,10 @@ popd
 pushd "${repo_basedir}"/services/monitoring
 # if  WSL, we comment - /etc/hostname:/etc/host_hostname
 
-if grep -qF  "#- /etc/hostname:/etc/nodename # don't work with windows" docker-compose.yml
+if grep -qF  "#- /etc/hostname:/etc/nodename # doesn't work with windows" docker-compose.yml
 then
     echo "Changing /etc/hostname in Monitoring configuration"
-    $psed -i -e "s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" docker-compose.yml
+    $psed -i -e "s~#- /etc/hostname:/etc/nodename # doesn't work with windows~- /etc/hostname:/etc/nodename # doesn't work with windows~" docker-compose.yml
 fi
 
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env

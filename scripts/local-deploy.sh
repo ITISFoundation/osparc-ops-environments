@@ -157,7 +157,6 @@ echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
 pushd "${repo_basedir}"/services/portainer
 sed -i "s/PORTAINER_ADMIN_PWD=.*/PORTAINER_ADMIN_PWD=$SERVICES_PASSWORD/" .env
-sed -i "s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 make up
 popd

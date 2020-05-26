@@ -1,4 +1,8 @@
 #!/bin/sh
+set -o errexit
+set -o nounset
+
+IFS=$(printf '\n\t')
 
 ##
 # Wrapper for various setup scripts included in the docker-mailserver

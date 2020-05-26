@@ -17,7 +17,6 @@ services:
     - ./config/:/tmp/docker-mailserver/
     env_file:
     - .env
-    - env-mailserver
     cap_add:
     - NET_ADMIN
     - SYS_PTRACE
@@ -28,9 +27,9 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=public-network
+        - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.mail.loadbalancer.server.port=25
-        - traefik.http.routers.mail.rule=Host(`smtp.simcore.io`)
+        - traefik.http.routers.mail.rule=Host(`smtp.${MACHINE_FQDN}`)
         - traefik.http.routers.mail.entrypoints=smtp
         - traefik.http.routers.mail.tls=true
         #- traefik.http.routers.jaeger.middlewares=whitelist_ips@docker, auth@docker, gzip@docker
@@ -44,7 +43,7 @@ volumes:
 networks:
   public:
     external: true
-    name: public-network
+    name: ${PUBLIC_NETWORK}
   monitored:
-    name: monitored_network
+    name: ${MONITORED_NETWORK}
     external: true

@@ -1,14 +1,6 @@
 version: '3.7'
 services:
   prometheus:
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=https://${MONITORING_DOMAIN}/prometheus/'
-      - '--web.route-prefix=/'
     deploy:
       labels:
         - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)

@@ -12,12 +12,7 @@ services:
         target: /secrets/domain.crt
       - source: rootca.crt
         target: /secrets/rootca.crt
-
-    configs:
-      - source: registry_init
-        target: /etc/docker/registry/init
-        mode: 0755
-
+        
 secrets:
   # private key
   domain.key:
@@ -28,7 +23,3 @@ secrets:
   # root authority
   rootca.crt:
     external: true
-
-configs:
-  registry_init:
-    file: ./init

@@ -13,13 +13,16 @@ services:
         REGISTRY_STORAGE_S3_REGION: "us-east-1"
         REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
         REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
-        REGISTRY_STORAGE_DELETE_ENABLED: "true"  
+        REGISTRY_STORAGE_DELETE_ENABLED: "true"
         # Metrics
         REGISTRY_HTTP_DEBUG_ADDR: ":5001"
         REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
         REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
+        # set to true if using self-signed certificates
+        UPDATE_CERTIFICATES: "false"
       networks:
           - public
+          - monitored
       deploy:
           labels:
             - traefik.enable=true
@@ -31,8 +34,26 @@ services:
             - traefik.http.routers.registry.tls=true
             - traefik.http.routers.registry.priority=10
             - traefik.http.routers.registry.middlewares=gzip@docker, auth@docker
+      configs:
+        - source: registry_init
+          target: /etc/docker/registry/init
+          mode: 0755
+        - source: nsswitch_conf
+          target: /etc/nsswitch.conf
+          mode: 0644
 
 networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+
+configs:
+  registry_config.yml:
+    file: ./registry/config.yml
+  nsswitch_conf:
+    file: ./registry/nsswitch.conf
+  registry_init:
+    file: ./registry/init

@@ -18,9 +18,8 @@ include $(realpath $(CURDIR)/../../scripts/common.mk)
 include ../common.Makefile
 
 .PHONY: up-aws
-up-aws: .env ${TEMP_COMPOSE}  ## Deploys jaeger stack in aws
+up-aws: .env ${TEMP_COMPOSE}  ## Deploys mail stack in aws
 	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
-
 
 # Helpers -------------------------------------------------
 
