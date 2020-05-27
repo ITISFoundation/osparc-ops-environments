@@ -41,17 +41,17 @@ certificates/domain.key:
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
-	bash scripts/local-deploy.sh
+	bash scripts/deployements/local-deploy.sh
 	@$(MAKE) info-local
 
 .PHONY: up-devel
 up-devel: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
-	bash scripts/local-deploy.sh --devel_mode=1
+	bash scripts/deployements/local-deploy.sh --devel_mode=1
 	@$(MAKE) info-local
 
 .PHONY: up-aws
 up-aws:
-	bash scripts/aws-deploy.sh
+	bash scripts/deployements/aws-deploy.sh
 
 
 .PHONY: down
