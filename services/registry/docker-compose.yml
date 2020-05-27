@@ -52,8 +52,8 @@ networks:
 
 configs:
   registry_config.yml:
-    file: ./registry/config.yml
+    file: ./config.yml
   nsswitch_conf:
-    file: ./registry/nsswitch.conf
+    file: ./nsswitch.conf
   registry_init:
-    file: ./registry/init
+    file: ./init
