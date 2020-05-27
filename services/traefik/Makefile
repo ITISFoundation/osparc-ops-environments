@@ -28,7 +28,7 @@ export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.s
 include .env
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.mk)
+include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 # Makefile including function used by every services
 include ../common.Makefile

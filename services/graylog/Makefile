@@ -13,7 +13,7 @@ include .env
 include ../common.Makefile
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.mk)
+include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack

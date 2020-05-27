@@ -22,7 +22,7 @@ include .env
 
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.mk)
+include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 

@@ -51,7 +51,7 @@ export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
 $(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
 
-include $(realpath $(CURDIR)/../../scripts/common.mk)
+include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 ## docker BUILD -------------------------------
 .PHONY: build build-kit build-x build-devel build-devel-kit build-devel-x

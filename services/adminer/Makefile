@@ -13,7 +13,7 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 include .env
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.mk)
+include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 # Makefile including function used by every services
 include ../common.Makefile

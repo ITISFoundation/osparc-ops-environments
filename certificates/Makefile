@@ -26,7 +26,7 @@ SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 
 .DEFAULT_GOAL := help
 
-# CERTIFICATES --------------------------------------------------
+# CERTIFICATES ---------------------------------------------------
 
 .PHONY: create-certificates
 create-certificates: rootca.crt domain.crt domain.key ## create self-signed certificates and ca authority
