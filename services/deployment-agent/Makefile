@@ -18,7 +18,7 @@ DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 
 TEMP_COMPOSE = .stack.${STACK_NAME}.yaml
 TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
-
+TEMP_COMPOSE-aws = .stack.${STACK_NAME}.aws.yml
 
 # Network from which services are reverse-proxied
 #  - by default it will create an overal attachable network called public_network
@@ -64,8 +64,8 @@ build build-kit build-x build-devel build-devel-kit build-devel-x: ## Builds $(A
 up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
 	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
 
-up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE}-aws ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker stack deploy -c ${TEMP_COMPOSE}-aws $(STACK_NAME)
+up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
+	@docker stack deploy -c ${TEMP_COMPOSE-aws} $(STACK_NAME)
 
 .PHONY: up-devel
 up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
@@ -166,7 +166,7 @@ ${TEMP_COMPOSE}: .env $(docker-compose-configs)
 ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
 	@docker-compose --file docker-compose.yml --file docker-compose.devel.yaml config > $@
 
-.PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose-aws.yml .env
+.PHONY: ${TEMP_COMPOSE-aws}
+${TEMP_COMPOSE-aws}: docker-compose.yml docker-compose-aws.yml .env
 	@docker-compose -f $< -f docker-compose-aws.yml config > $@
 	@echo "${STACK_NAME} stack file created for in $@"

@@ -10,11 +10,13 @@
 # shellcheck source=/dev/null
 source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 # ${psed:?}
-set -euo pipefail
-IFS=$'\n\t'
 # Are we using WSL ?
 grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null
 is_WSL=$?
+
+set -euo pipefail
+IFS=$'\n\t'
+
 
 # Paths
 this_script_dir=$(dirname "$0")
