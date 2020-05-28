@@ -18,7 +18,7 @@ current_git_branch = $(git branch | grep \* | cut -d ' ' -f2)
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
-. $(repo_basedir)/repo.config
+. $(repo_basedir)/scripts/deploy.config
 . $(repo_basedir)/services/portainer/env.config
 
 # Deploying portainer in the manager host
