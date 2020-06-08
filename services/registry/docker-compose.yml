@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   registry:
-      image: registry:2
+      image: registry:2.7.1
       environment:
         REGISTRY_HTTP_HOST: "https://${REGISTRY_DOMAIN}"
         REGISTRY_STORAGE: s3

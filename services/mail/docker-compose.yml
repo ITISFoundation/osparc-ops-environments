@@ -3,7 +3,7 @@ services:
   mail:
     dns:
       8.8.8.8
-    image: tvial/docker-mailserver:latest
+    image: tvial/docker-mailserver:release-v7.0.0
     container_name: ${CONTAINER_NAME}
     ports:
     - "25:25"

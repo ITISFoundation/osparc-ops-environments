@@ -1,9 +1,6 @@
 version: '3.7'
 services:
   registry:
-      image: registry:2
-      networks:
-          - public
       deploy:
           labels:
             - traefik.http.routers.registry.tls=false

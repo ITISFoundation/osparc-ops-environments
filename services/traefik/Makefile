@@ -39,8 +39,7 @@ up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack 
 
 .PHONY: up-aws
 up-aws: .env ${TEMP_COMPOSE}-aws ## Deploys the stack aws 
-	@echo "test"
-	@echo "$(shell pwd)"
+	@echo "deploying ${STACK_NAME} to aws"
 	docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-letsencrypt
