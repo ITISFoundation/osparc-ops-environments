@@ -33,20 +33,14 @@ make help
 
 ### WSL deployement
 
-If you are using WSL1, clone the repository under the Windows filesystem and access it in WSL. You need to ensure [Ensure Volume Mounts Work](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly) (Section Volume Mounts Work)
+#### WSL1
 
-Do not clone the repo directly in your WSL1 filesystem. 
+If you are using WSL1, clone the repository in a path accessible by the Windows filesystem (typically in /mnt/c/my_path and not in /home). You need to ensure [Ensure Volume Mounts Work](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly) (Section Volume Mounts Work)
 
-eg : Do not clone here
-```console 
-pwd
-/home/alexandre
-```
-But here
-```console 
-pwd
-/c/Users/Alexandre/
-```
+#### WSL2
+
+Clone the repository directly into the WSL2 filesystem (in /home for example).
+
 
 #### local deployment
   ```console

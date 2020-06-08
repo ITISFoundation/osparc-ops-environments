@@ -3,7 +3,6 @@ services:
   prometheus:
     deploy:
       labels:
-        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.tls=false
         - traefik.http.routers.prometheus.entrypoints=http
 
@@ -11,6 +10,5 @@ services:
     deploy:
       labels:
         # direct access through port
-        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
         - traefik.http.routers.grafana.tls=false
         - traefik.http.routers.grafana.entrypoints=http

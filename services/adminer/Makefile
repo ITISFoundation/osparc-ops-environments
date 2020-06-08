@@ -27,7 +27,7 @@ up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt  ## Deploys adminer stack
 	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: up-aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys adminer stack using let's encrypt
+up-aws: .init .env ${TEMP_COMPOSE}-aws  ## AWS Deployement
 	docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 
