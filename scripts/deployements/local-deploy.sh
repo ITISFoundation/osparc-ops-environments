@@ -11,8 +11,7 @@
 source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 # ${psed:?}
 # Are we using WSL ?
-grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null
-is_WSL=$?
+IS_WSL= $(grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null)
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -222,7 +221,7 @@ $psed -i -e "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/gr
 $psed -i -e "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
 $psed -i -e "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
 
-# if  WSL, we comment - /etc/hostname:/etc/host_hostname
+# if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if [ is_WSL ] 
 then 
     if [ ! $(grep -qEi  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml) ]
@@ -254,7 +253,7 @@ echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 pushd "${repo_basedir}"/services/adminer
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed -i -e "s/PG_HOST=.*/PG_HOST=$POSTGRES_ENDPOINT/" .env
+$psed -i -e "s/POSTGRES_DEFAULT_SERVER=.*/POSTGRES_DEFAULT_SERVER=$POSTGRES_HOST/" .env
 make up
 popd
 
@@ -268,7 +267,7 @@ $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
 $psed -i -e "s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$MONITORING_DOMAIN/graylog/|" .env
 $psed -i -e "s|GRAYLOG_ROOT_PASSWORD_SHA2=.*|GRAYLOG_ROOT_PASSWORD_SHA2=$graylog_password|" .env
 
-# if  WSL, we comment - /etc/hostname:/etc/host_hostname
+# if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if [ is_WSL ] 
 then 
     if [ ! $(grep -qEi  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml) ]

@@ -188,7 +188,7 @@ echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 pushd "${repo_basedir}"/services/adminer
 $psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed -i -e "s/PG_HOST=.*/PG_HOST=$POSTGRES_ENDPOINT/" .env
+$psed -i -e "s/POSTGRES_DEFAULT_SERVER=.*/POSTGRES_DEFAULT_SERVER=$POSTGRES_HOST/" .env
 make up-aws
 popd
 
@@ -215,7 +215,7 @@ echo -e "\e[1;33mstarting graylog...\e[0m"
 
 pushd "${repo_basedir}"/services/graylog;
 
-# Uncomment - /etc/hostname:/etc/host_hostname - In local for WSL, the script for the local deployement commment it automatically
+# Uncomment - /etc/hostname:/etc/host_hostname - In local for WSL, the script for the local deployement comment it automatically
 
 if grep -qF  "#- /etc/hostname:/etc/host_hostname # does not work in windows" docker-compose.yml
 then
