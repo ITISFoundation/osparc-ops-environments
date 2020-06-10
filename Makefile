@@ -71,15 +71,15 @@ leave: ## leaves the swarm
 		if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
 		echo -n "Do you wish to install the following host on the Windows host ? [y/N]" && read ans && [ $${ans:-N} = y ] &&  \
 		( echo "please run the following in a PWshell with Admin rights:" && \
-		echo "Add-Content c:\Windows\System32\drivers\etc\hosts \"\`r\`$(MACHINE_IP) $(MACHINE_FQDN)\`r\`$(MACHINE_IP) $(MONITORING_DOMAIN)\`r\`$(MACHINE_IP) $(REGISTRY_DOMAIN)\`r\`$(MACHINE_IP) $(PORTAINER_DOMAIN)\`r\`$(MACHINE_IP) $(STORAGE_DOMAIN)\"" && \
+		echo "Add-Content c:\Windows\System32\drivers\etc\hosts \"\`r\`$(MACHINE_IP) $(MACHINE_FQDN)\`r\`$(MACHINE_IP) $(MONITORING_DOMAIN)\`r\`$(MACHINE_IP) $(REGISTRY_DOMAIN)\`r\`$(MACHINE_IP) $(PORTAINER_DOMAIN)\`r\`$(MACHINE_IP) $(STORAGE_DOMAIN)\`r\`$(MACHINE_IP) $(API_DOMAIN)\"" && \
 		echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):" && \
-		echo "echo $(MACHINE_IP) $(MACHINE_FQDN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(MONITORING_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(PORTAINER_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(REGISTRY_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(STORAGE_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts") \
+		echo "echo $(MACHINE_IP) $(MACHINE_FQDN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(MONITORING_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(PORTAINER_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(REGISTRY_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(STORAGE_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(API_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts") \
 		|| [ 42 ]; \
 		fi \
 	,\
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
-		echo -n "Do you wish to install the following hosts? $(MACHINE_IP) $(MACHINE_FQDN) $(MACHINE_IP) $(PORTAINER_DOMAIN) $(MACHINE_IP) $(REGISTRY_DOMAIN) $(MACHINE_IP) $(MONITORING_DOMAIN) $(MACHINE_IP) $(STORAGE_DOMAIN) [y/N] " && read ans && [ $${ans:-N} = y ] && \
-		( sudo printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" | sudo tee -a /etc/hosts && \
+		echo -n "Do you wish to install the following hosts? $(MACHINE_IP) $(MACHINE_FQDN) $(MACHINE_IP) $(PORTAINER_DOMAIN) $(MACHINE_IP) $(REGISTRY_DOMAIN) $(MACHINE_IP) $(MONITORING_DOMAIN) $(MACHINE_IP) $(STORAGE_DOMAIN) $(MACHINE_IP) $(API_DOMAIN) [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		( sudo printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n$(MACHINE_IP) $(API_DOMAIN)\n" | sudo tee -a /etc/hosts && \
 		echo "# restarting docker daemon" && \
 		sudo systemctl restart docker ) \
 		|| [ 42 ]; \
@@ -90,7 +90,7 @@ leave: ## leaves the swarm
 	if ! sudo grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
 		echo -n "Do you wish to install the following host in WSL? \n [y/N] " && read ans && [ $${ans:-N} = y ] && \
 		( printf  "Adding\n" && \
-		printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" | sudo tee -a /etc/hosts && \
+		printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n$(MACHINE_IP) $(API_DOMAIN)\n" | sudo tee -a /etc/hosts && \
 		printf  "to /etc/hosts\n" ) \
 		|| [ 42 ]; \
 	fi \
