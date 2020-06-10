@@ -78,8 +78,8 @@ leave: ## leaves the swarm
 		fi \
 	,\
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
-		echo -n "Do you wish to install the following host? [y/N] " && read ans && [ $${ans:-N} = y ] && \
-		( sudo echo "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" >> /etc/hosts && \
+		echo -n "Do you wish to install the following hosts? $(MACHINE_IP) $(MACHINE_FQDN) $(MACHINE_IP) $(PORTAINER_DOMAIN) $(MACHINE_IP) $(REGISTRY_DOMAIN) $(MACHINE_IP) $(MONITORING_DOMAIN) $(MACHINE_IP) $(STORAGE_DOMAIN) [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		( sudo printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" | sudo tee -a /etc/hosts && \
 		echo "# restarting docker daemon" && \
 		sudo systemctl restart docker ) \
 		|| [ 42 ]; \
@@ -88,7 +88,7 @@ leave: ## leaves the swarm
 
 	@$(if $(IS_WSL), \
 	if ! sudo grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
-		echo -n "Do you wish to install the following host in WSL? [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		echo -n "Do you wish to install the following host in WSL? \n [y/N] " && read ans && [ $${ans:-N} = y ] && \
 		( printf  "Adding\n" && \
 		printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n" | sudo tee -a /etc/hosts && \
 		printf  "to /etc/hosts\n" ) \
@@ -160,7 +160,7 @@ reset-prune: ## resets docker swarm, removes all images, volumes, networks, cert
 	-docker system prune -a -f
 	-docker volume prune -f
 	-docker network prune -f
-	-cd certificates/ && $(MAKE) remove-root-certificate
+	-make -C certificates remove-root-certificate
 
 
 # FIXME: DO NOT USE... still working on this
