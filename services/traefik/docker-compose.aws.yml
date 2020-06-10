@@ -1,6 +1,8 @@
 version: '3.7'
 services:
   traefik:
+    dns:
+      8.8.8.8
     command:
       - '--api=true'
       - '--api.dashboard=true'
@@ -29,6 +31,8 @@ services:
         - traefik.http.middlewares.whitelist_ips.ipwhitelist.sourcerange=10.0.0.0/16
         - traefik.http.routers.api.entrypoints=http
   whoami:
+    dns:
+      8.8.8.8
     deploy:
       labels:
         - traefik.http.routers.whoami.tls=false

@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   mail:
-    dns:
+    dns: # Sometimes the DNS from the AWS AMI are not properly copied into the container and the container canno't acces internet
       8.8.8.8
     image: tvial/docker-mailserver:release-v7.0.0
     container_name: ${CONTAINER_NAME}

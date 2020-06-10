@@ -1,12 +1,16 @@
 version: '3.7'
 services:
   prometheus:
+    dns: # Sometimes the DNS from the AWS AMI are not properly copied into the container and the container canno't acces internet
+      8.8.8.8
     deploy:
       labels:
         - traefik.http.routers.prometheus.tls=false
         - traefik.http.routers.prometheus.entrypoints=http
 
   grafana:
+    dns: # Sometimes the DNS from the AWS AMI are not properly copied into the container and the container canno't acces internet
+      8.8.8.8  
     deploy:
       labels:
         # direct access through port

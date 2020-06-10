@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   adminer:
-    dns:
+    dns: # Sometimes the DNS from the AWS AMI are not properly copied into the container and the container canno't acces internet
       8.8.8.8
     deploy:
       labels:

@@ -5,5 +5,5 @@ services:
       8.8.8.8
     deploy:
       labels:
-        - traefik.http.routers.portainer.tls=false
-        - traefik.http.routers.portainer.entrypoints=http
+        - traefik.http.routers.redis.tls=false
+        - traefik.http.routers.redis.entrypoints=http
