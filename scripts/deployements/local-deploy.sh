@@ -9,6 +9,13 @@ set -o nounset
 set -o pipefail
 IFS=$'\n\t'
 
+function error_exit
+{
+    echo
+    echo -e "\e[91m${1:-"Unknown Error"}" 1>&2
+    exit 1
+}
+
 
 # Using osx support functions
 declare psed # fixes shellcheck issue with not finding psed
