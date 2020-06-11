@@ -62,8 +62,6 @@ if [ ${#SERVICES_PASSWORD} -lt $min_pw_length ]; then
     echo "Password length should be at least $min_pw_length characters"
 fi
 
-cd "$repo_basedir";
-
 echo
 echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
