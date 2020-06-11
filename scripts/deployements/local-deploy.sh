@@ -66,80 +66,29 @@ echo
 echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
 # -------------------------------- Simcore -------------------------------
-
+# update .env and docker-compose.deploy files
 pushd "${repo_basedir}"/services/simcore;
 
-ori_env_simcore=$(cat .env)
-
-# Set the image tag to be used from dockerhub
-$psed --in-place --expression="s/DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=$SIMCORE_IMAGE_TAG/" .env
-
-# Hostnames
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed --in-place --expression="s/PUBLISHED_HOST_NAME=.*/PUBLISHED_HOST_NAME=$MACHINE_FQDN/" .env
-
-# PGSQL
-$psed --in-place --expression="s/POSTGRES_DB=.*/POSTGRES_DB=$POSTGRES_DB/" .env
-$psed --in-place --expression="s/POSTGRES_ENDPOINT=.*/POSTGRES_ENDPOINT=$POSTGRES_ENDPOINT/" .env
-$psed --in-place --expression="s/POSTGRES_HOST=.*/POSTGRES_HOST=$POSTGRES_HOST/" .env
-$psed --in-place --expression="s/POSTGRES_USER=.*/POSTGRES_USER=$POSTGRES_USER/" .env
-$psed --in-place --expression="s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$POSTGRES_PASSWORD/" .env
-$psed --in-place --expression="s/POSTGRES_PORT=.*/POSTGRES_PORT=$POSTGRES_PORT/" .env
-
-# Registry
-$psed --in-place --expression="s/REGISTRY_AUTH=.*/REGISTRY_AUTH=$REGISTRY_AUTH/" .env
-$psed --in-place --expression="s/REGISTRY_PW=.*/REGISTRY_PW=$REGISTRY_PW/" .env
-$psed --in-place --expression="s/REGISTRY_SSL=.*/REGISTRY_SSL=$REGISTRY_SSL/" .env
-$psed --in-place --expression="s/REGISTRY_URL=.*/REGISTRY_URL=$REGISTRY_DOMAIN/" .env
-$psed --in-place --expression="s/REGISTRY_USER=.*/REGISTRY_USER=$REGISTRY_USER/" .env
-
-# S3
-$psed --in-place --expression="s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/S3_SECRET_KEY=.*/S3_SECRET_KEY=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/S3_BUCKET_NAME=.*/S3_BUCKET_NAME=$S3_BUCKET/" .env
-$psed --in-place --expression="s/S3_ENDPOINT=.*/S3_ENDPOINT=$S3_ENDPOINT/" .env
-$psed --in-place --expression="s/S3_SECURE=.*/S3_SECURE=$S3_SECURE/" .env
-
-
-# Mail
-$psed --in-place --expression="s/SMTP_HOST=.*/SMTP_HOST=$SMTP_HOST/" .env
-$psed --in-place --expression="s/SMTP_PORT=.*/SMTP_PORT=$SMTP_PORT/" .env
-$psed --in-place --expression="s/SMTP_USERNAME=.*/SMTP_USERNAME=$SMTP_USERNAME/" .env
-$psed --in-place --expression="s/SMTP_PASSWORD=.*/SMTP_PASSWORD=$SMTP_PASSWORD/" .env
-
-# Osparc config
-$psed --in-place --expression="s/WEBSERVER_LOGIN_REGISTRATION_CONFIRMATION_REQUIRED=.*/WEBSERVER_LOGIN_REGISTRATION_CONFIRMATION_REQUIRED=$WEBSERVER_LOGIN_REGISTRATION_CONFIRMATION_REQUIRED/" .env
-$psed --in-place --expression="s/WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED=.*/WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED=$WEBSERVER_LOGIN_REGISTRATION_INVITATION_REQUIRED/" .env
-$psed --in-place --expression="s/WEBSERVER_STUDIES_ACCESS_ENABLED=.*/WEBSERVER_STUDIES_ACCESS_ENABLED=$WEBSERVER_STUDIES_ACCESS_ENABLED/" .env
-
-# Rabbit
-$psed --in-place --expression="s/RABBIT_PORT=.*/RABBIT_PORT=$RABBIT_PORT/" .env
-$psed --in-place --expression="s/RABBIT_HOST=.*/RABBIT_HOST=$RABBIT_HOST/" .env
-$psed --in-place --expression="s/RABBIT_LOG_CHANNEL=.*/RABBIT_LOG_CHANNEL=$RABBIT_LOG_CHANNEL/" .env
-$psed --in-place --expression="s/RABBIT_PROGRESS_CHANNEL=.*/RABBIT_PROGRESS_CHANNEL=$RABBIT_PROGRESS_CHANNEL/" .env
-$psed --in-place --expression="s/RABBIT_USER=.*/RABBIT_USER=$RABBIT_USER/" .env
-$psed --in-place --expression="s/RABBIT_PASSWORD=.*/RABBIT_PASSWORD=$RABBIT_PASSWORD/" .env
-
-# Redis
-$psed --in-place --expression="s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/" .env
-$psed --in-place --expression="s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env
-
+# NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
+tmpenv=$(mktemp)
+envsubst < .env > "${tmpenv}" && mv "${tmpenv}" .env
 
 # docker-compose-simcore
-ori_compose_simcore=$(cat docker-compose.deploy.yml)
-
+# for local use we need tls self-signed certificate for the traefik entrypoint in simcore
 $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' docker-compose.deploy.yml
 $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' docker-compose.deploy.yml
 
-
-# We use a auto-generated root certificate for storage
+# for local use we need to provide the generated certificate authority so that storage can access S3, or the director the registry
 $psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' docker-compose.deploy.yml
 $psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' docker-compose.deploy.yml
 $psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" docker-compose.deploy.yml
 $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' docker-compose.deploy.yml
 
-new_compose_simcore=$(cat docker-compose.deploy.yml)
-new_env_simcore=$(cat .env)
+# check if changes were done, basically if there are changes in the repo
+exit 1
+
+
+
 if [ "$ori_env_simcore" = "$new_env_simcore" ] && [ "$ori_compose_simcore" = "$new_compose_simcore" ]; then
     echo "Simcore service ready for deployment"
 else
