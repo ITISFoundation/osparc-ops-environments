@@ -11,6 +11,7 @@ IFS=$'\n\t'
 
 
 # Using osx support functions
+declare psed # fixes shellcheck issue with not finding psed
 # shellcheck source=/dev/null
 source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 # ${psed:?}
@@ -53,6 +54,7 @@ done
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
+# shellcheck source=/dev/null
 source "${repo_basedir}"/repo.config
 
 min_pw_length=8
