@@ -126,20 +126,17 @@ export TRAEFIK_PASSWORD
 substitute_environs "${repo_basedir}"/services/traefik/.env
 make -C "${repo_basedir}"/services/traefik up-local
 
-exit 1
 # -------------------------------- MINIO -------------------------------
 # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
 
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"
-pushd "${repo_basedir}"/services/minio;
-$psed --in-place --expression="s/MINIO_NUM_MINIOS=.*/MINIO_NUM_MINIOS=1/" .env
-$psed --in-place --expression="s/MINIO_NUM_PARTITIONS=.*/MINIO_NUM_PARTITIONS=1/" .env
+# use simple instances for local deploy
+$psed --in-place --expression="s/MINIO_NUM_MINIOS=.*/MINIO_NUM_MINIOS=1/" "${repo_basedir}"/services/minio/.env
+$psed --in-place --expression="s/MINIO_NUM_PARTITIONS=.*/MINIO_NUM_PARTITIONS=1/" "${repo_basedir}"/services/minio/.env
+substitute_environs "${repo_basedir}"/services/minio/.env
+make -C "${repo_basedir}"/services/minio up
 
-$psed --in-place --expression="s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/STORAGE_DOMAIN=.*/STORAGE_DOMAIN=${STORAGE_DOMAIN}/" .env
-make up; popd
 echo "waiting for minio to run...don't worry..."
 while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
     echo "waiting for minio to run..."
