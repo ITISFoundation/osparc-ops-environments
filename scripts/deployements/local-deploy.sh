@@ -53,8 +53,7 @@ case $i in
     ;;
     ##
     :|--help|-h|*)
-    echo "$usage" >&2
-    exit 1
+    error_exit "$usage"
     ;;
 esac
 done
@@ -66,44 +65,39 @@ source "${repo_basedir}"/repo.config
 
 min_pw_length=8
 if [ ${#SERVICES_PASSWORD} -lt $min_pw_length ]; then
-    echo "Password length should be at least $min_pw_length characters"
+    error_exit "Password length should be at least $min_pw_length characters"
 fi
 
 echo
 echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
 # -------------------------------- Simcore -------------------------------
-# update .env and docker-compose.deploy files
 pushd "${repo_basedir}"/services/simcore;
+simcore_env=".env"
+simcore_compose="docker-compose.deploy.yml"
 
 # NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
 tmpenv=$(mktemp)
-envsubst < .env > "${tmpenv}" && mv "${tmpenv}" .env
+envsubst < ${simcore_env} > "${tmpenv}" && mv "${tmpenv}" ${simcore_env}
 
 # docker-compose-simcore
 # for local use we need tls self-signed certificate for the traefik entrypoint in simcore
-$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' docker-compose.deploy.yml
-$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' docker-compose.deploy.yml
+$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' ${simcore_compose}
+$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' ${simcore_compose}
 
 # for local use we need to provide the generated certificate authority so that storage can access S3, or the director the registry
-$psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' docker-compose.deploy.yml
-$psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' docker-compose.deploy.yml
-$psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" docker-compose.deploy.yml
-$psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' docker-compose.deploy.yml
+$psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' ${simcore_compose}
+$psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' ${simcore_compose}
+$psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
+$psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
 
 # check if changes were done, basically if there are changes in the repo
-exit 1
-
-
-
-if [ "$ori_env_simcore" = "$new_env_simcore" ] && [ "$ori_compose_simcore" = "$new_compose_simcore" ]; then
-    echo "Simcore service ready for deployment"
-else
-    echo "Some values weren't up to to date in Simcore service (.env and/or docker-compose.deploy). They have been updated, please push them to github and restart the script"
-    exit 1
-fi
-
-
+for path in ${simcore_env} ${simcore_compose}
+do
+    if ! git diff origin/"${current_git_branch}" --quiet --exit-code $path; then 
+        error_exit "${simcore_env} is modified, please commit and push your changes and restart the script";
+    fi
+done
 popd
 
 
