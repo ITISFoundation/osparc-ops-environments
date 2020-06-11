@@ -113,23 +113,20 @@ echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
 substitute_environs "${repo_basedir}"/services/portainer/.env
 make -C "${repo_basedir}"/services/portainer up
-exit 1
+
 # -------------------------------- TRAEFIK -------------------------------
 echo
 echo -e "\e[1;33mstarting traefik...\e[0m"
-pushd "${repo_basedir}"/services/traefik
 # copy certificates to traefik
-cp "${repo_basedir}"/certificates/*.crt secrets/
-cp "${repo_basedir}"/certificates/*.key secrets/
+cp "${repo_basedir}"/certificates/*.crt "${repo_basedir}"/services/traefik/secrets/
+cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secrets/
 # setup configuration
-$psed --in-place --expression="s/MACHINE_FQDN=.*/MACHINE_FQDN=$MACHINE_FQDN/" .env
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed --in-place --expression="s/TRAEFIK_USER=.*/TRAEFIK_USER=$SERVICES_USER/" .env
-traefik_password=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
-$psed --in-place --expression="s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD=${traefik_password}|" .env
-make up-local
-popd
+TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
+export TRAEFIK_PASSWORD
+substitute_environs "${repo_basedir}"/services/traefik/.env
+make -C "${repo_basedir}"/services/traefik up-local
 
+exit 1
 # -------------------------------- MINIO -------------------------------
 # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
 
