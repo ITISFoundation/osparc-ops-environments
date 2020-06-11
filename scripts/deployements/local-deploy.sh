@@ -194,28 +194,24 @@ make -C "${service_dir}" up
 # -------------------------------- GRAYLOG -------------------------------
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
-# set MACHINE_FQDN
-pushd "${repo_basedir}"/services/graylog;
-graylog_password=$(echo -n "$SERVICES_PASSWORD" | sha256sum | cut -d ' ' -f1)
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed --in-place --expression="s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$MONITORING_DOMAIN/graylog/|" .env
-$psed --in-place --expression="s|GRAYLOG_ROOT_PASSWORD_SHA2=.*|GRAYLOG_ROOT_PASSWORD_SHA2=$graylog_password|" .env
-
+service_dir="${repo_basedir}"/services/graylog
+GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$SERVICES_PASSWORD" | sha256sum | cut -d ' ' -f1)
+export GRAYLOG_ROOT_PASSWORD_SHA2
+substitute_environs "${service_dir}"/.env
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
-    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml)" ]
+    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]
     then
-        $psed --in-place --expression="s~- /etc/hostname:/etc/host_hostname # does not work in windows~#- /etc/hostname:/etc/host_hostname # does not work in windows~" docker-compose.yml
+        $psed --in-place --expression="s~- /etc/hostname:/etc/host_hostname # does not work in windows~#- /etc/hostname:/etc/host_hostname # does not work in windows~" "${service_dir}"/docker-compose.yml
     fi
 else
-    if [ "$(grep  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml)" ]
+    if [ "$(grep  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]
     then
-        $psed --in-place --expression="s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" docker-compose.yml
+        $psed --in-place --expression="s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-
-make up
+make -C "${service_dir}" up
 
 echo
 echo "waiting for graylog to run..."
@@ -238,14 +234,7 @@ EOF
 curl -u "$SERVICES_USER":"$SERVICES_PASSWORD" --header "Content-Type: application/json" \
     --header "X-Requested-By: cli" -X POST \
     --data "$json_data" https://"$MONITORING_DOMAIN"/graylog/api/system/inputs
-popd
 
-# -------------------------------- ADMINER -------------------------------
-echo
-echo -e "\e[1;33mstarting adminer...\e[0m"
-pushd "${repo_basedir}"/services/adminer;
-make up
-popd
 
 if [ "$devel_mode" -eq 0 ]; then
 
