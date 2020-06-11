@@ -111,12 +111,9 @@ popd
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-pushd "${repo_basedir}"/services/portainer
-sed -i "s/PORTAINER_ADMIN_PWD=.*/PORTAINER_ADMIN_PWD=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-make up
-popd
-
+substitute_environs "${repo_basedir}"/services/portainer/.env
+make -C "${repo_basedir}"/services/portainer up
+exit 1
 # -------------------------------- TRAEFIK -------------------------------
 echo
 echo -e "\e[1;33mstarting traefik...\e[0m"
