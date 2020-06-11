@@ -14,17 +14,11 @@ IFS=$'\n\t'
 # shellcheck source=/dev/null
 source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 # ${psed:?}
-# Are we using WSL ?
-IS_WSL= $(grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null)
-
-set -euo pipefail
-IFS=$'\n\t'
 
 
 # Paths
 this_script_dir=$(dirname "$0")
 repo_basedir=$(realpath "${this_script_dir}"/../../)
-scripts_dir=$(realpath "${repo_basedir}"/scripts)
 
 # VCS info on current repo
 current_git_url=$(git config --get remote.origin.url)
@@ -238,14 +232,14 @@ $psed -i -e "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICE
 $psed -i -e "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
 
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
-if [ is_WSL ] 
+if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
-    if [ ! $(grep -qEi  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml) ]
+    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml)" ]
     then
         $psed -i -e "s~- /etc/hostname:/etc/nodename # don't work with windows~#- /etc/hostname:/etc/nodename # don't work with windows~" docker-compose.yml
     fi
 else
-    if [ $(grep  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml) ]  
+    if [ "$(grep  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml)" ]  
     then
         $psed -i -e "s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" docker-compose.yml
     fi
@@ -284,14 +278,14 @@ $psed -i -e "s|GRAYLOG_HTTP_EXTERNAL_URI=.*|GRAYLOG_HTTP_EXTERNAL_URI=https://$M
 $psed -i -e "s|GRAYLOG_ROOT_PASSWORD_SHA2=.*|GRAYLOG_ROOT_PASSWORD_SHA2=$graylog_password|" .env
 
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
-if [ is_WSL ] 
+if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
-    if [ ! $(grep -qEi  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml) ]
+    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml)" ]
     then
         $psed -i -e "s~- /etc/hostname:/etc/host_hostname # does not work in windows~#- /etc/hostname:/etc/host_hostname # does not work in windows~" docker-compose.yml
     fi
 else
-    if [ $(grep  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml) ]  
+    if [ "$(grep  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null docker-compose.yml)" ]
     then
         $psed -i -e "s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" docker-compose.yml
     fi
@@ -329,7 +323,7 @@ pushd "${repo_basedir}"/services/adminer;
 make up
 popd
 
-if [ $devel_mode -eq 0 ]; then
+if [ "$devel_mode" -eq 0 ]; then
 
     # -------------------------------- DEPlOYMENT-AGENT -------------------------------
     echo
