@@ -159,30 +159,24 @@ make -C "${repo_basedir}"/services/redis-commander up
 # -------------------------------- MONITORING -------------------------------
 echo
 echo -e "\e[1;33mstarting monitoring...\e[0m"
-# set MACHINE_FQDN
-pushd "${repo_basedir}"/services/monitoring
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed --in-place --expression="s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
-$psed --in-place --expression="s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
-$psed --in-place --expression="s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
-
+service_dir="${repo_basedir}"/services/monitoring
+substitute_environs "${service_dir}"/.env
+substitute_environs "${service_dir}"/grafana/config.monitoring
+substitute_environs "${service_dir}"/grafana/provisioning/datasources/datasource.yml
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
-    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml)" ]
+    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]
     then
-        $psed --in-place --expression="s~- /etc/hostname:/etc/nodename # don't work with windows~#- /etc/hostname:/etc/nodename # don't work with windows~" docker-compose.yml
+        $psed --in-place --expression="s~- /etc/hostname:/etc/nodename # don't work with windows~#- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 else
-    if [ "$(grep  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null docker-compose.yml)" ]  
+    if [ "$(grep  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]  
     then
-        $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" docker-compose.yml
+        $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-
-make up
-popd
-
+make -C "${repo_basedir}"/services/monitoring up
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
