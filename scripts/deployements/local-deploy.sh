@@ -92,12 +92,14 @@ $psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-ce
 $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
 
 # check if changes were done, basically if there are changes in the repo
-for path in ${simcore_env} ${simcore_compose}
-do
-    if ! git diff origin/"${current_git_branch}" --quiet --exit-code $path; then 
-        error_exit "${simcore_env} is modified, please commit and push your changes and restart the script";
-    fi
-done
+if [ "$devel_mode" -eq 0 ]; then
+    for path in ${simcore_env} ${simcore_compose}
+    do
+        if ! git diff origin/"${current_git_branch}" --quiet --exit-code $path; then 
+            error_exit "${simcore_env} is modified, please commit and push your changes and restart the script";
+        fi
+    done
+fi
 popd
 
 
