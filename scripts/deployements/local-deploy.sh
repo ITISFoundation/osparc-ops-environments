@@ -176,16 +176,13 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-make -C "${repo_basedir}"/services/monitoring up
+make -C "${service_dir}" up
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
-# set MACHINE_FQDN
-pushd "${repo_basedir}"/services/jaeger
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-make up
-popd
-
+service_dir="${repo_basedir}"/services/jaeger
+substitute_environs "${service_dir}"/.env
+make -C "${service_dir}" up
 
 # -------------------------------- Adminer -------------------------------
 echo
