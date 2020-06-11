@@ -3,7 +3,11 @@
 # Deploys in local host
 #
 #
-
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -o errexit
+set -o nounset
+set -o pipefail
+IFS=$'\n\t'
 
 
 # Using osx support functions
