@@ -16,6 +16,13 @@ function error_exit
     exit 1
 }
 
+function substitute_environs
+{
+    # NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
+    tmpfile=$(mktemp)
+    envsubst < "${1:-"Missing File"}" > "${tmpfile}" && mv "${tmpfile}" "${1:-"Missing File"}"
+}
+
 
 # Using osx support functions
 declare psed # fixes shellcheck issue with not finding psed
@@ -76,9 +83,7 @@ pushd "${repo_basedir}"/services/simcore;
 simcore_env=".env"
 simcore_compose="docker-compose.deploy.yml"
 
-# NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
-tmpenv=$(mktemp)
-envsubst < ${simcore_env} > "${tmpenv}" && mv "${tmpenv}" ${simcore_env}
+substitute_environs ${simcore_env}
 
 # docker-compose-simcore
 # for local use we need tls self-signed certificate for the traefik entrypoint in simcore
