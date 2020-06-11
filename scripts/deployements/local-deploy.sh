@@ -144,7 +144,7 @@ if [ "$ori_env_simcore" = "$new_env_simcore" ] && [ "$ori_compose_simcore" = "$n
     echo "Simcore service ready for deployment"
 else
     echo "Some values weren't up to to date in Simcore service (.env and/or docker-compose.deploy). They have been updated, please push them to github and restart the script"
-    exit
+    exit 1
 fi
 
 
