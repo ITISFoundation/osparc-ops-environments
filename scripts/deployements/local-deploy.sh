@@ -187,11 +187,9 @@ make -C "${service_dir}" up
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
-pushd "${repo_basedir}"/services/adminer
-$psed --in-place --expression="s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed --in-place --expression="s/POSTGRES_DEFAULT_SERVER=.*/POSTGRES_DEFAULT_SERVER=$POSTGRES_HOST/" .env
-make up
-popd
+service_dir="${repo_basedir}"/services/adminer
+substitute_environs "${service_dir}"/.env
+make -C "${service_dir}" up
 
 # -------------------------------- GRAYLOG -------------------------------
 echo
