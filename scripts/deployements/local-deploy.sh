@@ -146,16 +146,8 @@ done
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-pushd "${repo_basedir}"/services/registry
-
-# set configuration
-$psed --in-place --expression="s/REGISTRY_DOMAIN=.*/REGISTRY_DOMAIN=$REGISTRY_DOMAIN/" .env
-$psed --in-place --expression="s/S3_ACCESS_KEY_ID=.*/S3_ACCESS_KEY_ID=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/S3_SECRET_ACCESS_KEY=.*/S3_SECRET_ACCESS_KEY=$SERVICES_PASSWORD/" .env
-$psed --in-place --expression="s/S3_BUCKET=.*/S3_BUCKET=${S3_BUCKET}/" .env
-$psed --in-place --expression="s/S3_ENDPOINT=.*/S3_ENDPOINT=${S3_ENDPOINT}/" .env
-make up
-popd
+substitute_environs "${repo_basedir}"/services/registry/.env
+make -C "${repo_basedir}"/services/registry up
 
 
 # -------------------------------- Redis commander-------------------------------
