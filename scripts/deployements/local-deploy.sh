@@ -211,6 +211,18 @@ $psed -i -e "s/S3_ENDPOINT=.*/S3_ENDPOINT=${S3_ENDPOINT}/" .env
 make up
 popd
 
+
+# -------------------------------- Redis commander-------------------------------
+echo
+echo -e "\e[1;33mstarting redis commander...\e[0m"
+pushd "${repo_basedir}"/services/redis-commander
+
+# set configuration
+$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
+
+make up
+popd
+
 # -------------------------------- MONITORING -------------------------------
 echo
 echo -e "\e[1;33mstarting monitoring...\e[0m"

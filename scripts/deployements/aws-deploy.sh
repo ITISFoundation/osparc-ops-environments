@@ -147,6 +147,17 @@ make up-aws
 popd
 
 
+# -------------------------------- Redis commander-------------------------------
+echo
+echo -e "\e[1;33mstarting redis commander...\e[0m"
+pushd "${repo_basedir}"/services/redis-commander
+
+# set configuration
+$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
+
+make up-aws
+popd
+
 
 # -------------------------------- MONITORING -------------------------------
 
