@@ -120,7 +120,7 @@ $psed --in-place --expression="s/RABBIT_PROGRESS_CHANNEL=.*/RABBIT_PROGRESS_CHAN
 $psed --in-place --expression="s/RABBIT_USER=.*/RABBIT_USER=$RABBIT_USER/" .env
 $psed --in-place --expression="s/RABBIT_PASSWORD=.*/RABBIT_PASSWORD=$RABBIT_PASSWORD/" .env
 
-# Reddis
+# Redis
 $psed --in-place --expression="s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/" .env
 $psed --in-place --expression="s/REDIS_PORT=.*/REDIS_PORT=$REDIS_PORT/" .env
 
