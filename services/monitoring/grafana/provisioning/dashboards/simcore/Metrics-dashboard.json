@@ -1,0 +1,2024 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Simcore metrics",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "iteration": 1591597772539,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 30,
+      "panels": [],
+      "title": "Simcore usage",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "50%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": 0
+      },
+      "datasource": "$Postgresql",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "fontSize": "150%",
+      "format": "short",
+      "gridPos": {
+        "h": 11,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 14,
+      "interval": null,
+      "legend": {
+        "percentage": true,
+        "show": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "maxDataPoints": 1,
+      "nullPointMode": "connected",
+      "pieType": "pie",
+      "pluginVersion": "7.0.0",
+      "strokeWidth": 1,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            }
+          ],
+          "metricColumn": "role",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(created_at,$__interval),\n  role AS metric,\n  sum(count(id)) OVER (PARTITION BY role ORDER BY $__timeGroup(created_at,$__interval)) AS \"id\"\nFROM users\nWHERE\n  role = 'USER'\nGROUP BY 1,2\nORDER BY 1,2",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "window"
+              },
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "users",
+          "timeColumn": "created_at",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "datatype": "userrole",
+              "name": "",
+              "params": [
+                "role",
+                "=",
+                "'USER'"
+              ],
+              "type": "expression"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            }
+          ],
+          "metricColumn": "role",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(created_at,$__interval),\n  role AS metric,\n  sum(count(id)) OVER (PARTITION BY role ORDER BY $__timeGroup(created_at,$__interval)) AS \"id\"\nFROM users\nWHERE\n  role = 'TESTER'\nGROUP BY 1,2\nORDER BY 1,2",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "window"
+              },
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "users",
+          "timeColumn": "created_at",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "datatype": "userrole",
+              "name": "",
+              "params": [
+                "role",
+                "=",
+                "'TESTER'"
+              ],
+              "type": "expression"
+            }
+          ]
+        },
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            }
+          ],
+          "metricColumn": "role",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(created_at,$__interval),\n  role AS metric,\n  sum(count(id)) OVER (PARTITION BY role ORDER BY $__timeGroup(created_at,$__interval)) AS \"id\"\nFROM users\nWHERE\n  role = 'GUEST'\nGROUP BY 1,2\nORDER BY 1,2",
+          "refId": "C",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "window"
+              },
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "users",
+          "timeColumn": "created_at",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "datatype": "userrole",
+              "name": "",
+              "params": [
+                "role",
+                "=",
+                "'GUEST'"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Number of registered Users by type [current]",
+      "type": "grafana-piechart-panel",
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "cacheTimeout": null,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "decimals": 1,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "hiddenSeries": false,
+      "id": 12,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "6.7.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (endpoint)  (rate(http_requests_total{endpoint=~\"/v0/me\", http_status=~\"2[0-9]+\", app_name=~\".+webserver\", deployment=\"$deployment\"}[$__range]))*$__range_ms/1000",
+          "format": "time_series",
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "endpoint: {{endpoint}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Login rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:76",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:77",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 36,
+      "links": [],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "values": false
+        }
+      },
+      "pluginVersion": "7.0.0",
+      "targets": [
+        {
+          "expr": "count(redis_key_value{key=~\".+:alive\", deployment=\"$deployment\"})",
+          "interval": "",
+          "legendFormat": "Connected clients",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(redis_key_size{deployment=\"$deployment\"}) by ()",
+          "interval": "",
+          "legendFormat": "Resources per client",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Current connections - Redis [current]",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$Postgresql",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 3,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            }
+          ],
+          "metricColumn": "none",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(created_at,$__interval),\n  (CASE WHEN sum(id) >= lag(sum(id)) OVER (ORDER BY $__timeGroup(created_at,$__interval)) THEN sum(id) - lag(sum(id)) OVER (ORDER BY $__timeGroup(created_at,$__interval)) WHEN lag(sum(id)) OVER (ORDER BY $__timeGroup(created_at,$__interval)) IS NULL THEN NULL ELSE sum(id) END)/extract(epoch from min(created_at) - lag(min(created_at)) OVER (ORDER BY $__timeGroup(created_at,$__interval))) AS \"id\"\nFROM users\nWHERE\n  $__timeFilter(created_at)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "rate"
+                ],
+                "type": "window"
+              },
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "users",
+          "timeColumn": "created_at",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "New users per second [time]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$Postgresql",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 7,
+        "x": 0,
+        "y": 12
+      },
+      "hiddenSeries": false,
+      "id": 34,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 3,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            }
+          ],
+          "metricColumn": "none",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(created_at,$__interval),\n  sum(count(id)) OVER (ORDER BY $__timeGroup(created_at,$__interval)) AS \"id\"\nFROM users\nWHERE\n  $__timeFilter(created_at) AND\n  role = 'GUEST' AND\n  created_ip NOT LIKE '195.176.8.%'\nGROUP BY 1\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "window"
+              },
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "users",
+          "timeColumn": "created_at",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            },
+            {
+              "datatype": "userrole",
+              "name": "",
+              "params": [
+                "role",
+                "=",
+                "'GUEST'"
+              ],
+              "type": "expression"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "created_ip",
+                "NOT LIKE",
+                "'195.176.8.%'"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Total number of anonymous users who are redirected to oSPARC from the SPARC Portal",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$Postgresql",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 9,
+        "x": 7,
+        "y": 12
+      },
+      "hiddenSeries": false,
+      "id": 41,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 3,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            }
+          ],
+          "metricColumn": "none",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(created_at,$__interval),\n  sum(count(id)) OVER (ORDER BY $__timeGroup(created_at,$__interval)) AS \"id\"\nFROM users\nWHERE\n  $__timeFilter(created_at) AND\n  role = 'GUEST' AND\n  created_ip LIKE '195.176.8.%'\nGROUP BY 1\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "window"
+              },
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "users",
+          "timeColumn": "created_at",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            },
+            {
+              "datatype": "userrole",
+              "name": "",
+              "params": [
+                "role",
+                "=",
+                "'GUEST'"
+              ],
+              "type": "expression"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "created_ip",
+                "LIKE",
+                "'195.176.8.%'"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Total number of anonymous users who are redirected to oSPARC from Z43",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "Prometheus",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {},
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "index": 0,
+                "value": null
+              },
+              {
+                "color": "red",
+                "index": 1,
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/05e9404a-acb4-11e9-bf0f-02420aff77ac"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Small Enteric Neural Network Simulator"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/0d475cde-acb5-11e9-a8d6-02420aff77ac"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] 2D Plot"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/0da37066-acb3-11e9-a6c7-02420aff77ac"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] opencor-py model"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/110ada80-acb5-11e9-95b2-02420aff77ac"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] 3D Visualization"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/14a20508-acb5-11e9-b1ff-02420aff77ac"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Anatomical Model Viewer\t"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/47d0b766-af53-11e9-a62b-02420aff7e72"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Rabbit cardiac models"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/c7264592-af54-11e9-8346-02420aff7e72"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Human cardiac models"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/fc9038ca-acb3-11e9-9aea-02420aff77ac"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] SPARC Nerve Activity Predictor (SNAP)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/804e859a-a0e6-11ea-978b-02420a0002ec"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Kember Cardiac Model"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/224cd23a-5316-11ea-a71c-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Mattward"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/405f8a40-5316-11ea-bd69-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Bornstein"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/51b292f0-5315-11ea-a74f-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] 2D plot"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/6ddd972e-5315-11ea-9941-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] Opencor"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/8533ff8c-5315-11ea-9952-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] 3D EM"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/a1d38250-5316-11ea-928a-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] CC Rabbit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/d8f1e374-5316-11ea-8684-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] CC Human"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/study/f6f82c08-5315-11ea-8b10-02420a00029d"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "[ISAN] 3D Anatomical"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 12
+      },
+      "id": 10,
+      "links": [],
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.0.0",
+      "targets": [
+        {
+          "expr": "sum by (endpoint) (http_requests_total{endpoint=~\"/study/.+\", app_name=~\".*webserver\", deployment=\"$deployment\"})",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{endpoint}}",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Hits per published study [current]",
+      "type": "bargauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "cacheTimeout": null,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 1,
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "hiddenSeries": false,
+      "id": 18,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "6.7.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": ""
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (service_name) (label_replace(container_tasks_state:count_by_image, \"service_name\", \"$3\", \"image\", \".*/simcore/services/(dynamic|comp)/([a-zA-Z0-9]*/)?(.*)\"))",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{service_name}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Number of services running by version [time]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 10,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "cacheTimeout": null,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 1,
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "hiddenSeries": false,
+      "id": 40,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "6.7.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": ""
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "rate(simcore_simcore_service_webserver_services_started_total:sum_by_service_key_service_tag{deployment=\"$deployment\"}[$__range])*$__range_ms/1000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{service_key}}:{{service_tag}}",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(simcore_simcore_service_director_services_started_total:sum_by_service_key_service_tag{deployment=\"$deployment\"}[$__range])*$__range_ms/1000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{service_key}}:{{service_tag}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Service started [time]",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 10,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 32,
+      "panels": [],
+      "title": "Cluster usage",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "hiddenSeries": false,
+      "id": 27,
+      "interval": "",
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(increase(node_cpu_seconds_total{mode!=\"idle\"}[$__range]))/60/60",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "1h",
+          "intervalFactor": 1,
+          "legendFormat": "increase of cpu hours over time range",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Total CPU consumption  [cpu-hours]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:330",
+          "format": "none",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:331",
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "hiddenSeries": false,
+      "id": 28,
+      "interval": "",
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_avail_bytes{mountpoint=\"/\"})",
+          "interval": "1h",
+          "intervalFactor": 1,
+          "legendFormat": "data usage",
+          "refId": "B"
+        },
+        {
+          "expr": "-sum(delta(node_filesystem_avail_bytes{mountpoint=\"/\"}[$__range]))",
+          "interval": "1h",
+          "intervalFactor": 1,
+          "legendFormat": "variation",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Overall data storage [GB]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 2,
+      "fillGradient": 3,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "hiddenSeries": false,
+      "id": 25,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "100 - (avg(irate(node_cpu_seconds_total{job=\"node-exporter\",mode=\"idle\"}[$__range]) * on(instance) group_left(node_name) node_meta{}) by (node_name)  * 100)",
+          "interval": "",
+          "legendFormat": "{{node_name}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "warning",
+          "fill": true,
+          "line": false,
+          "op": "gt",
+          "value": 90,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU consumption per node [time]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percent",
+          "label": null,
+          "logBase": 1,
+          "max": "100",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.85
+              },
+              {
+                "color": "red",
+                "value": 0.95
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 40
+      },
+      "id": 22,
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.0.0",
+      "targets": [
+        {
+          "expr": "1 - sum(node_filesystem_avail_bytes{mountpoint=\"/\"}/node_filesystem_size_bytes{mountpoint=\"/\"} * on(instance) group_left(node_name) node_meta{}) by (node_name)",
+          "interval": "",
+          "legendFormat": "{{node_name}}",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Used disk space  [current]",
+      "type": "bargauge"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "green",
+                "value": 15
+              }
+            ]
+          },
+          "unit": "decgbytes"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "osparc1"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 374
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "osparc2"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 374
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "osparc3"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 374
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "osparc4"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 625
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "osparc5"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 311
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 40
+      },
+      "id": 23,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.0.0",
+      "targets": [
+        {
+          "expr": "sum(node_filesystem_avail_bytes{mountpoint=\"/\"} /1024/1024/1024 * on(instance) group_left(node_name) node_meta{}) by (node_name)",
+          "interval": "",
+          "legendFormat": "{{node_name}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(node_filesystem_size_bytes{mountpoint=\"/\"} /1024/1024/1024 * on(instance) group_left(node_name) node_meta{}) by (node_name)",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "{{node_name}}_total",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Available disk space [current]",
+      "type": "bargauge"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 25,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "production",
+          "value": "production"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Deployment",
+        "multi": false,
+        "name": "deployment",
+        "options": [
+          {
+            "selected": true,
+            "text": "production",
+            "value": "production"
+          },
+          {
+            "selected": false,
+            "text": "staging",
+            "value": "staging"
+          }
+        ],
+        "query": "production, staging",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "ProductionPostgres",
+          "value": "ProductionPostgres"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "Postgresql",
+        "options": [],
+        "query": "postgres",
+        "refresh": 1,
+        "regex": "/^($deployment).*/i",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Metrics",
+  "uid": "X_99jTHWk",
+  "version": 15
+}

@@ -10,41 +10,60 @@ deleteDatasources:
 # whats available in the database
 datasources:
   # <string, required> name of the datasource. Required
-- name: Prometheus
-  # <string, required> datasource type. Required
-  type: prometheus
-  # <string, required> access mode. direct or proxy. Required
-  access: proxy
-  # <int> org id. will default to orgId 1 if not specified
-  orgId: 1
-  # <string> url
-  url: http://prometheus:9090
-  # <string> database password, if used
-  password:
-  # <string> database user, if used
-  user:
-  # <string> database name, if used
-  database:
-  # <bool> enable/disable basic auth
-  basicAuth: true
-  # <string> basic auth username
-  basicAuthUser: admin
-  # <string> basic auth password
-  basicAuthPassword: adminadmin
-  # <bool> enable/disable with credentials headers
-  withCredentials:
-  # <bool> mark as default datasource. Max one per org
-  isDefault: true
-  # <map> fields that will be converted to json and stored in json_data
-  jsonData:
-     graphiteVersion: "1.1"
-     tlsAuth: false
-     tlsAuthWithCACert: false
-  # <string> json object of data that will be encrypted.
-  secureJsonData:
-    tlsCACert: "..."
-    tlsClientCert: "..."
-    tlsClientKey: "..."
-  version: 1
-  # <bool> allow users to edit datasources from the UI.
-  editable: true
+  - name: Prometheus
+    # <string, required> datasource type. Required
+    type: prometheus
+    # <string, required> access mode. direct or proxy. Required
+    access: proxy
+    # <int> org id. will default to orgId 1 if not specified
+    orgId: 1
+    # <string> url
+    url: http://prometheus:9090
+    # <string> database password, if used
+    password:
+    # <string> database user, if used
+    user:
+    # <string> database name, if used
+    database:
+    # <bool> enable/disable basic auth
+    basicAuth: true
+    # <string> basic auth username
+    basicAuthUser: admin
+    # <string> basic auth password
+    basicAuthPassword: adminadmin
+    # <bool> enable/disable with credentials headers
+    withCredentials:
+    # <bool> mark as default datasource. Max one per org
+    isDefault: true
+    # <map> fields that will be converted to json and stored in json_data
+    jsonData:
+      graphiteVersion: "1.1"
+      tlsAuth: false
+      tlsAuthWithCACert: false
+    # <string> json object of data that will be encrypted.
+    secureJsonData:
+      tlsCACert: "..."
+      tlsClientCert: "..."
+      tlsClientKey: "..."
+    version: 1
+    # <bool> allow users to edit datasources from the UI.
+    editable:
+      true
+      # NOTES: a special dangerless user is created on postgresql prior to that
+      # CREATE USER grafanareader WITH PASSWORD 'password';
+      #  GRANT USAGE ON SCHEMA schema TO grafanareader;
+      # GRANT SELECT ON users TO grafanareader
+  - name: Postgres
+    type: postgres
+    url: postgres
+    database: simcoredb
+    user: grafanareader
+    secureJsonData:
+      password: "adminadmin"
+    jsonData:
+      sslmode: "disable" # disable/require/verify-ca/verify-full
+      maxOpenConns: 0 # Grafana v5.4+
+      maxIdleConns: 2 # Grafana v5.4+
+      connMaxLifetime: 14400 # Grafana v5.4+
+      postgresVersion: 1000 # 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10
+      timescaledb: false

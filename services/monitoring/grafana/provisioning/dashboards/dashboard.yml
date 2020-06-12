@@ -1,11 +1,39 @@
 apiVersion: 1
 
 providers:
-- name: 'Prometheus'
-  orgId: 1
-  folder: ''
-  type: file
-  disableDeletion: false
-  editable: true
-  options:
-    path: /etc/grafana/provisioning/dashboards
+  - name: "Simcore"
+    orgId: 1
+    folder: "simcore"
+    type: file
+    disableDeletion: true
+    editable: true
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/simcore
+  - name: "Ops"
+    orgId: 1
+    folder: "ops"
+    type: file
+    disableDeletion: true
+    editable: true
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/ops
+  - name: "System"
+    orgId: 1
+    folder: "system"
+    type: file
+    disableDeletion: true
+    editable: true
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/system
+  - name: "NIH Metrics"
+    orgId: 1
+    folder: "nih-metrics"
+    type: file
+    disableDeletion: true
+    editable: true
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/nih-metrics
