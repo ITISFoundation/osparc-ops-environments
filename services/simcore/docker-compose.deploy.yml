@@ -212,18 +212,18 @@ services:
         # external traefik
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
-        - traefik.http.services.${SWARM_STACK_NAME}_traefik_http.loadbalancer.server.port=80
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.rule=Host(`${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.entrypoints=https
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.priority=1
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.middlewares=gzip@docker, sslheader@docker
-        - traefik.http.services.${SWARM_STACK_NAME}_traefik_api.loadbalancer.server.port=10081
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.rule=Host(`api.${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.entrypoints=https
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=1
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_http.loadbalancer.server.port=80
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=Host(`${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_api.loadbalancer.server.port=10081
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.rule=Host(`api.${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.middlewares=gzip@docker, sslheader@docker
       update_config:
         parallelism: 2
         order: start-first
@@ -249,12 +249,12 @@ services:
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         # traefik UI
         - traefik.enable=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.service=api@internal
-        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.priority=2
-        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
-        - traefik.http.services.${SWARM_STACK_NAME}_busybox.loadbalancer.server.port=8080
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.service=api@internal
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_traefik_api.loadbalancer.server.port=8080
       update_config:
         parallelism: 2
         order: start-first
