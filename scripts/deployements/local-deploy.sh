@@ -19,7 +19,7 @@ function error_exit
 function substitute_environs
 {
     # NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
-    tmpfile=$(mktemp)
+    tmpfile=$(mktemp)    
     envsubst < "${1:-"Missing File"}" > "${tmpfile}" && mv "${tmpfile}" "${1:-"Missing File"}"
 }
 
@@ -28,8 +28,6 @@ function substitute_environs
 declare psed # fixes shellcheck issue with not finding psed
 # shellcheck source=/dev/null
 source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
-# ${psed:?}
-
 
 # Paths
 this_script_dir=$(dirname "$0")
@@ -68,7 +66,7 @@ done
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
 # shellcheck source=/dev/null
-source "${repo_basedir}"/repo.config
+set -o allexport; source "${repo_basedir}"/repo.config; set +o allexport; 
 
 min_pw_length=8
 if [ ${#SERVICES_PASSWORD} -lt $min_pw_length ]; then
