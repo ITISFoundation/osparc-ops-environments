@@ -143,7 +143,7 @@ services:
         - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_replace_regex.replacepathregex.regex=^/${PREFIX_STACK_NAME}_rabbit/(.*)$$
         - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.middlewares=${PREFIX_STACK_NAME}_rabbit_replace_regex@docker, gzip@docker
-        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.tls.certresolver=lehttpchallenge
+        # - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.tls.certresolver=lehttpchallenge
       update_config:
         parallelism: 2
         order: start-first
