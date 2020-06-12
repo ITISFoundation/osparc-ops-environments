@@ -62,7 +62,7 @@ services:
         # gzip compression
         - traefik.http.middlewares.gzip.compress=true
         # ip whitelisting
-        - traefik.http.middlewares.whitelist_ips.ipwhitelist.sourcerange=0.0.0.0/1
+        - traefik.http.middlewares.whitelist_ips.ipwhitelist.sourcerange=0.0.0.0/1,128.0.0.0/2,192.0.0.0/3,224.0.0.0/4
         # traefik UI
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.rule=Host(`${MONITORING_DOMAIN}`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
