@@ -142,7 +142,7 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.tls=true
         - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_replace_regex.replacepathregex.regex=^/${PREFIX_STACK_NAME}_rabbit/(.*)$$
         - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.middlewares=${PREFIX_STACK_NAME}_rabbit_replace_regex@docker, gzip@docker
+        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.middlewares=${PREFIX_STACK_NAME}_rabbit_replace_regex@docker, ops_gzip@docker
         # - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.tls.certresolver=lehttpchallenge
       update_config:
         parallelism: 2
@@ -217,14 +217,14 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=1
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=ops_gzip@docker, ops_sslheader@docker
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.service=${SWARM_STACK_NAME}_simcore_http
         - traefik.http.services.${SWARM_STACK_NAME}_simcore_api.loadbalancer.server.port=10081
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.rule=Host(`api.${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.priority=1
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.middlewares=ops_gzip@docker, ops_sslheader@docker
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.service=${SWARM_STACK_NAME}_simcore_api
       update_config:
         parallelism: 2
