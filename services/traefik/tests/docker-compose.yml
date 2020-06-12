@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   whoami:
@@ -15,7 +15,7 @@ services:
         - traefik.http.routers.whoami.rule=Host(`osparc.local`) && PathPrefix(`/whoami`)
         - traefik.http.routers.whoami.entrypoints=https
         - traefik.http.routers.whoami.tls=true
-        - traefik.http.routers.whoami.middlewares=gzip@docker
+        - traefik.http.routers.whoami.middlewares=ops_gzip@docker
     networks:
       - public
 networks:
