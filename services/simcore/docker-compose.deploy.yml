@@ -255,7 +255,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=2
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=${SWARM_STACK_NAME}_auth@docker, ${SWARM_STACK_NAME}_gzip@docker
         - traefik.http.services.${SWARM_STACK_NAME}_traefik_api.loadbalancer.server.port=8080
       update_config:
         parallelism: 2
@@ -289,7 +289,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=hostregexp(`{host:.+}`) && PathPrefix(`/whoami`)
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
-        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@docker,gzip@docker
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@docker,${SWARM_STACK_NAME}_gzip@docker
       update_config:
         parallelism: 2
         order: start-first
