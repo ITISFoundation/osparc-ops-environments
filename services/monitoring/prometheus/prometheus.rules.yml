@@ -1,0 +1,20 @@
+groups:
+  - name: http_requests_total-rate-5min
+    rules:
+      - record: http_requests_total:rate5m
+        expr: rate(http_requests_total[5m])
+
+  - name: container_tasks_state-count_by_image
+    rules:
+      - record: container_tasks_state:count_by_image
+        expr: count by (image)(container_tasks_state{state="running", image=~".*/simcore/services/.*"})
+
+  - name: simcore_simcore_service_webserver_services_started_total-sum_by_key_tag
+    rules:
+      - record: simcore_simcore_service_webserver_services_started_total:sum_by_service_key_service_tag
+        expr: sum by (service_key, service_tag, deployment)(simcore_simcore_service_webserver_services_started_total)
+
+  - name: simcore_simcore_service_director_services_started_total-sum_by_key_tag
+    rules:
+      - record: simcore_simcore_service_director_services_started_total:sum_by_service_key_service_tag
+        expr: sum by (service_key, service_tag, deployment)(simcore_simcore_service_director_services_started_total)

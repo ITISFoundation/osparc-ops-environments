@@ -1,4 +1,9 @@
 GF_SECURITY_ADMIN_PASSWORD=adminadmin
 GF_USERS_ALLOW_SIGN_UP=false
+GF_SERVER_DOMAIN=osparc.local
 GF_SERVER_ROOT_URL=https://osparc.local/grafana
-GF_INSTALL_PLUGINS=grafana-piechart-panel
+GF_INSTALL_PLUGINS=grafana-piechart-panel, grafana-worldmap-panel
+# NOTE: grafana image renedering plugin: https://grafana.com/blog/2020/05/07/grafana-7.0-preview-new-image-renderer-plugin-to-replace-phantomjs/
+GF_RENDERING_SERVER_URL=http://grafana-image-renderer:8081/render
+GF_RENDERING_CALLBACK_URL=http://grafana:3000/
+GF_LOG_FILTERS=rendering:debug
