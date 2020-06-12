@@ -4,6 +4,27 @@
 # See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 version: "3.7"
 services:
+  api-gateway:
+    networks:
+      - public
+      - monitored
+    environment:
+      - LOGSPOUT_MULTILINE=true
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    extra_hosts: []
   webserver:
     networks:
       - public
@@ -162,11 +183,11 @@ services:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-  # in clusters one or more nodes are typically defined as THE postgres nodes.
-  #   deploy:
-  #     placement:
-  #       constraints:
-  #         - node.labels.postgres==true
+    # in clusters one or more nodes are typically defined as THE postgres nodes.
+    #   deploy:
+    #     placement:
+    #       constraints:
+    #         - node.labels.postgres==true
     deploy:
       update_config:
         parallelism: 2
@@ -191,12 +212,18 @@ services:
         # external traefik
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
-        - traefik.http.services.${SWARM_STACK_NAME}_traefik.loadbalancer.server.port=80
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.rule=Host(`${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.entrypoints=https
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.priority=1
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_traefik_http.loadbalancer.server.port=80
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.rule=Host(`${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_http.middlewares=gzip@docker, sslheader@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_traefik_api.loadbalancer.server.port=10081
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.rule=Host(`api.${PUBLISHED_HOST_NAME}`) && PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=gzip@docker, sslheader@docker
       update_config:
         parallelism: 2
         order: start-first
