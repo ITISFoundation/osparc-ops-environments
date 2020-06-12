@@ -160,7 +160,6 @@ pushd "${repo_basedir}"/services/monitoring
 $psed -i -e "s|GF_SERVER_ROOT_URL=.*|GF_SERVER_ROOT_URL=https://$MACHINE_FQDN/grafana|" grafana/config.monitoring
 $psed -i -e "s|GF_SECURITY_ADMIN_PASSWORD=.*|GF_SECURITY_ADMIN_PASSWORD=$SERVICES_PASSWORD|" grafana/config.monitoring
 $psed -i -e "s|basicAuthPassword:.*|basicAuthPassword: $SERVICES_PASSWORD|" grafana/provisioning/datasources/datasource.yml
-$psed -i -e "s|--web.external-url=.*|--web.external-url=https://$MACHINE_FQDN/prometheus/'|" docker-compose.yml
 make up
 popd
 
