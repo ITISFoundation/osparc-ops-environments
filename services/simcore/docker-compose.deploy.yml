@@ -136,6 +136,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
   redis:
     networks:
       - monitored
@@ -155,20 +156,18 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
   postgres:
     networks:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-    # in clusters one or more nodes are typically defined as THE postgres nodes.
-    #   deploy:
-    #     placement:
-    #       constraints:
-    #         - node.labels.postgres==true
+  # in clusters one or more nodes are typically defined as THE postgres nodes.
+  #   deploy:
+  #     placement:
+  #       constraints:
+  #         - node.labels.postgres==true
     deploy:
-      placement:
-        constraints:
-          - node.labels.postgres==true
       update_config:
         parallelism: 2
         order: start-first
@@ -182,6 +181,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
   traefik:
     networks:
       - monitored
@@ -274,6 +274,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
 networks:
   public:
     external: true
