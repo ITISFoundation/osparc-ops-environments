@@ -20,8 +20,14 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # postgres db ulr
 POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+# External VARIABLES
+include .env
+
+# redis db url
+REDIS_EXPORTER_DATA_SOURCE_NAME ?= redis://redis:6379
 
 export POSTGRES_EXPORTER_DATA_SOURCE_NAME
+export REDIS_EXPORTER_DATA_SOURCE_NAME
 
 
 # TARGETS --------------------------------------------------

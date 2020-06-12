@@ -44,6 +44,8 @@ main:
       export DOCKER_REGISTRY=${SIMCORE_DOCKER_REGISTRY} &&
       export DOCKER_IMAGE_TAG=${SIMCORE_IMAGE_TAG} &&
       export SWARM_STACK_NAME=${SIMCORE_STACK_NAME} &&
+      export OPS_PUBLIC_NETWORK=${PUBLIC_NETWORK} &&
+      export OPS_MONITORED_NETWORK=${MONITORED_NETWORK} &&
       export PREFIX_STACK_NAME=${PREFIX_STACK_NAME} &&
       mv .env .env.platform &&
       cat .env-devel >> .env.nosub && cat .env.platform >> .env.nosub &&

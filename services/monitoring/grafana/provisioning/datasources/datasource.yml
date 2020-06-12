@@ -47,4 +47,23 @@ datasources:
       tlsClientKey: "..."
     version: 1
     # <bool> allow users to edit datasources from the UI.
-    editable: true
+    editable:
+      true
+      # NOTES: a special dangerless user is created on postgresql prior to that
+      # CREATE USER grafanareader WITH PASSWORD 'password';
+      #  GRANT USAGE ON SCHEMA schema TO grafanareader;
+      # GRANT SELECT ON users TO grafanareader
+  - name: Postgres
+    type: postgres
+    url: ${POSTGRES_HOST}
+    database: ${POSTGRES_DB}
+    user: ${POSTGRES_GRAFANA_USER}
+    secureJsonData:
+      password: ${POSTGRES_GRAFANA_PASSWORD}
+    jsonData:
+      sslmode: "disable" # disable/require/verify-ca/verify-full
+      maxOpenConns: 0 # Grafana v5.4+
+      maxIdleConns: 2 # Grafana v5.4+
+      connMaxLifetime: 14400 # Grafana v5.4+
+      postgresVersion: 1000 # 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10
+      timescaledb: false

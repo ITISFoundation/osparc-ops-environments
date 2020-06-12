@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   agent:
@@ -47,7 +47,7 @@ services:
         - traefik.http.routers.portainer.tls=true
         - traefik.http.middlewares.portainer_replace_regex.replacepathregex.regex=^/portainer/?(.*)$$
         - traefik.http.middlewares.portainer_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.portainer.middlewares=gzip@docker, portainer_replace_regex
+        - traefik.http.routers.portainer.middlewares=whitelist_ips@docker, gzip@docker, portainer_replace_regex
 
 networks:
   agent_network:
