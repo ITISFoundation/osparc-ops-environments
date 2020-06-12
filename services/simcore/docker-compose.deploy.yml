@@ -249,12 +249,12 @@ services:
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         # traefik UI
         - traefik.enable=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_api.service=api@internal
-        - traefik.http.routers.${SWARM_STACK_NAME}_api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_api.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_api.priority=2
-        - traefik.http.routers.${SWARM_STACK_NAME}_api.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
-        - traefik.http.services.${SWARM_STACK_NAME}_api.loadbalancer.server.port=8080
+        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.service=api@internal
+        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_busybox.middlewares=${SWARM_STACK_NAME}_auth@docker, gzip@docker
+        - traefik.http.services.${SWARM_STACK_NAME}_busybox.loadbalancer.server.port=8080
       update_config:
         parallelism: 2
         order: start-first
