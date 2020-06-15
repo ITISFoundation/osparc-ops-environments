@@ -1,0 +1,20 @@
+name: Automerge
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit-test-deployment-agent:
+    runs-on: ubuntu-latest
+    name: Unit-testing deployment-agent
+    steps:
+      - name: Exit with success
+        run: exit 0
+
+  system-test-deployment-agent:
+    runs-on: ubuntu-latest
+    name: System-testing deployment-agent
+    steps:
+      - name: Exit with success
+        run: exit 0
