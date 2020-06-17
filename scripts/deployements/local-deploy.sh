@@ -19,8 +19,8 @@ function error_exit
 function substitute_environs
 {
     # NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
-    tmpfile=$(mktemp)    
-    envsubst < "${1:-"Missing File"}" > "${tmpfile}" && mv "${tmpfile}" "${1:-"Missing File"}"
+       
+    envsubst < "${1:-"Missing File"}" > "${2}"
 }
 
 
@@ -81,7 +81,7 @@ pushd "${repo_basedir}"/services/simcore;
 simcore_env=".env"
 simcore_compose="docker-compose.deploy.yml"
 
-substitute_environs ${simcore_env}
+# substitute_environs ${simcore_env}
 
 # docker-compose-simcore
 # for local use we need tls self-signed certificate for the traefik entrypoint in simcore
@@ -94,23 +94,13 @@ $psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - sourc
 $psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
 $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
 
-# check if changes were done, basically if there are changes in the repo
-if [ "$devel_mode" -eq 0 ]; then
-    for path in ${simcore_env} ${simcore_compose}
-    do
-        if ! git diff origin/"${current_git_branch}" --quiet --exit-code $path; then 
-            error_exit "${simcore_env} is modified, please commit and push your changes and restart the script";
-        fi
-    done
-fi
-popd
+
 
 
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-substitute_environs "${repo_basedir}"/services/portainer/.env
-make -C "${repo_basedir}"/services/portainer up
+make -C "${repo_basedir}"/services/portainer env-subst up
 
 # -------------------------------- TRAEFIK -------------------------------
 echo
@@ -121,19 +111,15 @@ cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secre
 # setup configuration
 TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
 export TRAEFIK_PASSWORD
-substitute_environs "${repo_basedir}"/services/traefik/.env
+substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
 make -C "${repo_basedir}"/services/traefik up-local
 
 # -------------------------------- MINIO -------------------------------
 # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
 
 echo
-echo -e "\e[1;33mstarting minio...\e[0m"
-# use simple instances for local deploy
-$psed --in-place --expression="s/MINIO_NUM_MINIOS=.*/MINIO_NUM_MINIOS=1/" "${repo_basedir}"/services/minio/.env
-$psed --in-place --expression="s/MINIO_NUM_PARTITIONS=.*/MINIO_NUM_PARTITIONS=1/" "${repo_basedir}"/services/minio/.env
-substitute_environs "${repo_basedir}"/services/minio/.env
-make -C "${repo_basedir}"/services/minio up
+echo -e "\e[1;33mstarting minio...\e[0m"y
+make -C "${repo_basedir}"/services/minio env-subst up
 
 echo "waiting for minio to run...don't worry..."
 while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
@@ -144,23 +130,20 @@ done
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-substitute_environs "${repo_basedir}"/services/registry/.env
-make -C "${repo_basedir}"/services/registry up
+make -C "${repo_basedir}"/services/registry env-subst up
 
 
 # -------------------------------- Redis commander-------------------------------
 echo
 echo -e "\e[1;33mstarting redis commander...\e[0m"
-substitute_environs "${repo_basedir}"/services/redis-commander/.env
-make -C "${repo_basedir}"/services/redis-commander up
+make -C "${repo_basedir}"/services/redis-commander env-subst up
 
 # -------------------------------- MONITORING -------------------------------
 echo
 echo -e "\e[1;33mstarting monitoring...\e[0m"
 service_dir="${repo_basedir}"/services/monitoring
-substitute_environs "${service_dir}"/.env
-substitute_environs "${service_dir}"/grafana/config.monitoring
-substitute_environs "${service_dir}"/grafana/provisioning/datasources/datasource.yml
+substitute_environs "${service_dir}"/grafana/template-config.monitoring "${service_dir}"/grafana/config.monitoring
+substitute_environs "${service_dir}"/grafana/provisioning/datasources/template-datasource.yml "${service_dir}"/grafana/provisioning/datasources/datasource.yml
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
@@ -174,20 +157,18 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-make -C "${service_dir}" up
+make -C "${service_dir}" env-subst up
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
 service_dir="${repo_basedir}"/services/jaeger
-substitute_environs "${service_dir}"/.env
-make -C "${service_dir}" up
+make -C "${service_dir}" env-subst up
 
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 service_dir="${repo_basedir}"/services/adminer
-substitute_environs "${service_dir}"/.env
-make -C "${service_dir}" up
+make -C "${service_dir}" env-subst up
 
 # -------------------------------- GRAYLOG -------------------------------
 echo
@@ -195,7 +176,7 @@ echo -e "\e[1;33mstarting graylog...\e[0m"
 service_dir="${repo_basedir}"/services/graylog
 GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$SERVICES_PASSWORD" | sha256sum | cut -d ' ' -f1)
 export GRAYLOG_ROOT_PASSWORD_SHA2
-substitute_environs "${service_dir}"/.env
+substitute_environs "${service_dir}"/template.env "${service_dir}"/.env
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
@@ -268,6 +249,6 @@ if [ "$devel_mode" -eq 0 ]; then
     $psed --in-place "s~excluded_services:.*~excluded_services: [webclient]~" deployment_config.default.yaml
     # update
     $psed --in-place "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
-    make down up;
+    make down env-subst up;
     popd
 fi

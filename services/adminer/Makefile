@@ -11,6 +11,7 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # External VARIABLES
 include .env
+include $(realpath $(CURDIR)/../../repo.config)
 
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.Makefile)

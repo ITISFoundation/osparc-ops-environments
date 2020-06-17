@@ -19,6 +19,7 @@ MONITORED_NETWORK := $(monitored_network)
 endif
 export MONITORED_NETWORK
 
+
 .PHONY: down
 down: ## Removes the stack from the swarm
 	@echo "${STACK_NAME}"
@@ -37,6 +38,12 @@ clean: .check_clean ## Cleans all outputs
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
+.PHONY: env-subst
+env-subst: 
+	set -o allexport; \
+	source $(realpath $(CURDIR)/../../repo.config); \
+	set +o allexport; \
+	envsubst < "template.env" > ".env"
 
 # Helpers -------------------------------------------------
 .PHONY: .init

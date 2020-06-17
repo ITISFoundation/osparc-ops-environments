@@ -32,8 +32,6 @@ up-letsencrypt: .init .env .secrets ${TEMP_COMPOSE}-letsencrypt  ## Deploys port
 up-aws: .init .env .secrets ${TEMP_COMPOSE}-aws  ## Deploys portainer stack in aws
 	docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-
-
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}

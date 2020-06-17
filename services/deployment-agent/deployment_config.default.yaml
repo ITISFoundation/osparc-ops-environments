@@ -20,8 +20,8 @@ main:
         - services/docker-compose.yml
         - .env-devel
     - id: simcore-ops-repo
-      url: https://github.com/ITISFoundation/osparc-ops.git
-      branch: master
+      url: https://github.com/surfict/osparc-ops.git
+      branch: aws-integration
       pull_only_files: true
       paths:
         - services/simcore/docker-compose.deploy.yml
@@ -56,7 +56,10 @@ main:
     excluded_volumes: []
     additional_parameters:
       extra_hosts: {}
-      environment: {}
+      environment:
+        S3_ENDPOINT: storage.osparc.local
+        S3_ACCESS_KEY: adminadmin
+        S3_SECRET_KEY: adminadmin
     services_prefix: ${PREFIX_STACK_NAME}
   portainer:
     # lists the portainer instances to call upon
