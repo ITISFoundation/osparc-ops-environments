@@ -1,9 +1,9 @@
-version: '3.7'
+version: "3.7"
 
 volumes:
-    prometheus_data: {}
-    grafana_data: {}
-    alertmanager_data: {}
+  prometheus_data: {}
+  grafana_data: {}
+  alertmanager_data: {}
 
 networks:
   internal:
@@ -21,22 +21,22 @@ configs:
     file: ./dockerd-exporter/Caddyfile
   alertmanager_config:
     file: ./alertmanager/config.yml
-
+  node_exporter_entrypoint:
+    file: ./node-exporter/docker-entrypoint.sh
 services:
-
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.18.1
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=https://osparc.local/prometheus/'
-      - '--web.route-prefix=/'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
+      - "--web.route-prefix=/"
     ports:
       - "9090"
     depends_on:
@@ -45,6 +45,7 @@ services:
       - internal
       - monitored
       - public
+    extra_hosts: []
     #logging:
     #  driver: gelf
     #  options:
@@ -58,13 +59,13 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
-        - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.entrypoints=https
         - traefik.http.routers.prometheus.tls=true
         # Let's encrypt use-case
         # - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
         - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
-        - traefik.http.routers.prometheus.middlewares=auth@docker, gzip@docker, prometheus_stripprefixregex
+        - traefik.http.routers.prometheus.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheus_stripprefixregex
       resources:
         limits:
           memory: 2048M
@@ -93,22 +94,28 @@ services:
           memory: 64M
 
   node-exporter:
-    # special node exporter that allows setting the node name to be more human readable later on in grafana.
-    # very good description in there: https://github.com/stefanprodan/swarmprom
-    image: stefanprodan/swarmprom-node-exporter:v0.16.0
+    image: prom/node-exporter:v0.18.1
     volumes:
-      - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - /proc:/host/proc:ro
       - /etc/hostname:/etc/nodename
+    configs:
+      - source: node_exporter_entrypoint
+        target: /docker-entrypoint.sh
     environment:
       - NODE_ID={{.Node.ID}}
     command:
-      - '--path.sysfs=/host/sys'
-      - '--path.procfs=/host/proc'
-      - '--collector.textfile.directory=/etc/node-exporter/'
-      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--no-collector.ipvs'
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)"
+      - "--collector.textfile.directory=/home/"
+      - "--collector.meminfo_numa"
+      - "--no-collector.ipvs"
+    entrypoint:
+      - /bin/sh
+      - /docker-entrypoint.sh
     networks:
       - internal
     deploy:
@@ -118,7 +125,7 @@ services:
           memory: 128M
         reservations:
           memory: 64M
-          
+
   nvidia-exporter:
     image: mindprince/nvidia_gpu_prometheus_exporter:0.1
     networks:
@@ -132,18 +139,18 @@ services:
           memory: 64M
           generic_resources:
             - discrete_resource_spec:
-                kind: 'VRAM'
+                kind: "VRAM"
                 value: 1
 
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:v0.20.0
     ports:
       - "9093"
     volumes:
       - alertmanager_data:/alertmanager
     command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
+      - "--config.file=/etc/alertmanager/config.yml"
+      - "--storage.path=/alertmanager"
     networks:
       - internal
     configs:
@@ -152,7 +159,7 @@ services:
     deploy:
       placement:
         constraints:
-           - node.role==manager
+          - node.role==manager
       resources:
         limits:
           memory: 128M
@@ -160,17 +167,19 @@ services:
           memory: 64M
 
   cadvisor:
-    image: google/cadvisor
+    image: gcr.io/google-containers/cadvisor:v0.35.0
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     ports:
       - "8080"
     networks:
       - internal
       - monitored
+    command: -logtostderr -docker_only
     deploy:
       mode: global
       resources:
@@ -180,7 +189,7 @@ services:
           memory: 64M
 
   postgres-exporter:
-    image: wrouesnel/postgres_exporter
+    image: bitnami/postgres-exporter:0.8.0
     ports:
       - "9187"
     networks:
@@ -194,9 +203,24 @@ services:
           memory: 128M
         reservations:
           memory: 64M
-
+  redis-exporter:
+    image: oliver006/redis_exporter
+    ports:
+      - "9121"
+    networks:
+      - internal
+      - monitored
+    environment:
+      - REDIS_ADDR=${REDIS_EXPORTER_DATA_SOURCE_NAME}
+      - REDIS_EXPORTER_CHECK_KEYS=user_id*client_session_id*alive, user_id*client_session_id*resources
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:7.0.0
     depends_on:
       - prometheus
     ports:
@@ -209,6 +233,7 @@ services:
     user: "104"
     networks:
       - internal
+      - monitored # needed to access postgres
       - public
     deploy:
       placement:
@@ -221,14 +246,32 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
+        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
         - traefik.http.routers.grafana.entrypoints=https
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.grafana.middlewares=gzip@docker, grafana_replace_regex
+        - traefik.http.routers.grafana.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, grafana_replace_regex
       resources:
         limits:
           memory: 128M
+        reservations:
+          memory: 64M
+
+  grafana-image-renderer:
+    image: grafana/grafana-image-renderer:latest
+    environment:
+      ENABLE_METRICS: "true"
+      RENDERING_MODE: clustered
+      RENDERING_CLUSTERING_MODE: context
+      RENDERING_CLUSTERING_MAX_CONCURRENCY: 5
+    ports:
+      - "8081"
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          memory: 512M
         reservations:
           memory: 64M

@@ -49,11 +49,12 @@ services:
         - traefik.http.routers.portus.entrypoints=https
         - traefik.http.routers.portus.tls=true
         - traefik.http.routers.portus.priority=10
-        - traefik.http.routers.portus.middlewares=gzip@docker
+        - traefik.http.routers.portus.middlewares=ops_whitelist_ips@docker, ops_gzip@docker
         - traefik.http.routers.portus_token.rule=Host(`${MACHINE_FQDN}`) && PathPrefix(`/v2/token`)
         - traefik.http.routers.portus_token.entrypoints=https
         - traefik.http.routers.portus_token.tls=true
         - traefik.http.routers.portus_token.priority=40
+        - traefik.http.routers.portus_token.middlewares=ops_whitelist_ips@docker, ops_gzip@docker
   background:
     image: opensuse/portus:head
     init: true
@@ -155,7 +156,7 @@ services:
         - traefik.http.routers.registry.entrypoints=https
         - traefik.http.routers.registry.tls=true
         - traefik.http.routers.registry.priority=20
-        - traefik.http.routers.registry.middlewares=gzip@docker
+        - traefik.http.routers.registry.middlewares=ops_whitelist_ips@docker, ops_gzip@docker
     volumes:
       - registry_data:/var/lib/registry
     configs:

@@ -87,11 +87,9 @@ services:
         - traefik.http.routers.graylog.rule=PathPrefix(`/graylog`)
         - traefik.http.routers.graylog.entrypoints=https
         - traefik.http.routers.graylog.tls=true
-        #  Let's encrypt use case
-        # - traefik.http.routers.graylog.tls.certresolver=lehttpchallenge
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.graylog.middlewares=gzip@docker, graylog_replace_regex
+        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, graylog_replace_regex
       placement:
         constraints:
           - node.role==manager

@@ -1,10 +1,10 @@
-version: '3.7'
+version: "3.7"
 services:
   jaeger:
     image: jaegertracing/all-in-one:1.14
     command: >
-          --query.base-path=/jaeger
-          --memory.max-traces=200
+      --query.base-path=/jaeger
+      --memory.max-traces=200
 
     init: true
     ports:
@@ -25,7 +25,7 @@ services:
         - traefik.http.routers.jaeger.rule=PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
         - traefik.http.routers.jaeger.tls=true
-        - traefik.http.routers.jaeger.middlewares=auth@docker, gzip@docker
+        - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
       resources:
         limits:
           memory: 2048M

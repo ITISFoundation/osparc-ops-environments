@@ -15,7 +15,7 @@ env:
   DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  #no buildkit right now since the labels from docker-compsoe are not used (bug that will be fixed soon)
+  # no buildkit right now since the labels from docker-compsoe are not used (bug that will be fixed soon)
   # DOCKER_BUILDKIT: 1
   # COMPOSE_DOCKER_CLI_BUILD: 1
 

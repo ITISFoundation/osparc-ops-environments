@@ -1,7 +1,7 @@
-version: '3.7'
+version: "3.7"
 services:
   adminer:
-    image: adminer
+    image: adminer:4.7.6
     init: true
     ports:
       - 8080
@@ -9,17 +9,19 @@ services:
       - monitored
       - public
     environment:
-      ADMINER_DEFAULT_SERVER: postgres
+      - ADMINER_DEFAULT_SERVER=postgres
+      - ADMINER_DESIGN=nette
+      - ADMINER_PLUGINS=json-column
     deploy:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.adminer.loadbalancer.server.port=8080
-        - traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)
+        - traefik.http.routers.adminer.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer`)
         - traefik.http.routers.adminer.entrypoints=https
         - traefik.http.routers.adminer.tls=true
         - traefik.http.middlewares.adminer_stripprefixregex.stripprefixregex.regex=^/adminer
-        - traefik.http.routers.adminer.middlewares=gzip@docker, adminer_stripprefixregex
+        - traefik.http.routers.adminer.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_stripprefixregex
       resources:
         limits:
           memory: 128M

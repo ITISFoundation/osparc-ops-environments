@@ -31,9 +31,8 @@ services:
       - "letsencrypt_certs:/letsencrypt"
     deploy:
       labels:
-        - traefik.http.routers.whoami.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/whoami`)
-          - traefik.http.routers.api.tls=true
-          - traefik.http.routers.api.tls.certresolver=lehttpchallenge
+        - traefik.http.routers.api.tls=true
+        - traefik.http.routers.api.tls.certresolver=lehttpchallenge
   whoami:
     deploy:
       labels:

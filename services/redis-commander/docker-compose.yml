@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   redis-commander:
     image: rediscommander/redis-commander:latest
@@ -21,7 +21,7 @@ services:
         - traefik.http.routers.redis.entrypoints=https
         - traefik.http.routers.redis.tls=true
         - traefik.http.middlewares.redis_stripprefixregex.stripprefixregex.regex=^/redis
-        - traefik.http.routers.redis.middlewares=auth@docker, gzip@docker
+        - traefik.http.routers.redis.middlewares=ops_auth@docker, ops_gzip@docker
       resources:
         limits:
           memory: 128M

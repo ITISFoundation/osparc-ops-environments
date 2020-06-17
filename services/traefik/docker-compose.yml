@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   traefik:
-    image: traefik:v2.2.0
+    image: traefik:v2.2.1
     init: true
     command:
       - "--api=true"
@@ -29,13 +29,17 @@ services:
     ports:
       - target: 80
         published: 80
+        mode: host
       - target: 443
         published: 443
+        mode: host
+
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
 
     deploy:
+      mode: global
       placement:
         constraints:
           - node.role == manager
@@ -43,7 +47,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
-        - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.middlewares.ops_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
         # redirect http to https
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
         - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
@@ -54,21 +58,22 @@ services:
         # To create user:password pair, it's possible to use this command:
         # docker run --rm --entrypoint htpasswd registry:2 -nb user password | sed -e s/\\$/\\$\\$/g
         # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
-        - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
+        - traefik.http.middlewares.ops_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         # gzip compression
-        - traefik.http.middlewares.gzip.compress=true
+        - traefik.http.middlewares.ops_gzip.compress=true
+        # ip whitelisting
+        - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=0.0.0.0/1,128.0.0.0/2,192.0.0.0/3,224.0.0.0/4
         # traefik UI
         - traefik.http.routers.api.service=api@internal
-        - traefik.http.routers.api.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        - traefik.http.routers.api.rule=Host(`${MONITORING_DOMAIN}`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
         - traefik.http.routers.api.entrypoints=https
         - traefik.http.routers.api.tls=true
-        - traefik.http.routers.api.middlewares=auth@docker, gzip@docker
+        - traefik.http.routers.api.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
         - traefik.http.services.api.loadbalancer.server.port=8080
 
     networks:
       - public
       - monitored
-
   whoami:
     image: "containous/whoami"
     deploy:
@@ -79,7 +84,7 @@ services:
         - traefik.http.routers.whoami.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/whoami`)
         - traefik.http.routers.whoami.entrypoints=https
         - traefik.http.routers.whoami.tls=true
-        - traefik.http.routers.whoami.middlewares=auth@docker, gzip@docker
+        - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
     networks:
       - public
 

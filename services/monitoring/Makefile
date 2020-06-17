@@ -27,9 +27,15 @@ endif
 
 # postgres db ulr
 POSTGRES_EXPORTER_DATA_SOURCE_NAME ?= postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+# External VARIABLES
+include .env
+
+# redis db url
+REDIS_EXPORTER_DATA_SOURCE_NAME ?= redis://redis:6379
 
 export MONITORED_NETWORK
 export POSTGRES_EXPORTER_DATA_SOURCE_NAME
+export REDIS_EXPORTER_DATA_SOURCE_NAME
 
 # Network from which services are reverse-proxied
 #  - by default it will create an overal attachable network called public_network
