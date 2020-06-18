@@ -80,6 +80,13 @@ down: ## Stops and remove stack from swarm
 leave: ## leaves swarm stopping all stacks, secrets in it
 	-docker swarm leave -f
 
+.PHONY: env-subst
+env-subst: 
+	set -o allexport; \
+	source $(realpath $(CURDIR)/../../repo.config); \
+	set +o allexport; \
+	envsubst < "template.env" > ".env"
+
 .PHONY: push
 push: ## Pushes service to the registry.
 	docker push ${DOCKER_REGISTRY}/$(APP_NAME):${DOCKER_IMAGE_TAG}

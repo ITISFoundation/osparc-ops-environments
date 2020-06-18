@@ -47,6 +47,7 @@ main:
       export OPS_PUBLIC_NETWORK=${PUBLIC_NETWORK} &&
       export OPS_MONITORED_NETWORK=${MONITORED_NETWORK} &&
       export PREFIX_STACK_NAME=${PREFIX_STACK_NAME} &&
+      export PUBLISHED_HOST_NAME=${MACHINE_FQDN} &&
       mv .env .env.platform &&
       cat .env-devel >> .env.nosub && cat .env.platform >> .env.nosub &&
       envsubst < .env.nosub > .env &&
@@ -60,7 +61,7 @@ main:
         S3_ENDPOINT: storage.osparc.local
         S3_ACCESS_KEY: adminadmin
         S3_SECRET_KEY: adminadmin
-    services_prefix: ${PREFIX_STACK_NAME}
+    services_prefix: local
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
