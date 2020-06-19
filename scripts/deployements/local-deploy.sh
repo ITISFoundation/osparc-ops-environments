@@ -81,7 +81,7 @@ pushd "${repo_basedir}"/services/simcore;
 simcore_env=".env"
 simcore_compose="docker-compose.deploy.yml"
 
-# substitute_environs ${simcore_env}
+substitute_environs template${simcore_env} ${simcore_env}
 
 # docker-compose-simcore
 # for local use we need tls self-signed certificate for the traefik entrypoint in simcore
@@ -109,8 +109,9 @@ echo -e "\e[1;33mstarting traefik...\e[0m"
 cp "${repo_basedir}"/certificates/*.crt "${repo_basedir}"/services/traefik/secrets/
 cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secrets/
 # setup configuration
-TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
+TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$/\\$\\$/g)
 export TRAEFIK_PASSWORD
+echo ${TRAEFIK_PASSWORD}
 substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
 make -C "${repo_basedir}"/services/traefik up-local
 

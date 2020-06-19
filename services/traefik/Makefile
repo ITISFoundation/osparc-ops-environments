@@ -33,7 +33,7 @@ include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 # Makefile including function used by every services
 include ../common.Makefile
 
-.PHONY: up
+.PHONY: up-local
 up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
 	docker stack deploy -c ${TEMP_COMPOSE}-local ${STACK_NAME}
 

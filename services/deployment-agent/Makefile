@@ -161,7 +161,7 @@ devenv: .venv ## create a python virtual environment with dev tools (e.g. linter
 		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
 	)
 
-${DEPLOYMENT_AGENT_CONFIG}: deployment_config.default.yaml
+${DEPLOYMENT_AGENT_CONFIG}:  deployment_config.default.yaml 
 	@cp $< $@
 
 
