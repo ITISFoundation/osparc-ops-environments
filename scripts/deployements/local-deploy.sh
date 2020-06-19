@@ -109,7 +109,7 @@ echo -e "\e[1;33mstarting traefik...\e[0m"
 cp "${repo_basedir}"/certificates/*.crt "${repo_basedir}"/services/traefik/secrets/
 cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secrets/
 # setup configuration
-TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$/\\$\\$/g)
+TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$TRAEFIK_USER" "$TRAEFIK_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$/\\$\\$/g)
 export TRAEFIK_PASSWORD
 echo ${TRAEFIK_PASSWORD}
 substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
@@ -175,7 +175,7 @@ make -C "${service_dir}" env-subst up
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
 service_dir="${repo_basedir}"/services/graylog
-GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$SERVICES_PASSWORD" | sha256sum | cut -d ' ' -f1)
+GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$GRAYLOG_ROOT_PASSWORD" | sha256sum | cut -d ' ' -f1)
 export GRAYLOG_ROOT_PASSWORD_SHA2
 substitute_environs "${service_dir}"/template.env "${service_dir}"/.env
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname

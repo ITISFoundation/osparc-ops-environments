@@ -19,8 +19,8 @@ function error_exit
 function substitute_environs
 {
     # NOTE: be careful that no variable with $ are in .env or they will be replaced by envsubst unless a list of variables is given
-    tmpfile=$(mktemp)    
-    envsubst < "${1:-"Missing File"}" > "${tmpfile}" && mv "${tmpfile}" "${1:-"Missing File"}"
+       
+    envsubst < "${1:-"Missing File"}" > "${2}"
 }
 
 # Using osx support functions
@@ -59,7 +59,6 @@ simcore_compose="docker-compose.deploy.yml"
 
 substitute_environs ${simcore_env}
 
-
 # for aws use we need http for the traefik entrypoint in simcore. Https is handled by aws
 $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=http/' ${simcore_compose}
 $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=false/' ${simcore_compose}
@@ -82,44 +81,30 @@ popd
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-substitute_environs "${repo_basedir}"/services/portainer/.env
-make -C "${repo_basedir}"/services/portainer up-aws
+make -C "${repo_basedir}"/services/portainer env-subst up-aws
 
 
 # -------------------------------- TRAEFIK -------------------------------
 echo
 echo -e "\e[1;33mstarting traefik...\e[0m"
-substitute_environs "${repo_basedir}"/services/traefik/.env
-make -C "${repo_basedir}"/services/traefik up-aws   
-
+# setup configuration
+TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$TRAEFIK_USER" "$TRAEFIK_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$/\\$\\$/g)
+export TRAEFIK_PASSWORD
+substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
+make -C "${repo_basedir}"/services/traefik up-aws
 
 
 
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-pushd "${repo_basedir}"/services/registry
-$psed -i -e "s/REGISTRY_DOMAIN=.*/REGISTRY_DOMAIN=$REGISTRY_DOMAIN/" .env
-$psed -i -e "s/S3_ACCESS_KEY_ID=.*/S3_ACCESS_KEY_ID=$REGISTRY_S3_ACCESS_KEY_ID/" .env
-$psed -i -e "s~S3_SECRET_ACCESS_KEY=.*~S3_SECRET_ACCESS_KEY=$REGISTRY_S3_SECRET_ACCESS_KEY~" .env
-$psed -i -e "s/S3_BUCKET=.*/S3_BUCKET=$REGISTRY_S3_BUCKET/" .env
-$psed -i -e "s/S3_ENDPOINT=.*/S3_ENDPOINT=$REGISTRY_S3_ENDPOINT/" .env
-$psed -i -e "s/S3_SECURE=.*/S3_SECURE=$REGISTRY_S3_SECURE/" .env
-$psed -i -e "s/AWS_REGION=.*/AWS_REGION=$REGISTRY_AWS_REGION/" .env
-make up-aws
-popd
+make -C "${repo_basedir}"/services/registry env-subst up-aws
 
 
 # -------------------------------- Redis commander-------------------------------
 echo
 echo -e "\e[1;33mstarting redis commander...\e[0m"
-pushd "${repo_basedir}"/services/redis-commander
-
-# set configuration
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-
-make up-aws
-popd
+make -C "${repo_basedir}"/services/redis-commander env-subst up-aws
 
 
 # -------------------------------- MONITORING -------------------------------
@@ -130,77 +115,71 @@ echo -e "\e[1;33mstarting monitoring...\e[0m"
 # grafana config
 pushd "${repo_basedir}"/services/monitoring/grafana
 
-$psed -i -e "s/GF_SERVER_DOMAIN=.*/GF_SERVER_DOMAIN=$MONITORING_DOMAIN/"  config.monitoring
-$psed -i -e "s~GF_SERVER_ROOT_URL=.*~GF_SERVER_ROOT_URL=https://$MONITORING_DOMAIN/grafana~"  config.monitoring
+service_dir="${repo_basedir}"/services/monitoring
+substitute_environs "${service_dir}"/grafana/template-config.monitoring "${service_dir}"/grafana/config.monitoring
+substitute_environs "${service_dir}"/grafana/provisioning/datasources/template-datasource.yml "${service_dir}"/grafana/provisioning/datasources/datasource.yml
 popd
 
 # monitoring config
-pushd "${repo_basedir}"/services/monitoring
-# if  WSL, we comment - /etc/hostname:/etc/host_hostname
-
-if grep -qF  "#- /etc/hostname:/etc/nodename # doesn't work with windows" docker-compose.yml
-then
-    echo "Changing /etc/hostname in Monitoring configuration"
-    $psed -i -e "s~#- /etc/hostname:/etc/nodename # doesn't work with windows~- /etc/hostname:/etc/nodename # doesn't work with windows~" docker-compose.yml
+# if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
+if grep -qEi "(Microsoft|WSL)" /proc/version;
+then 
+    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]
+    then
+        $psed --in-place --expression="s~- /etc/hostname:/etc/nodename # don't work with windows~#- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
+    fi
+else
+    if [ "$(grep  "#- /etc/hostname:/etc/nodename # don't work with windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]  
+    then
+        $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
+    fi
 fi
-
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-make up-aws
-popd
+make -C "${service_dir}" env-subst up-aws
 
 
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
-pushd "${repo_basedir}"/services/jaeger
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-make up-aws
-popd
-
+service_dir="${repo_basedir}"/services/jaeger
+make -C "${service_dir}" env-subst up-aws
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
-pushd "${repo_basedir}"/services/adminer
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed -i -e "s/POSTGRES_DEFAULT_SERVER=.*/POSTGRES_DEFAULT_SERVER=$POSTGRES_HOST/" .env
-make up-aws
-popd
+service_dir="${repo_basedir}"/services/adminer
+make -C "${service_dir}" env-subst up-aws
 
 # -------------------------------- Mail -------------------------------
 echo
 echo -e "\e[1;33mstarting mail server...\e[0m"
-pushd "${repo_basedir}"/services/mail
-
-
-
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$SMTP_HOST/" .env
-$psed -i -e "s/PG_HOST=.*/PG_HOST=$POSTGRES_ENDPOINT/" .env
+service_dir="${repo_basedir}"/services/mail
+make -C "${service_dir}" env-subst up-aws
 #./setup.sh email add support@simcore.io alexamdre
-
-
-
-make up-aws
-popd
-
 
 # -------------------------------- GRAYLOG -------------------------------
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
 
-pushd "${repo_basedir}"/services/graylog;
+service_dir="${repo_basedir}"/services/graylog
+GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$GRAYLOG_ROOT_PASSWORD" | sha256sum | cut -d ' ' -f1)
+export GRAYLOG_ROOT_PASSWORD_SHA2
+substitute_environs "${service_dir}"/template.env "${service_dir}"/.env
 
 # Uncomment - /etc/hostname:/etc/host_hostname - In local for WSL, the script for the local deployement comment it automatically
 
-if grep -qF  "#- /etc/hostname:/etc/host_hostname # does not work in windows" docker-compose.yml
-then
-    echo "Changing /etc/hostname in Graylog configuration"
-    $psed -i -e "s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" docker-compose.yml
+# if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
+if grep -qEi "(Microsoft|WSL)" /proc/version;
+then 
+    if [ ! "$(grep -qEi  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]
+    then
+        $psed --in-place --expression="s~- /etc/hostname:/etc/host_hostname # does not work in windows~#- /etc/hostname:/etc/host_hostname # does not work in windows~" "${service_dir}"/docker-compose.yml
+    fi
+else
+    if [ "$(grep  "#- /etc/hostname:/etc/host_hostname # does not work in windows" &> /dev/null "${service_dir}"/docker-compose.yml)" ]
+    then
+        $psed --in-place --expression="s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" "${service_dir}"/docker-compose.yml
+    fi
 fi
-
-
-$psed -i -e "s/MONITORING_DOMAIN=.*/MONITORING_DOMAIN=$MONITORING_DOMAIN/" .env
-$psed -i -e "s~GRAYLOG_HTTP_EXTERNAL_URI=.*~GRAYLOG_HTTP_EXTERNAL_URI=https://$MONITORING_DOMAIN/graylog/~" .env
-make up-aws
+make -C "${service_dir}" up-aws
 
 # Wait for Graylog to start, then send a request configuring one INPUT to allow graylogs to receive logs transmitted by LOGSPOUT
 echo
@@ -235,27 +214,21 @@ pushd "${repo_basedir}"/services/deployment-agent;
 if [[ $current_git_url == git* ]]; then
     # it is a ssh style link let's get the organisation name and just replace this cause that conf only accepts https git repos
     current_organisation=$(echo "$current_git_url" | cut -d":" -f2 | cut -d"/" -f1)
-    sed -i "s|https://github.com/ITISFoundation/osparc-ops.git|https://github.com/$current_organisation/osparc-ops.git|" deployment_config.default.yaml
+    $psed --in-place "s|https://github.com/ITISFoundation/osparc-ops.git|https://github.com/$current_organisation/osparc-ops.git|" deployment_config.default.yaml
 else
-    sed -i "/- id: simcore-ops-repo/{n;s|url:.*|url: $current_git_url|}" deployment_config.default.yaml
+    $psed --in-place "/- id: simcore-ops-repo/{n;s|url:.*|url: $current_git_url|}" deployment_config.default.yaml
 fi
-sed -i "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
+$psed --in-place "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
 
 # Add environment variable that will be used by the simcore stack when deployed with the deployement-agent
 YAML_STRING="environment:\n        S3_ENDPOINT: ${S3_ENDPOINT}\n        S3_ACCESS_KEY: ${ACCESS_KEY_ID}\n        S3_SECRET_KEY: ${SECRET_ACCESS_KEY}"
-sed -i "s~environment: {}~$YAML_STRING~" deployment_config.default.yaml
+$psed --in-place "s~environment: {}~$YAML_STRING~" deployment_config.default.yaml
 # update in case there is already something in "environment: {}"
-sed -i "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${S3_ENDPOINT}/" deployment_config.default.yaml
-sed -i "s~S3_ACCESS_KEY:.*~S3_ACCESS_KEY: ${ACCESS_KEY_ID}~" deployment_config.default.yaml
-sed -i "s~S3_SECRET_KEY:.*~S3_SECRET_KEY: ${SECRET_ACCESS_KEY}~" deployment_config.default.yaml
+$psed --in-place "s/S3_ENDPOINT:.*/S3_ENDPOINT: ${S3_ENDPOINT}/" deployment_config.default.yaml
+$psed --in-place "s~S3_ACCESS_KEY:.*~S3_ACCESS_KEY: ${ACCESS_KEY_ID}~" deployment_config.default.yaml
+$psed --in-place "s~S3_SECRET_KEY:.*~S3_SECRET_KEY: ${SECRET_ACCESS_KEY}~" deployment_config.default.yaml
 
 # We don't use Minio and postgresql with AWS
-sed -i "s~excluded_services:.*~excluded_services: [webclient, minio, postgres]~" deployment_config.default.yaml
-# Prefix stack name
-$psed -i -e "s/PREFIX_STACK_NAME=.*/PREFIX_STACK_NAME=$PREFIX_STACK_NAME/" .env
-# defines the simcore stack name
-$psed -i -e "s/SIMCORE_STACK_NAME=.*/SIMCORE_STACK_NAME=$SIMCORE_STACK_NAME/" .env
-# set the image tag to be used from dockerhub
-$psed -i -e "s/SIMCORE_IMAGE_TAG=.*/SIMCORE_IMAGE_TAG=$DOCKER_IMAGE_TAG/" .env
-make down up-aws;
+$psed --in-place "s~excluded_services:.*~excluded_services: [webclient, minio, postgres]~" deployment_config.default.yaml
+make down env-subst up-aws;
 popd
