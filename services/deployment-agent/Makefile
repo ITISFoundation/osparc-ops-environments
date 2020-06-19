@@ -82,10 +82,10 @@ leave: ## leaves swarm stopping all stacks, secrets in it
 
 .PHONY: env-subst
 env-subst: 
-	set -o allexport; \
-	source $(realpath $(CURDIR)/../../repo.config); \
-	set +o allexport; \
-	envsubst < "template.env" > ".env"
+		set -o allexport; \
+		source $(realpath $(CURDIR)/../../repo.config); \
+		set +o allexport; \
+		envsubst < "template.env" > ".env"
 
 .PHONY: push
 push: ## Pushes service to the registry.
@@ -162,7 +162,10 @@ devenv: .venv ## create a python virtual environment with dev tools (e.g. linter
 	)
 
 ${DEPLOYMENT_AGENT_CONFIG}:  deployment_config.default.yaml 
-	@cp $< $@
+	set -o allexport; \
+	source $(realpath $(CURDIR)/.env); \
+	set +o allexport; \
+	envsubst < $< > $@
 
 
 docker-compose-configs = $(wildcard docker-compose*.yml)
