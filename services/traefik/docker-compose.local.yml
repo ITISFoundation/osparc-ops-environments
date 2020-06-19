@@ -25,18 +25,22 @@ services:
       - "--entryPoints.portus.address=:5000"
       - "--entryPoints.storage.address=:10000"
       - "--entryPoints.traefik.address=:9001"
+      - "--entryPoints.simcore_api.address=:10081"
       - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
     ports:
       # additional ports for services
       - target: 10000
         published: 10000
-        # mode: host
+        mode: host
       - target: 5000
         published: 5000
-        # mode: host
+        mode: host
       - target: 9001
         published: 9001
-        # mode: host
+        mode: host
+      - target: 10081
+        published: 10081
+        mode: host
     deploy:
       labels:
         # redirect http to https
@@ -58,6 +62,13 @@ services:
         - traefik.http.routers.traefik_http_to_https.rule=hostregexp(`{host:.+}`)
         - traefik.http.routers.traefik_http_to_https.entrypoints=traefik
         - traefik.http.routers.traefik_http_to_https.middlewares=traefik_force_https
+
+        # simcore_api
+        - traefik.http.middlewares.simcore_api_force_https.redirectScheme.scheme=https
+        - traefik.http.middlewares.simcore_api_force_https.redirectScheme.port=10081
+        - traefik.http.routers.simcore_api_http_to_https.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.simcore_api_http_to_https.entrypoints=simcore_api
+        - traefik.http.routers.simcore_api_http_to_https.middlewares=simcore_api_force_https
 
         # traefik api
         - traefik.http.routers.api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)

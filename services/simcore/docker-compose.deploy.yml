@@ -4,13 +4,16 @@
 # See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 version: "3.7"
 services:
-  api-gateway:
+  api-server:
     networks:
       - public
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
     deploy:
+      labels:
+        # NOTE: apiserver does not need sslheader since there is no socket.io
+        - traefik.http.routers.${SWARM_STACK_NAME}_api-server.middlewares=${SWARM_STACK_NAME}_gzip@docker
       update_config:
         parallelism: 2
         order: start-first
@@ -34,6 +37,12 @@ services:
       - PYTHONTRACEMALLOC=1
       - DIAGNOSTICS_MAX_AVG_LATENCY=10
     deploy:
+      labels:
+        # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
+        # NOTE: traefik does not like - in the sslheader middleware, so we override it here
+        # NOTE: in deploy mode with SSL they must be set to https!
+        - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_webserver.middlewares=${SWARM_STACK_NAME}_gzip@docker, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
       update_config:
         parallelism: 2
         order: start-first
@@ -222,7 +231,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.priority=1
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.middlewares=ops_gzip@docker, ops_sslheader@docker
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.middlewares=ops_gzip@docker
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.service=${SWARM_STACK_NAME}_simcore_api
       update_config:
         parallelism: 2
