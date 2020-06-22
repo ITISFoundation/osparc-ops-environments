@@ -31,7 +31,7 @@ cd osparc-ops
 make help
 ```
 
-### WSL deployement
+### WSL deployment
 
 #### WSL1
 

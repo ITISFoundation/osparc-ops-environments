@@ -1,6 +1,0 @@
-# Order is important. The last matching pattern has the most precedence.
-
-# files and folders recursively
-/virtual_cluster/              @ehzastrow
-/scripts/                      @pcrespov
-/services/                     @sanderegg,@pcrespov

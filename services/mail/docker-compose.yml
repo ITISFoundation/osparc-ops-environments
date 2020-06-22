@@ -32,7 +32,7 @@ services:
         - traefik.http.routers.mail.rule=Host(`smtp.${MACHINE_FQDN}`)
         - traefik.http.routers.mail.entrypoints=smtp
         - traefik.http.routers.mail.tls=true
-        #- traefik.http.routers.jaeger.middlewares=whitelist_ips@docker, auth@docker, gzip@docker
+        #- traefik.http.routers.jaeger.middlewares=whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
 volumes:
   maildata:
     driver: local

@@ -164,7 +164,7 @@ GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$GRAYLOG_ROOT_PASSWORD" | sha256sum | cut 
 export GRAYLOG_ROOT_PASSWORD_SHA2
 substitute_environs "${service_dir}"/template.env "${service_dir}"/.env
 
-# Uncomment - /etc/hostname:/etc/host_hostname - In local for WSL, the script for the local deployement comment it automatically
+# Uncomment - /etc/hostname:/etc/host_hostname - In local for WSL, the script for the local deployment comment it automatically
 
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if grep -qEi "(Microsoft|WSL)" /proc/version;
@@ -220,7 +220,7 @@ else
 fi
 $psed --in-place "/- id: simcore-ops-repo/{n;n;s|branch:.*|branch: $current_git_branch|}" deployment_config.default.yaml
 
-# Add environment variable that will be used by the simcore stack when deployed with the deployement-agent
+# Add environment variable that will be used by the simcore stack when deployed with the deployment-agent
 YAML_STRING="environment:\n        S3_ENDPOINT: ${S3_ENDPOINT}\n        S3_ACCESS_KEY: ${ACCESS_KEY_ID}\n        S3_SECRET_KEY: ${SECRET_ACCESS_KEY}"
 $psed --in-place "s~environment: {}~$YAML_STRING~" deployment_config.default.yaml
 # update in case there is already something in "environment: {}"
