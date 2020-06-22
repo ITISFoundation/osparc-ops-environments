@@ -123,7 +123,7 @@ substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_base
 # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
 
 echo
-echo -e "\e[1;33mstarting minio...\e[0m"y
+echo -e "\e[1;33mstarting minio...\e[0m"
  call_make "${repo_basedir}"/services/minio up
 
 echo "waiting for minio to run...don't worry..."
