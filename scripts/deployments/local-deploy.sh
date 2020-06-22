@@ -23,6 +23,10 @@ function substitute_environs
     envsubst < "${1:-"Missing File"}" > "${2}"
 }
 
+function call_make
+{
+    make --no-print-directory --directory "${1:-"Missing Directory"}" "${2:-"Missing recipe"}"
+}
 
 # Using osx support functions
 declare psed # fixes shellcheck issue with not finding psed
@@ -100,7 +104,7 @@ $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/c
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-make -C "${repo_basedir}"/services/portainer up
+ call_make "${repo_basedir}"/services/portainer up
 
 # -------------------------------- TRAEFIK -------------------------------
 echo
@@ -113,14 +117,14 @@ TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$TRAE
 export TRAEFIK_PASSWORD
 echo ${TRAEFIK_PASSWORD}
 substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
-make -C "${repo_basedir}"/services/traefik up-local
+ call_make "${repo_basedir}"/services/traefik up-local
 
 # -------------------------------- MINIO -------------------------------
 # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
 
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"y
-make -C "${repo_basedir}"/services/minio up
+ call_make "${repo_basedir}"/services/minio up
 
 echo "waiting for minio to run...don't worry..."
 while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
@@ -131,13 +135,13 @@ done
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-make -C "${repo_basedir}"/services/registry up
+ call_make "${repo_basedir}"/services/registry up
 
 
 # -------------------------------- Redis commander-------------------------------
 echo
 echo -e "\e[1;33mstarting redis commander...\e[0m"
-make -C "${repo_basedir}"/services/redis-commander up
+ call_make "${repo_basedir}"/services/redis-commander up
 
 # -------------------------------- MONITORING -------------------------------
 echo
@@ -158,18 +162,18 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-make -C "${service_dir}" up
+ call_make "${service_dir}" up
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
 service_dir="${repo_basedir}"/services/jaeger
-make -C "${service_dir}" up
+ call_make "${service_dir}" up
 
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 service_dir="${repo_basedir}"/services/adminer
-make -C "${service_dir}" up
+ call_make "${service_dir}" up
 
 # -------------------------------- GRAYLOG -------------------------------
 echo
@@ -191,7 +195,7 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-make -C "${service_dir}" up
+ call_make "${service_dir}" up
 
 echo
 echo "waiting for graylog to run..."
