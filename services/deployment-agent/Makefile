@@ -170,9 +170,12 @@ ${DEPLOYMENT_AGENT_CONFIG}:  deployment_config.default.yaml
 
 docker-compose-configs = $(wildcard docker-compose*.yml)
 
+.PHONY: ${TEMP_COMPOSE}
+
 ${TEMP_COMPOSE}: .env $(docker-compose-configs)
 	@docker-compose --file docker-compose.yml config > $@
 
+.PHONY: ${TEMP_COMPOSE-devel}
 ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
 	@docker-compose --file docker-compose.yml --file docker-compose.devel.yaml config > $@
 
