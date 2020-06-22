@@ -100,7 +100,7 @@ $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/c
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-make -C "${repo_basedir}"/services/portainer env-subst up
+make -C "${repo_basedir}"/services/portainer up
 
 # -------------------------------- TRAEFIK -------------------------------
 echo
@@ -120,7 +120,7 @@ make -C "${repo_basedir}"/services/traefik up-local
 
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"y
-make -C "${repo_basedir}"/services/minio env-subst up
+make -C "${repo_basedir}"/services/minio up
 
 echo "waiting for minio to run...don't worry..."
 while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
@@ -131,13 +131,13 @@ done
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-make -C "${repo_basedir}"/services/registry env-subst up
+make -C "${repo_basedir}"/services/registry up
 
 
 # -------------------------------- Redis commander-------------------------------
 echo
 echo -e "\e[1;33mstarting redis commander...\e[0m"
-make -C "${repo_basedir}"/services/redis-commander env-subst up
+make -C "${repo_basedir}"/services/redis-commander up
 
 # -------------------------------- MONITORING -------------------------------
 echo
@@ -158,18 +158,18 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-make -C "${service_dir}" env-subst up
+make -C "${service_dir}" up
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
 service_dir="${repo_basedir}"/services/jaeger
-make -C "${service_dir}" env-subst up
+make -C "${service_dir}" up
 
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 service_dir="${repo_basedir}"/services/adminer
-make -C "${service_dir}" env-subst up
+make -C "${service_dir}" up
 
 # -------------------------------- GRAYLOG -------------------------------
 echo

@@ -81,7 +81,7 @@ popd
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
-make -C "${repo_basedir}"/services/portainer env-subst up-aws
+make -C "${repo_basedir}"/services/portainer up-aws
 
 
 # -------------------------------- TRAEFIK -------------------------------
@@ -98,13 +98,13 @@ make -C "${repo_basedir}"/services/traefik up-aws
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
-make -C "${repo_basedir}"/services/registry env-subst up-aws
+make -C "${repo_basedir}"/services/registry up-aws
 
 
 # -------------------------------- Redis commander-------------------------------
 echo
 echo -e "\e[1;33mstarting redis commander...\e[0m"
-make -C "${repo_basedir}"/services/redis-commander env-subst up-aws
+make -C "${repo_basedir}"/services/redis-commander up-aws
 
 
 # -------------------------------- MONITORING -------------------------------
@@ -134,25 +134,25 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
-make -C "${service_dir}" env-subst up-aws
+make -C "${service_dir}" up-aws
 
 
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
 service_dir="${repo_basedir}"/services/jaeger
-make -C "${service_dir}" env-subst up-aws
+make -C "${service_dir}" up-aws
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 service_dir="${repo_basedir}"/services/adminer
-make -C "${service_dir}" env-subst up-aws
+make -C "${service_dir}" up-aws
 
 # -------------------------------- Mail -------------------------------
 echo
 echo -e "\e[1;33mstarting mail server...\e[0m"
 service_dir="${repo_basedir}"/services/mail
-make -C "${service_dir}" env-subst up-aws
+make -C "${service_dir}" up-aws
 #./setup.sh email add support@simcore.io alexamdre
 
 # -------------------------------- GRAYLOG -------------------------------
@@ -230,5 +230,5 @@ $psed --in-place "s~S3_SECRET_KEY:.*~S3_SECRET_KEY: ${SECRET_ACCESS_KEY}~" deplo
 
 # We don't use Minio and postgresql with AWS
 $psed --in-place "s~excluded_services:.*~excluded_services: [webclient, minio, postgres]~" deployment_config.default.yaml
-make down env-subst up-aws;
+make down up-aws;
 popd
