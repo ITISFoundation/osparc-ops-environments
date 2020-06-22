@@ -72,7 +72,7 @@ run: ## starts jupyter notebook for testing (use make test-network if simcore st
 
 .PHONY: up
 up: .init ## Deploys or updates current stack "$(STACK_NAME)"
-	docker stack deploy -c docker-compose.yml $(STACK_NAME)
+	docker stack deploy --compose-file docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack

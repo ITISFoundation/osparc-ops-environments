@@ -17,15 +17,15 @@ include ../common.Makefile
 
 .PHONY: up
 up: .init .env .secrets ${TEMP_COMPOSE}  ## Deploys portainer stack
-	@docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-letsencrypt
 up-letsencrypt: .init .env .secrets ${TEMP_COMPOSE}-letsencrypt  ## Deploys portainer stack using let's encrypt
-	@docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: up-aws
 up-aws: .init .env .secrets ${TEMP_COMPOSE}-aws  ## Deploys portainer stack in aws
-	@docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 # Helpers -------------------------------------------------
 
