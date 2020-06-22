@@ -75,7 +75,7 @@ leave: ## leaves the swarm
 		echo "Add-Content c:\Windows\System32\drivers\etc\hosts \"\`r\`$(MACHINE_IP) $(MACHINE_FQDN)\`r\`$(MACHINE_IP) $(MONITORING_DOMAIN)\`r\`$(MACHINE_IP) $(REGISTRY_DOMAIN)\`r\`$(MACHINE_IP) $(PORTAINER_DOMAIN)\`r\`$(MACHINE_IP) $(STORAGE_DOMAIN)\`r\`$(MACHINE_IP) $(API_DOMAIN)\"" && \
 		echo "OR please run the following in a CMD with Admin rights (note that wildcards are not accepted):" && \
 		echo "echo $(MACHINE_IP) $(MACHINE_FQDN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(MONITORING_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(PORTAINER_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(REGISTRY_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(STORAGE_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts && echo $(MACHINE_IP) $(API_DOMAIN) >> c:\Windows\System32\drivers\etc\hosts") \
-		|| [ 42 ]; \
+		|| true; \
 		fi \
 	,\
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
@@ -93,7 +93,7 @@ leave: ## leaves the swarm
 		( printf  "Adding\n" && \
 		printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n$(MACHINE_IP) $(API_DOMAIN)\n" | sudo tee -a /etc/hosts && \
 		printf  "to /etc/hosts\n" ) \
-		|| [ 42 ]; \
+		|| true; \
 	fi \
 	,)
 .PHONY: help
