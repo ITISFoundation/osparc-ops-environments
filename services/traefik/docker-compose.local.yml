@@ -65,19 +65,13 @@ services:
         - traefik.http.routers.simcore_api_http_to_https.middlewares=simcore_api_force_https
 
         # traefik api
-        - traefik.http.routers.api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-        - traefik.http.routers.api.entrypoints=traefik
+       # - traefik.http.routers.api.entrypoints=traefik
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
     secrets:
       - domain.key
       - domain.crt
-  whoami:
-    deploy:
-      labels:
-        - traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)
-        - traefik.http.routers.whoami.entrypoints=traefik
 
 configs:
   traefik_dynamic_config.yml:
