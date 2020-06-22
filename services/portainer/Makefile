@@ -2,7 +2,6 @@
 
 
 
-
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(shell pwd))
@@ -10,12 +9,8 @@ SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET = $(shell docker secret inspect --format {{.Spec.Name}} portainer_admin_password 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
-# External VARIABLES
-include .env
-
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.Makefile)
-
 
 # Makefile including function used by every services
 include ../common.Makefile
