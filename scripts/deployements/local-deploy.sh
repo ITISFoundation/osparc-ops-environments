@@ -109,7 +109,7 @@ echo -e "\e[1;33mstarting traefik...\e[0m"
 cp "${repo_basedir}"/certificates/*.crt "${repo_basedir}"/services/traefik/secrets/
 cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secrets/
 # setup configuration
-TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2 -nb "$TRAEFIK_USER" "$TRAEFIK_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$/\\$\\$/g)
+TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$TRAEFIK_USER" "$TRAEFIK_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$/\\$\\$/g)
 export TRAEFIK_PASSWORD
 echo ${TRAEFIK_PASSWORD}
 substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
@@ -253,3 +253,5 @@ if [ "$devel_mode" -eq 0 ]; then
     make down env-subst up;
     popd
 fi
+
+

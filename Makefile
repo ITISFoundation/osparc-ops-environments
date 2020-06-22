@@ -157,12 +157,12 @@ reset-prune: ## resets docker swarm, removes all images, volumes, networks, cert
 	@echo -n "Are you sure ? All volumes (including S3 and the database in local deployment) will be deleted. [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@make down
-	@make leave
 	@make clean
 	-docker system prune -a -f
 	-docker volume prune -f
 	-docker network prune -f
 	-make -C certificates remove-root-certificate
+	@make leave
 
 
 # FIXME: DO NOT USE... still working on this
