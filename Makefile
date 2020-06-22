@@ -19,6 +19,7 @@ $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL instead.
 
 # Makefile's shell
 SHELL := /bin/bash
+MAKE_C := $(MAKE) --no-print-directory --directory
 
 # Host machine IP
 export MACHINE_IP = $(shell source $(realpath $(CURDIR)/scripts/portable.sh) && get_this_ip)
@@ -33,16 +34,16 @@ certificates/domain.crt: certificates/domain.key
 certificates/domain.key:
 	# domain key/crt files must be located in $< and certificates/domain.crt to be used
 	@echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ]; \
-	$(MAKE) -C certificates create-certificates; \
-	$(MAKE) -C certificates install-root-certificate;
+	@$(MAKE_C) certificates create-certificates; \
+	@$(MAKE_C) certificates install-root-certificate;
 
 .PHONY: .create-secrets
 .create-secrets:
-	$(MAKE) -C certificates deploy
+	@$(MAKE_C) certificates deploy
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
-	bash scripts/deployments/local-deploy.sh
+	@./scripts/deployments/local-deploy.sh
 	@$(MAKE) info-local
 
 .PHONY: up-devel
@@ -52,13 +53,13 @@ up-devel: .install-fqdn certificates/domain.crt certificates/domain.key .create-
 
 .PHONY: up-aws
 up-aws:
-	bash scripts/deployments/aws-deploy.sh
+	./scripts/deployments/aws-deploy.sh
 
 
 .PHONY: down
 down:
 	@for service in $(SERVICES); do \
-		pushd $$service; $(MAKE) down; popd; \
+		$(MAKE_C) $$service down; \
 	done
 
 .PHONY: leave
