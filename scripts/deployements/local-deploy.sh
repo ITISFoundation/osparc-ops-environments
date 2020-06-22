@@ -250,7 +250,7 @@ if [ "$devel_mode" -eq 0 ]; then
     $psed --in-place "s~excluded_services:.*~excluded_services: [webclient]~" deployment_config.default.yaml
     # update
     $psed --in-place "/extra_hosts:/{n;s/- .*/- \"${MACHINE_FQDN}:${machine_ip}\"/}" deployment_config.default.yaml
-    make down env-subst up;
+    make down up;
     popd
 fi
 
