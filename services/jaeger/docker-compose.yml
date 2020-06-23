@@ -7,11 +7,11 @@ services:
       --memory.max-traces=200
 
     init: true
-    ports:
-      # admin, healthcheck, metrics
-      - 14269
-      # UI
-      - 16686
+    # ports:
+    #   # admin, healthcheck, metrics
+    #   - 14269
+    #   # UI
+    #   - 16686
     networks:
       - public
       - monitored
