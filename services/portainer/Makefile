@@ -29,17 +29,14 @@ up-aws: .init .env .secrets ${TEMP_COMPOSE}-aws  ## Deploys portainer stack in a
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: .secrets
 .secrets: .env
