@@ -48,3 +48,12 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt secrets/domain.crt; fi;
 	@if [[ ! $$(docker secret ls | grep -w domain.key) ]]; then docker secret create domain.key secrets/domain.key; fi;
 	@if [[ ! $$(docker secret ls | grep -w rootca.crt) ]]; then if [ ! -f secrets/rootca.crt ]; then cp secrets/domain.crt secrets/rootca.crt; fi; docker secret create rootca.crt secrets/rootca.crt; fi;
+
+.PHONY: .env
+.env: template.env ../../repo.config
+	@set -o allexport; \
+	source $(realpath $(CURDIR)/../../repo.config); \
+	TRAEFIK_PASSWORD=$$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$$TRAEFIK_USER" "$$TRAEFIK_PASSWORD" | cut -d ':' -f2);\
+	export TRAEFIK_PASSWORD;\
+	set +o allexport; \
+	envsubst < $< > $@
