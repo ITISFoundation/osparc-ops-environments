@@ -62,14 +62,14 @@ build build-kit build-x build-devel build-devel-kit build-devel-x: ## Builds $(A
 
 .PHONY: up
 up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
+	@docker stack deploy --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker stack deploy -c ${TEMP_COMPOSE-aws} $(STACK_NAME)
+	@docker stack deploy --compose-file ${TEMP_COMPOSE-aws} $(STACK_NAME)
 
 .PHONY: up-devel
 up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker stack deploy -c ${TEMP_COMPOSE-devel} $(STACK_NAME)
+	@docker stack deploy --compose-file ${TEMP_COMPOSE-devel} $(STACK_NAME)
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
@@ -173,13 +173,13 @@ docker-compose-configs = $(wildcard docker-compose*.yml)
 .PHONY: ${TEMP_COMPOSE}
 
 ${TEMP_COMPOSE}: .env $(docker-compose-configs)
-	@docker-compose --file docker-compose.yml config > $@
+	@docker-compose --file docker-compose.yml --log-level=ERROR config > $@
 
 .PHONY: ${TEMP_COMPOSE-devel}
 ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
-	@docker-compose --file docker-compose.yml --file docker-compose.devel.yaml config > $@
+	@docker-compose --file docker-compose.yml --file docker-compose.devel.yaml --log-level=ERROR config > $@
 
 .PHONY: ${TEMP_COMPOSE-aws}
 ${TEMP_COMPOSE-aws}: docker-compose.yml docker-compose-aws.yml .env
-	@docker-compose -f $< -f docker-compose-aws.yml config > $@
+	@docker-compose -f $< -f docker-compose-aws.yml --log-level=ERROR config > $@
 	@echo "${STACK_NAME} stack file created for in $@"

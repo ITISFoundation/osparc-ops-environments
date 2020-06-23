@@ -15,22 +15,18 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 # Makefile including function used by every services
 include ../common.Makefile
 
-
-# External VARIABLES
-include .env
-
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE} .create-secrets ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1)
-	@docker stack deploy -c ${TEMP_COMPOSE} $(STACK_NAME)
+	@docker stack deploy --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
 
 .PHONY: up-letsencrypt
 up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt .create-secrets ## Deploys minio stack using let's encrypt
-	@docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 	@echo "in case you created more than 1 replicas, you need to label the nodes accordingly using"
 	@echo "'docker node update --label-add minioX=true' with X being from 1 to number of replicas."
 
@@ -63,7 +59,7 @@ endef
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
 	$(call jinja, $<, tmp.yaml)
-	@docker-compose -f tmp.yaml config > $@
+	@docker-compose -f tmp.yaml --log-level=ERROR config > $@
 	@rm tmp.yaml
 	@echo "${STACK_NAME} stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 
@@ -71,7 +67,7 @@ ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yaml.j2 docker-compose.letsencrypt.yaml.j2 .venv
 	$(call jinja, $<, tmp.yaml)
 	$(call jinja, docker-compose.letsencrypt.yaml.j2, tmp-letsencrypt.yaml)
-	@docker-compose -f tmp.yaml -f tmp-letsencrypt.yaml config > $@
+	@docker-compose -f tmp.yaml -f tmp-letsencrypt.yaml --log-level=ERROR config > $@
 	@rm tmp.yaml tmp-letsencrypt.yaml
 	@echo "${STACK_NAME} stack file created for ${MINIO_NUM_MINIOS} services/replicas with ${MINIO_NUM_PARTITIONS} partitions in $@"
 

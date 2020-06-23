@@ -23,11 +23,11 @@ export MONITORED_NETWORK
 .PHONY: down
 down: ## Removes the stack from the swarm
 	@echo "${STACK_NAME}"
-	docker stack rm ${STACK_NAME}
+	@docker stack rm ${STACK_NAME}
 
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
-	-docker swarm leave -f
+	-@docker swarm leave -f
 
 .PHONY: clean check_clean
 clean: .check_clean ## Cleans all outputs
@@ -38,12 +38,12 @@ clean: .check_clean ## Cleans all outputs
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
-.PHONY: env-subst
-env-subst: 
-	set -o allexport; \
+.PHONY: .env
+.env: template.env
+	@set -o allexport; \
 	source $(realpath $(CURDIR)/../../repo.config); \
 	set +o allexport; \
-	envsubst < "template.env" > ".env"
+	envsubst < $< > $@
 
 # Helpers -------------------------------------------------
 .PHONY: .init

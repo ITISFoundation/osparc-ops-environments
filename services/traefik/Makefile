@@ -8,7 +8,6 @@ IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
-$(info + Detected OS : $(IS_LINUX)$(IS_OSX)$(IS_WSL)$(IS_WIN))
 
 # Makefile's shell
 SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
@@ -24,9 +23,6 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
 
 
-# External VARIABLES
-include .env
-
 # TARGETS --------------------------------------------------
 include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
@@ -35,20 +31,20 @@ include ../common.Makefile
 
 .PHONY: up-local
 up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
-	docker stack deploy -c ${TEMP_COMPOSE}-local ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
 .PHONY: up-aws
 up-aws: .env ${TEMP_COMPOSE}-aws ## Deploys the stack aws 
 	@echo "deploying ${STACK_NAME} to aws"
-	docker stack deploy -c ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-letsencrypt
 up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt ## Deploys the stack without certificates (self-generated or let's encrypt)
-	docker stack deploy -c ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE}-letsencrypt ${STACK_NAME}
 
 .PHONY: up-no-certificates
 up-no-certificates: .init .env ${TEMP_COMPOSE} ## Deploys the stack without certificates (self-generated or let's encrypt)
-	docker stack deploy -c ${TEMP_COMPOSE} ${STACK_NAME}
+	@docker stack deploy --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 
 # Helpers -------------------------------------------------
@@ -56,17 +52,17 @@ up-no-certificates: .init .env ${TEMP_COMPOSE} ## Deploys the stack without cert
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@docker-compose -f $< -f docker-compose.local.yml config > $@
+	@docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
 	@echo "${STACK_NAME} stack file created for $@"
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.yml config > $@
+	@docker-compose -f $< -f docker-compose.letsencrypt.yml --log-level=ERROR config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
-	@docker-compose -f $< -f docker-compose.aws.yml config > $@
+	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
 	@echo "${STACK_NAME} stack file created for in $@"
 
 # Self-signed certificate authority
