@@ -13,7 +13,7 @@ Support services used for the deployment of the oSPARC platform:
 - [Portainer](services/portainer/): Docker management tool
 - [Traefik](services/traefik/): Reverse-proxy to handle secured entrypoints
 - [Minio](services/minio/): AWS compatible S3 storage
-- [Portus](services/portus/): Docker images registry
+- [Docker registry](services/registry/): Docker images registry
 - [Graylog](services/graylog): Logs aggregator
 - [Jaeger](services/jaeger): Tracing system
 - [Monitoring](services/monitoring/): Prometheus/Grafana monitoring
