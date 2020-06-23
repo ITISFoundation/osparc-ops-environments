@@ -58,7 +58,7 @@ clean: .check_clean ## Cleans all outputs
 # Helpers -------------------------------------------------
 .PHONY: .init
 .init: ## initializeds swarm cluster
-	@echo "Initialization launched"
+	# "Initialization launched"
 	$(if $(SWARM_HOSTS),  \
 		,                 \
 		docker swarm init \
