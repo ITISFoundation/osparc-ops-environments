@@ -31,17 +31,14 @@ up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt ## Deploys the stack with
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 	@docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
-	# $(STACK_NAME) stack file created for $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml --log-level=ERROR config > $@
-	# $(STACK_NAME) stack file created for in $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
-	# $(STACK_NAME) stack file created for in $@
 
 .PHONY: .create_secrets
 .create_secrets: secrets/domain.crt secrets/domain.key secrets/rootca.crt

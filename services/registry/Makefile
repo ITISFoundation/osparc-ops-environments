@@ -42,14 +42,11 @@ up-aws: .env ${TEMP_COMPOSE}-aws  ## Deploys registry on AWS
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml docker-compose.self-signed.yml
 	@docker-compose -f $< -f docker-compose.self-signed.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for $@"
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"

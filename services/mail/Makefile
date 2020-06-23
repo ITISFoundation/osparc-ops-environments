@@ -26,4 +26,3 @@ up-aws: .env ${TEMP_COMPOSE}  ## Deploys mail stack in aws
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
