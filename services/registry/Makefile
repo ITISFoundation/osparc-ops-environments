@@ -1,16 +1,5 @@
 .DEFAULT_GOAL := help
 
-# Operating system
-ifeq ($(filter Windows_NT,$(OS)),)
-IS_WSL  := $(if $(findstring Microsoft,$(shell uname -a)),WSL,)
-IS_OSX  := $(filter Darwin,$(shell uname -a))
-IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
-endif
-IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
-
-# Makefile's shell
-SHELL := $(if $(IS_WIN),powershell.exe,/bin/bash)
-
 
 
 # Internal VARIABLES ------------------------------------------------
@@ -19,15 +8,8 @@ STACK_NAME = $(notdir $(shell pwd))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
-# exports
-# Host machine IP
-export MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
-
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.Makefile)
-
-# Makefile including function used by every services
-include ../common.Makefile
+include ../../scripts/common.Makefile
 
 define create-s3-bucket
 	# ensure bucket is available in S3...
