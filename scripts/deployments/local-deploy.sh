@@ -37,14 +37,10 @@ source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 this_script_dir=$(dirname "$0")
 repo_basedir=$(realpath "${this_script_dir}"/../../)
 
-# VCS info on current repo
-current_git_url=$(git config --get remote.origin.url)
-current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
 machine_ip=$(get_this_ip)
 
 devel_mode=0
-
 usage="$(basename "$0") [-h] [--key=value]
 
 Deploys all the osparc-ops stacks and the SIM-core stack on osparc.local.
@@ -79,26 +75,6 @@ fi
 
 echo
 echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
-
-# -------------------------------- Simcore -------------------------------
-pushd "${repo_basedir}"/services/simcore;
-simcore_env=".env"
-simcore_compose="docker-compose.deploy.yml"
-
-substitute_environs template${simcore_env} ${simcore_env}
-
-# docker-compose-simcore
-# for local use we need tls self-signed certificate for the traefik entrypoint in simcore
-$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' ${simcore_compose}
-$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' ${simcore_compose}
-
-# for local use we need to provide the generated certificate authority so that storage can access S3, or the director the registry
-$psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' ${simcore_compose}
-$psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' ${simcore_compose}
-$psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
-$psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
-
-
 
 
 # -------------------------------- PORTAINER ------------------------------
@@ -221,6 +197,29 @@ curl -u "$SERVICES_USER":"$SERVICES_PASSWORD" --header "Content-Type: applicatio
 
 
 if [ "$devel_mode" -eq 0 ]; then
+
+    # -------------------------------- Simcore -------------------------------
+    pushd "${repo_basedir}"/services/simcore;
+    # VCS info on current repo
+    current_git_url=$(git config --get remote.origin.url)
+    current_git_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    simcore_env=".env"
+    simcore_compose="docker-compose.deploy.yml"
+
+    substitute_environs template${simcore_env} ${simcore_env}
+
+    # docker-compose-simcore
+    # for local use we need tls self-signed certificate for the traefik entrypoint in simcore
+    $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' ${simcore_compose}
+    $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' ${simcore_compose}
+
+    # for local use we need to provide the generated certificate authority so that storage can access S3, or the director the registry
+    $psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' ${simcore_compose}
+    $psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' ${simcore_compose}
+    $psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
+    $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
+
 
     # -------------------------------- DEPlOYMENT-AGENT -------------------------------
     echo
