@@ -27,14 +27,41 @@ up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys graylog stack using let's enc
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
+
+.PHONY: .env
+.env: template.env ../../repo.config
+	@set -o allexport; \
+	source $(realpath $(CURDIR)/../../repo.config); \
+	GRAYLOG_ROOT_PASSWORD_SHA2=$$(echo -n "$${GRAYLOG_ROOT_PASSWORD}" | sha256sum | cut -d ' ' -f1);\
+	export GRAYLOG_ROOT_PASSWORD_SHA2;\
+	set +o allexport; \
+	envsubst < $< > $@
+
+.PHONY: configure-instance
+configure-instance: ../../repo.config
+	# waiting for graylog to run...
+	@set -o allexport; source ../../repo.config; set +o allexport; \
+	while [ ! "$$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10  -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://"$$MONITORING_DOMAIN"/graylog/api/users)" = 401 ]; do\
+		echo "waiting for graylog to run...";\
+		sleep 5s;\
+	done;\
+	json_data="{\
+		\"title\": \"standard GELF UDP input\",\
+		\"type\": \"org.graylog2.inputs.gelf.udp.GELFUDPInput\",\
+		\"global\": \"true\",\
+		\"configuration\": {\
+			\"bind_address\": \"0.0.0.0\",\
+			\"port\":12201\
+		}\
+	}";\
+	curl -u "$$SERVICES_USER":"$$SERVICES_PASSWORD" --header "Content-Type: application/json" \
+		--header "X-Requested-By: cli" -X POST \
+		--data "$$json_data" https://"$$MONITORING_DOMAIN"/graylog/api/system/inputs
