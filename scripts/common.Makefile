@@ -1,5 +1,5 @@
 # HELPER Makefile that countains all the recipe that will be used by every services. Please include it in your Makefile if you add a new service
-
+SHELL := /bin/bash
 # Network from which services are reverse-proxied
 #  - by default it will create an overal attachable network called public_network
 ifeq ($(public_network),)
