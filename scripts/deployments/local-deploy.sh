@@ -91,7 +91,6 @@ cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secre
 # setup configuration
 TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$TRAEFIK_USER" "$TRAEFIK_PASSWORD" | cut -d ':' -f2)
 export TRAEFIK_PASSWORD
-echo ${TRAEFIK_PASSWORD}
 substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
  call_make "${repo_basedir}"/services/traefik up-local
 
