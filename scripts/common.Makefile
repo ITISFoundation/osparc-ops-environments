@@ -49,7 +49,7 @@ clean: .check_clean ## Cleans all outputs
 	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 
 .PHONY: .env
-.env: template.env
+.env: template.env ../../repo.config
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/../../repo.config); \
 	set +o allexport; \
