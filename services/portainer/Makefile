@@ -10,10 +10,7 @@ DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET = $(shell docker secret inspect --format 
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.Makefile)
-
-# Makefile including function used by every services
-include ../common.Makefile
+include ../../scripts/common.Makefile
 
 .PHONY: up
 up: .init .env .secrets ${TEMP_COMPOSE}  ## Deploys portainer stack
@@ -45,8 +42,8 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: .secrets
-.secrets:
+.secrets: .env
 	@$(if $(DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET), \
 		, \
-		echo -n "${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
+		set -o allexport; source .env; set +o allexport; echo -n "$${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null;\
 	)
