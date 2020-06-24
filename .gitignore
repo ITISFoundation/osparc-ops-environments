@@ -38,7 +38,7 @@ id_ed25519*
 .pytest_cache/
 
 #docker
-.env
+**/.env
 
 # generated stack files
 .stack.*

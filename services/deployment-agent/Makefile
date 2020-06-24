@@ -1,44 +1,19 @@
 .DEFAULT_GOAL := help
-SHELL := /bin/bash
 
 APP_NAME := deployment-agent
 
 # External VARIABLES
-include .env
+include ../../repo.config
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-ifeq ($(PREFIX_STACK_NAME),)
-STACK_NAME := $(notdir $(PWD))
-else
-STACK_NAME := $(PREFIX_STACK_NAME)-$(notdir $(PWD))
-endif
+STACK_NAME = $(notdir $(shell pwd))
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
-DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
-
 TEMP_COMPOSE = .stack.${STACK_NAME}.yaml
 TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
 TEMP_COMPOSE-aws = .stack.${STACK_NAME}.aws.yml
 
-# Network from which services are reverse-proxied
-#  - by default it will create an overal attachable network called public_network
-ifeq ($(public_network),)
-PUBLIC_NETWORK = public-network
-else
-PUBLIC_NETWORK := $(public_network)
-endif
-export PUBLIC_NETWORK
-
-# Network that includes all services to monitor
-#  - by default it will create an overal attachable network called monitored_network
-ifeq ($(monitored_network),)
-MONITORED_NETWORK = monitored_network
-else
-MONITORED_NETWORK := $(monitored_network)
-endif
-export MONITORED_NETWORK
-
-
+# TARGETS --------------------------------------------------
+include ../../scripts/common.Makefile
 
 # exports
 export VCS_URL:=$(shell git config --get remote.origin.url)
@@ -50,8 +25,6 @@ export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_TAG ?= $(shell cat VERSION)
 $(info DOCKER_REGISTRY set to ${DOCKER_REGISTRY})
 $(info DOCKER_IMAGE_TAG set to ${DOCKER_IMAGE_TAG})
-
-include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 ## docker BUILD -------------------------------
 .PHONY: build build-kit build-x build-devel build-devel-kit build-devel-x
@@ -73,19 +46,8 @@ up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} ## Deploys or u
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
-	-docker stack rm $(STACK_NAME)
-	-docker stack rm ${SIMCORE_STACK_NAME}
-
-.PHONY: leave
-leave: ## leaves swarm stopping all stacks, secrets in it
-	-docker swarm leave -f
-
-.PHONY: .env
-.env: template.env
-		set -o allexport; \
-		source $(realpath $(CURDIR)/../../repo.config); \
-		set +o allexport; \
-		envsubst < $< > $@
+	-@docker stack rm $(STACK_NAME)
+	-@docker stack rm ${SIMCORE_STACK_NAME}
 
 .PHONY: push
 push: ## Pushes service to the registry.
@@ -145,22 +107,6 @@ devenv: .venv ## create a python virtual environment with dev tools (e.g. linter
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 # Helpers -------------------------------------------------
-.PHONY: .init
-.init:
-	## initialize swarm cluster
-	$(if $(SWARM_HOSTS),  \
-		,                 \
-		docker swarm init \
-	)
-	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(PUBLIC_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(PUBLIC_NETWORK) \
-	)
-	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		, docker network ls --filter="name==$(MONITORED_NETWORK)" \
-		, docker network create --attachable --driver=overlay $(MONITORED_NETWORK) \
-	)
-
 ${DEPLOYMENT_AGENT_CONFIG}:  deployment_config.default.yaml 
 	set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
@@ -182,4 +128,3 @@ ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
 .PHONY: ${TEMP_COMPOSE-aws}
 ${TEMP_COMPOSE-aws}: docker-compose.yml docker-compose-aws.yml .env
 	@docker-compose -f $< -f docker-compose-aws.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"

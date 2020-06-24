@@ -84,7 +84,7 @@ leave: ## leaves the swarm
 		( sudo printf "$(MACHINE_IP) $(MACHINE_FQDN)\n$(MACHINE_IP) $(PORTAINER_DOMAIN)\n$(MACHINE_IP) $(REGISTRY_DOMAIN)\n$(MACHINE_IP) $(MONITORING_DOMAIN)\n$(MACHINE_IP) $(STORAGE_DOMAIN)\n$(MACHINE_IP) $(API_DOMAIN)\n" | sudo tee -a /etc/hosts && \
 		echo "# restarting docker daemon" && \
 		sudo systemctl restart docker ) \
-		|| [ 42 ]; \
+		|| true; \
 	fi \
 	)
 

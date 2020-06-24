@@ -10,10 +10,7 @@ DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET = $(shell docker secret inspect --format 
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.Makefile)
-
-# Makefile including function used by every services
-include ../common.Makefile
+include ../../scripts/common.Makefile
 
 .PHONY: up
 up: .init .env .secrets ${TEMP_COMPOSE}  ## Deploys portainer stack
@@ -32,21 +29,18 @@ up-aws: .init .env .secrets ${TEMP_COMPOSE}-aws  ## Deploys portainer stack in a
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
 	@docker-compose -f $< --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 	@docker-compose -f $< -f docker-compose.letsencrypt.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
-	@echo "${STACK_NAME} stack file created for in $@"
 
 .PHONY: .secrets
-.secrets:
+.secrets: .env
 	@$(if $(DOCKER_PORTAINER_ADMIN_PASSWORD_SECRET), \
 		, \
-		echo -n "${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
+		set -o allexport; source .env; set +o allexport; echo -n "$${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null;\
 	)

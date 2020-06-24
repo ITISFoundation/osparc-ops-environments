@@ -1,17 +1,17 @@
 version: "3.7"
 services:
   jaeger:
-    image: jaegertracing/all-in-one:1.14
+    image: jaegertracing/all-in-one:1.18.1
     command: >
       --query.base-path=/jaeger
       --memory.max-traces=200
 
     init: true
-    ports:
-      # admin, healthcheck, metrics
-      - 14269
-      # UI
-      - 16686
+    # ports:
+    #   # admin, healthcheck, metrics
+    #   - 14269
+    #   # UI
+    #   - 16686
     networks:
       - public
       - monitored

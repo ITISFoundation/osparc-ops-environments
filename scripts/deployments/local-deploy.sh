@@ -37,14 +37,10 @@ source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 this_script_dir=$(dirname "$0")
 repo_basedir=$(realpath "${this_script_dir}"/../../)
 
-# VCS info on current repo
-current_git_url=$(git config --get remote.origin.url)
-current_git_branch=$(git rev-parse --abbrev-ref HEAD)
 
 machine_ip=$(get_this_ip)
 
 devel_mode=0
-
 usage="$(basename "$0") [-h] [--key=value]
 
 Deploys all the osparc-ops stacks and the SIM-core stack on osparc.local.
@@ -80,31 +76,11 @@ fi
 echo
 echo -e "\e[1;33mDeploying osparc on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD...\e[0m"
 
-# -------------------------------- Simcore -------------------------------
-pushd "${repo_basedir}"/services/simcore;
-simcore_env=".env"
-simcore_compose="docker-compose.deploy.yml"
-
-substitute_environs template${simcore_env} ${simcore_env}
-
-# docker-compose-simcore
-# for local use we need tls self-signed certificate for the traefik entrypoint in simcore
-$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' ${simcore_compose}
-$psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' ${simcore_compose}
-
-# for local use we need to provide the generated certificate authority so that storage can access S3, or the director the registry
-$psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' ${simcore_compose}
-$psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' ${simcore_compose}
-$psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
-$psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
-
-
-
 
 # -------------------------------- PORTAINER ------------------------------
 echo
 echo -e "\e[1;33mstarting portainer...\e[0m"
- call_make "${repo_basedir}"/services/portainer up
+call_make "${repo_basedir}"/services/portainer up
 
 # -------------------------------- TRAEFIK -------------------------------
 echo
@@ -112,19 +88,14 @@ echo -e "\e[1;33mstarting traefik...\e[0m"
 # copy certificates to traefik
 cp "${repo_basedir}"/certificates/*.crt "${repo_basedir}"/services/traefik/secrets/
 cp "${repo_basedir}"/certificates/*.key "${repo_basedir}"/services/traefik/secrets/
-# setup configuration
-TRAEFIK_PASSWORD=$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$TRAEFIK_USER" "$TRAEFIK_PASSWORD" | cut -d ':' -f2)
-export TRAEFIK_PASSWORD
-echo ${TRAEFIK_PASSWORD}
-substitute_environs "${repo_basedir}"/services/traefik/template.env "${repo_basedir}"/services/traefik/.env
- call_make "${repo_basedir}"/services/traefik up-local
+call_make "${repo_basedir}"/services/traefik up-local
 
 # -------------------------------- MINIO -------------------------------
 # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
 
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"
- call_make "${repo_basedir}"/services/minio up
+call_make "${repo_basedir}"/services/minio up
 
 echo "waiting for minio to run...don't worry..."
 while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
@@ -135,13 +106,13 @@ done
 # -------------------------------- REGISTRY -------------------------------
 echo
 echo -e "\e[1;33mstarting registry...\e[0m"
- call_make "${repo_basedir}"/services/registry up
+call_make "${repo_basedir}"/services/registry up
 
 
 # -------------------------------- Redis commander-------------------------------
 echo
 echo -e "\e[1;33mstarting redis commander...\e[0m"
- call_make "${repo_basedir}"/services/redis-commander up
+call_make "${repo_basedir}"/services/redis-commander up
 
 # -------------------------------- MONITORING -------------------------------
 echo
@@ -162,26 +133,23 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/nodename # don't work with windows~- /etc/hostname:/etc/nodename # don't work with windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
- call_make "${service_dir}" up
+call_make "${service_dir}" up
 # -------------------------------- JAEGER -------------------------------
 echo
 echo -e "\e[1;33mstarting jaeger...\e[0m"
 service_dir="${repo_basedir}"/services/jaeger
- call_make "${service_dir}" up
+call_make "${service_dir}" up
 
 # -------------------------------- Adminer -------------------------------
 echo
 echo -e "\e[1;33mstarting adminer...\e[0m"
 service_dir="${repo_basedir}"/services/adminer
- call_make "${service_dir}" up
+call_make "${service_dir}" up
 
 # -------------------------------- GRAYLOG -------------------------------
 echo
 echo -e "\e[1;33mstarting graylog...\e[0m"
 service_dir="${repo_basedir}"/services/graylog
-GRAYLOG_ROOT_PASSWORD_SHA2=$(echo -n "$GRAYLOG_ROOT_PASSWORD" | sha256sum | cut -d ' ' -f1)
-export GRAYLOG_ROOT_PASSWORD_SHA2
-substitute_environs "${service_dir}"/template.env "${service_dir}"/.env
 # if  the script is running under Windows, this line need to be commented : - /etc/hostname:/etc/host_hostname
 if grep -qEi "(Microsoft|WSL)" /proc/version;
 then 
@@ -195,32 +163,34 @@ else
         $psed --in-place --expression="s~#- /etc/hostname:/etc/host_hostname # does not work in windows~- /etc/hostname:/etc/host_hostname # does not work in windows~" "${service_dir}"/docker-compose.yml
     fi
 fi
- call_make "${service_dir}" up
-
-echo
-echo "waiting for graylog to run..."
-while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10  -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://"$MONITORING_DOMAIN"/graylog/api/users)" = 401 ]; do
-    echo "waiting for graylog to run..."
-    sleep 5s
-done
-json_data=$(cat <<EOF
-{
-"title": "standard GELF UDP input",
-    "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
-    "global": "true",
-    "configuration": {
-        "bind_address": "0.0.0.0",
-        "port":12201
-    }
-}
-EOF
-)
-curl -u "$SERVICES_USER":"$SERVICES_PASSWORD" --header "Content-Type: application/json" \
-    --header "X-Requested-By: cli" -X POST \
-    --data "$json_data" https://"$MONITORING_DOMAIN"/graylog/api/system/inputs
+call_make "${service_dir}" up
+call_make "${service_dir}" configure-instance
 
 
 if [ "$devel_mode" -eq 0 ]; then
+
+    # -------------------------------- Simcore -------------------------------
+    pushd "${repo_basedir}"/services/simcore;
+    # VCS info on current repo
+    current_git_url=$(git config --get remote.origin.url)
+    current_git_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    simcore_env=".env"
+    simcore_compose="docker-compose.deploy.yml"
+
+    substitute_environs template${simcore_env} ${simcore_env}
+
+    # docker-compose-simcore
+    # for local use we need tls self-signed certificate for the traefik entrypoint in simcore
+    $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.entrypoints=https/' ${simcore_compose}
+    $psed --in-place --expression='s/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=.*/traefik.http.routers.${PREFIX_STACK_NAME}_webserver.tls=true/' ${simcore_compose}
+
+    # for local use we need to provide the generated certificate authority so that storage can access S3, or the director the registry
+    $psed --in-place --expression='s/\s\s\s\s#secrets:/    secrets:/' ${simcore_compose}
+    $psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' ${simcore_compose}
+    $psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
+    $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
+
 
     # -------------------------------- DEPlOYMENT-AGENT -------------------------------
     echo
