@@ -27,10 +27,10 @@ up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt ## Deploys the stack with
 
 # Helpers -------------------------------------------------
 
-.PHONY: ${TEMP_COMPOSE}-local
+.PHONY: ${TEMP_COMPOSE}-local .env
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 	@set -o allexport; \
-	source $(realpath $(CURDIR)/.env); \
+	source .env; \
 	set +o allexport; \
 	printenv; \
 	docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
@@ -54,7 +54,7 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 .env: template.env ../../repo.config
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/../../repo.config); \
-	TRAEFIK_PASSWORD=$$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$$TRAEFIK_USER" "$$TRAEFIK_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$$/\\$$\\$$/g);\
+	TRAEFIK_PASSWORD=\'$$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$$TRAEFIK_USER" "$$TRAEFIK_PASSWORD" | cut -d ':' -f2)\';\
 	export TRAEFIK_PASSWORD;\
 	set +o allexport; \
 	envsubst < $< > $@
