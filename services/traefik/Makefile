@@ -10,7 +10,6 @@ TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 # Host machine IP
 MACHINE_IP = $(shell source $(realpath $(CURDIR)/../../scripts/portable.sh) && get_this_ip)
 
-
 # TARGETS --------------------------------------------------
 include ../../scripts/common.Makefile
 
@@ -30,7 +29,11 @@ up-letsencrypt: .init .env ${TEMP_COMPOSE}-letsencrypt ## Deploys the stack with
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
+	@set -o allexport; \
+	source $(realpath $(CURDIR)/.env); \
+	set +o allexport; \
+	printenv; \
+	docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt
 ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
@@ -39,6 +42,7 @@ ${TEMP_COMPOSE}-letsencrypt: docker-compose.yml docker-compose.letsencrypt.yml
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@docker-compose -f $< -f docker-compose.aws.yml --log-level=ERROR config > $@
+
 
 .PHONY: .create_secrets
 .create_secrets: secrets/domain.crt secrets/domain.key secrets/rootca.crt
@@ -50,7 +54,7 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 .env: template.env ../../repo.config
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/../../repo.config); \
-	TRAEFIK_PASSWORD=$$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$$TRAEFIK_USER" "$$TRAEFIK_PASSWORD" | cut -d ':' -f2);\
+	TRAEFIK_PASSWORD=$$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$$TRAEFIK_USER" "$$TRAEFIK_PASSWORD" | cut -d ':' -f2 | sed -e s/\\$$/\\$$\\$$/g);\
 	export TRAEFIK_PASSWORD;\
 	set +o allexport; \
 	envsubst < $< > $@
