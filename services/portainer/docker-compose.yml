@@ -21,6 +21,8 @@ services:
         constraints: [node.platform.os == linux]
 
   portainer:
+    dns: 
+      8.8.8.8
     image: portainer/portainer
     init: true
     command: >

@@ -9,8 +9,8 @@ set -o nounset
 set -o pipefail
 IFS=$'\n\t'
 
-function create_bucket() {
-
+create_bucket() {
+    echo "ok" && \
     docker run \
     -v /etc/ssl/certs:/etc/ssl/certs:ro \
     --network host \

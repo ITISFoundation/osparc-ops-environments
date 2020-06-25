@@ -32,7 +32,6 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	printenv; \
 	docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt

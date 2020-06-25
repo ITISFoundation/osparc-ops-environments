@@ -25,6 +25,8 @@ configs:
     file: ./node-exporter/docker-entrypoint.sh
 services:
   prometheus:
+    dns: 
+      8.8.8.8
     image: prom/prometheus:v2.18.1
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -220,6 +222,8 @@ services:
         reservations:
           memory: 64M
   grafana:
+    dns: 
+      8.8.8.8
     image: grafana/grafana:7.0.0
     depends_on:
       - prometheus

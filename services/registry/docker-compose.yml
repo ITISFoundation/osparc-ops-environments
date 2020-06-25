@@ -1,6 +1,8 @@
 version: "3.7"
 services:
   registry:
+    dns: 
+      8.8.8.8
     image: registry:2.7.1
     environment:
       REGISTRY_HTTP_HOST: "https://${REGISTRY_DOMAIN}"
@@ -18,6 +20,7 @@ services:
       REGISTRY_HTTP_DEBUG_ADDR: ":5001"
       REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
       REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
+      REGISTRY_LOGLEVEL: debug
       # set to true if using self-signed certificates
       UPDATE_CERTIFICATES: "false"
     networks:

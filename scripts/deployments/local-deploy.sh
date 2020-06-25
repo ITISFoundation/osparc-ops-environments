@@ -33,10 +33,12 @@ declare psed # fixes shellcheck issue with not finding psed
 # shellcheck source=/dev/null
 source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 
+
 # Paths
 this_script_dir=$(dirname "$0")
 repo_basedir=$(realpath "${this_script_dir}"/../../)
 
+source "${repo_basedir}"/scripts/create-s3-bucket.bash
 
 machine_ip=$(get_this_ip)
 
@@ -105,7 +107,7 @@ while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${
 done
 
 # Add simcore bucket
-"${repo_basedir}"/scripts/create-s3-bucket.bash "${S3_BUCKET}";
+create_bucket "${S3_BUCKET}";
 
 # -------------------------------- REGISTRY -------------------------------
 echo
