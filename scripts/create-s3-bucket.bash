@@ -14,6 +14,6 @@ create_bucket() {
     docker run \
     -v /etc/ssl/certs:/etc/ssl/certs:ro \
     --network host \
-    -e MC_HOST_local="https://${S3_ACCESS_KEY_ID}:${S3_SECRET_ACCESS_KEY}@${S3_ENDPOINT}" \
+    -e MC_HOST_local="https://${S3_ACCESS_KEY}:${S3_SECRET_KEY}@${S3_ENDPOINT}" \
     minio/mc mb --ignore-existing local/$1 2>/dev/null
 }

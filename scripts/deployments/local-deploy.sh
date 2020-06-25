@@ -107,6 +107,7 @@ while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${
 done
 
 # Add simcore bucket
+printenv
 create_bucket "${S3_BUCKET}";
 
 # -------------------------------- REGISTRY -------------------------------

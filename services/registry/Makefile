@@ -16,7 +16,8 @@ define create-s3-bucket
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	../../scripts/create-s3-bucket.bash create_bucket "$${S3_BUCKET}";
+	source ../../scripts/create-s3-bucket.bash; \
+	create_bucket "$${S3_BUCKET}";
 	# bucket is available in S3
 endef
 
