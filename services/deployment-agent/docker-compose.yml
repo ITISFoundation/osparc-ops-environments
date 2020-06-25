@@ -1,6 +1,8 @@
 version: "3.7"
 services:
   auto-deployment-agent:
+    dns:
+      8.8.8.8
     build:
       context: ./
       dockerfile: Dockerfile

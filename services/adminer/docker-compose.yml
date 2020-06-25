@@ -1,6 +1,8 @@
 version: "3.7"
 services:
   adminer:
+    dns:
+      8.8.8.8
     image: adminer:4.7.6
     init: true
     # ports:

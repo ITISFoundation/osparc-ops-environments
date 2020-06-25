@@ -230,5 +230,5 @@ $psed --in-place "s~S3_SECRET_KEY:.*~S3_SECRET_KEY: ${SECRET_ACCESS_KEY}~" deplo
 
 # We don't use Minio and postgresql with AWS
 $psed --in-place "s~excluded_services:.*~excluded_services: [webclient, minio, postgres]~" deployment_config.default.yaml
-make down up-aws;
+make down up;
 popd

@@ -1,6 +1,8 @@
 version: "3.7"
 services:
   jaeger:
+    dns: 
+      8.8.8.8
     image: jaegertracing/all-in-one:1.18.1
     command: >
       --query.base-path=/jaeger

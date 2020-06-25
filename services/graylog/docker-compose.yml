@@ -40,6 +40,8 @@ services:
           memory: 1G
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
+    dns: 
+      8.8.8.8
     image: graylog/graylog:3.2
     init: true
     # user: "1000:1001"

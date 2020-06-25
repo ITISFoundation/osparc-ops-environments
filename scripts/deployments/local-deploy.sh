@@ -95,6 +95,7 @@ call_make "${repo_basedir}"/services/traefik up-local
 
 echo
 echo -e "\e[1;33mstarting minio...\e[0m"
+service_dir="${repo_basedir}"/services/minio
 call_make "${repo_basedir}"/services/minio up
 
 echo "waiting for minio to run...don't worry..."
@@ -102,6 +103,9 @@ while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${
     echo "waiting for minio to run..."
     sleep 5s
 done
+
+# Add simcore bucket
+"${repo_basedir}"/scripts/create-s3-bucket.bash "${S3_BUCKET}";
 
 # -------------------------------- REGISTRY -------------------------------
 echo
@@ -190,6 +194,7 @@ if [ "$devel_mode" -eq 0 ]; then
     $psed --in-place --expression='s/\s\s\s\s\s\s#- source: rootca.crt/      - source: rootca.crt/' ${simcore_compose}
     $psed --in-place --expression="s~\s\s\s\s\s\s\s\s#target: /usr/local/share/ca-certificates/osparc.crt~        target: /usr/local/share/ca-certificates/osparc.crt~" ${simcore_compose}
     $psed --in-place --expression='s~\s\s\s\s\s\s#- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt~' ${simcore_compose}
+
 
 
     # -------------------------------- DEPlOYMENT-AGENT -------------------------------
