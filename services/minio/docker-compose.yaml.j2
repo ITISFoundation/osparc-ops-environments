@@ -14,8 +14,6 @@ services:
       {%- for j in range(num_partitions|int) %}
       - ${MINIO_INTERNAL_VOLUME_DATA_PART{{ j|string }}:-minio{{ service_id|string }}_data_part{{ j|string }}}:/data{{ j|string }}
       {%- endfor %}
-    # ports:
-    #   - "{% if num_minios|int == 1 %}30000:{% endif %}9000"
     networks:
       - default
       - public
