@@ -12,6 +12,8 @@ services:
         target: /secrets/domain.crt
       - source: rootca.crt
         target: /secrets/rootca.crt
+    extra_hosts:
+      - "storage.osparc.local:${S3_ENDPOINT_IP}"
         
 secrets:
   # private key
@@ -23,3 +25,4 @@ secrets:
   # root authority
   rootca.crt:
     external: true
+

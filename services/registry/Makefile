@@ -23,7 +23,6 @@ endef
 
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE}  ## Deploys registry stack
-	
 	@$(create-s3-bucket)
 	@docker stack deploy --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 

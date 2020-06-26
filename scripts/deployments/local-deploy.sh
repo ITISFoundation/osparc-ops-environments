@@ -65,6 +65,10 @@ case $i in
 esac
 done
 
+# Set local ip in repo.config
+ENDPOINT_IP=${machine_ip}
+export ENDPOINT_IP
+
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
 # shellcheck source=/dev/null
