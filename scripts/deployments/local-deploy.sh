@@ -66,8 +66,8 @@ esac
 done
 
 # Set local ip in repo.config
-LOCAL_ENDPOINT_IP=${machine_ip}
-export LOCAL_ENDPOINT_IP
+MANAGER_ENDPOINT_IP=${machine_ip}
+export MANAGER_ENDPOINT_IP
 
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash

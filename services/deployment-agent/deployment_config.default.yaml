@@ -20,7 +20,7 @@ main:
         - services/docker-compose.yml
         - .env-devel
     - id: simcore-ops-repo
-      url: https://github.com/surfict/osparc-ops.git
+      url: https://github.com/ITISFoundation/osparc-ops.git
       branch: aws-integration
       pull_only_files: true
       paths:
