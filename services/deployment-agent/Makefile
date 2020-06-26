@@ -111,7 +111,7 @@ devenv: .venv ## create a python virtual environment with dev tools (e.g. linter
 # Helpers -------------------------------------------------
 ${DEPLOYMENT_AGENT_CONFIG}:  deployment_config.default.yaml 
 	@set -o allexport; \
-	source $(realpath $(CURDIR)/.env); \
+	source $(realpath $(CURDIR)/../../repo.config); \
 	set +o allexport; \
 	envsubst < $< > $@
 
