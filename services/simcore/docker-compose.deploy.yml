@@ -87,6 +87,7 @@ services:
         window: 120s
 
   director:
+    # Certificate necessary for local deploiement only
     secrets:
       - source: rootca.crt
         target: /usr/local/share/ca-certificates/osparc.crt

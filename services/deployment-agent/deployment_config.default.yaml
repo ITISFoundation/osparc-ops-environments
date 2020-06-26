@@ -61,9 +61,9 @@ main:
     additional_parameters:
       extra_hosts: {}
       environment:
-        S3_ENDPOINT: storage.osparc.local
-        S3_ACCESS_KEY: adminadmin
-        S3_SECRET_KEY: adminadmin
+        S3_ENDPOINT: ${S3_ENDPOINT}
+        S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+        S3_SECRET_KEY: ${S3_SECRET_KEY}
     services_prefix: ${PREFIX_STACK_NAME}
   portainer:
     # lists the portainer instances to call upon

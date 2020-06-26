@@ -38,8 +38,6 @@ source "$( dirname "${BASH_SOURCE[0]}" )/../portable.sh"
 this_script_dir=$(dirname "$0")
 repo_basedir=$(realpath "${this_script_dir}"/../../)
 
-source "${repo_basedir}"/scripts/create-s3-bucket.bash
-
 machine_ip=$(get_this_ip)
 
 devel_mode=0
@@ -109,10 +107,6 @@ while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${
     echo "waiting for minio to run..."
     sleep 5s
 done
-
-# Add simcore bucket
-printenv
-create_bucket "${S3_BUCKET}";
 
 # -------------------------------- REGISTRY -------------------------------
 echo
