@@ -20,12 +20,13 @@ main:
         - services/docker-compose.yml
         - .env-devel
     - id: simcore-ops-repo
-      url: https://github.com/ITISFoundation/osparc-ops.git
-      branch: master
+      url: https://github.com/surfict/osparc-ops.git
+      branch: aws-integration
       pull_only_files: true
       paths:
         - services/simcore/docker-compose.deploy.yml
         - services/simcore/.env
+        - repo.config
   docker_private_registries:
     # lists registries and their credentials if necessary to check for services to download from
     - url: https://index.docker.io/v1
@@ -47,6 +48,9 @@ main:
       export OPS_PUBLIC_NETWORK=${PUBLIC_NETWORK} &&
       export OPS_MONITORED_NETWORK=${MONITORED_NETWORK} &&
       export PREFIX_STACK_NAME=${PREFIX_STACK_NAME} &&
+      export MANAGER_ENDPOINT_IP=${MANAGER_ENDPOINT_IP} &&
+      export REGISTRY_DOMAIN=${REGISTRY_DOMAIN} &&
+      export STORAGE_DOMAIN=${STORAGE_DOMAIN} &&
       mv .env .env.platform &&
       cat .env-devel >> .env.nosub && cat .env.platform >> .env.nosub &&
       envsubst < .env.nosub > .env &&

@@ -67,6 +67,8 @@ services:
       # minio sdk uses this env to use self-signed certs
       - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
       - LOGSPOUT_MULTILINE=true
+    extra_hosts:
+      - "${STORAGE_DOMAIN}:${MANAGER_ENDPOINT_IP}"  
 
     networks:
       - monitored
@@ -113,10 +115,10 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    extra_hosts: []
+    extra_hosts:
+      - "${REGISTRY_DOMAIN}:${MANAGER_ENDPOINT_IP}" 
 
   sidecar:
-    extra_hosts: []
     environment:
       - LOGSPOUT_MULTILINE=true
     deploy:
@@ -134,7 +136,8 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+    extra_hosts:
+      - "${REGISTRY_DOMAIN}:${MANAGER_ENDPOINT_IP}" 
   rabbit:
     networks:
       - monitored
