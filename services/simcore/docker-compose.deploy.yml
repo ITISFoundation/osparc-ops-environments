@@ -67,12 +67,10 @@ services:
       # minio sdk uses this env to use self-signed certs
       - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
       - LOGSPOUT_MULTILINE=true
-    extra_hosts:
-      - "${STORAGE_DOMAIN}:${MANAGER_ENDPOINT_IP}"  
-
     networks:
       - monitored
-    extra_hosts: []
+    extra_hosts:
+      - "${STORAGE_DOMAIN}:${MANAGER_ENDPOINT_IP}"  
     deploy:
       update_config:
         parallelism: 2
