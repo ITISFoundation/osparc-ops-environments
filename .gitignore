@@ -29,9 +29,6 @@ id_ed25519*
 *.key
 *.crt
 
-# vscode
-.vscode/
-
 # python
 *.pyc
 .venv/
@@ -119,5 +116,5 @@ deployment_config.yaml
 # token
 *_token
 
-
-
+# vscode
+.vscode/settings.json
