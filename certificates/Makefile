@@ -7,7 +7,7 @@ VERSION := $(shell uname -a)
 
 # Operating system
 ifeq ($(filter Windows_NT,$(OS)),)
-IS_WSL  := $(if $(findstring Microsoft,$(shell uname -a)),WSL,)
+IS_WSL  := $(if $(findstring microsoft,$(shell uname -a | tr '[:upper:]' '[:lower:]')),WSL,)
 IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
