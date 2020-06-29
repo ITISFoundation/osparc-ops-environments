@@ -67,7 +67,7 @@ leave: ## leaves the swarm
 	docker swarm leave -f
 
 .PHONY: .install-fqdn
- # [ 42 ]; = always true
+
 .install-fqdn:
 	@$(if $(IS_WSL), \
 		if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /c/Windows/System32/drivers/etc/hosts; then \
@@ -97,6 +97,7 @@ leave: ## leaves the swarm
 		|| true; \
 	fi \
 	,)
+
 .PHONY: help
 help: ## This colourful help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
