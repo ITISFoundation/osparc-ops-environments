@@ -26,6 +26,7 @@ main:
       paths:
         - services/simcore/docker-compose.deploy.yml
         - services/simcore/.env
+        - repo.config
   docker_private_registries:
     # lists registries and their credentials if necessary to check for services to download from
     - url: https://index.docker.io/v1
@@ -47,23 +48,29 @@ main:
       export OPS_PUBLIC_NETWORK=${PUBLIC_NETWORK} &&
       export OPS_MONITORED_NETWORK=${MONITORED_NETWORK} &&
       export PREFIX_STACK_NAME=${PREFIX_STACK_NAME} &&
+      export MANAGER_ENDPOINT_IP=${MANAGER_ENDPOINT_IP} &&
+      export REGISTRY_DOMAIN=${REGISTRY_DOMAIN} &&
+      export STORAGE_DOMAIN=${STORAGE_DOMAIN} &&
       mv .env .env.platform &&
       cat .env-devel >> .env.nosub && cat .env.platform >> .env.nosub &&
       envsubst < .env.nosub > .env &&
       docker-compose -f services/docker-compose.yml -f docker-compose.deploy.yml config > stack.yml
     stack_file: stack.yml # the output file of the command above, or just the file to use
-    excluded_services: [webclient, minio]
+    excluded_services: [webclient]
     excluded_volumes: []
     additional_parameters:
       extra_hosts: {}
-      environment: {}
+      environment:
+        S3_ENDPOINT: storage.osparc.local
+        S3_ACCESS_KEY: adminadmin
+        S3_SECRET_KEY: adminadmin
     services_prefix: ${PREFIX_STACK_NAME}
   portainer:
     # lists the portainer instances to call upon
     - url: http://portainer:9000
       endpoint_id: -1
-      username: admin
-      password: adminadmin
+      username: ${SERVICES_USER}
+      password: ${SERVICES_PASSWORD}
       stack_name: ${SIMCORE_STACK_NAME}
   polling_interval: 15
   notifications:

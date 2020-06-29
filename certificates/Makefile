@@ -7,7 +7,7 @@ VERSION := $(shell uname -a)
 
 # Operating system
 ifeq ($(filter Windows_NT,$(OS)),)
-IS_WSL  := $(if $(findstring Microsoft,$(shell uname -a)),WSL,)
+IS_WSL  := $(if $(findstring microsoft,$(shell uname -a | tr '[:upper:]' '[:lower:]')),WSL,)
 IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
@@ -26,7 +26,7 @@ SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 
 .DEFAULT_GOAL := help
 
-# CERTIFICATES --------------------------------------------------
+# CERTIFICATES ----------------------------------------------------
 
 .PHONY: create-certificates
 create-certificates: rootca.crt domain.crt domain.key ## create self-signed certificates and ca authority
@@ -50,7 +50,7 @@ rootca.crt: rootca.key
 		-sha256 -days 10000 -out $@;
 
 extfile.cnf:
-	@echo "subjectAltName = DNS:${MACHINE_FQDN}" > $@ #You can use IP:your_IP or DNS:host_name
+	@echo "subjectAltName = DNS:${MACHINE_FQDN}, DNS:${MONITORING_DOMAIN}, DNS:${STORAGE_DOMAIN}, DNS:${REGISTRY_DOMAIN}, DNS:${PORTAINER_DOMAIN}, DNS:${API_DOMAIN}" > $@ #You can use IP:your_IP or DNS:host_name
 
 domain.key:
 	# Creating private key

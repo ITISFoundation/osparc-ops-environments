@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  adminer:
+    deploy:
+      labels:
+        - traefik.http.routers.adminer.tls=false
+        - traefik.http.routers.adminer.entrypoints=http

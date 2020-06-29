@@ -1,0 +1,49 @@
+version: '3.7'
+services:
+  mail:
+    dns: # Sometimes the DNS from the AWS AMI are not properly copied into the container and the container canno't acces internet
+      8.8.8.8
+    image: tvial/docker-mailserver:release-v7.0.0
+    container_name: ${CONTAINER_NAME}
+    ports:
+    - "25:25"
+    - "143:143"
+    - "587:587"
+    - "993:993"
+    volumes:
+    - maildata:/var/mail
+    - mailstate:/var/mail-state
+    - maillogs:/var/log/mail
+    - ./config/:/tmp/docker-mailserver/
+    env_file:
+    - .env
+    cap_add:
+    - NET_ADMIN
+    - SYS_PTRACE
+    restart: always
+    networks:
+      - public
+      - monitored
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.mail.loadbalancer.server.port=25
+        - traefik.http.routers.mail.rule=Host(`smtp.${MACHINE_FQDN}`)
+        - traefik.http.routers.mail.entrypoints=smtp
+        - traefik.http.routers.mail.tls=true
+        #- traefik.http.routers.jaeger.middlewares=whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
+volumes:
+  maildata:
+    driver: local
+  mailstate:
+    driver: local
+  maillogs:
+    driver: local
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true

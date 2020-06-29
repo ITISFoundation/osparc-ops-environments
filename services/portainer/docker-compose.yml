@@ -21,15 +21,13 @@ services:
         constraints: [node.platform.os == linux]
 
   portainer:
+    dns: 
+      8.8.8.8
     image: portainer/portainer
     init: true
     command: >
       -H tcp://tasks.agent:9001 --tlsskipverify
       --admin-password-file /run/secrets/portainer_admin_password
-    ports:
-      []
-      # - "8000:8000"
-      # - "9000:9000"
     volumes:
       - portainer_data:/data
     networks:
@@ -46,7 +44,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.portainer.loadbalancer.server.port=9000
-        - traefik.http.routers.portainer.rule=(Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/portainer`))
+        - traefik.http.routers.portainer.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/portainer`)
         - traefik.http.routers.portainer.entrypoints=https
         - traefik.http.routers.portainer.tls=true
         - traefik.http.middlewares.portainer_replace_regex.replacepathregex.regex=^/portainer/?(.*)$$

@@ -3,5 +3,4 @@ services:
   jaeger:
     deploy:
       labels:
-        - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.tls.certresolver=lehttpchallenge

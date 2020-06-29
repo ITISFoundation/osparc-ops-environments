@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+  traefik:
+    command:
+      - '--api=true'
+      - '--api.dashboard=true'
+      - '--log.level=DEBUG'
+      - '--accesslog=true'
+      - '--metrics.prometheus=true'
+      - '--metrics.prometheus.addEntryPointsLabels=true'
+      - '--metrics.prometheus.addServicesLabels=true'
+      - '--entryPoints.metrics.address=:8082'
+      - '--metrics.prometheus.entryPoint=metrics'
+      - '--entryPoints.http.address=:80'    
+      - '--entryPoints.https.address=:443'
+      - '--entryPoints.smtp.address=:25'
+      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
+      - '--providers.docker.swarmMode=true'
+      - '--providers.docker.exposedByDefault=false'
+      - '--tracing=true'
+      - '--tracing.jaeger=true'
+      - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
+      - '--tracing.jaeger.localAgentHostPort=jaeger:6831'   
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `*`)"
+    deploy:
+      labels:
+        - traefik.http.routers.api.tls=false
+         #- com.docker.aws.lb.arn=arn:aws:acm:us-east-1:327357531293:certificate/1c87d979-f327-4497-996a-2b70a82e76d7
+        - traefik.http.middlewares.whitelist_ips.ipwhitelist.sourcerange=10.0.0.0/16
+        - traefik.http.routers.api.entrypoints=http
+  whoami:
+    deploy:
+      labels:
+        - traefik.http.routers.whoami.tls=false
+        - traefik.http.routers.whoami.entrypoints=http
+    networks:
+      - public
+
+volumes:
+  letsencrypt_certs:

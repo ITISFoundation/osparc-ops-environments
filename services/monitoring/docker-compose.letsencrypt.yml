@@ -3,12 +3,10 @@ services:
   prometheus:
     deploy:
       labels:
-        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
 
   grafana:
     deploy:
       labels:
         # direct access through port
-        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
         - traefik.http.routers.grafana.tls.certresolver=lehttpchallenge

@@ -5,6 +5,8 @@ services:
 {%- for i in range(num_minios|int) %}
   {%- set service_id = i+1 %}
   minio{{ service_id|string }}:
+    dns: 
+      8.8.8.8
     image: minio/minio:RELEASE.2020-05-16T01-33-21Z
     init: true
     hostname: minio{{ service_id|string }}
@@ -12,8 +14,6 @@ services:
       {%- for j in range(num_partitions|int) %}
       - ${MINIO_INTERNAL_VOLUME_DATA_PART{{ j|string }}:-minio{{ service_id|string }}_data_part{{ j|string }}}:/data{{ j|string }}
       {%- endfor %}
-    ports:
-      - "{% if num_minios|int == 1 %}30000:{% endif %}9000"
     networks:
       - default
       - public
@@ -37,8 +37,8 @@ services:
         # direct access without path (necessary for minio client it does not like /path)
         - traefik.http.services.minio.loadbalancer.server.port=9000
         - traefik.http.services.minio.loadbalancer.healthcheck.path=/minio/health/ready
-        - traefik.http.routers.minio.rule=PathPrefix(`/`)
-        - traefik.http.routers.minio.entrypoints=storage
+        - traefik.http.routers.minio.rule=Host(`${STORAGE_DOMAIN}`) && PathPrefix(`/`)
+        - traefik.http.routers.minio.entrypoints=https
         - traefik.http.routers.minio.tls=true
         # Let's encrypt use-case
         # - traefik.http.routers.minio.tls.certresolver=lehttpchallenge

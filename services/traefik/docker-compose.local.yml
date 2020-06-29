@@ -22,68 +22,14 @@ services:
       - "--tracing.jaeger=true"
       - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
       - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
-      - "--entryPoints.portus.address=:5000"
-      - "--entryPoints.storage.address=:10000"
-      - "--entryPoints.traefik.address=:9001"
-      - "--entryPoints.simcore_api.address=:10081"
       - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
-    ports:
-      # additional ports for services
-      - target: 10000
-        published: 10000
-        mode: host
-      - target: 5000
-        published: 5000
-        mode: host
-      - target: 9001
-        published: 9001
-        mode: host
-      - target: 10081
-        published: 10081
-        mode: host
-    deploy:
-      labels:
-        # redirect http to https
-        # portus
-        - traefik.http.middlewares.portus_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.portus_force_https.redirectScheme.port=5000
-        - traefik.http.routers.portus_http_to_https.rule=hostregexp(`{host:.+}`)
-        - traefik.http.routers.portus_http_to_https.entrypoints=portus
-        - traefik.http.routers.portus_http_to_https.middlewares=portus_force_https
-        # minio
-        - traefik.http.middlewares.minio_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.minio_force_https.redirectScheme.port=10000
-        - traefik.http.routers.storage_http_to_https.rule=hostregexp(`{host:.+}`)
-        - traefik.http.routers.storage_http_to_https.entrypoints=storage
-        - traefik.http.routers.storage_http_to_https.middlewares=minio_force_https
-        # traefik
-        - traefik.http.middlewares.traefik_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.traefik_force_https.redirectScheme.port=9001
-        - traefik.http.routers.traefik_http_to_https.rule=hostregexp(`{host:.+}`)
-        - traefik.http.routers.traefik_http_to_https.entrypoints=traefik
-        - traefik.http.routers.traefik_http_to_https.middlewares=traefik_force_https
 
-        # simcore_api
-        - traefik.http.middlewares.simcore_api_force_https.redirectScheme.scheme=https
-        - traefik.http.middlewares.simcore_api_force_https.redirectScheme.port=10081
-        - traefik.http.routers.simcore_api_http_to_https.rule=hostregexp(`{host:.+}`)
-        - traefik.http.routers.simcore_api_http_to_https.entrypoints=simcore_api
-        - traefik.http.routers.simcore_api_http_to_https.middlewares=simcore_api_force_https
-
-        # traefik api
-        - traefik.http.routers.api.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-        - traefik.http.routers.api.entrypoints=traefik
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
     secrets:
       - domain.key
       - domain.crt
-  whoami:
-    deploy:
-      labels:
-        - traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)
-        - traefik.http.routers.whoami.entrypoints=traefik
 
 configs:
   traefik_dynamic_config.yml:

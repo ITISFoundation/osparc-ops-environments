@@ -1,17 +1,14 @@
 version: "3.7"
 services:
   jaeger:
-    image: jaegertracing/all-in-one:1.14
+    dns: 
+      8.8.8.8
+    image: jaegertracing/all-in-one:1.18.1
     command: >
       --query.base-path=/jaeger
       --memory.max-traces=200
 
     init: true
-    ports:
-      # admin, healthcheck, metrics
-      - 14269
-      # UI
-      - 16686
     networks:
       - public
       - monitored
@@ -22,7 +19,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.jaeger.loadbalancer.server.port=16686
-        - traefik.http.routers.jaeger.rule=PathPrefix(`/jaeger`)
+        - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
         - traefik.http.routers.jaeger.tls=true
         - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker

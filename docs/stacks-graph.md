@@ -39,10 +39,6 @@ This is an example for 4 replicas and 2 partitions per service
 ![](./img/portainer.png)
 
 
-## portus (ongoing)
-
-![](./img/portus.png)
-
 
 ---
 

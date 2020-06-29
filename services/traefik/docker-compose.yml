@@ -2,6 +2,8 @@ version: "3.7"
 
 services:
   traefik:
+    dns: 
+      8.8.8.8
     image: traefik:v2.2.1
     init: true
     command:
@@ -75,6 +77,8 @@ services:
       - public
       - monitored
   whoami:
+    dns: 
+      8.8.8.8
     image: "containous/whoami"
     deploy:
       labels:

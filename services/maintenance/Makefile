@@ -1,9 +1,3 @@
-
-
-
-
-
-
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(PWD))
 
@@ -28,7 +22,7 @@ include .env
 
 
 # TARGETS --------------------------------------------------
-include $(realpath $(CURDIR)/../../scripts/common.mk)
+include $(realpath $(CURDIR)/../../scripts/common.Makefile)
 
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 
@@ -78,7 +72,7 @@ run: ## starts jupyter notebook for testing (use make test-network if simcore st
 
 .PHONY: up
 up: .init ## Deploys or updates current stack "$(STACK_NAME)"
-	docker stack deploy -c docker-compose.yml $(STACK_NAME)
+	docker stack deploy --compose-file docker-compose.yml $(STACK_NAME)
 
 .PHONY: down reset
 down: ## Stops stack

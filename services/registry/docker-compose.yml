@@ -1,0 +1,62 @@
+version: "3.7"
+services:
+  registry:
+    dns: 
+      8.8.8.8
+    image: registry:2.7.1
+    environment:
+      REGISTRY_HTTP_HOST: "https://${REGISTRY_DOMAIN}"
+      REGISTRY_STORAGE: s3
+      REGISTRY_STORAGE_S3_ACCESSKEY: ${S3_ACCESS_KEY}
+      REGISTRY_STORAGE_S3_SECRETKEY: ${S3_SECRET_KEY}
+      REGISTRY_STORAGE_S3_REGIONENDPOINT: ${S3_ENDPOINT}
+      REGISTRY_STORAGE_S3_SECURE: "true"
+      REGISTRY_STORAGE_S3_BUCKET: ${S3_BUCKET}
+      REGISTRY_STORAGE_S3_REGION: "us-east-1"
+      REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
+      REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      # Metrics
+      REGISTRY_HTTP_DEBUG_ADDR: ":5001"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
+      REGISTRY_LOGLEVEL: debug
+      # set to true if using self-signed certificates
+      UPDATE_CERTIFICATES: "false"
+    networks:
+      - public
+      - monitored
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.registry.loadbalancer.server.port=5000
+        - traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)
+        - traefik.http.routers.registry.entrypoints=https
+        - traefik.http.routers.registry.tls=true
+        - traefik.http.routers.registry.priority=10
+        - traefik.http.routers.registry.middlewares=ops_gzip@docker, ops_auth@docker
+    configs:
+      - source: registry_init
+        target: /etc/docker/registry/init
+        mode: 0755
+      - source: nsswitch_conf
+        target: /etc/nsswitch.conf
+        mode: 0644
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+
+configs:
+  registry_config.yml:
+    file: ./config.yml
+  nsswitch_conf:
+    file: ./nsswitch.conf
+  registry_init:
+    file: ./init

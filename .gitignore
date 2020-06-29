@@ -29,16 +29,13 @@ id_ed25519*
 *.key
 *.crt
 
-# vscode
-.vscode/
-
 # python
 *.pyc
 .venv/
 .pytest_cache/
 
 #docker
-.env
+**/.env
 
 # generated stack files
 .stack.*
@@ -119,5 +116,5 @@ deployment_config.yaml
 # token
 *_token
 
-
-
+# vscode
+.vscode/settings.json

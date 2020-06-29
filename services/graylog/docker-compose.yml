@@ -40,6 +40,8 @@ services:
           memory: 1G
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
+    dns: 
+      8.8.8.8
     image: graylog/graylog:3.2
     init: true
     # user: "1000:1001"
@@ -84,7 +86,7 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.graylog.loadbalancer.server.port=9000
-        - traefik.http.routers.graylog.rule=PathPrefix(`/graylog`)
+        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)
         - traefik.http.routers.graylog.entrypoints=https
         - traefik.http.routers.graylog.tls=true
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
@@ -102,7 +104,7 @@ services:
       - graylog
     init: true
     volumes:
-      - /etc/hostname:/etc/host_hostname # does not work in windows
+      ##########- /etc/hostname:/etc/host_hostname # does not work in windows
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - ALLOW_TTY=true

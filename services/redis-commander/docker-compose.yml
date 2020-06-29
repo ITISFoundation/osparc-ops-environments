@@ -1,9 +1,10 @@
 version: "3.7"
 services:
   redis-commander:
+    dns: 
+      8.8.8.8
     image: rediscommander/redis-commander:latest
     init: true
-    restart: always
     ports:
       - 8081
     networks:

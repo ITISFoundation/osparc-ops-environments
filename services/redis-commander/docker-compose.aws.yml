@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  portainer:
+    deploy:
+      labels:
+        - traefik.http.routers.redis.tls=false
+        - traefik.http.routers.redis.entrypoints=http
