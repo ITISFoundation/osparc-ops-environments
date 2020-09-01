@@ -58,7 +58,7 @@ def _services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
     return content
 
 
-@pytest.fixture("session")
+@pytest.fixture(scope="session")
 def services_docker_compose(osparc_simcore_root_dir) -> Dict[str, str]:
     return _services_docker_compose(osparc_simcore_root_dir)
 
