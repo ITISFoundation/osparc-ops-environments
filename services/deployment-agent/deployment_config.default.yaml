@@ -72,7 +72,7 @@ main:
       username: ${SERVICES_USER}
       password: ${SERVICES_PASSWORD}
       stack_name: ${SIMCORE_STACK_NAME}
-  polling_interval: 15
+  polling_interval: 60
   notifications:
     - service: mattermost
       url: http://mattermost.com
