@@ -20,7 +20,7 @@ test_requirements = read_reqs( here / "requirements" / "_test.txt" )
 
 setup(
     name='simcore-service-deployment-agent',
-    version='0.9.2',
+    version='0.9.3',
     description='Agent that automatically deploy services in a swarm',
     packages=find_packages(where='src'),
     package_dir={
