@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: setup python environment
-        uses: actions/setup-python@v1.1.1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
       - name: show versions
@@ -68,7 +68,7 @@ jobs:
           echo ::set-env name=DOCKER_REGISTRY::${TMP_DOCKER_REGISTRY,,}
       - uses: actions/checkout@v2
       - name: setup python environment
-        uses: actions/setup-python@v1.1.1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
       - name: show versions
