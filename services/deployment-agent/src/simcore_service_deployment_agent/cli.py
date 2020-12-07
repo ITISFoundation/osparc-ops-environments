@@ -22,9 +22,10 @@ from . import application, cli_config
 
 log = logging.getLogger(__name__)
 
+
 def create_environ(skip_system_environ=False):
     """
-        Build environment of substitutable variables
+    Build environment of substitutable variables
 
     """
     # system's environment variables
@@ -32,7 +33,7 @@ def create_environ(skip_system_environ=False):
 
     # project-related environment variables
     here = os.path.dirname(__file__)
-    environ['THIS_PACKAGE_DIR'] = here
+    environ["THIS_PACKAGE_DIR"] = here
 
     # rootdir = search_osparc_repo_dir(start=here)
     # if rootdir is not None:
@@ -46,8 +47,9 @@ def setup(_parser):
     return _parser
 
 
-parser = argparse.ArgumentParser(description='Command description.')
+parser = argparse.ArgumentParser(description="Command description.")
 setup(parser)
+
 
 def parse(args, _parser):
     """ Parse options and returns a configuration object """
@@ -61,11 +63,15 @@ def parse(args, _parser):
     # TODO: check whether extra options can be added to the config?!
     return config
 
+
 def main(config=None):
     config = parse(config, parser)
 
     log_level = config["main"]["log_level"]
-    logging.basicConfig(level=getattr(logging, log_level))
+    logging.basicConfig(
+        level=getattr(logging, log_level),
+        format="[%(asctime)s] %(levelname)s: {%(pathname)s:%(lineno)d} - %(message)s",
+    )
     logging.getLogger().setLevel(getattr(logging, log_level))
 
     application.run(config)
