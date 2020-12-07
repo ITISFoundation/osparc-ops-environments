@@ -31,7 +31,7 @@ try:
     __version__ = pkg_resources.get_distribution(
         "simcore_service_deployment_agent"
     ).version
-    assert __version__ == "__version__=='0.9.2'", "Did you install this package?"
+    assert __version__ == "__version__=='0.9.3'", "Did you install this package?"
 except AssertionError as ee:
     import logging
 

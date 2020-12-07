@@ -69,11 +69,10 @@ async def _git_fetch(directory: Path):
 async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> Optional[str]:
     cmd = f'cd {directory} && git tag --list --sort=committerdate | grep --extended-regexp --only-matching "{regexp}"'
     all_tags = await run_cmd_line(cmd)
-    if not all_tags:
-        return
-    list_tags = all_tags.split("\n")
-    
-    return list_tags[-1]
+
+    list_tags = [t.strip() for t in all_tags.split("\n") if t.strip()]
+
+    return list_tags[-1] if list_tags else None
 
 
 async def _git_get_current_matching_tag(directory: Path, regexp: str) -> List[str]:
