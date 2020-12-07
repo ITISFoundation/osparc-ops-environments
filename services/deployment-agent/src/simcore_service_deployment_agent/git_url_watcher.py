@@ -1,5 +1,4 @@
 import logging
-import re
 import shutil
 import tempfile
 from pathlib import Path
@@ -68,16 +67,13 @@ async def _git_fetch(directory: Path):
 
 
 async def _git_get_latest_matching_tag(directory: Path, regexp: str) -> Optional[str]:
-    cmd = f'cd {directory} && git tag --list --sort=committerdate | grep --extended-regexp --only-matching "{regexp}" | sort --reverse'
+    cmd = f'cd {directory} && git tag --list --sort=committerdate | grep --extended-regexp --only-matching "{regexp}"'
     all_tags = await run_cmd_line(cmd)
     if not all_tags:
         return
     list_tags = all_tags.split("\n")
-    reg_object = re.compile(regexp)
-    for tag in list_tags:
-        if reg_object.fullmatch(tag):
-            return tag
-    return
+    
+    return list_tags[-1]
 
 
 async def _git_get_current_matching_tag(directory: Path, regexp: str) -> List[str]:
