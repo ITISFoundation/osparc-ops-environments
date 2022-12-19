@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.29
+    command: >
+      --query.base-path=/jaeger
+    init: true
+    networks:
+      - public
+      - monitored
+    environment:
+      MEMORY_MAX_TRACES: 200
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.jaeger.loadbalancer.server.port=16686
+        - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
+        - traefik.http.routers.jaeger.entrypoints=https
+        - traefik.http.routers.jaeger.tls=true
+        - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
+        - prometheus-job=jaeger
+        - prometheus-port=14269
+      resources:
+        limits:
+          memory: 2048M
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true

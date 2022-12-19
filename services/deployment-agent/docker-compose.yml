@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  auto-deployment-agent:
+    image: ${DOCKER_REGISTRY}/deployment-agent:0.10.5
+    init: true
+    ports:
+      - "8888"
+    configs:
+      - source: deployment_config
+        target: /home/scu/config-prod.yaml
+      - source: create_stack_script
+        target: /home/scu/startup_script.bash
+        mode: 0555
+    networks:
+      - portainer_agent_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+networks:
+  portainer_agent_network:
+    external: true
+
+configs:
+  deployment_config:
+    file: ./${DEPLOYMENT_AGENT_CONFIG}
+  create_stack_script:
+    file: ./startup_script.bash

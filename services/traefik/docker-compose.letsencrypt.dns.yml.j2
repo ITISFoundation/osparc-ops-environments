@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  traefik:
+    deploy:
+      labels:
+        - traefik.http.routers.wwwsecure-catchall.tls.certresolver=myresolver
+        - traefik.http.routers.api.tls.certresolver=myresolver
+        - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
+        # What follows is a tested workaround to ensure letsencrypt certificates for products' domains are generated
+{% for j2item in MACHINE_FQDNS.split(",") + [MACHINE_FQDN] %}
+        - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.domains[0].main=service.{{j2item.replace(' ','').replace('\'','')}}
+        - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.domains[0].sans=*.services.{{j2item.replace(' ','').replace('\'','')}}
+        - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.domains[0].main=service.testing.{{j2item.replace(' ','').replace('\'','')}}
+        - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.domains[0].sans=*.services.testing.{{j2item.replace(' ','').replace('\'','')}}
+        - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.certresolver=myresolver
+{% endfor %}

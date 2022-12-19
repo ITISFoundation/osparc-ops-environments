@@ -1,0 +1,56 @@
+scrape_configs:
+  # SIMCORE -------------------------------------------------------------------
+  - job_name: "simcore"
+    scrape_interval: 73s
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        separator: ;
+        regex: ^(.*\.)?(.*?)[_-].*$
+        target_label: deployment
+        replacement: $2
+        action: replace
+      - source_labels: [__meta_dns_name]
+        separator: ;
+        regex: ^.*?[_-](.*)$
+        target_label: service_name
+        replacement: $1
+        action: replace
+    # Handle with "tasks." when there are multiple replica accrding to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
+    dns_sd_configs:
+      - names:
+          - "tasks.production_webserver"
+          - "tasks.staging_webserver"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_storage"
+          - "tasks.staging_storage"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_director"
+          - "tasks.staging_director"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_rabbit"
+          - "tasks.staging_rabbit"
+        type: "A"
+        port: 15692
+      - names:
+          - "tasks.production_traefik"
+          - "tasks.staging_traefik"
+        type: "A"
+        port: 8082
+      - names:
+          - "tasks.redis-exporter"
+        type: "A"
+        port: 9121
+      - names:
+          - "tasks.postgres-exporter"
+        type: "A"
+        port: 9187
+      - names:
+          - "tasks.dcgm-exporter"
+        type: "A"
+        port: 9400

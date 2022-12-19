@@ -1,0 +1,69 @@
+# Minio config
+scrape_configs:
+  # to generate the token use the following
+  # docker run -v /etc/ssl/certs:/etc/ssl/certs:ro --network host \
+  #   -e MC_HOST_local="https://12345678:12345678@osparc.local:10000" \
+  #   minio/mc admin prometheus generate local
+  - job_name: minio-job
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: https
+    static_configs:
+      - targets: ["${STORAGE_DOMAIN}"]
+
+  # SIMCORE -------------------------------------------------------------------
+  - job_name: "simcore"
+    scrape_interval: 73s
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        separator: ;
+        regex: ^(.*\.)?(.*?)[_-].*$
+        target_label: deployment
+        replacement: $2
+        action: replace
+      - source_labels: [__meta_dns_name]
+        separator: ;
+        regex: ^.*?[_-](.*)$
+        target_label: service_name
+        replacement: $1
+        action: replace
+    # Handle with "tasks." when there are multiple replica accrding to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
+    dns_sd_configs:
+      - names:
+          - "tasks.production_webserver"
+          - "tasks.staging_webserver"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_storage"
+          - "tasks.staging_storage"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_director"
+          - "tasks.staging_director"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_rabbit"
+          - "tasks.staging_rabbit"
+        type: "A"
+        port: 15692
+      - names:
+          - "tasks.production_traefik"
+          - "tasks.staging_traefik"
+        type: "A"
+        port: 8082
+      - names:
+          - "tasks.staging-redis-exporter"
+          - "tasks.production-redis-exporter"
+        type: "A"
+        port: 9121
+      - names:
+          - "tasks.staging-postgres-exporter"
+          - "tasks.production-postgres-exporter"
+        type: "A"
+        port: 9187
+      - names:
+          - "tasks.dcgm-exporter"
+        type: "A"
+        port: 9400

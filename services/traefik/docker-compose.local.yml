@@ -1,0 +1,71 @@
+version: "3.7"
+
+services:
+  traefik:
+    command:
+      # Here we subsitute with a custom entrypoint to load self-signed
+      # certificates.
+      - "/bin/sh"
+      - "/customEntrypoint.sh"
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.smtp.address=:25"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.https.address=:443"
+      - '--entryPoints.master_postgres.address=:5432'
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
+    networks:
+      public:
+      monitored:
+        aliases: # This enables the registry to resolve "registry.osparc.local" etc. to minio, via traefik. Necessary to give the registry access to the S3 bucket.
+          - "${STORAGE_DOMAIN}"
+          - "${REGISTRY_DOMAIN}"
+    deploy:
+      placement:
+        constraints: []
+      labels:
+        # redirect http to https
+        - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
+        - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.http_to_https.entrypoints=http
+        - traefik.http.routers.http_to_https.middlewares=http_to_https
+    env_file:
+      - .env
+    configs:
+      - source: traefik_dynamic_config.yml
+        target: /etc/traefik/dynamic_conf.yml
+      - source: customEntrypoint.sh
+        target: /customEntrypoint.sh
+    secrets:
+      - domain.key
+      - domain.crt
+      - source: storageca.crt
+        target: /secrets/storageca.crt
+
+configs:
+  traefik_dynamic_config.yml:
+    file: ./config/dynamic_conf.yml
+  customEntrypoint.sh:
+    file: ./config/customCAInit.sh
+secrets:
+  domain.key:
+    external: true
+  domain.crt:
+    external: true
+  storageca.crt:
+    external: true

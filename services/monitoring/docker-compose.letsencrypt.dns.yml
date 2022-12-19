@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  prometheus:
+    deploy:
+      labels:
+        - traefik.http.routers.prometheus.tls.certresolver=myresolver
+
+  grafana:
+    deploy:
+      labels:
+        - traefik.http.routers.grafana.tls.certresolver=myresolver

@@ -1,0 +1,55 @@
+version: '3.7'
+services:
+  traefik:
+    dns: 8.8.8.8 # This is critical to make the ACME challange work
+    command:
+      - '--api=true'
+      - '--api.dashboard=true'
+      - '--log.level=INFO'
+      - '--accesslog=false'
+      - '--metrics.prometheus=true'
+      - '--metrics.prometheus.addEntryPointsLabels=true'
+      - '--metrics.prometheus.addServicesLabels=true'
+      - '--entryPoints.metrics.address=:8082'
+      - '--entryPoints.postgres.address=:5432'
+      - '--metrics.prometheus.entryPoint=metrics'
+      - '--entryPoints.http.address=:80'
+      - '--entryPoints.https.address=:443'
+      - '--entryPoints.smtp.address=:25'
+      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
+      - '--providers.docker.swarmMode=true'
+      - '--providers.docker.exposedByDefault=false'
+      - '--tracing=true'
+      - '--tracing.jaeger=true'
+      - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
+      - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
+      - "--entryPoints.https.forwardedHeaders.insecure"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=rfc2136"
+      - "--certificatesresolvers.myresolver.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.delaybeforecheck=120"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # For debug purpose, to avoid being ban by let's encrypt servers
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=${CERTIFICATE_RESOLVE_DNS_CHALLANGE_IP}"
+    volumes:
+      - "letsencrypt_certs:/letsencrypt"
+    environment:
+      -  RFC2136_TSIG_KEY=${RFC2136_TSIG_KEY}
+      -  RFC2136_TSIG_SECRET=${RFC2136_TSIG_SECRET}
+      -  RFC2136_TSIG_ALGORITHM=${RFC2136_TSIG_ALGORITHM}
+      -  RFC2136_NAMESERVER=${RFC2136_NAMESERVER}
+      -  RFC2136_PROPAGATION_TIMEOUT=${RFC2136_PROPAGATION_TIMEOUT}
+      -  RFC2136_POLLING_INTERVAL=${RFC2136_POLLING_INTERVAL}
+    deploy:
+      replicas: ${OPS_TRAEFIK_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.traefik==true
+  whoami:
+    deploy:
+      labels:
+        - traefik.http.routers.whoami.tls.certresolver=myresolver
+
+volumes:
+  letsencrypt_certs:

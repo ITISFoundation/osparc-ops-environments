@@ -1,0 +1,157 @@
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v2.8.3
+    init: true
+    command:
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--log.level=INFO"
+      - "--accesslog=false"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - '--entryPoints.postgres.address=:5432'
+      - '--entryPoints.postgres2.address=:5433'
+      - "--entryPoints.https.address=:443"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      # so that internal services are not picked up
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
+      - target: 5432
+        published: 5432
+        mode: host
+      - target: 5433
+        published: 5433
+        mode: host
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    deploy:
+      # mode: global
+      replicas: ${OPS_TRAEFIK_REPLICAS}
+      resources:
+        limits:
+          memory: 2048M
+          cpus: '2.000'
+        reservations:
+          memory: 2048M
+          cpus: '2.000'
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
+        - traefik.http.middlewares.ops_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        ####### SECURITY HEADERS --> See https://infosec.mozilla.org/guidelines/web_security
+        # Content Security Policy
+        - >
+                traefik.http.middlewares.ops_sslheader.headers.contentSecurityPolicy=frame-ancestors https://*.${MACHINE_FQDN}:* 'self'; default-src 'self'; script-src https: 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src *;
+        # Strict Transport Security
+        - traefik.http.middlewares.ops_sslheader.headers.stsSeconds=15768001
+        #- traefik.http.middlewares.ops_sslheader.headers.stsPreload=true
+        - traefik.http.middlewares.ops_sslheader.headers.stsIncludeSubdomains=true
+        # X-Content-Type-Options header with the value nosniff: DOESNT WORK WITH OSPARC
+        #- traefik.http.middlewares.ops_sslheader.headers.contentTypeNosniff=true
+        # X-Frame-Options - Enabling this breaks osparc
+        #- traefik.http.middlewares.ops_sslheader.headers.customFrameOptionsValue=DENY
+        # X-XSS-Protecton
+        - traefik.http.middlewares.ops_sslheader.headers.browserxssfilter=true
+        ###########################
+        # redirect http to https
+        - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
+        - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.http_to_https.entrypoints=http
+        - traefik.http.routers.http_to_https.middlewares=http_to_https
+        ###########################
+        # via https://community.traefik.io/t/v2-2-8-global-redirect-www-to-non-www-with-http-to-https/7428
+        # see also: https://community.traefik.io/t/get-a-valid-ssl-certificate-for-www-domains-via-traefik-and-lets-encrypt/2023
+        # Global redirection: https (www.) to https
+        - traefik.http.routers.wwwsecure-catchall.rule=HostRegexp(`{host:(www\.).+}`)
+        - traefik.http.routers.wwwsecure-catchall.entrypoints=https
+        - traefik.http.routers.wwwsecure-catchall.tls=true
+        - traefik.http.routers.wwwsecure-catchall.middlewares=wwwtohttps
+        # middleware: http(s)://(www.) to  https://
+        - traefik.http.middlewares.wwwtohttps.redirectregex.regex=^https?://(?:www\.)?(.+)
+        - traefik.http.middlewares.wwwtohttps.redirectregex.replacement=https://$${1}
+        - traefik.http.middlewares.wwwtohttps.redirectregex.permanent=true
+        # Explicit www domain certificate
+        - traefik.http.routers.wwwsecure-catchall.tls.domains[0].main=www.${MACHINE_FQDN}
+        ###########################
+        # basic authentication
+        # Note: all dollar signs in the hash need to be doubled for escaping.
+        # To create user:password pair, it's possible to use this command:
+        # docker run --rm --entrypoint htpasswd registry:2 -nb user password | sed -e s/\\$/\\$\\$/g
+        # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+        - traefik.http.middlewares.ops_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
+        # gzip compression
+        - traefik.http.middlewares.ops_gzip.compress=true
+        # ip whitelisting
+        - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
+        # traefik UI
+        - traefik.http.routers.api.service=api@internal
+        - traefik.http.routers.api.rule=Host(`${MONITORING_DOMAIN}`) &&
+          (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+        - traefik.http.routers.api.entrypoints=https
+        - traefik.http.routers.api.tls=true
+        - traefik.http.routers.api.middlewares=ops_whitelist_ips@docker,
+          ops_auth@docker, ops_gzip@docker
+        - traefik.http.services.api.loadbalancer.server.port=8080
+        # prometheus labels
+        - prometheus-job=traefik_ops
+        - prometheus-port=8082
+
+        # wildcard certificate
+        - traefik.http.routers.api.tls.domains[0].main=service.${MACHINE_FQDN}
+        - traefik.http.routers.api.tls.domains[0].sans=*.services.${MACHINE_FQDN}
+        # ops generic rate limiter
+        - traefik.http.middlewares.ops_ratelimit.ratelimit.average=${TRAEFIK_RATELIMIT_AVG}
+        - traefik.http.middlewares.ops_ratelimit.ratelimit.burst=${TRAEFIK_RATELIMIT_BURST}
+        - traefik.http.middlewares.ops_ratelimit.ratelimit.sourcecriterion.ipstrategy.depth=1
+
+    networks:
+      public: null
+      monitored: null
+  whoami:
+    image: "containous/whoami"
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.whoami.loadbalancer.server.port=80
+        - traefik.http.routers.whoami.rule=Host(`${MONITORING_DOMAIN}`) &&
+          PathPrefix(`/whoami`)
+        - traefik.http.routers.whoami.entrypoints=https
+        - traefik.http.routers.whoami.tls=true
+        - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@docker,
+          ops_auth@docker, ops_gzip@docker
+    networks:
+      - public
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true

@@ -1,0 +1,16 @@
+attrs==21.4.0
+certifi==2021.10.8
+charset-normalizer==2.0.12
+click==8.1.2
+docker==5.0.3
+idna==3.3
+importlib-resources==5.7.1
+jsonschema==4.4.0
+pyrsistent==0.18.1
+python-dotenv==0.20.0
+requests==2.27.1
+tenacity==8.0.1
+typer==0.4.1
+urllib3==1.26.9
+websocket-client==1.3.2
+zipp==3.8.0

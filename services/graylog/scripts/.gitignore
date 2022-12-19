@@ -1,0 +1,4 @@
+alerts.yaml
+./venv/*
+./venv/**/*
+./venv

@@ -1,0 +1,39 @@
+version: "3.7"
+volumes:
+  batmanpanel_data: {}
+configs:
+  batmanpanel_nginx_config:
+    file: ./nginx.conf
+  batmanpanel_nginx_default_config:
+    file: ./default.conf
+services:
+  batman_nginx:
+    image: flashspys/nginx-static
+    configs:
+      - source: batmanpanel_nginx_config
+        target: /etc/nginx/nginx.conf
+      - source: batmanpanel_nginx_default_config
+        target: /etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    deploy:
+      placement:
+        constraints: []
+      labels: []
+      resources:
+        limits:
+          memory: 64M
+    volumes:
+      - batmanpanel_data:/static:r
+  batman_tablegeneration:
+    image: python:3.10
+    command: ["/bin/bash", "-c", "pip install -r /batmanpanels/requirements.txt && cd /batmanpanels && python3 main.py"]
+    deploy:
+      placement:
+        constraints: []
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - batmanpanel_data:/content:rw
+      - ./:/batmanpanels/:r

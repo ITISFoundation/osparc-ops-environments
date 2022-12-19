@@ -1,0 +1,133 @@
+version: "3.8"
+services:
+  autoscaling:
+    deploy:
+      replicas: 0
+      placement:
+        constraints:
+          - node.role==manager
+  agent:
+    volumes:
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+  # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
+  catalog:
+    deploy:
+      replicas: 1
+  storage:
+    secrets:
+        - source: storageca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      # This is necessary to make python-botocore work with the self-signed certificate
+      - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/osparc.crt
+      # minio sdk uses this env to use self-signed certs
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+  director:
+    deploy:
+      replicas: 1
+    environment:
+      # needed to pass the self-signed certificate to the spawned services
+      - DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
+      - DIRECTOR_SELF_SIGNED_SSL_SECRET_NAME=rootca.crt
+      - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=${DIRECTOR_SELF_SIGNED_SSL_SECRET_ID}
+      - DIRECTOR_REGISTRY_CACHING_TTL=15
+      #- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+    secrets:
+        - source: rootca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+  dask-sidecar:
+    secrets:
+        - source: rootca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      # minio sdk uses this env to use self-signed certs
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+      # This is necessary to make python work with the self-signed certificate
+      - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/osparc.crt
+  postgres:
+    labels:
+      - "pgbackup.enable=true"
+    deploy:
+      replicas: 1
+  director-v2:
+    secrets:
+      - source: rootca.crt
+        target: /usr/local/share/ca-certificates/osparc.crt
+  api-server:
+    deploy:
+      replicas: 1
+  migration:
+    deploy:
+      replicas: 1
+  rabbit:
+    deploy:
+      replicas: 1
+  dask-scheduler:
+    deploy:
+      replicas: 1
+  datcore-adapter:
+    deploy:
+      replicas: 0
+  redis:
+    deploy:
+      replicas: 1
+  traefik:
+    command:
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--ping=true"
+      - "--entryPoints.ping.address=:9082"
+      - "--ping.entryPoint=ping"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.http.forwardedHeaders.insecure"
+      - "--entryPoints.postgres.address=:5432"
+      - "--entryPoints.simcore_api.address=:10081"
+      - "--entryPoints.simcore_api.forwardedHeaders.insecure"
+      - "--entryPoints.traefik_monitor.address=:8080"
+      - "--entryPoints.traefik_monitor.forwardedHeaders.insecure"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.network=${SWARM_STACK_NAME}_default"
+      - "--providers.docker.swarmMode=true"
+      # https://github.com/traefik/traefik/issues/7886
+      - "--providers.docker.swarmModeRefreshSeconds=1"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+    deploy:
+      labels:
+        # oSparc postgres
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=postgres
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=${PREFIX_STACK_NAME}_postgres
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.tls=false
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.service=${SWARM_STACK_NAME}_postgresRoute
+        - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+      replicas: 1
+  traefik_api:
+    deploy:
+      replicas: 1
+  webserver:
+    deploy:
+      replicas: 1
+    secrets:
+      - source: rootca.crt
+        target: /usr/local/share/ca-certificates/osparc.crt
+  wb-garbage-collector:
+    deploy:
+      replicas: 1
+    secrets:
+      - source: rootca.crt
+        target: /usr/local/share/ca-certificates/osparc.crt
+  whoami:
+    deploy:
+      replicas: 1

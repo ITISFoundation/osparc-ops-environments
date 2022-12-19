@@ -1,0 +1,6 @@
+version: '3.7'
+services:
+  redis-commander:
+    deploy:
+      labels:
+        - traefik.http.routers.redis.tls.certresolver=myresolver

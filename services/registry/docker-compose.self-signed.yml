@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  registry:
+    environment:
+      # set to true if using self-signed certificates
+      UPDATE_CERTIFICATES: "true"
+    secrets:
+      - source: domain.key
+        target: /secrets/domain.key
+      - source: domain.crt
+        target: /secrets/domain.crt
+      - source: storageca.crt
+        target: /secrets/rootca.crt
+
+secrets:
+  # private key
+  domain.key:
+    external: true
+  # certificate
+  domain.crt:
+    external: true
+  # root authority
+  rootca.crt:
+    external: true
+  # root authority
+  storageca.crt:
+    external: true

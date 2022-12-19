@@ -1,0 +1,95 @@
+services:
+  autoscaling:
+    deploy:
+      replicas: 0
+      placement:
+        constraints:
+          - node.role==manager
+  postgres:
+    labels:
+      - "pgbackup.enable=true"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.postgres==true
+  api-server:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  catalog:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  migration:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  rabbit:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  dask-sidecar:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dasksidecar==true
+          - node.role == manager
+  dask-scheduler:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  datcore-adapter:
+    deploy:
+      replicas: 0
+      placement:
+        constraints:
+          - node.role==manager
+  redis:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.redis==true
+  static-webserver:
+    hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
+    deploy:
+      placement:
+        constraints:
+        - node.role==manager
+  storage:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  traefik:
+    deploy:
+      labels:
+        - prometheus-job=traefik_simcore_production
+      placement:
+        constraints:
+          - node.labels.traefik==true
+  traefik_api:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  webserver:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  wb-garbage-collector:
+    hostname: "{{.Service.Name}}"
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  whoami:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager

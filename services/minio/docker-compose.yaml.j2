@@ -1,0 +1,81 @@
+version: '3.7'
+services:
+{% set num_minios = MINIO_NUM_MINIOS %}
+{% set num_partitions = MINIO_NUM_PARTITIONS %}
+{% set host_folder = MINIO_HOST_DATA_FOLDER %}
+{%- for i in range(num_minios|int) %}
+  {%- set service_id = i+1 %}
+  minio{{ service_id|string }}:
+    image: minio/minio:RELEASE.2021-04-22T15-44-28Z
+    init: true
+    hostname: minio{{ service_id|string }}
+    volumes: # default uses a named volume, option2 is to use the variable to set specific mount path(s)
+      {%- for j in range(num_partitions|int) %}
+      {% if host_folder == 'true' %}
+      - /data/disk{{ j|string }}/minio:/data{{ j|string }}
+      {% else %}
+      - minio{{ service_id|string }}_data_part{{ j|string }}:/data{{ j|string }}
+      {% endif %}
+      {%- endfor %}
+    networks:
+      - default
+      - public
+      - monitored
+    ports:
+      - target: 9000
+    environment:
+      - MINIO_ACCESS_KEY_FILE=minio_access_key
+      - MINIO_SECRET_KEY_FILE=minio_secret_key
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+    deploy:
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      {%- if num_minios|int > 1 %}
+      placement:
+        constraints:
+          - {{ "node.labels.minio" ~ service_id|string ~ "==true" }}
+      {%- endif %}
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access without path (necessary for minio client it does not like /path)
+        - traefik.http.services.minio.loadbalancer.server.port=9000
+        - traefik.http.services.minio.loadbalancer.healthcheck.path=/minio/health/ready
+        - traefik.http.routers.minio.rule=Host(`${STORAGE_DOMAIN}`)
+        - traefik.http.routers.minio.entrypoints=https
+        - traefik.http.routers.minio.tls=true
+        - traefik.http.routers.minio.middlewares=ops_gzip@docker
+    command: >
+      server
+      {%- for i in range(num_minios|int) %}
+      {%- for j in range(num_partitions|int) %}
+      {% if num_minios|int > 1 %}http://minio{{ (i+1)|string }}{% endif %}/data{{ j|string }}
+      {%- endfor %}
+      {%- endfor %}
+    secrets:
+      - minio_secret_key
+      - minio_access_key
+
+{% endfor %}
+volumes:
+{%- for i in range(num_minios|int) %}
+{%- for j in range(num_partitions|int) %}
+  minio{{ (i+1)|string }}_data_part{{ j|string }}:
+{%- endfor %}
+{%- endfor %}
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+
+secrets:
+  minio_secret_key:
+    external: true
+  minio_access_key:
+    external: true

@@ -1,0 +1,31 @@
+{
+  "access": "proxy",
+  "basicAuth": false,
+  "basicAuthPassword": "",
+  "basicAuthUser": "",
+  "database": "simcoredb",
+  "id": 3,
+  "isDefault": false,
+  "jsonData": {
+    "connMaxLifetime": 14400,
+    "maxIdleConns": 2,
+    "maxOpenConns": 0,
+    "postgresVersion": 1000,
+    "sslmode": "disable",
+    "timescaledb": false
+  },
+  "name": "ProductionPostgres",
+  "orgId": 1,
+  "password": "",
+  "readOnly": false,
+  "secureJsonFields": {
+    "password": true
+  },
+  "type": "postgres",
+  "typeLogoUrl": "",
+  "uid": "FYmEr527k",
+  "url": "production_postgres",
+  "user": "grafanareader",
+  "version": 1,
+  "withCredentials": false
+}

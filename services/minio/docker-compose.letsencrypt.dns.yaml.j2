@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+{% set num_minios = MINIO_NUM_MINIOS %}
+{% set num_partitions = MINIO_NUM_PARTITIONS %}
+{%- for i in range(num_minios|int) %}
+  {%- set service_id = i+1 %}
+  minio{{ service_id|string }}:
+    deploy:
+      labels:
+        - traefik.http.routers.minio.tls.certresolver=myresolver
+{% endfor %}

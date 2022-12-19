@@ -1,0 +1,124 @@
+version: "3.7"
+services:
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongodb:
+    image: mongo:4.2
+    init: true
+    volumes:
+      # data persistency
+      - mongo_data:/data/db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      default:
+        aliases:
+          - mongo # needed because of graylog configuration
+
+  # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    init: true
+    volumes:
+      # data persistency
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 1G
+  # Graylog: https://hub.docker.com/r/graylog/graylog/
+  graylog:
+    image: graylog/graylog:4.3.3
+    init: true
+    # user: "1000:1001"
+    volumes:
+      # Mount local configuration directory into Docker container
+      # - graylog_config:/usr/share/graylog/data/config
+      # data persistency
+      - graylog_journal:/usr/share/graylog/data/journal
+    env_file:
+      - .env
+    environment:
+      # CHANGE ME (must be at least 16 characters)!
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
+      # Username: admin
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
+      - GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}
+    networks:
+      - public
+      - default
+    ports:
+    - 12201:12201/udp
+    - 12202:12202/udp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "8.00"
+          memory: 8G
+        reservations:
+          cpus: "4.00"
+          memory: 4G
+
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.graylog.loadbalancer.server.port=9000
+        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)
+        - traefik.http.routers.graylog.entrypoints=https
+        - traefik.http.routers.graylog.tls=true
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, graylog_replace_regex
+
+  # Logspout: https://github.com/mictsi/logspout-gelf-tls
+  logspout:
+    image: docker.io/itisfoundation/logspout:latest
+    command: multiline+gelf://graylog:12201
+    init: true
+    volumes:
+      ##########- /etc/hostname:/etc/host_hostname # does not work in windows
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/hostname:/etc/host_hostname:ro
+    environment:
+      - SYSLOG_TAG="{{index .Service.Name}}"
+      - SYSLOG_HOSTNAME="{{index .Node.Hostname}}"
+      - INACTIVITY_TIMEOUT=1m
+      - BACKLOG=false
+      - SYSLOG_STRUCTURED_DATA="logdna@48950 key=\"12345\" tag=\"swarm,stacks\""
+      - LOGSPOUT=ignore
+      - ALLOW_TTY=true
+      - MULTILINE_MATCH=first
+      - MULTILINE_PATTERN=^(.*\[.*)?(ERROR|WARNING|INFO|DEBUG|CRITICAL)(.*\[0m)?[:]
+      - MULTILINE_ENABLE_DEFAULT=false
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: "0.20"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+
+volumes:
+  mongo_data:
+  elasticsearch_data:
+  graylog_journal:
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}

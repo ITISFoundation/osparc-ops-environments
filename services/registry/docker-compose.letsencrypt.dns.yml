@@ -1,0 +1,6 @@
+version: '3.7'
+services:
+  registry:
+    deploy:
+      labels:
+        - traefik.http.routers.registry.tls.certresolver=myresolver

@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  mail:
+    image: mailserver/docker-mailserver:10.5.0
+    ports:
+    - target: 587
+      published: 587
+      mode: host
+    - target: 25
+      published: 25
+      mode: host
+    - "143:143"
+    - "993:993"
+
+    volumes:
+    - maildata:/var/mail
+    - mailstate:/var/mail-state
+    - maillogs:/var/log/mail
+    - ./config/:/tmp/docker-mailserver/
+    - traefik_letsencrypt_certs:/etc/letsencrypt/:rw
+    env_file:
+    - .env
+    cap_add:
+    - NET_ADMIN
+    - SYS_PTRACE
+    restart: always
+    networks:
+      - public
+      - monitored
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.mail.loadbalancer.server.port=25
+        - traefik.http.routers.mail.rule=Host(`smtp.${MACHINE_FQDN}`)
+        - traefik.http.routers.mail.entrypoints=smtp
+        - traefik.http.routers.mail.tls=true
+volumes:
+  maildata:
+    driver: local
+  mailstate:
+    driver: local
+  maillogs:
+    driver: local
+  traefik_letsencrypt_certs:
+     external: true
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true

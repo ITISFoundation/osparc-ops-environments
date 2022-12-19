@@ -1,0 +1,6 @@
+c.ServerApp.ip = '0.0.0.0'
+c.ServerApp.port = 8888
+c.ServerApp.open_browser = False
+c.ServerApp.trust_xheaders = True
+c.ServerApp.allow_origin= '*'
+c.ServerApp.custom_display_url = '${ADMINPANELS_DOMAIN}'

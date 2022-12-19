@@ -1,0 +1,84 @@
+{
+  "interval": "1m",
+  "name": "cpu_usage_alert",
+  "rules": [
+    {
+      "expr": "",
+      "for": "3m",
+      "grafana_alert": {
+        "condition": "B",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "exemplar": false,
+              "expr": "clamp_max(avg by (instance) (sum by (instance)(rate(process_cpu_seconds_total[5m])) / (sum by (instance) (rate(node_cpu_seconds_total{job=\"node-exporter\", mode=~\"(idle)\"}[5m])))),1)",
+              "hide": false,
+              "interval": "",
+              "intervalMs": 1000,
+              "legendFormat": "{{instance}}",
+              "maxDataPoints": 43200,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 900,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "-100",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0.91
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "A"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "grafana-expression",
+                "uid": "-100"
+              },
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "B",
+              "type": "classic_conditions"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 0,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Alerting",
+        "intervalSeconds": 60,
+        "no_data_state": "Alerting",
+        "rule_group": "cpu_usage_alert",
+        "title": "cpu_usage_alert",
+        "updated": "2022-06-21T12:00:24Z",
+        "version": 1
+      }
+    }
+  ]
+}

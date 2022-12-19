@@ -1,0 +1,13 @@
+services:
+  rabbit:
+    deploy:
+      labels:
+        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.tls.certresolver=myresolver
+
+  traefik:
+    deploy:
+      labels:
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.tls.certresolver=myresolver
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.tls.certresolver=myresolver
+        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.tls.certresolver=myresolver
+        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_api.tls.certresolver=myresolver

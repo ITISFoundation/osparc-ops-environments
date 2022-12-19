@@ -1,0 +1,10 @@
+datasources2dashboards:
+  - dashboard_name: "Staging Metrics"
+    mapping:
+      - datasource_name: "StagingPostgres"
+        type: "postgres"
+defaults:
+  - type: "postgres"
+    datasource_name: "ProductionPostgres"
+  - type: "prometheus"
+    datasource_name: "Prometheus"

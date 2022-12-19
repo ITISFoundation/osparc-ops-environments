@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  redis-commander:
+    dns:
+      8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rediscommander==true

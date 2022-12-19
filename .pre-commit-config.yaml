@@ -1,0 +1,121 @@
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: "^.venv$|^.cache$|^.pytest_cache$"
+default_language_version:
+  python: python3.9
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=499"] # ensures docker config compatability for all files
+      - id: check-merge-conflict
+      - id: check-yaml
+        exclude: ^(.*.go.yml)|(.*.template.yaml)$
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-executables-have-shebangs
+      - id: detect-private-key
+        exclude: "^certificates/(.*)$"
+      - id: detect-aws-credentials
+        exclude: "^certificates/(.*)$"
+  - repo: local
+    hooks:
+      - id: validate-template-dotenv
+        name: Validate template.env
+        description: Validate template.env
+        entry: 'scripts/pre-commit-hooks/validateTemplateDotEnv/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*)\/services\/(.*)(template\.env)$'
+      - id: validateDockerComposeNoDuplication
+        name: validateDockerComposeNoDuplication
+        description: validateDockerComposeNoDuplication
+        entry: 'scripts/pre-commit-hooks/validateDockerComposeNoDuplication/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*)(docker-compose.*\.y([a])?ml)$'
+      - id: validateMakeComposeSimcoreRuns
+        name: validateMakeComposeSimcoreRuns
+        description: validateMakeComposeSimcoreRuns
+        entry: 'scripts/pre-commit-hooks/validateMakeComposeSimcoreRuns/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*)\/services\/simcore/(docker-compose.*\.y([a])?ml)$'
+      - id: no-env-vars-exported-in-critical-pipeline-files
+        name: no-env-vars-exported-in-critical-pipeline-files
+        description: no-env-vars-exported-in-critical-pipeline-files
+        entry: 'scripts/pre-commit-hooks/no-env-vars-exported-in-critical-pipeline-files/launch.bash'
+        exclude: ^(services/maintenance-page/Makefile)$
+        always_run: true
+        language: script
+        files: '^(.*\/Makefile.*)|(.*\.deploy.sh)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
+      - id: stack-yml-generated-is-valid
+        name: stack-yml-generated-is-valid
+        description: stack-yml-generated-is-valid
+        entry: 'scripts/pre-commit-hooks/stack-yml-generated-is-valid/launch.bash'
+        always_run: true
+        language: script
+        files: '^((.*)\/services\/simcore\/(.*))|((.*)\/services\/deployment-agent\/(.*))$'
+  # NOTE: Keep order as pyupgrade (will update code) then pycln (remove unused imports), then isort (sort them) and black (final formatting)
+  - repo: https://github.com/roy-ht/pre-commit-jupyter
+    rev: v1.2.1
+    hooks:
+      - id: jupyter-notebook-cleanup
+        language: python
+        entry: jupyter-notebook-cleanup
+        args:
+          - --remove-kernel-metadata
+          - --pin-patterns
+          - "[pin];[donotremove]"
+        files: .*[.]ipynb$
+        types: ["file"]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.34.0
+    hooks:
+      - id: pyupgrade
+        args:
+          - "--py39-plus"
+        name: upgrade code
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v1.2.5
+    hooks:
+      - id: pycln
+        args: [--all, --expand-stars]
+        name: prune imports
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+        name: sort imports
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+      - id: python-no-eval
+        name: check for the `eval()` built-in python function
+  - repo: https://github.com/fortman/pre-commit-prometheus
+    rev: v1.2.0
+    hooks:
+    - id: check-rules
+      name: prometheus rule check
+      files: >
+        (?x)^(
+          services/monitoring/prometheus/.*\.rules\.yml
+        )$
+
+  #- repo: https://github.com/PyCQA/bandit
+  #  rev: 1.7.4
+  #  hooks:
+  #    - id: bandit
+  #      name: bandit python3 security linter
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shellcheck
+        name: Shell scripts conform to shellcheck
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        name: black format code

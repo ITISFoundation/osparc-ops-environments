@@ -1,0 +1,7 @@
+domain.crt
+domain.csr
+domain.key
+extfile.cnf
+rootca.crt
+rootca.key
+rootca.srl

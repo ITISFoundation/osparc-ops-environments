@@ -1,0 +1,85 @@
+## Runtime configuration for the simcore_service_deployment_agent application.
+##
+version: "1.0"
+rest:
+  version: v0
+  location: oas3/v0/openapi.yaml
+main:
+  log_level: ${DEPLOYMENT_AGENT_LOGLEVEL}
+  host: 127.0.0.1
+  port: 8888
+  watched_git_repositories:
+    # all git repositories that shall be controlled
+    - id: simcore-github-repo
+      url: ${GIT_SIMCORE_REPO_URL}
+      branch: ${GIT_SIMCORE_REPO_BRANCH}
+      username: ${GIT_SIMCORE_LOGIN}
+      password: ${GIT_SIMCORE_PASSWORD}
+      pull_only_files: true # if true will only pull the files define in paths
+      # tags: ^v[0-9]+.[0-9]+.[0-9]+$
+      ${TAGS_SIMCORE_REPO}
+      paths:
+        # lists the files where to look for changes in the repo
+        - services/docker-compose.yml
+        - .env-devel
+        - .env-wb-garbage-collector
+    - id: simcore-ops-repo
+      url: ${GIT_OPS_REPO_URL}
+      branch: ${GIT_OPS_REPO_BRANCH}
+      pull_only_files: false
+      username: ${GIT_OPS_LOGIN}
+      password: ${GIT_OPS_PASSWORD}
+      paths: []
+    - id: simcore-ops-config-repo
+      url: ${GIT_DEPLOYEMENTCONFIG_REPO_URL}
+      branch: ${GIT_DEPLOYEMENTCONFIG_REPO_BRANCH}
+      pull_only_files: true
+      username: ${GIT_DEPLOYEMENTCONFIG_LOGIN}
+      password: ${GIT_DEPLOYEMENTCONFIG_PASSWORD}
+      paths:
+        - repo.config
+  docker_private_registries:
+    # lists registries and their credentials if necessary to check for services to download from
+    - url: ${DOCKER_HUB_URL}
+      username: ${DOCKER_HUB_LOGIN}
+      password: ${DOCKER_HUB_PASSWORD}
+  docker_stack_recipe:
+    # defines the recipe to generate the docker-compose style stack file to be deployed in the swarm
+    # An optional command line may be defined to that end that generate the docker-compose file.
+    files:
+      - id: simcore-ops-config-repo
+        paths:
+          - repo.config
+      - id: simcore-github-repo
+        paths:
+          - services/docker-compose.yml
+          - .env-devel
+          - .env-wb-garbage-collector
+    workdir: simcore-ops-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
+    # The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
+    # It is very important (due to the deployment agent running git clean) no files are overwritten with files of the same name
+    command: > #Check exec (simcore dockerfiles)
+      bash -c "/home/scu/startup_script.bash --workdir ${DOLLAR}(pwd -P) --debug"
+    stack_file: stack.yml # the output file of the command above, or just the file to use
+    excluded_services: [${EXCLUDED_SIMCORE_SERVICES}]
+    excluded_volumes: []
+    additional_parameters:
+      extra_hosts: []
+      environment: []
+    services_prefix: ${PREFIX_STACK_NAME}
+  portainer:
+    # lists the portainer instances to call upon
+    - url: http://portainer:9000
+      endpoint_id: -1
+      username: ${PORTAINER_USER}
+      password: ${PORTAINER_PASSWORD}
+      stack_name: ${SIMCORE_STACK_NAME}
+  polling_interval: 60
+  notifications:
+    - service: mattermost
+      url: ${MATTERMOST_URL}
+      message: ":panda_face: :panda_face: :panda_face:  New [SIM-Core](https://github.com/ITISFoundation/osparc-simcore) on [${MATTERMOST_HEADER_NAME}](https://${MACHINE_FQDN}) :panda_face: :panda_face: :panda_face:"
+      enabled: true
+      channel_id: ${MATTERMOST_CHANNEL_ID}
+      personal_token: ${MATTERMOST_PERSONAL_TOKEN}
+      header_unique_name: ${MATTERMOST_HEADER_NAME}

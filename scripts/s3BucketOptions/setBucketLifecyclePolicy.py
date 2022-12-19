@@ -1,0 +1,69 @@
+import warnings
+
+import boto3
+import botocore
+import typer
+
+warnings.filterwarnings(
+    "ignore",
+    ".*Adding certificate verification is strongly advised.*",
+)
+#
+def main(
+    destinationbucketname: str,
+    destinationbucketaccess: str,
+    destinationbucketsecret: str,
+    destinationendpointurl: str,
+    noncurrentVersionExpirationDays: int,
+):
+    #
+    bucketLifecycleConfig = {
+        "ID": "DeleteOldVersionsAfter" + str(noncurrentVersionExpirationDays) + "Days",
+        "Status": "Enabled",
+        "Prefix": "",
+        "NoncurrentVersionExpiration": {
+            "NoncurrentDays": noncurrentVersionExpirationDays,
+        },
+    }
+
+    s3 = boto3.client(
+        "s3",
+        region_name="us-east-1",
+        endpoint_url=destinationendpointurl,
+        aws_access_key_id=destinationbucketaccess,
+        aws_secret_access_key=destinationbucketsecret,
+        verify=False,
+    )
+    try:
+        response = s3.get_bucket_lifecycle(Bucket=destinationbucketname)
+        print("Lifecycle Settings before the change:")
+        print(response["Rules"])
+        print("########")
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] == "NoSuchLifecycleConfiguration":
+            print("NoSuchLifecycleConfiguration")
+        else:
+            # AllAccessDisabled error == bucket not found
+            print(e)
+            return None
+    s3.put_bucket_lifecycle(
+        Bucket=destinationbucketname,
+        LifecycleConfiguration={"Rules": [bucketLifecycleConfig]},
+    )
+    try:
+        response = response = s3.get_bucket_lifecycle(Bucket=destinationbucketname)
+        print("Lifecycle Settings after the change:")
+        print(response["Rules"])
+        #
+        print("#####")
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] == "NoSuchLifecycleConfiguration":
+            return []
+        else:
+            # AllAccessDisabled error == bucket not found
+            print(e)
+            return None
+
+
+if __name__ == "__main__":
+    typer.run(main)

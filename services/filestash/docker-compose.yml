@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+  filestash:
+    image: machines/filestash:3a01b70
+    configs:
+      - source: filestash_config
+        target: /app/data/state/config/config.json
+    networks:
+      - public
+      - monitored
+    env_file:
+      - .env
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.filestash.loadbalancer.server.port=8334
+        - traefik.http.routers.filestash.rule=Host(`${FILESTASH_DOMAIN}`)
+        - traefik.http.routers.filestash.entrypoints=https
+        - traefik.http.routers.filestash.tls=true
+        - traefik.http.routers.filestash.middlewares=ops_whitelist_ips@docker
+      resources:
+        limits:
+          memory: 512M
+  onlyoffice:
+    image: onlyoffice/documentserver:7.0.0.132
+    networks:
+      - public
+      - monitored
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+
+configs:
+  filestash_config:
+    file: ./filestash_config.json

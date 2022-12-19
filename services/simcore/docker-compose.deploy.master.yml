@@ -1,0 +1,145 @@
+services:
+  autoscaling:
+    deploy:
+      replicas: 0
+      placement:
+        constraints:
+          - node.role==manager
+  agent:
+    volumes:
+      - /docker/volumes/:/docker/volumes/
+  postgres:
+    labels:
+      - "pgbackup.enable=true"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.postgres==true
+  api-server:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  catalog:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  migration:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  rabbit:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  dask-sidecar:
+    environment:
+      - SIDECAR_LOGLEVEL=INFO
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dasksidecar==true
+          - node.role == worker
+  dask-scheduler:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  datcore-adapter:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  redis:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.redis==true
+  storage:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  traefik:
+    command:
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--ping=true"
+      - "--entryPoints.ping.address=:9082"
+      - "--ping.entryPoint=ping"
+      - "--log.level=WARNING"
+      - "--accesslog=false"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.http.forwardedHeaders.insecure"
+      - "--entryPoints.postgres.address=:5432"
+      - "--entryPoints.simcore_api.address=:10081"
+      - "--entryPoints.simcore_api.forwardedHeaders.insecure"
+      - "--entryPoints.traefik_monitor.address=:8080"
+      - "--entryPoints.traefik_monitor.forwardedHeaders.insecure"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.network=${SWARM_STACK_NAME}_default"
+      - "--providers.docker.swarmMode=true"
+      # https://github.com/traefik/traefik/issues/7886
+      - "--providers.docker.swarmModeRefreshSeconds=1"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+          cpus: '2.000'
+      labels:
+        # oSparc postgres
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=postgres
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=${PREFIX_STACK_NAME}_postgres
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.tls=false
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.service=${SWARM_STACK_NAME}_postgresRoute
+        - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+      placement:
+        constraints:
+          - node.labels.traefik==true
+  traefik_api:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  webserver:
+    deploy:
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
+  wb-garbage-collector:
+    deploy:
+      placement:
+        constraints:
+          - node.platform.os == linux
+          - node.role==manager
+  whoami:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar!=true
+          - node.role == worker
