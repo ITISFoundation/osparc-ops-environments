@@ -8,6 +8,10 @@ services:
   agent:
     volumes:
       - /docker/volumes/:/docker/volumes/
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
   postgres:
     labels:
       - "pgbackup.enable=true"

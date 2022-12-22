@@ -23,11 +23,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - LOGLEVEL=WARNING
+      - AGENT_VOLUMES_CLEANUP_TARGET_SWARM_STACK_NAME=${AGENT_VOLUMES_CLEANUP_TARGET_SWARM_STACK_NAME}
     deploy:
       placement:
         constraints:
           - node.labels.dynamicsidecar==true
-          - node.role==worker
       update_config:
         parallelism: 2
         order: start-first

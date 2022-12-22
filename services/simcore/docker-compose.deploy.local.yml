@@ -7,6 +7,10 @@ services:
         constraints:
           - node.role==manager
   agent:
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
     volumes:
       - /var/lib/docker/volumes:/var/lib/docker/volumes
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates

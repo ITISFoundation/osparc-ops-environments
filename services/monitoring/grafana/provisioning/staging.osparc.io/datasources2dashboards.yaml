@@ -1,0 +1,5 @@
+defaults:
+  - type: "postgres"
+    datasource_name: "ProductionPostgres"
+  - type: "prometheus"
+    datasource_name: "Prometheus"
