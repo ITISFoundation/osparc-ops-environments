@@ -42,7 +42,7 @@ export MONITORED_NETWORK
 
 # Check that a valid location to a config file is set.
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
-REPO_CONFIG_LOCATION := $(shell cat $(REPO_BASE_DIR)/.config.location)
+export REPO_CONFIG_LOCATION := $(shell cat $(REPO_BASE_DIR)/.config.location)
 $(if $(REPO_CONFIG_LOCATION),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell cat $(REPO_CONFIG_LOCATION)),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell wc -l $(REPO_BASE_DIR)/.config.location | grep 1),,$(error The .config.location file has more than one path specified. Only one path is allowed. Aborting))
