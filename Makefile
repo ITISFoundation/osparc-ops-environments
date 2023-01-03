@@ -85,7 +85,7 @@ down-simcore:  ## Stop the simcore service
 		if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /mnt/c/Windows/System32/drivers/etc/hosts; then \
 		echo -n "Do you wish to deploy the on a Windows or WSL2 host ? [y/N]" && read ans && [ $${ans:-N} = y ] &&  \
 		( echo "Please run the following in a PowerShell with Admin rights, if necessary multiple times, until no error is returned:" && \
-		echo "(Get-Content -Path 'C:\Windows\System32\drivers\etc\hosts') | Where-Object { \$$_ -notmatch '^\s*.*\..*\..*\..*\s+.*osparc\.local'} | Set-Content -Path 'C:\Windows\System32\drivers\etc\hosts' -Force; Add-Content c:\Windows\System32\drivers\etc\hosts \"\`r\`$(MACHINE_IP) $(MACHINE_FQDN)\`r\`$(MACHINE_IP) $(MONITORING_DOMAIN)\`r\`$(MACHINE_IP) $(REGISTRY_DOMAIN)\`r\`$(MACHINE_IP) $(STORAGE_DOMAIN)\`r\`$(MACHINE_IP) $(API_DOMAIN)\"") || true; \
+		echo "(Get-Content -Path 'C:\Windows\System32\drivers\etc\hosts') | Where-Object { \$$_ -notmatch '^\s*.*\..*\..*\..*\s+.*osparc\.local'} | Set-Content -Path 'C:\Windows\System32\drivers\etc\hosts' -Force; Add-Content c:\Windows\System32\drivers\etc\hosts \"\`r\`$(MACHINE_IP) $(MACHINE_FQDN)\`r\`$(MACHINE_IP) traefikdashboard.$(MACHINE_FQDN)\`r\`$(MACHINE_IP) testing.$(MACHINE_FQDN)\`r\`$(MACHINE_IP) $(MONITORING_DOMAIN)\`r\`$(MACHINE_IP) $(REGISTRY_DOMAIN)\`r\`$(MACHINE_IP) $(STORAGE_DOMAIN)\`r\`$(MACHINE_IP) $(API_DOMAIN)\"") || true; \
 		fi \
 	,\
 	if ! grep -Fq "$(MACHINE_IP) $(MACHINE_FQDN)" /etc/hosts; then \
