@@ -480,7 +480,7 @@ services:
         # oSparc non rate limited webAPI for testing
         - traefik.http.services.${SWARM_STACK_NAME}_testing_simcore_http.loadbalancer.server.port=80
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.service=${SWARM_STACK_NAME}_testing_simcore_http
-        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.rule=(${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL})
+        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.rule=(${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE})
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.middlewares=ops_gzip@docker, ops_sslheader@docker, ops_auth@docker, ops_whitelist_ips@docker
