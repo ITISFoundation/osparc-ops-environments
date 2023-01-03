@@ -12,9 +12,10 @@ SERVICES = $(sort $(dir $(wildcard services/*/.)))
 # TARGETS --------------------------------------------------
 
 certificates/domain.crt: certificates/domain.key
+
 certificates/domain.key:
-	# domain key/crt files must be located in $< and certificates/domain.crt to be used
-	@echo -n "No $< certificate detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ] && \
+	# domain key/crt files must be located in $@ and certificates/domain.crt to be used
+	@echo -n "No $@ keyfile detected, do you wish to create self-signed certificates? [y/N] " && read ans && [ $${ans:-N} = y ] && \
 	$(MAKE_C) certificates create-certificates && \
 	$(MAKE_C) certificates install-root-certificate;
 
