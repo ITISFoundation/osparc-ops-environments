@@ -124,6 +124,9 @@ export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE=$(shell set -o allexpo
 # Determine host machine IP
 export MACHINE_IP = $(shell source $(realpath $(REPO_BASE_DIR)/scripts/portable.sh) && get_this_private_ip)
 
+# Docker secret ID for self-signed cert deplyent
+export DIRECTOR_SELF_SIGNED_SSL_SECRET_ID = $(shell if ! docker secret ls | grep -w rootca.crt >/dev/null; then echo VAR_NOT_SET; else docker secret ls | grep rootca.crt | cut -d " " -f1; fi;)
+
 .PHONY: help
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
