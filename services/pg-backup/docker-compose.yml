@@ -1,14 +1,20 @@
 version: '3.7'
 services:
-  dbbackup:
-    image: justb4/pgbackup:10
+  SERVICE_NAME_PARAMETRIZED:
+    image: kartoza/pg-backup:14-3.3@sha256:4d1867707b1da879324199fb3c0d542122113bfc50cd2418764efb8f4309d6c1
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /tank:/backup
+      - /tank/${MACHINE_FQDN}:/backups
     environment:
-    - PGB_SCHEDULE=0 * * * * # Every hours
+      - DUMPPREFIX=PG_${MACHINE_FQDN}
+      - DUMP_ARGS="--format=c"
+      - POSTGRES_HOST=${PREFIX_STACK_NAME}_postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - CRON_SCHEDULE="*/2 * * * *"
     networks:
     - monitored
+    - public
     deploy:
       placement:
         constraints:
@@ -16,4 +22,7 @@ services:
 networks:
   monitored:
     name: ${MONITORED_NETWORK}
+    external: true
+  public:
+    name: ${PUBLIC_NETWORK}
     external: true

@@ -12,8 +12,8 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up ## Deploys pg-backup stack
-up: .init ${TEMP_COMPOSE}  ## Deploys pg-backup stack
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+up: .init .env ${TEMP_COMPOSE}  ## Deploys pg-backup stack
+	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}; \
 
 .PHONY: up-dalco ## Deploys pg-backup stack for Dalco Cluster
 up-dalco: up
@@ -26,15 +26,22 @@ up-master: up-dalco
 
 .PHONY: up-public ## Deploys pg-backup stack for public access cluster
 up-public: .init ${TEMP_COMPOSE}-public
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
-
+	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}; \
 
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose -f $< --log-level=ERROR config > $@
+	docker-compose -f $< --log-level=ERROR config > $@
+	set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	sed -i "s/SERVICE_NAME_PARAMETRIZED/$${PREFIX_STACK_NAME}_pg_backup/g" $@;\
+	set +o allexport; \
 
 .PHONY: ${TEMP_COMPOSE}-public
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml
 	docker-compose -f $< -f docker-compose.public.yml --log-level=ERROR config > $@
+	set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	sed -i "s/SERVICE_NAME_PARAMETRIZED/$${PREFIX_STACK_NAME}_pg_backup/g" $@;\
+	set +o allexport; \
