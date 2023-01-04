@@ -83,7 +83,7 @@ export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL=$(shell set -o all
 		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
+			DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`testing.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
 		done; \
 		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL"; \
 	fi; \
