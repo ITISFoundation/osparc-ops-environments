@@ -12457,7 +12457,7 @@
             "type": "prometheus",
             "uid": "RmZEr52nz"
           },
-          "definition": "label_values(node_meta{node_name=\"$name\"}, instance)",
+          "definition": "label_values(node_uname_info{job=\"node-exporter\"}, instance)",
           "hide": 2,
           "includeAll": false,
           "label": "Host:",
@@ -12465,7 +12465,7 @@
           "name": "node",
           "options": [],
           "query": {
-            "query": "label_values(node_meta{node_name=\"$name\"}, instance)",
+            "query": "label_values(node_uname_info{job=\"node-exporter\"}, instance)",
             "refId": "Prometheus-node-Variable-Query"
           },
           "refresh": 1,
