@@ -13,7 +13,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up ## Deploys pg-backup stack
 up: .init .env ${TEMP_COMPOSE}  ## Deploys pg-backup stack
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}; \
+	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys pg-backup stack for Dalco Cluster
 up-dalco: up
@@ -26,22 +26,29 @@ up-master: up-dalco
 
 .PHONY: up-public ## Deploys pg-backup stack for public access cluster
 up-public: .init ${TEMP_COMPOSE}-public
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}; \
+	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
 
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
-	docker-compose -f $< --log-level=ERROR config > $@
-	set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	sed -i "s/SERVICE_NAME_PARAMETRIZED/$${PREFIX_STACK_NAME}_pg_backup/g" $@;\
-	set +o allexport; \
+${TEMP_COMPOSE}: .venv  docker-compose.yml
+	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
+	docker-compose -f docker-compose.yml --log-level=ERROR config > $@
+	rm docker-compose.yml >/dev/null 2>&1;
+
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml
-	docker-compose -f $< -f docker-compose.public.yml --log-level=ERROR config > $@
-	set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	sed -i "s/SERVICE_NAME_PARAMETRIZED/$${PREFIX_STACK_NAME}_pg_backup/g" $@;\
-	set +o allexport; \
+${TEMP_COMPOSE}-public: venv  docker-compose.yml docker-compose.public.yml
+	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
+	docker-compose -f docker-compose.yml -f docker-compose.public.yml --log-level=ERROR config > $@
+	rm docker-compose.yml >/dev/null 2>&1;
+
+.venv:
+	# creating virtual environment with tooling (jinja, etc)
+	@python3 -m venv .venv
+	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install jinja2 j2cli[yaml]
+
+define jinja
+	.venv/bin/j2 --format=env $(1) .env -o $(2)
+endef

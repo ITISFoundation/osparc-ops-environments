@@ -1,17 +1,18 @@
 version: '3.7'
 services:
-  SERVICE_NAME_PARAMETRIZED:
+  {{ PREFIX_STACK_NAME }}_pg_backup:
     image: kartoza/pg-backup:14-3.3@sha256:4d1867707b1da879324199fb3c0d542122113bfc50cd2418764efb8f4309d6c1
     volumes:
       - /tank/${MACHINE_FQDN}:/backups
     environment:
       - DUMPPREFIX=PG_${MACHINE_FQDN}
-      - DUMP_ARGS="--format=c"
+      - DUMP_ARGS="--format=plain"
       - POSTGRES_HOST=${PREFIX_STACK_NAME}_postgres
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASS=${POSTGRES_PASSWORD}
       - POSTGRES_PORT=${POSTGRES_PORT}
-      - CRON_SCHEDULE="*/2 * * * *"
+      - REMOVE_BEFORE=365
+      #- CRON_SCHEDULE="*/2 * * * *" # By default every day at 11pm
     networks:
     - monitored
     - public
