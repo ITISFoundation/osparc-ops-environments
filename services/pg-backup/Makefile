@@ -25,8 +25,7 @@ up-local: up
 up-master: up-dalco
 
 .PHONY: up-public ## Deploys pg-backup stack for public access cluster
-up-public: .init .env ${TEMP_COMPOSE}-public
-	docker stack deploy --with-registry-auth --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
+up-public: up
 
 # Helpers -------------------------------------------------
 
@@ -35,15 +34,6 @@ ${TEMP_COMPOSE}: .venv
 	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
 	docker-compose -f docker-compose.yml --log-level=ERROR config > $@
 	rm docker-compose.yml >/dev/null 2>&1;
-
-
-.PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: .venv
-	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
-	@$(call jinja, docker-compose.public.yml.j2, docker-compose.public.yml)
-	docker-compose -f docker-compose.yml -f docker-compose.public.yml --log-level=ERROR config > $@
-	rm docker-compose.yml >/dev/null 2>&1;
-	rm docker-compose.public.yml >/dev/null 2>&1;
 
 .venv:
 	# creating virtual environment with tooling (jinja, etc)
