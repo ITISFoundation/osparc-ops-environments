@@ -13,7 +13,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up ## Deploys pg-backup stack
 up: .init .env ${TEMP_COMPOSE}  ## Deploys pg-backup stack
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+	docker stack deploy --with-registry-auth --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys pg-backup stack for Dalco Cluster
 up-dalco: up
@@ -25,22 +25,14 @@ up-local: up
 up-master: up-dalco
 
 .PHONY: up-public ## Deploys pg-backup stack for public access cluster
-up-public: .init ${TEMP_COMPOSE}-public
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
+up-public: up
 
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: .venv  docker-compose.yml
+${TEMP_COMPOSE}: .venv
 	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
 	docker-compose -f docker-compose.yml --log-level=ERROR config > $@
-	rm docker-compose.yml >/dev/null 2>&1;
-
-
-.PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: venv  docker-compose.yml docker-compose.public.yml
-	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
-	docker-compose -f docker-compose.yml -f docker-compose.public.yml --log-level=ERROR config > $@
 	rm docker-compose.yml >/dev/null 2>&1;
 
 .venv:
