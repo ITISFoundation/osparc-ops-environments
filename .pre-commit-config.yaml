@@ -19,6 +19,7 @@ repos:
         exclude: "^certificates/(.*)$"
       - id: detect-aws-credentials
         exclude: "^certificates/(.*)$"
+        args: ["--allow-missing-credentials"]
   - repo: local
     hooks:
       - id: validate-template-dotenv
