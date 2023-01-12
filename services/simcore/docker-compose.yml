@@ -127,8 +127,6 @@ services:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-      - WEBSERVER_LOGIN_2FA_REQUIRED=${WEBSERVER_LOGIN_2FA_REQUIRED}
-      - LOGIN_2FA_REQUIRED=${WEBSERVER_LOGIN_2FA_REQUIRED}
       - DIAGNOSTICS_MAX_AVG_LATENCY=10
       - WEBSERVER_STATIC_MODULE_STATIC_WEB_SERVER_URL=http://${PREFIX_STACK_NAME}_static-webserver:8000
       # temporaries for helping to debug issues with responsivity
