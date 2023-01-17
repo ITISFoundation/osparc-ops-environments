@@ -17,6 +17,10 @@ services:
       - EC2_INSTANCES_KEY_NAME=${AUTOSCALING_EC2_INSTANCES_KEY_NAME} # defines the used Key name for the EC2 instances
       - NODES_MONITORING_NODE_LABELS=${AUTOSCALING_NODES_MONITORING_NODE_LABELS} # defines the labels to check for on the nodes (i.e. ["dynamicsidecar"])
       - NODES_MONITORING_SERVICE_LABELS=${AUTOSCALING_NODES_MONITORING_SERVICE_LABELS} # optional defines the label to check for on the monitored services
+      - RABBIT_HOST=${RABBIT_HOST}
+      - RABBIT_PASSWORD=${RABBIT_PASSWORD}
+      - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_USER=${RABBIT_USER}
     deploy:
       update_config:
         parallelism: 2
@@ -159,8 +163,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver.middlewares=${SWARM_STACK_NAME}_gzip@docker, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.service=${SWARM_STACK_NAME}_webserver
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME}_gzip@docker, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
-        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=hostregexp(`{host:.+}`)
-          && PathPrefix(`/dev/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=hostregexp(`{host:.+}`) && PathPrefix(`/dev/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=2
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
