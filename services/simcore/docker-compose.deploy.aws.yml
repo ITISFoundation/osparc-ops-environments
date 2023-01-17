@@ -1,11 +1,4 @@
 services:
-  autoscaling:
-    deploy:
-      placement:
-        constraints:
-          - node.role==manager
-          - node.labels.dynamicsidecar!=true
-          - node.labels.dasksidecar!=true
   agent:
     volumes:
       - /docker/volumes/:/docker/volumes/
