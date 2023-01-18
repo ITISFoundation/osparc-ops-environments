@@ -23,8 +23,7 @@ services:
           - traefik.enable=true
           - traefik.docker.network=${PUBLIC_NETWORK}
           - traefik.http.routers.nginx_web.priority=2
-          - traefik.http.routers.nginx_web.rule=${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}
-          # Todo: Capture Host(`${DEPLOYMENT_FQDN}/study/*`)
+          - traefik.http.routers.nginx_web.rule=${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE}
           - traefik.http.routers.nginx_web.tls=true
           - traefik.http.routers.nginx_web.tls.certresolver=myresolver
           - traefik.http.services.nginx_web.loadbalancer.server.port=80
