@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   mail:
-    image: mailserver/docker-mailserver:10.5.0
+    image: mailserver/docker-mailserver:11.2.0
     ports:
     - target: 587
       published: 587
