@@ -21,6 +21,8 @@ services:
       - RABBIT_PASSWORD=${RABBIT_PASSWORD}
       - RABBIT_PORT=${RABBIT_PORT}
       - RABBIT_USER=${RABBIT_USER}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     deploy:
       update_config:
         parallelism: 2
