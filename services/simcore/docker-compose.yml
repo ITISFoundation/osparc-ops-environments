@@ -37,6 +37,13 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      resources:
+        reservations:
+          cpus: "0.5"
+          memory: "256M"
+        limits:
+          cpus: "0.5"
+          memory: "512M"
 
   agent:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
