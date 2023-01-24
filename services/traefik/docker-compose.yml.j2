@@ -66,7 +66,8 @@ services:
         ####### SECURITY HEADERS --> See https://infosec.mozilla.org/guidelines/web_security
         # Content Security Policy
         - >
-                traefik.http.middlewares.ops_sslheader.headers.contentSecurityPolicy=frame-ancestors https://*.${MACHINE_FQDN}:* 'self'; default-src 'self'; script-src https: 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src *;
+                traefik.http.middlewares.ops_sslheader.headers.contentSecurityPolicy=frame-ancestors https://*.${MACHINE_FQDN}:* 'self'; default-src 'self'{% for j2item in DEPLOYMENT_FQDNS.replace("\"","").replace('\'',"").replace(" ","").split(",") %}{{" *." + j2item + " " + j2item if j2item else ""}}{% endfor %}; script-src https: 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src *;
+
         # Strict Transport Security
         - traefik.http.middlewares.ops_sslheader.headers.stsSeconds=15768001
         #- traefik.http.middlewares.ops_sslheader.headers.stsPreload=true
