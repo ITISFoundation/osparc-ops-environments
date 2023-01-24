@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 
@@ -8,6 +9,8 @@ from pytest_simcore.docker_registry import _pull_push_service
 
 dotenv_path = Path(".env")
 load_dotenv(dotenv_path=dotenv_path)
+
+logging.basicConfig(level=logging.DEBUG)
 
 USERNAME = "test@example.org"
 REMOTE_REGISTRY_PREFIX = os.environ.get("SIMCORE_DOCKER_REGISTRY")
@@ -33,10 +36,12 @@ cmd_string = (
     + os.environ.get("SERVICES_USER")
     + " --password-stdin"
 )
+logging.info("Running cmd command for docker login...")
 os.system(cmd_string)
 
 node_schema = json.load(json_schema_path.open())
 for key in servicesList.keys():
+    logging.info("Pulling and pushing service: %s", key)
     _pull_push_service(
         REMOTE_REGISTRY_PREFIX + "/" + key,
         servicesList[key],

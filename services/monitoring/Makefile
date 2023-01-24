@@ -112,9 +112,7 @@ grafana-import: ## Import grafana dashboards and datasources
 	fi;\
 	source venv/bin/activate;\
 	pip install -r requirements.txt > /dev/null 2>&1;\
-	python import.py && \
-	echo "**************** Trying to add grafanauser to postgres database:" && \
-	./add_grafana_user_to_db.bash
+	python import.py
 
 .PHONY: config.grafana.dashboards
 config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters

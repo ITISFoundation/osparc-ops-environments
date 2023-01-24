@@ -1,6 +1,0 @@
-version: '3.7'
-services:
-  dbbackup:
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /tank/ti-plan:/backup

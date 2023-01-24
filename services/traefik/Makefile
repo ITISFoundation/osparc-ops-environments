@@ -98,7 +98,7 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-comp
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose -f $< -f docker-compose.master.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	docker-compose --file $< --file docker-compose.master.yml --file docker-compose.letsencrypt.dns.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
 
 .PHONY: docker-compose.letsencrypt.dns.yml
 docker-compose.letsencrypt.dns.yml: .venv .env
