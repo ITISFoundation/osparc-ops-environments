@@ -152,7 +152,7 @@ log_info "Deploying osparc for $1 cluster on ${MACHINE_FQDN}, using credentials 
 if [ "$disable_vcs_check" -eq 1 ]; then
     log_info "Asserting that there are no uncommited changes in the config-files docker-compose-deploy and .env ..."
     pushd "${repo_basedir}"/services/simcore;
-    call_make . compose-"$1" > /dev/null
+    call_make "." compose-"$1" > /dev/null
     popd
 
     # Check if current branch is up to date with origin/main
