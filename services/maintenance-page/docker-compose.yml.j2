@@ -6,7 +6,7 @@ configs:
     file: ./nginx-config/default.conf
 {% for item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] %}
   {{ "maintenance_page_web_" + item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}:
-    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + item + ".html" }}{% endfor %}
+    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + item.replace(" ","") + ".html" }}{% endfor %}
 services:
 {% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] %}
   maintenance_page_{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}:
