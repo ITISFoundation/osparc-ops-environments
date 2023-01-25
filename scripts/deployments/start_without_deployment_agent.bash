@@ -138,7 +138,11 @@ log_info "Deleting the $SIMCORE_STACK_NAME docker stack if present"
 docker stack rm "$SIMCORE_STACK_NAME" || true
 sleep 3 # Wait for stack to be deleted, the networks often take a while, not waiting might lead to docker network creation issues
 log_info "Deploying: Running docker stack deploy for stack $SIMCORE_STACK_NAME..."
-docker stack deploy -c stack_with_prefix.yml "$SIMCORE_STACK_NAME"
+
+# Retry logic via https://unix.stackexchange.com/a/82610
+# shellcheck disable=2015
+for i in {1..5}; do docker stack deploy -c stack_with_prefix.yml "$SIMCORE_STACK_NAME" && break || sleep 5; done
+
 
 ############
 # CLEANUP
