@@ -8,8 +8,19 @@ SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# Makefile including function used by every services
+# TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+# Helpers -------------------------------------------------
+.venv:
+	# creating virtual environment with tooling (jinja, etc)
+	@python3 -m venv .venv
+	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install jinja2 j2cli[yaml]
+
+define jinja
+	.venv/bin/j2 --format=env $(1) .env -o $(2)
+endef
 
 .PHONY: up ## Deploys maintenance page stack
 up: .init .env ${TEMP_COMPOSE}
@@ -31,6 +42,12 @@ up-aws: up
 up-master: up
 
 # Helpers -------------------------------------------------
+
+.PHONY: docker-compose.yml
+docker-compose.yml: .venv .env
+	@$(call jinja, docker-compose.yml.j2, docker-compose.yml.unlinted) && \
+	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
+	rm docker-compose.yml.unlinted >/dev/null 2>&1;
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
