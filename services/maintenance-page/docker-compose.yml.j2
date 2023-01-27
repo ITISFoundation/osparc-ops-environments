@@ -25,7 +25,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.routers.nginx_web.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
-        - traefik.http.routers.nginx_web.rule={{  "Host(`" + j2item + "`)" }}}
+        - traefik.http.routers.nginx_web.rule={{  "Host(`" + j2item + "`)" }}
         - traefik.http.routers.nginx_web.rule=(Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.testing.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.testing.{{j2item}}`) && PathPrefix(`/`))
         - traefik.http.routers.nginx_web.tls=true
         - traefik.http.routers.nginx_web.tls.certresolver=myresolver
