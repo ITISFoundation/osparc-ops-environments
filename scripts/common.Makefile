@@ -42,7 +42,7 @@ export MONITORED_NETWORK
 
 # Check that a valid location to a config file is set.
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
-REPO_CONFIG_LOCATION := $(shell cat $(REPO_BASE_DIR)/.config.location)
+export REPO_CONFIG_LOCATION := $(shell cat $(REPO_BASE_DIR)/.config.location)
 $(if $(REPO_CONFIG_LOCATION),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell cat $(REPO_CONFIG_LOCATION)),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell wc -l $(REPO_BASE_DIR)/.config.location | grep 1),,$(error The .config.location file has more than one path specified. Only one path is allowed. Aborting))
@@ -61,33 +61,49 @@ endif
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 	else \
 		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`))";\
+			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
 		done; \
 		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL"; \
 	fi; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL; \
 	set +o allexport; )
 
-export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL=$(shell set -o allexport; \
+export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 	else \
 		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
+			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`))";\
 		done; \
-		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE"; \
 	fi; \
-	echo $$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL; \
+	echo $$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE; \
+	set +o allexport; )
+
+export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE="(Host(\`testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE="(Host(\`testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE || (Host(\`testing.$$element\`) && PathPrefix(\`/\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE; \
 	set +o allexport; )
 
 
@@ -124,6 +140,9 @@ export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE=$(shell set -o allexpo
 # Determine host machine IP
 export MACHINE_IP = $(shell source $(realpath $(REPO_BASE_DIR)/scripts/portable.sh) && get_this_private_ip)
 
+# Docker secret ID for self-signed cert deplyent
+export DIRECTOR_SELF_SIGNED_SSL_SECRET_ID = $(shell if ! docker secret ls | grep -w rootca.crt >/dev/null; then echo VAR_NOT_SET; else docker secret ls | grep rootca.crt | cut -d " " -f1; fi;)
+
 .PHONY: help
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
@@ -159,7 +178,7 @@ clean-default: .check_clean ## Cleans all outputs
 	source $(REPO_CONFIG_LOCATION); \
 	export DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL='${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}'; \
-	export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL='${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL}'; \
+	export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DOLLAR='$$'; \
 	set +o allexport; \

@@ -12,10 +12,6 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-
-.PHONY: configure
-configure: .env ${TEMP_COMPOSE} ## Update the configuration from the template and repo.config file
-
 .PHONY: compose-local
 compose-local: .env ${TEMP_COMPOSE}-local ## Create docker-compose.deploy for local deployment
 

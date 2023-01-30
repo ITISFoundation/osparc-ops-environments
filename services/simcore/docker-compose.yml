@@ -17,6 +17,34 @@ services:
       - EC2_INSTANCES_KEY_NAME=${AUTOSCALING_EC2_INSTANCES_KEY_NAME} # defines the used Key name for the EC2 instances
       - NODES_MONITORING_NODE_LABELS=${AUTOSCALING_NODES_MONITORING_NODE_LABELS} # defines the labels to check for on the nodes (i.e. ["dynamicsidecar"])
       - NODES_MONITORING_SERVICE_LABELS=${AUTOSCALING_NODES_MONITORING_SERVICE_LABELS} # optional defines the label to check for on the monitored services
+      - RABBIT_HOST=${RABBIT_HOST}
+      - RABBIT_PASSWORD=${RABBIT_PASSWORD}
+      - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_USER=${RABBIT_USER}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        reservations:
+          cpus: "0.5"
+          memory: "256M"
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+
   agent:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
     volumes:
@@ -127,8 +155,6 @@ services:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-      - WEBSERVER_LOGIN_2FA_REQUIRED=${WEBSERVER_LOGIN_2FA_REQUIRED}
-      - LOGIN_2FA_REQUIRED=${WEBSERVER_LOGIN_2FA_REQUIRED}
       - DIAGNOSTICS_MAX_AVG_LATENCY=10
       - WEBSERVER_STATIC_MODULE_STATIC_WEB_SERVER_URL=http://${PREFIX_STACK_NAME}_static-webserver:8000
       # temporaries for helping to debug issues with responsivity
@@ -146,8 +172,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver.middlewares=${SWARM_STACK_NAME}_gzip@docker, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.service=${SWARM_STACK_NAME}_webserver
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME}_gzip@docker, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
-        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=hostregexp(`{host:.+}`)
-          && PathPrefix(`/dev/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=hostregexp(`{host:.+}`) && PathPrefix(`/dev/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=2
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
@@ -480,7 +505,7 @@ services:
         # oSparc non rate limited webAPI for testing
         - traefik.http.services.${SWARM_STACK_NAME}_testing_simcore_http.loadbalancer.server.port=80
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.service=${SWARM_STACK_NAME}_testing_simcore_http
-        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.rule=(${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE_CATCHALL})
+        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.rule=(${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE})
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_http.middlewares=ops_gzip@docker, ops_sslheader@docker, ops_auth@docker, ops_whitelist_ips@docker

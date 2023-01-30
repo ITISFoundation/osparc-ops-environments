@@ -16,8 +16,8 @@ define create-s3-bucket
 	# ensure bucket is available in S3...
 	@set -o allexport; \
 	source .env; \
-	echo "$${S3_BUCKET}";\
-	${REPO_BASE_DIR}/scripts/create-s3-bucket.bash "$${S3_BUCKET}"; \
+	echo Creating bucket "$${S3_BUCKET}";\
+	${REPO_BASE_DIR}/scripts/create-s3-bucket.bash "$${S3_BUCKET}" && \
 	set +o allexport; \
 	# bucket is available in S3
 endef

@@ -66,7 +66,8 @@ services:
         ####### SECURITY HEADERS --> See https://infosec.mozilla.org/guidelines/web_security
         # Content Security Policy
         - >
-                traefik.http.middlewares.ops_sslheader.headers.contentSecurityPolicy=frame-ancestors https://*.${MACHINE_FQDN}:* 'self'; default-src 'self'; script-src https: 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src *;
+                traefik.http.middlewares.ops_sslheader.headers.contentSecurityPolicy=frame-ancestors https://*.${MACHINE_FQDN}:* 'self'; default-src 'self'{% for j2item in DEPLOYMENT_FQDNS.replace("\"","").replace('\'',"").replace(" ","").split(",") %}{{" *." + j2item + " " + j2item if j2item else ""}}{% endfor %}; script-src https: 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src *;
+
         # Strict Transport Security
         - traefik.http.middlewares.ops_sslheader.headers.stsSeconds=15768001
         #- traefik.http.middlewares.ops_sslheader.headers.stsPreload=true
@@ -124,6 +125,8 @@ services:
         # wildcard certificate
         - traefik.http.routers.api.tls.domains[0].main=service.${MACHINE_FQDN}
         - traefik.http.routers.api.tls.domains[0].sans=*.services.${MACHINE_FQDN}
+        - traefik.http.routers.api.tls.domains[0].main=service.testing.${MACHINE_FQDN}
+        - traefik.http.routers.api.tls.domains[0].sans=*.services.testing.${MACHINE_FQDN}
         # ops generic rate limiter
         - traefik.http.middlewares.ops_ratelimit.ratelimit.average=${TRAEFIK_RATELIMIT_AVG}
         - traefik.http.middlewares.ops_ratelimit.ratelimit.burst=${TRAEFIK_RATELIMIT_BURST}
