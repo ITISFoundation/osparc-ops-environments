@@ -22,6 +22,11 @@ function call_make
     make --no-print-directory --directory "${1:-"Missing Directory"}" "${@:2:$#}"
 }
 
+# Silent pushd via https://stackoverflow.com/a/25288289
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
 
 declare psed # fixes issue with not finding psed
 
@@ -147,7 +152,7 @@ log_info "Deploying osparc for $1 cluster on ${MACHINE_FQDN}, using credentials 
 if [ "$disable_vcs_check" -eq 1 ]; then
     log_info "Asserting that there are no uncommited changes in the config-files docker-compose-deploy and .env ..."
     pushd "${repo_basedir}"/services/simcore;
-    call_make "${repo_basedir}"/services/simcore compose-"$1" > /dev/null
+    call_make "." compose-"$1" > /dev/null
     popd
 
     # Check if current branch is up to date with origin/main
@@ -184,25 +189,35 @@ if [ "$start_opsstack" -eq 0 ]; then
 
     # -------------------------------- TRAEFIK -------------------------------
     log_info "starting traefik..."
-    call_make "${repo_basedir}"/services/traefik up-"$stack_target"
+    pushd "${repo_basedir}"/services/traefik
+    call_make "." up-"$stack_target"
+    popd
 
     # -------------------------------- PORTAINER ------------------------------
     log_info "starting portainer..."
-    call_make "${repo_basedir}"/services/portainer up-"$stack_target"
+    pushd "${repo_basedir}"/services/portainer
+    call_make "." up-"$stack_target"
+    popd
 
     # -------------------------------- Redis commander-------------------------------
     log_info "starting redis commander..."
-    call_make "${repo_basedir}"/services/redis-commander up-"$stack_target"
+    pushd "${repo_basedir}"/services/redis-commander
+    call_make "." up-"$stack_target"
+    popd
 
     # -------------------------------- JAEGER -------------------------------
     log_info "starting jaeger..."
     service_dir="${repo_basedir}"/services/jaeger
-    call_make "${service_dir}" up-"$stack_target"
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 
     # -------------------------------- Adminer -------------------------------
     log_info "starting adminer..."
     service_dir="${repo_basedir}"/services/adminer
-    call_make "${service_dir}" up-"$stack_target"
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 
     # FIXME (DK): Add proper handling for when to (not) start minio
     # As of Oct2022, this should only be the case for vagrant/local.
@@ -213,7 +228,9 @@ if [ "$start_opsstack" -eq 0 ]; then
         # In the .env, MINIO_NUM_MINIOS and MINIO_NUM_PARTITIONS need to be set at 1 to work without labelling the nodes with minioX=true
         log_info "starting minio..."
         service_dir="${repo_basedir}"/services/minio
-        call_make "${repo_basedir}"/services/minio up-"$stack_target"
+        pushd "${service_dir}"
+        call_make "." up-"$stack_target"
+        popd
 
         log_info "waiting for minio to run...don't worry..."
         while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
@@ -224,35 +241,43 @@ if [ "$start_opsstack" -eq 0 ]; then
 
     # -------------------------------- REGISTRY -------------------------------
     log_info "starting registry..."
-    call_make "${repo_basedir}"/services/registry up-"$stack_target"
-
+    service_dir="${repo_basedir}"/services/registry
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 
 
     # -------------------------------- Filestash: S3 Tools --------------------------------
     log_info "starting filestash..."
     service_dir="${repo_basedir}"/services/filestash
-    call_make "${repo_basedir}"/services/filestash up-"$stack_target"
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 
 
     if [ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]; then
     # -------------------------------- BACKUP PG -------------------------------
         log_info "starting PG-backup..."
         service_dir="${repo_basedir}"/services/pg-backup
-        call_make "${service_dir}" up-"$stack_target"
+        pushd "${service_dir}"
+        call_make "." up-"$stack_target"
+        popd
     fi
 
 
     if [ "$stack_target" = "aws" ] || [ "$stack_target" = "local" ]; then
         # -------------------------------- Mail -------------------------------
         log_info "starting mail server..."
-        call_make "${repo_basedir}"/services/mail up-"$stack_target"
+        pushd "${repo_basedir}"/services/mail
+        call_make "." up-"$stack_target"
+        popd
     fi
     # -------------------------------- MONITORING -------------------------------
 
     log_info "starting monitoring..."
     # Pushd because a call with call_make trigger a strange behavior
     pushd "${repo_basedir}"/services/monitoring;
-    make up-"$stack_target";
+    call_make "." up-"$stack_target";
     popd
 
     # -------------------------------- ADMIN-PANELS -------------------------------
@@ -260,15 +285,17 @@ if [ "$start_opsstack" -eq 0 ]; then
     log_info "starting admin-panels..."
     # Pushd because a call with call_make trigger a strange behavior
     pushd "${repo_basedir}"/services/admin-panels;
-    make up-"$stack_target";
+    call_make "." up-"$stack_target";
     popd
 
     # -------------------------------- GRAYLOG -------------------------------
     log_info "starting graylog..."
     service_dir="${repo_basedir}"/services/graylog
-    call_make "${service_dir}" up-"$stack_target"
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
     sleep 1
-    call_make "${service_dir}" configure
+    call_make "." configure
+    popd
 fi
 if [ "$start_simcore" -eq 0 ]; then
     if [ "$without_deploy_agent" -eq 0 ]; then

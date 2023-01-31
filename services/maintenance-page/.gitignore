@@ -1,2 +1,3 @@
 .env
 .stack.*.y*ml
+docker-compose.yml
