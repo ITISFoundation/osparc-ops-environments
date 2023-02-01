@@ -4,11 +4,11 @@ configs:
     file: ./page/api/index.html
   nginx_config:
     file: ./nginx-config/default.conf
-{% for item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] %}
-  {{ "maintenance_page_web_" + item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}:
-    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + item.replace(" ","") + ".html" }}{% endfor %}
+{% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] if j2item != "" %}
+  {{ "maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}:
+    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + j2item.replace(" ","") + ".html" }}{% endfor %}
 services:
-{% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] %}
+{% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] if j2item != "" %}
   maintenance_page_{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}:
     configs:
       - source: {{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}
