@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     #
     # Configure sending email notifications
-    if env.str("OSPARC_DEVOPS_MAIL_ADRESS") != "":
+    if env.str("GRAYLOG_ALERT_MAIL_ADDRESS") != "":
         url = (
             "https://monitoring."
             + env.str("MACHINE_FQDN")
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                 '{"title":"Graylog '
                 + env.str("MACHINE_FQDN")
                 + ' mail notification","description":"","config":{"sender":"","subject":"Graylog event notification: ${event_definition_title}","user_recipients":[],"email_recipients":["'
-                + env.str("OSPARC_DEVOPS_MAIL_ADRESS")
+                + env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
                 + '"],"type":"email-notification-v1"}}'
             )
             r = session.post(url, headers=hed, data=raw_data, verify=False)
@@ -367,7 +367,7 @@ if __name__ == "__main__":
                     exit(1)
         for i in data:
             i["notifications"] = []
-            if env.str("OSPARC_DEVOPS_MAIL_ADRESS"):
+            if env.str("GRAYLOG_ALERT_MAIL_ADDRESS"):
                 i["notifications"] += [{"notification_id": str(mailNotificationID)}]
             if env.str("GRAYLOG_SLACK_WEBHOOK_URL") != "":
                 i["notifications"] += [{"notification_id": str(slackNotificationID)}]
