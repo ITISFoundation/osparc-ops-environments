@@ -3,6 +3,7 @@ import os
 import shutil
 
 import requests
+import typer
 from environs import Env
 
 repo_config_location = os.getenv("REPO_CONFIG_LOCATION")

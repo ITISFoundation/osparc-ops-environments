@@ -137,152 +137,76 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "fixedColor": "rgb(31, 120, 193)",
-              "mode": "fixed"
+              "mode": "palette-classic"
             },
-            "mappings": [
-              {
-                "options": {
-                  "match": "null",
-                  "result": {
-                    "text": "N/A"
-                  }
-                },
-                "type": "special"
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "series",
+              "axisLabel": "Total CPU usage",
+              "axisPlacement": "auto",
+              "axisSoftMin": 0,
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "normal"
+              },
+              "thresholdsStyle": {
+                "mode": "line"
               }
-            ],
+            },
+            "mappings": [],
+            "min": 0,
             "thresholds": {
               "mode": "absolute",
               "steps": [
                 {
                   "color": "green",
                   "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
                 }
               ]
             },
-            "unit": "none"
+            "unit": "percent"
           },
           "overrides": []
         },
         "gridPos": {
-          "h": 4,
-          "w": 1,
+          "h": 19,
+          "w": 24,
           "x": 0,
           "y": 19
         },
-        "id": 44,
-        "links": [],
-        "maxDataPoints": 100,
+        "id": 60,
         "options": {
-          "colorMode": "none",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "horizontal",
-          "reduceOptions": {
-            "calcs": [
-              "mean"
-            ],
-            "fields": "",
-            "values": false
+          "legend": {
+            "calcs": [],
+            "displayMode": "table",
+            "placement": "right",
+            "showLegend": true
           },
-          "textMode": "auto"
-        },
-        "pluginVersion": "9.1.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "RmZEr52nz"
-            },
-            "expr": "count(node_load1)",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "refId": "A",
-            "step": 1800
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
           }
-        ],
-        "title": "Nodes",
-        "type": "stat"
-      },
-      {
-        "colors": [
-          "#299c46",
-          "#ED8128",
-          "#d44a3a",
-          "#4040a0"
-        ],
-        "datasource": {
-          "type": "prometheus",
-          "uid": "RmZEr52nz"
         },
-        "gridPos": {
-          "h": 16,
-          "w": 9,
-          "x": 1,
-          "y": 19
-        },
-        "id": 51,
-        "links": [],
-        "mappingType": 1,
-        "nullPointMode": "connected",
-        "pluginVersion": "9.1.3",
-        "polystat": {
-          "animationSpeed": 2500,
-          "columnAutoSize": true,
-          "columns": "",
-          "defaultClickThrough": "",
-          "defaultClickThroughNewTab": false,
-          "defaultClickThroughSanitize": false,
-          "displayLimit": 100,
-          "ellipseCharacters": 18,
-          "ellipseEnabled": false,
-          "fontAutoColor": true,
-          "fontAutoScale": true,
-          "fontSize": 12,
-          "fontType": "Roboto",
-          "globalDecimals": 0,
-          "globalDisplayMode": "all",
-          "globalDisplayTextTriggeredEmpty": "OK",
-          "globalOperatorName": "avg",
-          "globalUnitFormat": "short",
-          "gradientEnabled": true,
-          "hexagonSortByDirection": 1,
-          "hexagonSortByField": "name",
-          "maxMetrics": 0,
-          "polygonBorderColor": "#000000",
-          "polygonBorderSize": 2,
-          "polygonGlobalFillColor": "#0a55a1",
-          "radius": "",
-          "radiusAutoSize": true,
-          "regexPattern": "",
-          "rowAutoSize": true,
-          "rows": "",
-          "shape": "hexagon_pointed_top",
-          "tooltipDisplayMode": "all",
-          "tooltipDisplayTextTriggeredEmpty": "OK",
-          "tooltipEnabled": true,
-          "tooltipFontSize": 12,
-          "tooltipFontType": "Roboto",
-          "tooltipPrimarySortDirection": 2,
-          "tooltipPrimarySortField": "thresholdLevel",
-          "tooltipSecondarySortDirection": 2,
-          "tooltipSecondarySortField": "value",
-          "tooltipTimestampEnabled": true,
-          "valueEnabled": true
-        },
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "savedComposites": [],
-        "savedOverrides": [],
         "targets": [
           {
             "datasource": {
@@ -290,126 +214,19 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "round(count(rate(container_last_seen{container_label_com_docker_swarm_node_id=~\"$node_id\",container_label_com_docker_stack_namespace=~\"$stack_namespace\"}[$__interval])) by (container_label_com_docker_stack_namespace))",
+            "exemplar": false,
+            "expr": "sum by (service_name) (label_replace(rate(container_cpu_usage_seconds_total{instance=~\"$node_name\",image=~\"^itisfoundation/.*\", id=~\"/docker/.*\"}[5m]), \"service_name\", \"$1\", \"image\", \"^itisfoundation/(.*)\") / on(instance) group_left() engine_daemon_engine_cpus_cpus{instance=~\"$node_name\"}) * 100",
             "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{container_label_com_docker_stack_namespace}}",
-            "metric": "container_last_seen",
+            "hide": false,
+            "instant": false,
+            "interval": "1m",
+            "legendFormat": "{{service_name}}",
             "range": true,
-            "refId": "A",
-            "step": 600
+            "refId": "B"
           }
         ],
-        "title": "Containers # (by service stack)",
-        "type": "grafana-polystat-panel",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "N/A",
-            "value": "null"
-          }
-        ]
-      },
-      {
-        "colors": [
-          "#299c46",
-          "#ED8128",
-          "#d44a3a",
-          "#4040a0"
-        ],
-        "datasource": {
-          "type": "prometheus",
-          "uid": "RmZEr52nz"
-        },
-        "gridPos": {
-          "h": 16,
-          "w": 14,
-          "x": 10,
-          "y": 19
-        },
-        "id": 12,
-        "links": [],
-        "mappingType": 1,
-        "nullPointMode": "connected",
-        "pluginVersion": "9.1.3",
-        "polystat": {
-          "animationSpeed": 2500,
-          "columnAutoSize": true,
-          "columns": "",
-          "defaultClickThrough": "",
-          "defaultClickThroughNewTab": false,
-          "defaultClickThroughSanitize": false,
-          "displayLimit": 100,
-          "ellipseCharacters": 18,
-          "ellipseEnabled": false,
-          "fontAutoColor": true,
-          "fontAutoScale": true,
-          "fontSize": 12,
-          "fontType": "Roboto",
-          "globalDecimals": 0,
-          "globalDisplayMode": "all",
-          "globalDisplayTextTriggeredEmpty": "OK",
-          "globalOperatorName": "avg",
-          "globalUnitFormat": "short",
-          "gradientEnabled": true,
-          "hexagonSortByDirection": 1,
-          "hexagonSortByField": "name",
-          "maxMetrics": 0,
-          "polygonBorderColor": "#000000",
-          "polygonBorderSize": 2,
-          "polygonGlobalFillColor": "#0a55a1",
-          "radius": "",
-          "radiusAutoSize": true,
-          "regexPattern": "",
-          "rowAutoSize": true,
-          "rows": "",
-          "shape": "hexagon_pointed_top",
-          "tooltipDisplayMode": "all",
-          "tooltipDisplayTextTriggeredEmpty": "OK",
-          "tooltipEnabled": true,
-          "tooltipFontSize": 12,
-          "tooltipFontType": "Roboto",
-          "tooltipPrimarySortDirection": 2,
-          "tooltipPrimarySortField": "thresholdLevel",
-          "tooltipSecondarySortDirection": 2,
-          "tooltipSecondarySortField": "value",
-          "tooltipTimestampEnabled": true,
-          "valueEnabled": true
-        },
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "savedComposites": [],
-        "savedOverrides": [],
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "RmZEr52nz"
-            },
-            "editorMode": "code",
-            "expr": "round(sum(rate(container_last_seen{container_label_com_docker_stack_namespace=~\"$stack_namespace\",container_label_com_docker_swarm_node_id=~\"$node_id\"}[5m])) by (container_label_com_docker_swarm_service_name))",
-            "format": "time_series",
-            "intervalFactor": 10,
-            "legendFormat": "{{ container_label_com_docker_swarm_service_name }}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "containers running per doker service task",
-        "type": "grafana-polystat-panel",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "N/A",
-            "value": "null"
-          }
-        ]
+        "title": "osparc simcore only: osparc simcore cpu core usage for node: {{$node_name}}",
+        "type": "timeseries"
       },
       {
         "datasource": {
@@ -454,7 +271,291 @@
           "h": 4,
           "w": 1,
           "x": 0,
-          "y": 23
+          "y": 38
+        },
+        "id": 44,
+        "links": [],
+        "maxDataPoints": 100,
+        "options": {
+          "colorMode": "none",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.1.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "RmZEr52nz"
+            },
+            "expr": "count(node_load1)",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "refId": "A",
+            "step": 1800
+          }
+        ],
+        "title": "Nodes",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "RmZEr52nz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "match": "null",
+                  "result": {
+                    "text": "N/A"
+                  }
+                },
+                "type": "special"
+              }
+            ]
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 16,
+          "w": 9,
+          "x": 1,
+          "y": 38
+        },
+        "id": 51,
+        "links": [],
+        "nullPointMode": "connected",
+        "options": {
+          "autoSizeColumns": true,
+          "autoSizePolygons": true,
+          "autoSizeRows": true,
+          "compositeConfig": {
+            "animationSpeed": "2500",
+            "composites": [],
+            "enabled": true
+          },
+          "ellipseCharacters": 18,
+          "ellipseEnabled": false,
+          "globalAutoScaleFonts": true,
+          "globalClickthrough": "",
+          "globalClickthroughNewTabEnabled": false,
+          "globalClickthroughSanitizedEnabled": false,
+          "globalDecimals": 2,
+          "globalDisplayMode": "all",
+          "globalDisplayTextTriggeredEmpty": "OK",
+          "globalFillColor": "#0a55a1",
+          "globalFontSize": 12,
+          "globalGradientsEnabled": true,
+          "globalOperator": "mean",
+          "globalPolygonBorderColor": "#000000",
+          "globalPolygonBorderSize": 2,
+          "globalPolygonSize": 50,
+          "globalRegexPattern": "",
+          "globalShape": "hexagon_pointed_top",
+          "globalShowValueEnabled": true,
+          "globalTextFontAutoColor": "#000000",
+          "globalTextFontAutoColorEnabled": true,
+          "globalTextFontColor": "",
+          "globalThresholdsConfig": [],
+          "globalTooltipsEnabled": true,
+          "globalTooltipsShowTimestampEnabled": true,
+          "globalUnitFormat": "short",
+          "layoutDisplayLimit": 100,
+          "layoutNumColumns": 8,
+          "layoutNumRows": 8,
+          "overrideConfig": {
+            "overrides": []
+          },
+          "panelId": 0,
+          "radius": 100,
+          "sortByDirection": 1,
+          "sortByField": "name",
+          "tooltipDisplayMode": "all",
+          "tooltipDisplayTextTriggeredEmpty": "OK",
+          "tooltipPrimarySortByField": "thresholdLevel",
+          "tooltipPrimarySortDirection": 2,
+          "tooltipSecondarySortByField": "value",
+          "tooltipSecondarySortDirection": 2
+        },
+        "pluginVersion": "2.0.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "RmZEr52nz"
+            },
+            "editorMode": "code",
+            "expr": "round(count(rate(container_last_seen{container_label_com_docker_swarm_node_id=~\"$node_id\",container_label_com_docker_stack_namespace=~\"$stack_namespace\"}[$__interval])) by (container_label_com_docker_stack_namespace))",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "{{container_label_com_docker_stack_namespace}}",
+            "metric": "container_last_seen",
+            "range": true,
+            "refId": "A",
+            "step": 600
+          }
+        ],
+        "title": "Containers # (by service stack)",
+        "type": "grafana-polystat-panel"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "RmZEr52nz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "match": "null",
+                  "result": {
+                    "text": "N/A"
+                  }
+                },
+                "type": "special"
+              }
+            ]
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 16,
+          "w": 14,
+          "x": 10,
+          "y": 38
+        },
+        "id": 12,
+        "links": [],
+        "nullPointMode": "connected",
+        "options": {
+          "autoSizeColumns": true,
+          "autoSizePolygons": true,
+          "autoSizeRows": true,
+          "compositeConfig": {
+            "animationSpeed": "2500",
+            "composites": [],
+            "enabled": true
+          },
+          "ellipseCharacters": 18,
+          "ellipseEnabled": false,
+          "globalAutoScaleFonts": true,
+          "globalClickthrough": "",
+          "globalClickthroughNewTabEnabled": false,
+          "globalClickthroughSanitizedEnabled": false,
+          "globalDecimals": 2,
+          "globalDisplayMode": "all",
+          "globalDisplayTextTriggeredEmpty": "OK",
+          "globalFillColor": "#0a55a1",
+          "globalFontSize": 12,
+          "globalGradientsEnabled": true,
+          "globalOperator": "mean",
+          "globalPolygonBorderColor": "#000000",
+          "globalPolygonBorderSize": 2,
+          "globalPolygonSize": 50,
+          "globalRegexPattern": "",
+          "globalShape": "hexagon_pointed_top",
+          "globalShowValueEnabled": true,
+          "globalTextFontAutoColor": "#000000",
+          "globalTextFontAutoColorEnabled": true,
+          "globalTextFontColor": "",
+          "globalThresholdsConfig": [],
+          "globalTooltipsEnabled": true,
+          "globalTooltipsShowTimestampEnabled": true,
+          "globalUnitFormat": "short",
+          "layoutDisplayLimit": 100,
+          "layoutNumColumns": 8,
+          "layoutNumRows": 8,
+          "overrideConfig": {
+            "overrides": []
+          },
+          "panelId": 0,
+          "radius": 100,
+          "sortByDirection": 1,
+          "sortByField": "name",
+          "tooltipDisplayMode": "all",
+          "tooltipDisplayTextTriggeredEmpty": "OK",
+          "tooltipPrimarySortByField": "thresholdLevel",
+          "tooltipPrimarySortDirection": 2,
+          "tooltipSecondarySortByField": "value",
+          "tooltipSecondarySortDirection": 2
+        },
+        "pluginVersion": "2.0.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "RmZEr52nz"
+            },
+            "editorMode": "code",
+            "expr": "round(sum(rate(container_last_seen{container_label_com_docker_stack_namespace=~\"$stack_namespace\",container_label_com_docker_swarm_node_id=~\"$node_id\"}[5m])) by (container_label_com_docker_swarm_service_name))",
+            "format": "time_series",
+            "intervalFactor": 10,
+            "legendFormat": "{{ container_label_com_docker_swarm_service_name }}",
+            "range": true,
+            "refId": "A",
+            "step": 10
+          }
+        ],
+        "title": "containers running per doker service task",
+        "type": "grafana-polystat-panel"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "RmZEr52nz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "rgb(31, 120, 193)",
+              "mode": "fixed"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "match": "null",
+                  "result": {
+                    "text": "N/A"
+                  }
+                },
+                "type": "special"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 1,
+          "x": 0,
+          "y": 42
         },
         "id": 46,
         "links": [],
@@ -533,7 +634,7 @@
           "h": 4,
           "w": 1,
           "x": 0,
-          "y": 27
+          "y": 46
         },
         "id": 45,
         "links": [],
@@ -613,7 +714,7 @@
           "h": 4,
           "w": 1,
           "x": 0,
-          "y": 31
+          "y": 50
         },
         "id": 47,
         "links": [],
@@ -659,7 +760,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 35
+          "y": 54
         },
         "id": 57,
         "panels": [],
@@ -691,7 +792,7 @@
           "h": 18,
           "w": 12,
           "x": 0,
-          "y": 36
+          "y": 55
         },
         "hiddenSeries": false,
         "id": 33,
@@ -788,7 +889,7 @@
           "h": 18,
           "w": 12,
           "x": 12,
-          "y": 36
+          "y": 55
         },
         "hiddenSeries": false,
         "id": 22,
@@ -877,7 +978,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 54
+          "y": 73
         },
         "id": 55,
         "panels": [],
@@ -908,7 +1009,7 @@
           "h": 16,
           "w": 12,
           "x": 0,
-          "y": 55
+          "y": 74
         },
         "hiddenSeries": false,
         "id": 34,
@@ -1004,7 +1105,7 @@
           "h": 16,
           "w": 12,
           "x": 12,
-          "y": 55
+          "y": 74
         },
         "hiddenSeries": false,
         "id": 24,
@@ -1103,7 +1204,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 71
+          "y": 90
         },
         "id": 53,
         "panels": [],
@@ -1139,7 +1240,7 @@
           "h": 7,
           "w": 12,
           "x": 0,
-          "y": 72
+          "y": 91
         },
         "hiddenSeries": false,
         "id": 49,
@@ -1247,7 +1348,7 @@
           "h": 7,
           "w": 12,
           "x": 12,
-          "y": 72
+          "y": 91
         },
         "hiddenSeries": false,
         "id": 26,
@@ -1353,7 +1454,7 @@
           "h": 12,
           "w": 12,
           "x": 0,
-          "y": 79
+          "y": 98
         },
         "hiddenSeries": false,
         "id": 17,
@@ -1447,7 +1548,7 @@
           "h": 12,
           "w": 12,
           "x": 12,
-          "y": 79
+          "y": 98
         },
         "hiddenSeries": false,
         "id": 25,
@@ -1678,7 +1779,7 @@
     "timezone": "",
     "title": "Docker Swarm Overview",
     "uid": "ssc2",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
   },
   "meta": {
