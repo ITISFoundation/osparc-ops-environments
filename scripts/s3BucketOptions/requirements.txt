@@ -1,2 +1,2 @@
-boto3
-typer
+boto3==1.26.48
+typer==0.7.0

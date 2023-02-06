@@ -14,7 +14,6 @@ services:
 
     volumes:
     - maildata:/var/mail
-    - mailstate:/var/mail-state
     - maillogs:/var/log/mail
     - ./config/:/tmp/docker-mailserver/
     - traefik_letsencrypt_certs:/etc/letsencrypt/:rw
@@ -23,7 +22,6 @@ services:
     cap_add:
     - NET_ADMIN
     - SYS_PTRACE
-    restart: always
     networks:
       - public
       - monitored

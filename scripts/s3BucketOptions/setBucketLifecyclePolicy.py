@@ -14,15 +14,15 @@ def main(
     destinationbucketaccess: str,
     destinationbucketsecret: str,
     destinationendpointurl: str,
-    noncurrentVersionExpirationDays: int,
+    noncurrentversionexpirationdays: int,
 ):
     #
     bucketLifecycleConfig = {
-        "ID": "DeleteOldVersionsAfter" + str(noncurrentVersionExpirationDays) + "Days",
+        "ID": "DeleteOldVersionsAfter" + str(noncurrentversionexpirationdays) + "Days",
         "Status": "Enabled",
         "Prefix": "",
         "NoncurrentVersionExpiration": {
-            "NoncurrentDays": noncurrentVersionExpirationDays,
+            "NoncurrentDays": noncurrentversionexpirationdays,
         },
     }
 
@@ -41,6 +41,7 @@ def main(
         print("########")
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchLifecycleConfiguration":
+            print("Lifecycle Settings before the change:")
             print("NoSuchLifecycleConfiguration")
         else:
             # AllAccessDisabled error == bucket not found
