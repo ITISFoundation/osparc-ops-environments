@@ -116,13 +116,6 @@ set -o allexport
 source "${repo_config}"
 set +o allexport
 
-# Generate hashed traefik password
-rehasedTraefikPassword=$(docker run --rm --entrypoint openssl alpine/openssl passwd -"$(echo "$TRAEFIK_PASSWORD" | cut -d "\$" -f2)" -salt "$(echo "$TRAEFIK_PASSWORD" | cut -d "\$" -f3)" "$SERVICES_PASSWORD")
-if [ "${rehasedTraefikPassword}" != "$TRAEFIK_PASSWORD" ]; then
-    $psed --in-place "s|TRAEFIK_PASSWORD=.*|TRAEFIK_PASSWORD='$(docker run --rm --entrypoint htpasswd registry:2.6 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)'|" "${repo_config}"
-    log_info "INFO: Traefik hashed password was updated in file ${repo_config}."
-fi
-
 # Version Control System (VCS) info on current repo --> Currently unused
 # current_git_url=$(git config --get remote.origin.url)
 # current_git_branch=$(git rev-parse --abbrev-ref HEAD)
