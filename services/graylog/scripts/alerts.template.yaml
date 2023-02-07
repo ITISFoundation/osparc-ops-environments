@@ -126,11 +126,11 @@
     grace_period_ms: 0
     backlog_size:
   alert: true
-- title: "${MACHINE_FQDN}: Zombie dy-volumes detected and saved offsite"
-  description: "${MACHINE_FQDN}: Zombie dy-volumes detected and saved offsite"
+- title: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
+  description: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
   priority: 3
   config:
-    query: '"Files to sync by rclone" AND NOT container_name:/.*graylog_graylog.*/'
+    query: 'container_name: /.*agent.*/ AND "Shell subprocesses yielded nonzero error code" AND NOT container_name:/.*graylog_graylog.*/'
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
