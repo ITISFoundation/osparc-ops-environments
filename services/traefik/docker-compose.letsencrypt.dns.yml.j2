@@ -12,5 +12,6 @@ services:
         - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.domains[0].sans=*.services.{{j2item.replace(' ','').replace('\'','')}}
         - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}testing.tls.domains[0].main=service.testing.{{j2item.replace(' ','').replace('\'','')}}
         - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}testing.tls.domains[0].sans=*.services.testing.{{j2item.replace(' ','').replace('\'','')}}
+        - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}testing.tls.certresolver=myresolver
         - traefik.http.routers.{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}.tls.certresolver=myresolver
 {% endfor %}

@@ -26,7 +26,7 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.routers.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
         - traefik.http.routers.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule={{  "Host(`" + j2item + "`)" }}
-        - traefik.http.routers.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule=(Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.testing.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.testing.{{j2item}}`) && PathPrefix(`/`))
+        - traefik.http.routers.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule=(Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.{{j2item}}`) && PathPrefix(`/`))
         - traefik.http.routers.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.tls=true
         - traefik.http.routers.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.tls.certresolver=myresolver
         - traefik.http.services.{{"maintenance_page_web_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.loadbalancer.server.port=80
