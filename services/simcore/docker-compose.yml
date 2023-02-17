@@ -149,7 +149,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+  invitations:
+    environment:
+      - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
   webserver:
     networks:
       - public

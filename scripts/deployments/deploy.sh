@@ -247,17 +247,6 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-
-    if [ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]; then
-    # -------------------------------- BACKUP PG -------------------------------
-        log_info "starting PG-backup..."
-        service_dir="${repo_basedir}"/services/pg-backup
-        pushd "${service_dir}"
-        call_make "." up-"$stack_target"
-        popd
-    fi
-
-
     if [ "$stack_target" = "aws" ] || [ "$stack_target" = "local" ]; then
         # -------------------------------- Mail -------------------------------
         log_info "starting mail server..."
@@ -301,4 +290,31 @@ if [ "$start_simcore" -eq 0 ]; then
         make down up-"$stack_target";
         popd
     fi
+fi
+
+if [ "$start_opsstack" -eq 0 ] && ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]); then
+    # -------------------------------- BACKUP PG -------------------------------
+    # PG-backup has to wait for postgres container to be started and ready before starting, or it will fail.
+    # Wait for potsgres container to start
+    log_info "Before starting PG-backup, we ensure that postgres is started and ready to accept connections."
+    until docker ps -a --format '{{.Names}}' | grep -q "postgres"; do
+      log_info "Postgres didn't start yet. Waiting for 5 seconds..."
+      sleep 5
+    done
+
+    postgres_container_name=$(docker ps -a --format '{{.Names}}' | grep "postgres")
+    log_info "Postgres container started"
+
+    # Wait for the "database system is ready to accept connections" message to appear in the logs
+    until docker logs $postgres_container_name 2>&1 | grep -q "database system is ready to accept connections"; do
+      log_info "Postgres not initialized yet. Waiting for 5 seconds..."
+      sleep 5
+    done
+
+    log_info "Postgres is ready to accept connections. We can start pg-backup"
+    log_info "starting PG-backup..."
+    service_dir="${repo_basedir}"/services/pg-backup
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 fi
