@@ -169,8 +169,7 @@ def hosts_list(stack_arg):
     return hosts
     
 
-#clean_repos()
-#clone_repos()
+clone_repos()
 
 if arg not in args :
     print("Invalid argument. Please specify " + args)
@@ -178,3 +177,4 @@ else:
     hosts = hosts_list(arg)
     images_to_pull = yaml_data_to_pulling_info(arg)
     ssh(hosts, images_to_pull, arg)
+    clean_repos()

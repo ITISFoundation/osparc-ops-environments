@@ -1,5 +1,15 @@
-# Run
+# Object
 
-`make pull ${cluster}`
+This script pull sim4life images (s4l-core-lite, sym-server-dy) to all GPUs node on the selected deploy. Available deploys are :
+- aws-staging
+- aws-production
+- master
+- dalco-staging
+- dalco-production
+- tip
 
-This pull images 
+
+# Usage
+
+`./launch ${deploy}`
+
