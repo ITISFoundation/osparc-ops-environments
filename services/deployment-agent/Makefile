@@ -73,7 +73,9 @@ ${TEMP_COMPOSE}: .env $(docker-compose-configs)
 
 .PHONY: ${TEMP_COMPOSE-devel}
 ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.devel.yml")' > $@
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.devel.yml")' > .temp$@ && \
+	docker-compose --file .temp$@ --log-level=ERROR config > $@; \
+	rm .temp$@
 
 
 .PHONY: ${TEMP_COMPOSE-aws}
