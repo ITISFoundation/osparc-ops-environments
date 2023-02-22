@@ -16,11 +16,11 @@ STACK_NAME := $(PREFIX_STACK_NAME)-$(notdir $(shell pwd))
 endif
 
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
-TEMP_COMPOSE = .stack.${STACK_NAME}.yaml
+TEMP_COMPOSE = .stack.${STACK_NAME}.yml
 TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
 TEMP_COMPOSE-aws = .stack.${STACK_NAME}.aws.yml
-DEPLOYMENT_AGENT_CONFIG = deployment_config.yaml
-DEPLOYMENT_AGENT_CONFIG_DEFAULT = deployment_config.template.yaml
+DEPLOYMENT_AGENT_CONFIG = deployment_config.yml
+DEPLOYMENT_AGENT_CONFIG_DEFAULT = deployment_config.template.yml
 
 
 
