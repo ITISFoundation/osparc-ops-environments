@@ -21,7 +21,9 @@ certificates/domain.key:
 
 .PHONY: .create-secrets
 .create-secrets:
-	@$(MAKE_C) certificates deploy
+	@echo "Creating docker secrets..." && \
+	$(MAKE_C) certificates deploy && \
+	echo "Done: Creating docker secrets"
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
