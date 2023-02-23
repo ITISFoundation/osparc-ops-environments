@@ -144,7 +144,7 @@ export MACHINE_IP = $(shell source $(realpath $(REPO_BASE_DIR)/scripts/portable.
 export DIRECTOR_SELF_SIGNED_SSL_SECRET_ID = $(shell if ! docker secret ls | grep -w rootca.crt >/dev/null; then echo VAR_NOT_SET; else docker secret ls | grep rootca.crt | cut -d " " -f1; fi;)
 
 # Generate hashed traefik password
-export TRAEFIK_PASSWORD=$(shell docker run --rm --entrypoint htpasswd registry:2.6 -nb "$SERVICES_USER" "$SERVICES_PASSWORD" | cut -d ':' -f2)
+export TRAEFIK_PASSWORD=$(shell source $(REPO_CONFIG_LOCATION); docker run --rm --entrypoint htpasswd registry:2.6 -nb "$$SERVICES_USER" "$$SERVICES_PASSWORD" | cut -d ':' -f2)
 
 .PHONY: help
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
