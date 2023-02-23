@@ -8,6 +8,7 @@ main:
   log_level: ${DEPLOYMENT_AGENT_LOGLEVEL}
   host: 127.0.0.1
   port: 8888
+  synced_via_tags: True
   watched_git_repositories:
     # all git repositories that shall be controlled
     - id: simcore-github-repo
@@ -27,6 +28,7 @@ main:
       url: ${GIT_OPS_REPO_URL}
       branch: ${GIT_OPS_REPO_BRANCH}
       pull_only_files: false
+      ${TAGS_SIMCORE_REPO}
       username: ${GIT_OPS_LOGIN}
       password: ${GIT_OPS_PASSWORD}
       paths: []
