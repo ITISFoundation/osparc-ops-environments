@@ -14,13 +14,15 @@ import paramiko
 load_dotenv()
 arg = sys.argv[1]
 
+test_result = 0
+
 
 stacks = {"master": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Master", "sparc-external-name": "master", "registry": "registry.osparc-master.speag.com", "ops-deployment-configuration-git-branch": "osparc-master.speag.com"},
           "aws-staging": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/staging.osparc.io/osparc-staging.pem", "e2e-name": "AWS-Staging", "sparc-external-name": "aws-staging", "registry": "registry.staging.osparc.io", "ops-deployment-configuration-git-branch": "staging.osparc.io"},
           "aws-production": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.io/osparc-production.pem", "e2e-name": "AWS-Production", "sparc-external-name": "aws-production", "registry": "registry.osparc.io", "ops-deployment-configuration-git-branch": "osparc.io"},
           "tip": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/tip.itis.swiss/osparc-public.pem", "e2e-name": "tip.itis.swiss", "sparc-external-name": "tip-public", "registry": "registry.tip.itis.swiss", "ops-deployment-configuration-git-branch": "tip.itis.swiss"},
-          "osparc-staging.speag.com": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc-staging.speag.com", "ops-deployment-configuration-git-branch": "osparc-staging.speag.com"},
-          "osparc.speag.com": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc.speag.com", "ops-deployment-configuration-git-branch": "osparc.speag.com"}, }
+          "dalco-staging": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc-staging.speag.com", "ops-deployment-configuration-git-branch": "osparc-staging.speag.com"},
+          "dalco-production": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc.speag.com", "ops-deployment-configuration-git-branch": "osparc.speag.com"}, }
 
 args = ["master", "aws-production", "aws-staging",
         "dalco-staging", "dalco-production", "tip"]
@@ -41,6 +43,10 @@ def yaml_data_to_hosts(stack_arg):
         for host in hosts_yaml:
             for ho in host.values():
                 hosts.append(ho)
+    global test_result
+    if len(hosts) == 0:
+        print("Error : 0 host to ssh")
+        test_result = -1
     return hosts
 
 
@@ -50,20 +56,15 @@ def yaml_data_to_pulling_info(stack_arg):
     global stacks
     stack = stacks[stack_arg]
     pull_images = []
-    images_names = ["ci/osparc-osparc-s4l/master/s4l-core-lite",
-                    "ci/osparc-osparc-s4l/master/sym-server-dy"]
     with open("sparc-external/sync-workflow.yml", 'r') as file:
         yaml_data = yaml.load(file, Loader=yaml.FullLoader)
         images = yaml_data["stages"]
-        for sim4life_image in images_names:
-            for image in images:
-                if image["from"]["repository"] == sim4life_image:
-                    for destinations in image["to"]:
-                        if destinations["destination"] == stack["sparc-external-name"]:
-                            tags = len(destinations["tags"])
-                            tag = destinations["tags"][tags - 1]
-                            pull_images.append(
-                                destinations["repository"] + ":" + tag)
+        for image in images:
+            for to in image["to"]:
+                if "pull_last_version" in to and to["pull_last_version"] and to["destination"] == stack["sparc-external-name"]:
+                    tags = len(to["tags"])
+                    tag = to["tags"][tags - 1]
+                    pull_images.append(to["repository"] + ":" + tag)
     return pull_images
 
 
@@ -73,20 +74,30 @@ def stack_docker_registry_credentials(stack_arg):
     branch_name = stacks[stack_arg]["ops-deployment-configuration-git-branch"]
     subprocess.run(
         ['git', '-C', "osparc-ops-deployment-configuration", 'checkout', branch_name])
-    test = load_dotenv('osparc-ops-deployment-configuration/repo.config')
-    print(test)
+    load_dotenv('osparc-ops-deployment-configuration/repo.config')
     credentials = {"login" : os.environ.get('SERVICES_USER'), "pwd" : os.environ.get('SERVICES_PASSWORD'), "address" : os.environ.get('REGISTRY_DOMAIN')}
-    print(credentials)
     return credentials
 
 
 # Execute SSH command
-def execute_ssh_command(client, command):
+# Error fatal means that any error will result in the script sending exit(-1)
+# error message checks if the outputerr countains something in particular, and if yes exit(-1)
+# If Error fatal is true and error_message are filled, the script exit with -1 if the error output does NOT countain what is in the variable error_message
+def execute_ssh_command(client, command, error_fatal, error_message):
     stdin, stdout, stderr = client.exec_command(command)
     outputerr = stderr.read().decode()
-    outputout = stdout.read().decode()
-    print(outputerr)
-    print(outputout)
+    outputout = stdout.read().decode() # = "" when nothing is written
+    print("Error output\n" + outputerr)
+    print("Output\n" + outputout)
+    # Error output means that something goes wrong with the command. The script will exist with -1
+    global test_result
+    if outputerr is not "":
+        if error_fatal and error_message is not None and error_message not in outputerr:
+            test_result = -1
+        if not error_fatal and error_message is not None and error_message in outputerr:
+            test_result = -1
+        if error_fatal and error_message is None and outputerr is not None:
+            test_result = -1
 
 
 
@@ -112,7 +123,8 @@ def ssh(hosts, images_to_pull, stack_arg):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         private_key = paramiko.RSAKey.from_private_key_file(key_filename)
-
+        global test_result
+        
         try:
             # Connect to the remote host using SSH
             print("SSH to " + host_ip)
@@ -120,36 +132,39 @@ def ssh(hosts, images_to_pull, stack_arg):
                         username=username, pkey=private_key)
 
             # Execute the 'nvidia-smi' command on the remote host
-            stdin, stdout, stderr = ssh.exec_command(command)
+            stdin, stdout, stderr = ssh.exec_command(command, 0, None)
 
             # Read the output of the command
             output = stderr.read().decode()
-            print(output)
 
             # Check if the string is not found in the output
             if not_found_str not in output:
                 print("Nvidia-smi is present on this hosts. We pull the images")
                 print("First, we login to the registry")
                 command =  "docker login --username " + registry_credentials.get('login') + " --password " + registry_credentials.get('pwd') + " " + registry_credentials.get('address')
-                execute_ssh_command(ssh, command)
+                execute_ssh_command(ssh, command, False, "failed with status: 401 Unauthorized")
 
                 print("Next, we pull the images ")
                 for image in images_to_pull:
                     print("docker pull " + stack["registry"] + "/" + image)
                     command = "docker pull " + stack["registry"] + "/" + image
-                    execute_ssh_command(ssh, command)
+                    execute_ssh_command(ssh, command, True, None)
 
                 print("Last, we logout from the registry")
                 command = "docker logout"
-                execute_ssh_command(ssh, command)
+                execute_ssh_command(ssh, command, True, None)
 
             else:
-                print("Nvidia-smi not present.")
+                print("No GPU on the host.")
+        
 
         except paramiko.AuthenticationException:
+            test_result = -1
             print(
                 "Authentication failed. Please verify your credentials and private key file path.")
+            
         except paramiko.SSHException as ssh_exception:
+            test_result = -1
             print(
                 f"Unable to establish SSH connection. Error: {ssh_exception}")
         finally:
@@ -220,5 +235,10 @@ if arg not in args:
 else:
     hosts = hosts_list(arg)
     images_to_pull = yaml_data_to_pulling_info(arg)
-    ssh(hosts, images_to_pull, arg)
+    if len(images_to_pull) > 0:
+        ssh(hosts, images_to_pull, arg)
+    else:
+        print("No images to pull on stack " + arg)
     # clean_repos()
+print(test_result)
+exit(test_result)
