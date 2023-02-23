@@ -64,10 +64,10 @@ configure: ## If it does not exist, add the configuration (create mails and alia
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 email add e2e@$${MACHINE_FQDN} $${SMTP_PASSWORD} && \
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 email add mailservertestingroute@$${MACHINE_FQDN} $${SMTP_PASSWORD} && \
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add root@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS} && \
-		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add support@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS} && \
+		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add support@$${MACHINE_FQDN} $${OSPARC_SUPPORT_MAIL_ADRESS} && \
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add devops@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS} && \
-		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add code-of-conduct@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS} && \
-		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add s4l-lite@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS} && \
+		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add code-of-conduct@$${MACHINE_FQDN} $${OSPARC_SUPPORT_MAIL_ADRESS} && \
+		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add s4l-lite@$${MACHINE_FQDN} $${OSPARC_SUPPORT_MAIL_ADRESS} && \
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add postmaster@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS} && \
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add mailservertestingroute@$${MACHINE_FQDN} $${MAILSERVER_TESTING_REDIRECT} && \
 		bash setup.sh -i docker.io/mailserver/docker-mailserver:11.2.0 alias add e2e@$${MACHINE_FQDN} $${OSPARC_DEVOPS_MAIL_ADRESS}; \
