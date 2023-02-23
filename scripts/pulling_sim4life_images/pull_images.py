@@ -21,7 +21,7 @@ stacks = {"master": {"key": "osparc-infra/docs/deployments-hardware-and-credenti
           "aws-staging": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/staging.osparc.io/osparc-staging.pem", "e2e-name": "AWS-Staging", "sparc-external-name": "aws-staging", "registry": "registry.staging.osparc.io", "ops-deployment-configuration-git-branch": "staging.osparc.io"},
           "aws-production": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.io/osparc-production.pem", "e2e-name": "AWS-Production", "sparc-external-name": "aws-production", "registry": "registry.osparc.io", "ops-deployment-configuration-git-branch": "osparc.io"},
           "tip": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/tip.itis.swiss/osparc-public.pem", "e2e-name": "tip.itis.swiss", "sparc-external-name": "tip-public", "registry": "registry.tip.itis.swiss", "ops-deployment-configuration-git-branch": "tip.itis.swiss"},
-          "dalco-staging": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc-staging.speag.com", "ops-deployment-configuration-git-branch": "osparc-staging.speag.com"},
+          "dalco-staging": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc.speag.com", "ops-deployment-configuration-git-branch": "osparc-staging.speag.com"},
           "dalco-production": {"key": "osparc-infra/docs/deployments-hardware-and-credentials/osparc.speag.com/osparc-speag.pem", "e2e-name": "Dalco", "sparc-external-name": "dalco-staging-production", "registry": "registry.osparc.speag.com", "ops-deployment-configuration-git-branch": "osparc.speag.com"}, }
 
 args = ["master", "aws-production", "aws-staging",
@@ -87,7 +87,8 @@ def execute_ssh_command(client, command, error_fatal, error_message):
     stdin, stdout, stderr = client.exec_command(command)
     outputerr = stderr.read().decode()
     outputout = stdout.read().decode() # = "" when nothing is written
-    print("Error output\n" + outputerr)
+    if outputerr is not "":
+        print("Error output\n" + outputerr)
     print("Output\n" + outputout)
     # Error output means that something goes wrong with the command. The script will exist with -1
     global test_result
@@ -228,17 +229,18 @@ def hosts_list(stack_arg):
     return hosts
 
 
-# clone_repos()
+
 
 if arg not in args:
     print("Invalid argument. Please specify " + args)
 else:
+    clone_repos()
     hosts = hosts_list(arg)
     images_to_pull = yaml_data_to_pulling_info(arg)
     if len(images_to_pull) > 0:
         ssh(hosts, images_to_pull, arg)
     else:
         print("No images to pull on stack " + arg)
-    # clean_repos()
-print(test_result)
+    clean_repos()
+
 exit(test_result)
