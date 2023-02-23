@@ -33,7 +33,8 @@ main:
     - id: simcore-ops-config-repo
       url: ${GIT_DEPLOYEMENTCONFIG_REPO_URL}
       branch: ${GIT_DEPLOYEMENTCONFIG_REPO_BRANCH}
-      pull_only_files: true
+      ${TAGS_DEPLOYMENT_CONFIGURATION_REPO}
+      pull_only_files: false
       username: ${GIT_DEPLOYEMENTCONFIG_LOGIN}
       password: ${GIT_DEPLOYEMENTCONFIG_PASSWORD}
       paths:
