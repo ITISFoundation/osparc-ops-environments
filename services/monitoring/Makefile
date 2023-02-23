@@ -95,24 +95,24 @@ update.grafana.pwd: .env ## Change grafana pwd
 .PHONY: grafana-export
 grafana-export: ## Export grafana dashboards and datasources
 	@cd grafana/scripts;\
-	if [ ! -d "venv" ]; \
+	if [ ! -d ".venv" ]; \
 	then\
-		python3 -m venv venv;\
+		python3 -m venv .venv;\
 	fi;\
-	source venv/bin/activate;\
+	source .venv/bin/activate;\
 	pip install -r requirements.txt > /dev/null 2>&1;\
-	python export.py;
+	python3 export.py;
 
 .PHONY: grafana-import
 grafana-import: ## Import grafana dashboards and datasources
 	@cd grafana/scripts;\
-	if [ ! -d "venv" ]; \
+	if [ ! -d ".venv" ]; \
 	then\
-		python3 -m venv venv;\
+		python3 -m venv .venv;\
 	fi;\
-	source venv/bin/activate;\
+	source .venv/bin/activate;\
 	pip install -r requirements.txt > /dev/null 2>&1;\
-	python import.py
+	python3 import.py
 
 .PHONY: config.grafana.dashboards
 config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters

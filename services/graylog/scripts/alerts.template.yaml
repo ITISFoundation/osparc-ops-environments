@@ -126,11 +126,44 @@
     grace_period_ms: 0
     backlog_size:
   alert: true
-- title: "${MACHINE_FQDN}: Zombie dy-volumes detected and saved offsite"
-  description: "${MACHINE_FQDN}: Zombie dy-volumes detected and saved offsite"
+- title: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
+  description: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
   priority: 3
   config:
-    query: '"Files to sync by rclone" AND NOT container_name:/.*graylog_graylog.*/'
+    query: 'container_name: /.*agent.*/ AND "Shell subprocesses yielded nonzero error code" AND NOT container_name:/.*graylog_graylog.*/'
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+  key_spec:
+    - source
+    - container_name
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size:
+  alert: true
+- title: "${MACHINE_FQDN}: CRITICAL director-v2 error. Plattform operations impaired. Director-v2 restart required."
+  description: "${MACHINE_FQDN}: CRITICAL director-v2 error. Plattform operations impaired. Director-v2 restart required."
+  priority: 3
+  config:
+    query: >
+      '"WARNING:simcore_service_director_v2.modules.dynamic_sidecar.api_client._base:Pool status @ 'POOL TIMEOUT'" AND NOT container_name:/.*graylog_graylog.*/'
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000

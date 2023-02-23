@@ -1,9 +1,6 @@
 version: '3.7'
 services:
   redis-commander:
-    environment:
-      REDIS_HOSTS: "production_resources:production_redis:${REDIS_PORT}:0,production_locks:production_redis:${REDIS_PORT}:1,production_validation_codes:production_redis:${REDIS_PORT}:2"
-      URL_PREFIX: /redis
     deploy:
       placement:
         constraints:

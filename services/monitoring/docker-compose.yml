@@ -121,7 +121,7 @@ services:
         - prometheus-port=9445
       placement:
         constraints:
-          - node.labels.GPU==true
+          - node.labels.gpu==true
       mode: global
       resources:
         limits:
@@ -229,7 +229,7 @@ services:
       mode: global
       placement:
         constraints:
-          - node.labels.GPU==true
+          - node.labels.gpu==true
       resources:
         limits:
           memory: 128M

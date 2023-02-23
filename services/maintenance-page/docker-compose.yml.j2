@@ -1,0 +1,62 @@
+version: '3.8'
+configs:
+  maintenance_page_api_html:
+    file: ./page/api/index.html
+  nginx_config:
+    file: ./nginx-config/default.conf
+{% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] if j2item != "" %}
+  {{ "maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}:
+    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + j2item.replace(" ","") + ".html" }}{% endfor %}
+services:
+{% for j2item in DEPLOYMENT_FQDNS.replace(" ","").split(",") + [MACHINE_FQDN.replace(" ","")] if j2item != "" %}
+  maintenance_page_{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}:
+    configs:
+      - source: {{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}
+        target: /usr/share/nginx/html/index.html
+      - source: nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    # nginx config
+    image: nginx:1.23.3
+    networks:
+      - public
+      - monitored
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule={{  "Host(`" + j2item + "`)" }}
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule=(Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.{{j2item}}`) && PathPrefix(`/`))
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.tls=true
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.tls.certresolver=myresolver
+        - traefik.http.services.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.loadbalancer.server.port=80
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.entrypoints=https
+{% endfor %}
+  maintenance_page_api:
+    # nginx config
+    image: nginx:1.23.3
+    configs:
+      - source: maintenance_page_api_html
+        target: /usr/share/nginx/html/index.html
+      - source: nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    networks:
+      - public
+      - monitored
+    deploy:
+      labels:
+          - traefik.enable=true
+          - traefik.docker.network=${PUBLIC_NETWORK}
+          - traefik.http.routers.nginx_api.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
+          - traefik.http.routers.nginx_api.tls=true
+          - traefik.http.routers.nginx_api.rule=${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}
+          - traefik.http.routers.nginx_api.tls.certresolver=myresolver
+          - traefik.http.services.nginx_api.loadbalancer.server.port=80
+          - traefik.http.routers.nginx_api.entrypoints=https
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true

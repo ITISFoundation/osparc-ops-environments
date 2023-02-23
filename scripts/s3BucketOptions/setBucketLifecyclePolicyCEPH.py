@@ -15,16 +15,32 @@ def main(
     destinationbucketsecret: str,
     destinationendpointurl: str,
     noncurrentversionexpirationdays: int,
+    noncurrentversiontransitiondays: int,
 ):
     #
-    bucketLifecycleConfig = {
-        "ID": "DeleteOldVersionsAfter" + str(noncurrentversionexpirationdays) + "Days",
-        "Status": "Enabled",
-        "Prefix": "",
-        "NoncurrentVersionExpiration": {
-            "NoncurrentDays": noncurrentversionexpirationdays,
+    bucketLifecycleConfig = [
+        {
+            "ID": "DeleteOldVersionsAfter"
+            + str(noncurrentversionexpirationdays)
+            + "Days",
+            "Status": "Enabled",
+            "Prefix": "",
+            "NoncurrentVersionExpiration": {
+                "NoncurrentDays": noncurrentversionexpirationdays,
+            },
         },
-    }
+        {
+            "ID": "TransitionOldVersionsAfter"
+            + str(noncurrentversiontransitiondays)
+            + "Days",
+            "Status": "Enabled",
+            "Prefix": "",
+            "NoncurrentVersionTransition": {
+                "NoncurrentDays": noncurrentversiontransitiondays,
+                "StorageClass": "HDD_REPLICATED",
+            },
+        },
+    ]
 
     s3 = boto3.client(
         "s3",
@@ -49,7 +65,7 @@ def main(
             return None
     s3.put_bucket_lifecycle(
         Bucket=destinationbucketname,
-        LifecycleConfiguration={"Rules": [bucketLifecycleConfig]},
+        LifecycleConfiguration={"Rules": bucketLifecycleConfig},
     )
     try:
         response = response = s3.get_bucket_lifecycle(Bucket=destinationbucketname)
