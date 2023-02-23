@@ -168,3 +168,27 @@ reset-prune: ## resets docker swarm, removes all images, volumes, secrets, netwo
 print-labels: ## Print all docker node labels from all nodes (machines)
 	@docker node ls -q | xargs docker node inspect \
     -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
+
+#
+
+# RELEASE --------------------------------------------------------------------------------------------------------------------------------------------
+
+staging_prefix := staging_
+release_prefix := v
+_git_get_current_branch = $(shell git rev-parse --abbrev-ref HEAD)
+_git_get_formatted_staging_tag = ${staging_prefix}${name}$(version)
+_git_get_formatted_release_tag = ${release_prefix}$(version)
+
+# NOTE: be careful that GNU Make replaces newlines with space which is why this command cannot work using a Make function
+
+.PHONY: release-prod
+release-prod: ## Helper to create a staging or production release in Github (usage: make release-prod version=1.2.3)
+	@git tag  $(_git_get_formatted_release_tag) && \
+	git push origin $(_git_get_formatted_release_tag) && \
+	echo "Created tag $(_git_get_formatted_release_tag)";
+
+.PHONY: release-staging
+release-staging:  ## Helper to create a staging or production release in Github (usage: make release-staging name=sprint version=1 )
+	@git tag $(_git_get_formatted_staging_tag) && \
+	git push origin $(_git_get_formatted_staging_tag) && \
+	echo "Created tag $(_git_get_formatted_staging_tag)";
