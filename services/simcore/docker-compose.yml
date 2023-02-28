@@ -11,8 +11,10 @@ services:
       - EC2_REGION_NAME=${AUTOSCALING_EC2_REGION_NAME}
       - EC2_INSTANCES_ALLOWED_TYPES=${AUTOSCALING_EC2_INSTANCES_ALLOWED_TYPES} # defines the allowed EC2 instance types (["t2.nano", ...])
       - EC2_INSTANCES_AMI_ID=${AUTOSCALING_EC2_INSTANCES_AMI_ID} # defines the AMI ID to use
+      - EC2_INSTANCES_CUSTOM_BOOT_SCRIPTS=${AUTOSCALING_EC2_INSTANCES_CUSTOM_BOOT_SCRIPTS}
       - EC2_INSTANCES_MACHINES_BUFFER=${AUTOSCALING_EC2_INSTANCES_MACHINES_BUFFER} # defines the number of reserved machines
       - EC2_INSTANCES_MAX_INSTANCES=${AUTOSCALING_EC2_INSTANCES_MAX_INSTANCES} # maximum number of instances
+      - EC2_INSTANCES_PRE_PULL_IMAGES=${AUTOSCALING_EC2_INSTANCES_PRE_PULL_IMAGES}
       - EC2_INSTANCES_SECURITY_GROUP_IDS=${AUTOSCALING_EC2_INSTANCES_SECURITY_GROUP_IDS} # defines the security groups for starting EC2s
       - EC2_INSTANCES_SUBNET_ID=${AUTOSCALING_EC2_INSTANCES_SUBNET_ID} # defines the subnet ID to use for the EC2 instances
       - EC2_INSTANCES_KEY_NAME=${AUTOSCALING_EC2_INSTANCES_KEY_NAME} # defines the used Key name for the EC2 instances
@@ -24,6 +26,11 @@ services:
       - RABBIT_USER=${RABBIT_USER}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REGISTRY_USER=${REGISTRY_USER}
+      - REGISTRY_PW=${REGISTRY_PW}
+      - REGISTRY_URL=${REGISTRY_URL}
+      - REGISTRY_SSL=${REGISTRY_SSL}
+      - REGISTRY_AUTH=${REGISTRY_AUTH}
     deploy:
       update_config:
         parallelism: 2
@@ -149,7 +156,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+  invitations:
+    environment:
+      - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
   webserver:
     networks:
       - public
