@@ -29,7 +29,7 @@ services:
       - REGISTRY_USER=${REGISTRY_USER}
       - REGISTRY_PW=${REGISTRY_PW}
       - REGISTRY_URL=${REGISTRY_URL}
-      - REGISTRY_SSL=${REGISTRY_SSL}
+      - REGISTRY_SSL=true
       - REGISTRY_AUTH=${REGISTRY_AUTH}
     deploy:
       update_config:
