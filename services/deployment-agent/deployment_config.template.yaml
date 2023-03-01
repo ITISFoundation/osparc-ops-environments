@@ -15,7 +15,6 @@ main:
       branch: ${GIT_SIMCORE_REPO_BRANCH}
       username: ${GIT_SIMCORE_LOGIN}
       password: ${GIT_SIMCORE_PASSWORD}
-      pull_only_files: true # if true will only pull the files define in paths
       # tags: ^v[0-9]+.[0-9]+.[0-9]+$
       ${TAGS_SIMCORE_REPO}
       paths:
@@ -26,14 +25,12 @@ main:
     - id: simcore-ops-repo
       url: ${GIT_OPS_REPO_URL}
       branch: ${GIT_OPS_REPO_BRANCH}
-      pull_only_files: false
       username: ${GIT_OPS_LOGIN}
       password: ${GIT_OPS_PASSWORD}
       paths: []
     - id: simcore-ops-config-repo
       url: ${GIT_DEPLOYEMENTCONFIG_REPO_URL}
       branch: ${GIT_DEPLOYEMENTCONFIG_REPO_BRANCH}
-      pull_only_files: true
       username: ${GIT_DEPLOYEMENTCONFIG_LOGIN}
       password: ${GIT_DEPLOYEMENTCONFIG_PASSWORD}
       paths:
