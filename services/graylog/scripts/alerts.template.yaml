@@ -192,7 +192,7 @@
     backlog_size:
   alert: true
 - title: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start"
-  description: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start. See: https://git.speag.com/oSparc/osparc-infra/-/issues/16"
+  description: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start. See: https://github.com/moby/moby/issues/30820"
   priority: 3
   config:
     query: >
