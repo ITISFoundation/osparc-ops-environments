@@ -2,7 +2,8 @@
   description: "${MACHINE_FQDN}: Study Hanging"
   priority: 3
   config:
-    query: '"EntityTooLarge" AND NOT container_name:/.*graylog_graylog.*/'
+    query: >
+      "EntityTooLarge" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
@@ -34,7 +35,8 @@
   description: "${MACHINE_FQDN}: Alert if \"writer is None\" pops up. Communication with rabbitMQ is disrupted and this will make simcore go crazy"
   priority: 3
   config:
-    query: '"writer is None" AND NOT container_name:/.*graylog_graylog.*/'
+    query: >
+      "writer is None" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
@@ -66,7 +68,8 @@
   description: "${MACHINE_FQDN}: Alert if Dynamic Sidecar failed to save with S3TransferError"
   priority: 3
   config:
-    query: '"simcore_sdk.node_ports_common.exceptions.S3TransferError: Could not upload file" AND NOT container_name:/.*graylog_graylog.*/'
+    query: >
+      "simcore_sdk.node_ports_common.exceptions.S3TransferError: Could not upload file" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
@@ -98,7 +101,8 @@
   description: "${MACHINE_FQDN}: Alert if Dynamic Sidecar failed to save - 2"
   priority: 3
   config:
-    query: '"Could not contact dynamic-sidecar to save service" AND NOT container_name:/.*graylog_graylog.*/'
+    query: >
+      "Could not contact dynamic-sidecar to save service" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
@@ -130,7 +134,8 @@
   description: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
   priority: 3
   config:
-    query: 'container_name: /.*agent.*/ AND "Shell subprocesses yielded nonzero error code" AND NOT container_name:/.*graylog_graylog.*/'
+    query: >
+      container_name: /.*agent.*/ AND "Shell subprocesses yielded nonzero error code" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
@@ -163,7 +168,7 @@
   priority: 3
   config:
     query: >
-      '"WARNING:simcore_service_director_v2.modules.dynamic_sidecar.api_client._base:Pool status @ 'POOL TIMEOUT'" AND NOT container_name:/.*graylog_graylog.*/'
+      "WARNING:simcore_service_director_v2.modules.dynamic_sidecar.api_client._base:Pool status @ 'POOL TIMEOUT'" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     execute_every_ms: 600000
