@@ -15,6 +15,7 @@ main:
       branch: ${GIT_SIMCORE_REPO_BRANCH}
       username: ${GIT_SIMCORE_LOGIN}
       password: ${GIT_SIMCORE_PASSWORD}
+      pull_only_files: False
       # tags: ^v[0-9]+.[0-9]+.[0-9]+$
       ${TAGS_SIMCORE_REPO}
       paths:
@@ -28,11 +29,13 @@ main:
       username: ${GIT_OPS_LOGIN}
       password: ${GIT_OPS_PASSWORD}
       paths: []
+      pull_only_files: False
     - id: simcore-ops-config-repo
       url: ${GIT_DEPLOYEMENTCONFIG_REPO_URL}
       branch: ${GIT_DEPLOYEMENTCONFIG_REPO_BRANCH}
       username: ${GIT_DEPLOYEMENTCONFIG_LOGIN}
       password: ${GIT_DEPLOYEMENTCONFIG_PASSWORD}
+      pull_only_files: False
       paths:
         - repo.config
   docker_private_registries:
