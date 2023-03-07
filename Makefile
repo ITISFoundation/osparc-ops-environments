@@ -173,22 +173,52 @@ print-labels: ## Print all docker node labels from all nodes (machines)
 
 # RELEASE --------------------------------------------------------------------------------------------------------------------------------------------
 
+_git_origin := $(shell git remote get-url origin)
 staging_prefix := staging_
 release_prefix := v
 _git_get_current_branch = $(shell git rev-parse --abbrev-ref HEAD)
 _git_get_formatted_staging_tag = ${staging_prefix}${name}$(version)
 _git_get_formatted_release_tag = ${release_prefix}$(version)
+_git_list_remote_tags = $(shell git ls-remote --tags origin)
 
 # NOTE: be careful that GNU Make replaces newlines with space which is why this command cannot work using a Make function
 
 .PHONY: release-prod
 release-prod: ## Helper to create a staging or production release in Github (usage: make release-prod version=1.2.3)
-	@git tag  $(_git_get_formatted_release_tag) && \
-	git push origin $(_git_get_formatted_release_tag) && \
-	echo "Created tag $(_git_get_formatted_release_tag)";
+	@currentDesiredTag=$(_git_get_formatted_release_tag) && \
+	if $$(echo $(_git_list_remote_tags) | grep -q "refs/tags/$$currentDesiredTag"); then \
+        echo "Tag $$currentDesiredTag is already present on remote"; \
+		echo -n "Are you sure you want to retag? This will delete the old tag on the git remote. [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		git push --delete $(_git_origin) $$currentDesiredTag && \
+		git tag -d $$currentDesiredTag >/dev/null 2>&1 || true && \
+		git tag $$currentDesiredTag && \
+		git push origin $$currentDesiredTag && \
+		echo "Created tag $$currentDesiredTag on git remote $(_git_origin)"; \
+    else \
+        echo "Tagging git-$(_git_origin)"; \
+		git tag -d $$currentDesiredTag >/dev/null 2>&1 || true && \
+		git tag $$currentDesiredTag && \
+		git push origin $$currentDesiredTag && \
+		echo "Created tag $$currentDesiredTag on git remote $(_git_origin)"; \
+    fi
 
 .PHONY: release-staging
 release-staging:  ## Helper to create a staging or production release in Github (usage: make release-staging name=sprint version=1 )
-	@git tag $(_git_get_formatted_staging_tag) && \
-	git push origin $(_git_get_formatted_staging_tag) && \
-	echo "Created tag $(_git_get_formatted_staging_tag)";
+	@currentDesiredTag=$(_git_get_formatted_staging_tag) && \
+	if $$(echo $(_git_list_remote_tags) | grep -q "refs/tags/$$currentDesiredTag"); then \
+        echo "Tag $$currentDesiredTag is already present on remote"; \
+		echo -n "Are you sure you want to retag? This will delete the old tag on the git remote. [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ] && \
+		git push --delete $(_git_origin) $$currentDesiredTag && \
+		git tag -d $$currentDesiredTag >/dev/null 2>&1 || true && \
+		git tag $$currentDesiredTag && \
+		git push origin $$currentDesiredTag && \
+		echo "Created tag $$currentDesiredTag on git remote $(_git_origin)"; \
+    else \
+        echo "Tagging git-$(_git_origin)"; \
+		git tag -d $$currentDesiredTag >/dev/null 2>&1 || true && \
+		git tag $$currentDesiredTag && \
+		git push origin $$currentDesiredTag && \
+		echo "Created tag $$currentDesiredTag on git remote $(_git_origin)"; \
+    fi
