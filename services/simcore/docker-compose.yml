@@ -393,7 +393,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 65M
           cpus: '1.000'
         reservations:
           memory: 64M
