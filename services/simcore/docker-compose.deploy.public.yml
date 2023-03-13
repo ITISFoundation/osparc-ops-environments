@@ -33,7 +33,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.role==manager
+          - node.labels.rabbit==true
   dask-sidecar:
     deploy:
       placement:

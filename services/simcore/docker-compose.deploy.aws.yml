@@ -28,8 +28,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
+          - node.labels.rabbit==true
   dask-sidecar:
     deploy:
       placement:

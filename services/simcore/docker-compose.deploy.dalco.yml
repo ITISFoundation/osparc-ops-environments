@@ -51,11 +51,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
+          - node.labels.rabbit==true
   dask-sidecar:
     deploy:
       placement:
