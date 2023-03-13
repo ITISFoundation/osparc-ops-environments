@@ -8,6 +8,7 @@ main:
   log_level: ${DEPLOYMENT_AGENT_LOGLEVEL}
   host: 127.0.0.1
   port: 8888
+  synced_via_tags: ${GIT_TAG_SYNC}
   watched_git_repositories:
     # all git repositories that shall be controlled
     - id: simcore-github-repo
@@ -15,9 +16,7 @@ main:
       branch: ${GIT_SIMCORE_REPO_BRANCH}
       username: ${GIT_SIMCORE_LOGIN}
       password: ${GIT_SIMCORE_PASSWORD}
-      pull_only_files: true # if true will only pull the files define in paths
-      # tags: ^v[0-9]+.[0-9]+.[0-9]+$
-      ${TAGS_SIMCORE_REPO}
+      tags: ${TAGS_SIMCORE_REPO}
       paths:
         # lists the files where to look for changes in the repo
         - services/docker-compose.yml
@@ -26,14 +25,14 @@ main:
     - id: simcore-ops-repo
       url: ${GIT_OPS_REPO_URL}
       branch: ${GIT_OPS_REPO_BRANCH}
-      pull_only_files: false
+      tags: ${TAGS_SIMCORE_REPO}
       username: ${GIT_OPS_LOGIN}
       password: ${GIT_OPS_PASSWORD}
       paths: []
     - id: simcore-ops-config-repo
       url: ${GIT_DEPLOYEMENTCONFIG_REPO_URL}
       branch: ${GIT_DEPLOYEMENTCONFIG_REPO_BRANCH}
-      pull_only_files: true
+      tags: ${TAGS_DEPLOYMENT_CONFIGURATION_REPO}
       username: ${GIT_DEPLOYEMENTCONFIG_LOGIN}
       password: ${GIT_DEPLOYEMENTCONFIG_PASSWORD}
       paths:
