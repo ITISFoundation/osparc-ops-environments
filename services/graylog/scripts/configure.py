@@ -335,7 +335,8 @@ if __name__ == "__main__":
             streamAllEvents = [
                 i
                 for i in streamsList
-                if i["description"] == "Stream containing all messages"
+                if "Stream containing all messages" in i["description"]
+                or "Stream containing all events" in i["description"]
             ]
             streamIDForAllMessages = streamAllEvents[0]["id"]
         else:

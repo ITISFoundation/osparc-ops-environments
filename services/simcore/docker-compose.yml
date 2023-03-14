@@ -543,7 +543,7 @@ services:
     # NOTE: this is a trick to allow to access the internal traefik REST API
     # A comment
     # list router like so: curl https://domain/api/http/routers | jq
-    image: busybox:1.34.1
+    image: busybox:1.35.0
     command: sleep 900000d
     networks:
       - default
@@ -578,7 +578,7 @@ services:
         max_attempts: 3
         window: 120s
   whoami:
-    image: "containous/whoami"
+    image: "containous/whoami:v1.5.0"
     networks:
       - default
     # NOTE: this service allows better understanding of how the host gets forwarded inside the simcore stack
