@@ -18,5 +18,5 @@ Please consider `osparc-simcore/docs/releasing-workflow-instructions.md`
 
 ### Notes on tag-syncing:
 - For staging and production, the deployment agent will only push new code if the tags of all watched repos match, i.e. if `make release` has been run everywhere
-- Capitalization matters in the release and tag names
+- Tags are case-sensitive (`"testtag" != "TestTag"`)
 - For the osparc-ops-deployment-configuration repo, a special tag prefixing the release-name with `${BRANCH_NAME}/` is created. This is taken into account by the deployment agent by wrapping the part after the `/` of the tag into a regex-capture-group and thereby strip the first part of the tag name away.
