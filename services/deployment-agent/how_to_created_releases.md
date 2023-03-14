@@ -1,5 +1,5 @@
 ### How to release
-- 1. Make a osparc-simcore release
+- 1. Make an osparc-simcore release
 - 2. Make an osparc-ops-environments release
 - 3. Make an osparc-ops-deployment-configuration release
 
