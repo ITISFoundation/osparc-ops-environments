@@ -54,3 +54,7 @@ scrape_configs:
           - "tasks.dcgm-exporter"
         type: "A"
         port: 9400
+      - names:
+          - "tasks.pgsql-query-exporter"
+        type: "A"
+        port: 9560

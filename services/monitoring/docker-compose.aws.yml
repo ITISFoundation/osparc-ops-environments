@@ -1,4 +1,7 @@
 version: "3.7"
+configs:
+  pgsql_query_exporter_config:
+    file: ./pgsql_query_exporter_config.yaml
 services:
   prometheus:
     dns: 8.8.8.8
@@ -57,3 +60,21 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+  pgsql-query-exporter:
+    image: adonato/query-exporter:2.8.3
+    volumes: []
+    configs:
+      - source: pgsql_query_exporter_config
+        target: /config.yaml
+    networks:
+      - internal
+      - monitored
+      - public
+    extra_hosts: []
+    deploy:
+      labels: []
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M

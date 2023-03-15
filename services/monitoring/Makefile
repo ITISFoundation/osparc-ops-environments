@@ -28,7 +28,7 @@ up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current s
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-local
-up-local: .init .env config.prometheus ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+up-local: .init .env config.prometheus.ceph.master ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
 
 .PHONY: up-letsencrypt-http
@@ -79,7 +79,7 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-comp
 	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.master.yml --log-level=ERROR config > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml docker-compose.letsencrypt.dns.yml config.monitoring
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml docker-compose.letsencrypt.dns.yml config.monitoring pgsql_query_exporter_config.yaml
 	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.local.yml --log-level=ERROR config > $@
 
 
@@ -168,3 +168,9 @@ config.prometheus.aws: ${REPO_CONFIG_LOCATION}
 .PHONY: config.prometheus
 config.prometheus: ${REPO_CONFIG_LOCATION}
 	@cp prometheus/prometheus-base.yml prometheus/prometheus.yml
+
+pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.template ${REPO_CONFIG_LOCATION}
+	@set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	set +o allexport; \
+	envsubst < $< > $@

@@ -51,10 +51,10 @@ scrape_configs:
         type: "A"
         port: 9187
       - names:
-         - "pgbouncer-exporter"
-        type: "A"
-        port: 9127
-      - names:
           - "tasks.dcgm-exporter"
         type: "A"
         port: 9400
+      - names:
+          - "tasks.pgsql-query-exporter"
+        type: "A"
+        port: 9560
