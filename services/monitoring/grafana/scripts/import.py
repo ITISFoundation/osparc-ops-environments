@@ -189,7 +189,7 @@ def main(foldername: str = "", overwrite: bool = True):
             jsonObjectDatasource["basicAuthUser"] = env.str("SERVICES_USER")
             jsonObjectDatasource["basicAuthPassword"] = env.str("SERVICES_PASSWORD")
             jsonObjectDatasource["url"] = "http://prometheus:" + env.str(
-                "PROMETHEUS_PORT"
+                "MONITORING_PROMETHEUS_PORT"
             )
         r = session.post(url + "datasources", json=jsonObjectDatasource, headers=hed)
         objectToKeepTrack = {

@@ -1,0 +1,21 @@
+databases:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
+  postgres_{{_stack}}:
+    dsn: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@${{_stack}}_postgres:{{POSTGRES_PORT}}/{{POSTGRES_DB}}{% endfor %}
+
+metrics:{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
+  {{_stack}}_members_in_gid_{{_gid}}:
+    type: gauge
+    description: Number of users in group {{_gid}}{% endfor %}{% endfor %}
+
+
+queries:{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
+  query_{{_stack}}_members_in_gid_{{_gid}}:
+    interval: 55
+    databases: [postgres]
+    metrics: [{{_stack}}_members_in_gid_{{_gid}}]
+    sql: |
+      SELECT COUNT(*) as {{_stack}}_members_in_gid_{{_gid}}
+      FROM users
+      JOIN user_to_groups ON users.id = user_to_groups.uid
+      JOIN groups ON groups.gid = user_to_groups.gid
+      WHERE groups.gid = {{_gid}};{% endfor %}{% endfor %}

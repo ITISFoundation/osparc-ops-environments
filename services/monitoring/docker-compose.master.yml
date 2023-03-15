@@ -1,54 +1,5 @@
 version: '3.7'
-configs:
-  pgsql_query_exporter_config:
-    file: ./pgsql_query_exporter_config.yaml
 services:
-  master_postgres-exporter:
-    image: bitnami/postgres-exporter:0.8.0
-    networks:
-      - internal
-      - monitored
-    environment:
-      - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-
-  master_redis-exporter:
-    image: oliver006/redis_exporter
-    networks:
-      - internal
-      - monitored
-    environment:
-      - REDIS_ADDR=${REDIS_EXPORTER_DATA_SOURCE_NAME}
-      - REDIS_EXPORTER_CHECK_KEYS=user_id*client_session_id*alive, user_id*client_session_id*resources
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-  pgsql-query-exporter:
-    image: adonato/query-exporter:2.8.3
-    volumes: []
-    configs:
-      - source: pgsql_query_exporter_config
-        target: /config.yaml
-    networks:
-      - internal
-      - monitored
-      - public
-    extra_hosts: []
-    deploy:
-      labels: []
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
   grafana:
     deploy:
       placement:

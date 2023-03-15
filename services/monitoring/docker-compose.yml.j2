@@ -27,6 +27,8 @@ configs:
     file: ./prometheus/prometheus.rules.yml
   grafana_image_renderer_config:
     file: ./grafana-image-renderer/config.json
+  pgsql_query_exporter_config:
+    file: ./pgsql_query_exporter_config.yaml
 services:
   prometheus:
     image: prom/prometheus:v2.40.7
@@ -84,7 +86,7 @@ services:
       - source: node_exporter_entrypoint
         target: /docker-entrypoint.sh
     environment:
-      - NODE_ID={{.Node.ID}}
+      - NODE_ID={{ '{{.Node.ID}}' }}
     command:
       - "--path.procfs=/host/proc"
       - "--path.rootfs=/rootfs"
@@ -172,6 +174,7 @@ services:
           memory: 128M
         reservations:
           memory: 64M
+
   grafana:
     image: grafana/grafana-oss:9.4.3
     volumes:
@@ -221,7 +224,7 @@ services:
     cap_add:
       - SYS_ADMIN
     image: nvidia/dcgm-exporter:latest
-    hostname: '{{.Node.Hostname}}'
+    hostname: {{'{{.Node.Hostname}}'}}
     networks:
       - internal
       - monitored
@@ -238,3 +241,49 @@ services:
     labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
+
+  pgsql-query-exporter:
+    image: adonato/query-exporter:2.8.3
+    volumes: []
+    configs:
+      - source: pgsql_query_exporter_config
+        target: /config.yaml
+    networks:
+      - internal
+      - monitored
+      - public
+    extra_hosts: []
+    deploy:
+      labels: []
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
+  {{_stack}}-postgres-exporter:
+    image: bitnami/postgres-exporter:0.8.0
+    networks:
+      - internal
+      - monitored
+    environment:
+      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack}}_postgres:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+  {{_stack}}-redis-exporter:
+    image: oliver006/redis_exporter
+    networks:
+      - internal
+      - monitored
+    environment:
+      - REDIS_ADDR=redis://{{_stack}}_redis:{{REDIS_PORT}}
+      - REDIS_EXPORTER_CHECK_KEYS=user_id*client_session_id*alive, user_id*client_session_id*resources
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M{% endfor %}
