@@ -48,15 +48,15 @@ scrape_configs:
         type: "A"
         port: 8082
       - names:
-          - "tasks.master_redis-exporter"
-          - "tasks.staging_redis-exporter"
-          - "tasks.production_redis-exporter"
+          - "tasks.master-redis-exporter"
+          - "tasks.staging-redis-exporter"
+          - "tasks.production-redis-exporter"
         type: "A"
         port: 9121
       - names:
-          - "tasks.master_postgres-exporter"
-          - "tasks.staging_postgres-exporter"
-          - "tasks.production_postgres-exporter"
+          - "tasks.master-postgres-exporter"
+          - "tasks.staging-postgres-exporter"
+          - "tasks.production-postgres-exporter"
         type: "A"
         port: 9187
       - names:
