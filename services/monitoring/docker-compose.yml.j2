@@ -280,7 +280,7 @@ services:
       - monitored
     environment:
       - REDIS_ADDR=redis://{{_stack}}_redis:{{REDIS_PORT}}
-      - REDIS_EXPORTER_CHECK_KEYS=user_id*client_session_id*alive, user_id*client_session_id*resources
+      - REDIS_EXPORTER_CHECK_KEYS='db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*'
     deploy:
       resources:
         limits:
