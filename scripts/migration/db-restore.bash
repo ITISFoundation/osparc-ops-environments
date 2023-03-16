@@ -38,7 +38,5 @@ if [ "$yn" = "y" ]; then
     -v "$(pwd)":/var/pgdata \
     jbergknoff/postgresql-client postgresql://"${POSTGRES_USER}":"${POSTGRES_PASSWORD}"@"${POSTGRES_HOST}":"${POSTGRES_PORT}"/postgres \
     -c "DROP DATABASE ${POSTGRES_DB};" -c "CREATE DATABASE ${POSTGRES_DB};" \
-    -c "CREATE ROLE ${POSTGRES_GRAFANA_USER} with LOGIN ENCRYPTED PASSWORD '${POSTGRES_GRAFANA_PASSWORD}';" \
-    -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${POSTGRES_GRAFANA_USER};" \
     -c "\connect ${POSTGRES_DB}" -f "/var/pgdata/backup.sql"
 fi

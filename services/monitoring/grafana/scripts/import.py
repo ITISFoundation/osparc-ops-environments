@@ -178,6 +178,7 @@ def main(foldername: str = "", overwrite: bool = True):
             jsonFile.close()
 
         # We add the credentials for the PGSQL Databases with the secureJsonData field
+        # DK Mar2023 : THIS IS CURRENTLY NOT USED
         if jsonObjectDatasource["type"] == "postgres":
             jsonObjectDatasource["secureJsonData"] = {
                 "password": env.str("POSTGRES_GRAFANA_PASSWORD")
