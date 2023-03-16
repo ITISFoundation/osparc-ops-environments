@@ -256,6 +256,9 @@ services:
     extra_hosts: []
     deploy:
       labels: []
+      placement:
+        constraints:
+          - node.labels.prometheus==true
       resources:
         limits:
           memory: 128M
@@ -267,8 +270,11 @@ services:
       - internal
       - monitored
     environment:
-      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack}}_postgres:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
     deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
       resources:
         limits:
           memory: 128M
@@ -283,6 +289,9 @@ services:
       REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
       REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
     deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
       resources:
         limits:
           memory: 128M
