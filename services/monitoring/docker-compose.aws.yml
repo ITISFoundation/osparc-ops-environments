@@ -17,8 +17,6 @@ services:
       placement:
         constraints:
           - node.labels.grafana==true
-  postgres-exporter:
-    dns: 8.8.8.8
   alertmanager:
     deploy:
       placement:

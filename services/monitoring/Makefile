@@ -151,5 +151,5 @@ config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
 config.prometheus: ${REPO_CONFIG_LOCATION}
 	@cp prometheus/prometheus-base.yml prometheus/prometheus.yml
 
-pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.template ${REPO_CONFIG_LOCATION} .env
+pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.template ${REPO_CONFIG_LOCATION} .env .venv
 	$(call jinja, pgsql_query_exporter_config.yaml.j2, pgsql_query_exporter_config.yaml);

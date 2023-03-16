@@ -224,7 +224,7 @@ services:
     cap_add:
       - SYS_ADMIN
     image: nvidia/dcgm-exporter:latest
-    hostname: {{'{{.Node.Hostname}}'}}
+    hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
       - internal
       - monitored
@@ -245,6 +245,7 @@ services:
   pgsql-query-exporter:
     image: adonato/query-exporter:2.8.3
     volumes: []
+    dns: 8.8.8.8
     configs:
       - source: pgsql_query_exporter_config
         target: /config.yaml
@@ -279,8 +280,8 @@ services:
       - internal
       - monitored
     environment:
-      - REDIS_ADDR=redis://{{_stack}}_redis:{{REDIS_PORT}}
-      - REDIS_EXPORTER_CHECK_KEYS='db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*'
+      REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
+      REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
     deploy:
       resources:
         limits:
