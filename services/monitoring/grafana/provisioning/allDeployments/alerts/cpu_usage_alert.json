@@ -12,7 +12,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "exemplar": false,
-              "expr": "clamp_max(avg by (instance) (sum by (instance)(rate(process_cpu_seconds_total[5m])) / (sum by (instance) (rate(node_cpu_seconds_total{job=\"node-exporter\", mode=~\"(idle)\"}[5m])))),1)",
+              "expr": "sum without (cpu, mode, job) (rate(node_cpu_seconds_total{mode!=\"idle\"}[2m])) / ignoring(job,mode) (count by (instance) (count by (cpu,instance) (node_cpu_seconds_total)))",
               "hide": false,
               "interval": "",
               "intervalMs": 1000,
