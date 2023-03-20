@@ -82,7 +82,7 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-comp
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml docker-compose.letsencrypt.dns.yml config.monitoring pgsql_query_exporter_config.yaml
 	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.local.yml --log-level=ERROR config > $@
 
-docker-compose.yml: docker-compose.yml.j2 .env
+docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
 	$(call jinja,$<,$@)
 
 .PHONY: update.grafana.pwd

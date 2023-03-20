@@ -44,7 +44,7 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention=${PROMETHEUS_RETENTION}"
+      - "--storage.tsdb.retention=${MONITORING_PROMETHEUS_RETENTION}"
       - "--web.console.libraries=/usr/share/prometheus/console_libraries"
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
@@ -61,14 +61,14 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
-        - traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}
+        - traefik.http.services.prometheus.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
         - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.entrypoints=https
         - traefik.http.routers.prometheus.tls=true
         - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
         - traefik.http.routers.prometheus.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheus_stripprefixregex
         - prometheus-job=prometheus
-        - prometheus-port=${PROMETHEUS_PORT}
+        - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
         limits:
           memory: 4096M
