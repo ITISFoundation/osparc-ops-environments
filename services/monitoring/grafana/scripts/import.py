@@ -269,17 +269,17 @@ def main(foldername: str = "", overwrite: bool = True):
 
     # Finally we import the dashboards
     for directory in directoriesDashboards:
-        for file in glob.glob(directory + "/[!alerts]*"):
-            print(file)
+        for file in glob.glob(directory + "/*.json"):
             with open(file) as jsonFile:
                 jsonObject = json.load(jsonFile)
                 # We set the folder ID
                 r = session.get(url + "folders", headers=hed)
+                folderID = None
                 for i in r.json():
                     if i["title"] == file.split("/")[-2]:
                         folderID = i["id"]
                         break
-
+                assert folderID
                 print("Add dashboard " + jsonObject["dashboard"]["title"])
                 # Subsitute datasource UID
                 subsituteDatasources(
@@ -311,7 +311,6 @@ def main(foldername: str = "", overwrite: bool = True):
 
     # IMPORT ALERTS
     # 1. Provision Alerting User
-    grafanaAlertingMailTarget
     mailAddressProvisioningJSON = (
         '''{
     	"template_files": {},
