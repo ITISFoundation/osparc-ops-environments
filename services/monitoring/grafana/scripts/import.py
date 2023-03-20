@@ -9,9 +9,7 @@ import typer
 import yaml
 from environs import Env, EnvError
 
-repo_config_location = (
-    "/home/kaiser/git/personal_forks/osparc-ops-deployment-configuration/repo.config"
-)
+repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
 assert repo_config_location is not None
 if "\n" in repo_config_location:
     repo_config_location = repo_config_location.split("\n")[0]
@@ -230,7 +228,6 @@ def main(foldername: str = "", overwrite: bool = True):
     else:
         directoriesDashboards = glob.glob(foldername + "/dashboards/*")
     for directory in directoriesDashboards:
-        print(directoriesDashboards)
         if ".json" in directory:
             print(
                 "Error: Looking for folders but got json file. Is your folder structure organized properly?\nABORTING"
