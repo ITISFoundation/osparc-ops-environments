@@ -7,9 +7,11 @@ from pathlib import Path
 import requests
 import typer
 import yaml
-from environs import Env
+from environs import Env, EnvError
 
-repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
+repo_config_location = (
+    "/home/kaiser/git/personal_forks/osparc-ops-deployment-configuration/repo.config"
+)
 assert repo_config_location is not None
 if "\n" in repo_config_location:
     repo_config_location = repo_config_location.split("\n")[0]
@@ -139,14 +141,24 @@ def subsituteDatasources(
 
 def main(foldername: str = "", overwrite: bool = True):
     # Get mail adress for alerts:
-    grafanaAlertingMailTarget = env.str("GRAFANA_ALERTS_MAIL")
+    try:
+        grafanaAlertingMailTarget = env.str("GRAFANA_ALERTS_MAIL")
+    except EnvError:
+        grafanaAlertingMailTarget = None
+    try:
+        grafanaAlertingSlackTarget = env.str("GRAFANA_ALERTS_SLACK")
+    except EnvError:
+        grafanaAlertingSlackTarget = None
     # We first import the datasources
     url = "https://monitoring." + env.str("MACHINE_FQDN") + "/grafana/api/"
     #
     #
     print("**************** GRAFANA PROVISIONING *******************")
     print("Assuming deployment", env.str("MACHINE_FQDN"), "at", url)
-    print("Assuming alerting mail address", grafanaAlertingMailTarget)
+    if grafanaAlertingMailTarget:
+        print("Assuming alerting mail address", grafanaAlertingMailTarget)
+    if grafanaAlertingSlackTarget:
+        print("Assuming alerting slack webhook", grafanaAlertingSlackTarget)
     #
     #
     session = requests.Session()
@@ -218,6 +230,7 @@ def main(foldername: str = "", overwrite: bool = True):
     else:
         directoriesDashboards = glob.glob(foldername + "/dashboards/*")
     for directory in directoriesDashboards:
+        print(directoriesDashboards)
         if ".json" in directory:
             print(
                 "Error: Looking for folders but got json file. Is your folder structure organized properly?\nABORTING"
@@ -311,45 +324,90 @@ def main(foldername: str = "", overwrite: bool = True):
 
     # IMPORT ALERTS
     # 1. Provision Alerting User
-    mailAddressProvisioningJSON = (
-        '''{
-    	"template_files": {},
-    	"alertmanager_config": {
-    		"route": {
-    			"receiver": "'''
-        + grafanaAlertingMailTarget.split("@")[0]
-        + '''",
-    			"continue": false,
-    			"group_by": [],
-    			"routes": []
-    		},
-    		"templates": null,
-    		"receivers": [{
-    			"name": "'''
-        + grafanaAlertingMailTarget.split("@")[0]
-        + '''",
-    			"grafana_managed_receiver_configs": [{
-    				"name": "'''
-        + grafanaAlertingMailTarget.split("@")[0]
-        + '''",
-    				"type": "email",
-    				"disableResolveMessage": false,
-    				"settings": {
-    					"addresses": "'''
-        + grafanaAlertingMailTarget
-        + """"
-    				},
-    				"secureFields": {}
-    			}]
-    		}]
-    	}
-    }"""
-    )
-    # print(mailAddressProvisioningJSON)
-    print("**************** Add Target Mail Bucket *******************")
+    print("**************** Add Target Mail Bucket / Slack Webhook *******************")
+    if grafanaAlertingMailTarget:
+        mailAddressProvisioningJSON = (
+            '''{
+        	"template_files": {},
+        	"alertmanager_config": {
+        		"route": {
+        			"receiver": "'''
+            + grafanaAlertingMailTarget.split("@")[0]
+            + '''",
+        			"continue": false,
+        			"group_by": [],
+        			"routes": []
+        		},
+        		"templates": null,
+        		"receivers": [{
+        			"name": "'''
+            + grafanaAlertingMailTarget.split("@")[0]
+            + '''",
+        			"grafana_managed_receiver_configs": [{
+        				"name": "'''
+            + grafanaAlertingMailTarget.split("@")[0]
+            + '''",
+        				"type": "email",
+        				"disableResolveMessage": false,
+        				"settings": {
+        					"addresses": "'''
+            + grafanaAlertingMailTarget
+            + """"
+        				},
+        				"secureFields": {}
+        			}]
+        		}]
+        	}
+        }"""
+        )
+    else:
+        slackWebhookProvisioningJSON = (
+            '''{
+        	"template_files": {},
+        	"alertmanager_config": {
+        		"route": {
+        			"receiver": "'''
+            + "slackwebhook"
+            + '''",
+        			"continue": false,
+        			"group_by": [],
+        			"routes": []
+        		},
+        		"templates": null,
+        		"receivers": [{
+        			"name": "'''
+            + "slackwebhook"
+            + '''",
+        			"grafana_managed_receiver_configs": [{
+        				"name": "'''
+            + "slackwebhook"
+            + '''",
+        				"type": "slack",
+        				"disableResolveMessage": false,
+        				"settings": {
+        					"username": "'''
+            + "grafana-alert"
+            + '''"
+        				},
+        				"secureSettings":
+                        {
+                            "url": "'''
+            + str(grafanaAlertingSlackTarget)
+            + """",
+                            "token": ""
+                        }
+        			}]
+        		}]
+        	}
+        }"""
+        )
     r = session.post(
         url + "alertmanager/grafana/config/api/v1/alerts",
-        json=json.loads(mailAddressProvisioningJSON),
+        json=json.loads(
+            mailAddressProvisioningJSON
+            if grafanaAlertingMailTarget
+            else slackWebhookProvisioningJSON
+        ),
         headers=hed,
     )
     if r.status_code != 202:
@@ -361,10 +419,14 @@ def main(foldername: str = "", overwrite: bool = True):
             "POST to URL", url + "alertmanager/grafana/config/api/v1/alerts", "failed"
         )
         print("JSON file failed uploading:")
-        print(mailAddressProvisioningJSON)
+        print(
+            mailAddressProvisioningJSON
+            if grafanaAlertingMailTarget
+            else slackWebhookProvisioningJSON
+        )
         print("Response Error:")
         print(r.json())
-        exit()
+        exit(1)
     # 2. Import alerts
     print("**************** Add alerts *******************")
     # Finally we import the dashboards
@@ -379,36 +441,40 @@ def main(foldername: str = "", overwrite: bool = True):
         with open(file) as jsonFile:
             jsonObject = json.load(jsonFile)
             #
-            if len(jsonObject["rules"]) != 1:
-                print(
-                    "ERROR: Currently only alerts with one rule are supported. Aborting."
+            for rule_iter in range(len(jsonObject["rules"])):
+                # Add deployment name to alert name
+                jsonObject["rules"][rule_iter]["grafana_alert"]["title"] = (
+                    env.str("MACHINE_FQDN")
+                    + " - "
+                    + jsonObject["rules"][rule_iter]["grafana_alert"]["title"]
                 )
-                exit(1)
-            # Subsitute UIDs of datasources
-            subsituteDatasources(
-                directoriesDatasources,
-                configFilePath,
-                jsonObject["name"],
-                jsonObject["rules"][0],
-                session,
-                url,
-                hed,
-            )
-            # Propagate subsituted UIDs to other fields
-            for i in jsonObject["rules"][0]["grafana_alert"]["data"]:
-                if "datasourceUid" in i:
-                    if "model" in i:
-                        if "datasource" in i["model"]:
-                            if "type" in i["model"]["datasource"]:
-                                if (
-                                    i["model"]["datasource"]["type"]
-                                    != "grafana-expression"
-                                ):
-                                    i["datasourceUid"] = i["model"]["datasource"]["uid"]
-            # Remove UID if present
-            jsonObject["rules"][0]["grafana_alert"].pop("uid", None)
+                # Subsitute UIDs of datasources
+                subsituteDatasources(
+                    directoriesDatasources,
+                    configFilePath,
+                    jsonObject["name"],
+                    jsonObject["rules"][rule_iter],
+                    session,
+                    url,
+                    hed,
+                )
+                # Propagate subsituted UIDs to other fields
+                for i in jsonObject["rules"][rule_iter]["grafana_alert"]["data"]:
+                    if "datasourceUid" in i:
+                        if "model" in i:
+                            if "datasource" in i["model"]:
+                                if "type" in i["model"]["datasource"]:
+                                    if (
+                                        i["model"]["datasource"]["type"]
+                                        != "grafana-expression"
+                                    ):
+                                        i["datasourceUid"] = i["model"]["datasource"][
+                                            "uid"
+                                        ]
+                # Remove UID if present
+                jsonObject["rules"][rule_iter]["grafana_alert"].pop("uid", None)
 
-            print("Add alert " + jsonObject["name"])
+            print("Add alerts " + jsonObject["name"])
 
             r = session.post(
                 url + "ruler/grafana/api/v1/rules/ops", json=jsonObject, headers=hed
