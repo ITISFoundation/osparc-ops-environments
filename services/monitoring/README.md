@@ -18,7 +18,7 @@ Creates a stack to monitor a [osparc-simcore] stack. Uses [prometheus](prometheu
 Available web front-ends when deployed in locahost:
 
 - graphana: http://127.0.0.1:3000/dashboards
-- prometheus: http://127.0.0.1:${PROMETHEUS_PORT}
+- prometheus: http://127.0.0.1:${MONITORING_PROMETHEUS_PORT}
 - cAdvisor: http://127.0.0.1:8080/containers/
 - Alertmanager: http://127.0.0.1:9093
 
