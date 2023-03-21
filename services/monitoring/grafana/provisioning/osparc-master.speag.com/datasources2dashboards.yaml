@@ -1,5 +1,3 @@
 defaults:
-  - type: "postgres"
-    datasource_name: "MasterPostgres"
   - type: "prometheus"
     datasource_name: "Prometheus"
