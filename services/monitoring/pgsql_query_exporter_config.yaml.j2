@@ -28,4 +28,11 @@ queries:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% f
     metrics: [{{_stack}}_total_number_of_users]
     sql: |
       SELECT COUNT(*) as {{_stack}}_total_number_of_users
-      FROM users;{% endfor %}
+      FROM users;
+  query_{{_stack}}_total_number_of_users_excluding_guests:
+    interval: 55
+    databases: [postgres_{{_stack}}]
+    metrics: [{{_stack}}_total_number_of_users]
+    sql: |
+      SELECT COUNT(*) as {{_stack}}_total_number_of_users
+      FROM users WHERE role <> 'GUEST';{% endfor %}
