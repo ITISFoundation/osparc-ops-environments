@@ -28,7 +28,7 @@ up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current s
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-local
-up-local: .init .env config.prometheus.ceph.simcore ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+up-local: .init .env config.prometheus.simcore ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
 
 .PHONY: up-letsencrypt-http
@@ -40,7 +40,7 @@ up-letsencrypt-dns: .init .env config.monitoring  config.prometheus  ${TEMP_COMP
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
 .PHONY: up-dalco
-up-dalco: .init .env  config.monitoring config.prometheus.simcore ${TEMP_COMPOSE}-dalco ## Deploys monitoring stack for Dalco Cluster
+up-dalco: .init .env  config.monitoring config.prometheus.ceph.simcore ${TEMP_COMPOSE}-dalco ## Deploys monitoring stack for Dalco Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
 .PHONY: up-public
