@@ -129,8 +129,12 @@ deployment_config.yaml
 !/services/mail/config/amavis.cf
 services/monitoring/prometheus/prometheus.yml
 
-# Grafana dashboard templated
+# Monitoring
+### Grafana dashboard templated
 /services/monitoring/grafana/provisioning/dashboard/simcore/Metrics-dashboard.json
+### Auto-Generated postgres exporter config
+/services/monitoring/pgsql_query_exporter_config.yaml
+/services/monitoring/docker-compose.yml
 
 # Simcore: Contains location of repo.config file on the machine
 .config.location
