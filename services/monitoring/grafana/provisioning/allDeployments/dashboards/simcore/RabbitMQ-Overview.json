@@ -5041,7 +5041,20 @@
     "weekStart": ""
   },
   "meta": {
+    "annotationsPermissions": {
+      "dashboard": {
+        "canAdd": true,
+        "canDelete": true,
+        "canEdit": true
+      },
+      "organization": {
+        "canAdd": true,
+        "canDelete": true,
+        "canEdit": true
+      }
+    },
     "canAdmin": true,
+    "canDelete": true,
     "canEdit": true,
     "canSave": true,
     "canStar": true,
@@ -5052,6 +5065,9 @@
     "isFolder": false,
     "provisioned": false,
     "provisionedExternalId": "",
+    "publicDashboardAccessToken": "",
+    "publicDashboardEnabled": false,
+    "publicDashboardUid": "",
     "slug": "rabbitmq-overview",
     "type": "db",
     "updatedBy": "admin",
