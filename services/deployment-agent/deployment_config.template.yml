@@ -43,8 +43,8 @@ main:
       username: ${DOCKER_HUB_LOGIN}
       password: ${DOCKER_HUB_PASSWORD}
   docker_stack_recipe:
-    # defines the recipe to generate the docker-compose style stack file to be deployed in the swarm
-    # An optional command line may be defined to that end that generate the docker-compose file.
+    # defines the recipe to generate the docker compose style stack file to be deployed in the swarm
+    # An optional command line may be defined to that end that generate the docker compose file.
     files:
       - id: simcore-ops-config-repo
         paths:

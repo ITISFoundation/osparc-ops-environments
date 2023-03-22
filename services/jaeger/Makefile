@@ -45,20 +45,20 @@ up-local: up
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose -f $< --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.http.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.dalco.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml
-	@docker-compose -f $< -f docker-compose.aws.yml -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@
