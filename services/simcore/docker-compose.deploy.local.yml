@@ -90,7 +90,7 @@ services:
       - "--ping=true"
       - "--entryPoints.ping.address=:9082"
       - "--ping.entryPoint=ping"
-      - "--log.level=DEBUG"
+      - "--log.level=${SIMCORE_TRAEFIK_LOGLEVEL}"
       - "--accesslog=true"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addEntryPointsLabels=true"

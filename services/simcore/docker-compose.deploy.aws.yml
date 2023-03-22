@@ -66,7 +66,7 @@ services:
       - "--ping=true"
       - "--entryPoints.ping.address=:9082"
       - "--ping.entryPoint=ping"
-      - "--log.level=WARNING"
+      - "--log.level=${SIMCORE_TRAEFIK_LOGLEVEL}"
       - "--accesslog=false"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addEntryPointsLabels=true"

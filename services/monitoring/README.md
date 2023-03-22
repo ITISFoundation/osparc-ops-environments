@@ -15,6 +15,15 @@ Creates a stack to monitor a [osparc-simcore] stack. Uses [prometheus](prometheu
     $ make info
     $ make down
 
+## Local deployment
+Requires the docker daemon.json in `/etc/docker/daemon.json` to include
+```
+{
+  "metrics-addr" : "0.0.0.0:9323",
+  "experimental" : true
+}
+```
+
 Available web front-ends when deployed in locahost:
 
 - graphana: http://127.0.0.1:3000/dashboards
