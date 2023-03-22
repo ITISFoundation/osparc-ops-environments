@@ -319,7 +319,6 @@ services:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-      - TARGET_MPI_NODE_CPU_COUNT=${TARGET_MPI_NODE_CPU_COUNT}
     deploy:
       update_config:
         parallelism: 2
