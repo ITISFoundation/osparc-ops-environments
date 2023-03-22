@@ -7,7 +7,7 @@ from pathlib import Path
 import requests
 import typer
 import yaml
-from environs import Env, EnvError
+from environs import Env
 
 repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
 assert repo_config_location is not None
@@ -139,14 +139,9 @@ def subsituteDatasources(
 
 def main(foldername: str = "", overwrite: bool = True):
     # Get mail adress for alerts:
-    try:
-        grafanaAlertingMailTarget = env.str("GRAFANA_ALERTS_MAIL")
-    except EnvError:
-        grafanaAlertingMailTarget = None
-    try:
-        grafanaAlertingSlackTarget = env.str("GRAFANA_ALERTS_SLACK")
-    except EnvError:
-        grafanaAlertingSlackTarget = None
+    grafanaAlertingMailTarget = env.str("GRAFANA_ALERTS_MAIL", default=None)
+    grafanaAlertingSlackTarget = env.str("GRAFANA_ALERTS_SLACK", default=None)
+
     # We first import the datasources
     url = "https://monitoring." + env.str("MACHINE_FQDN") + "/grafana/api/"
     #
