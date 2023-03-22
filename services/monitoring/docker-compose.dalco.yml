@@ -1,31 +1,5 @@
 version: '3.7'
 services:
-  staging-postgres-exporter:
-    image: bitnami/postgres-exporter:0.8.0
-    networks:
-      - internal
-      - monitored
-    environment:
-      - DATA_SOURCE_NAME=${STAGING_POSTGRES_EXPORTER_DATA_SOURCE_NAME}
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-  production-postgres-exporter:
-    image: bitnami/postgres-exporter:0.8.0
-    networks:
-      - internal
-      - monitored
-    environment:
-      - DATA_SOURCE_NAME=${PRODUCTION_POSTGRES_EXPORTER_DATA_SOURCE_NAME}
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
   cadvisor-exporter:
     volumes:
       - /:/rootfs:ro
@@ -33,34 +7,6 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-  staging-redis-exporter:
-    image: oliver006/redis_exporter
-    networks:
-      - internal
-      - monitored
-    environment:
-      - REDIS_ADDR=${STAGING_REDIS_EXPORTER_DATA_SOURCE_NAME}
-      - REDIS_EXPORTER_CHECK_KEYS=user_id*client_session_id*alive, user_id*client_session_id*resources
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-  production-redis-exporter:
-    image: oliver006/redis_exporter
-    networks:
-      - internal
-      - monitored
-    environment:
-      - REDIS_ADDR=${PRODUCTION_REDIS_EXPORTER_DATA_SOURCE_NAME}
-      - REDIS_EXPORTER_CHECK_KEYS=user_id*client_session_id*alive, user_id*client_session_id*resources
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
   grafana:
     dns: 8.8.8.8
     deploy:
