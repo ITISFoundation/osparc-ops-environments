@@ -7,7 +7,7 @@ from pathlib import Path
 import requests
 import typer
 import yaml
-from environs import Env, EnvError
+from environs import Env
 
 repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
 assert repo_config_location is not None
@@ -435,25 +435,23 @@ def main(foldername: str = "", overwrite: bool = True):
         with open(file) as jsonFile:
             jsonObject = json.load(jsonFile)
             #
-            for rule_iter in range(len(jsonObject["rules"])):
+            for rule in jsonObject["rules"]:
                 # Add deployment name to alert name
-                jsonObject["rules"][rule_iter]["grafana_alert"]["title"] = (
-                    env.str("MACHINE_FQDN")
-                    + " - "
-                    + jsonObject["rules"][rule_iter]["grafana_alert"]["title"]
+                rule["grafana_alert"]["title"] = (
+                    env.str("MACHINE_FQDN") + " - " + rule["grafana_alert"]["title"]
                 )
                 # Subsitute UIDs of datasources
                 subsituteDatasources(
                     directoriesDatasources,
                     configFilePath,
                     jsonObject["name"],
-                    jsonObject["rules"][rule_iter],
+                    rule,
                     session,
                     url,
                     hed,
                 )
                 # Propagate subsituted UIDs to other fields
-                for i in jsonObject["rules"][rule_iter]["grafana_alert"]["data"]:
+                for i in rule["grafana_alert"]["data"]:
                     if "datasourceUid" in i:
                         if "model" in i:
                             if "datasource" in i["model"]:
@@ -466,7 +464,7 @@ def main(foldername: str = "", overwrite: bool = True):
                                             "uid"
                                         ]
                 # Remove UID if present
-                jsonObject["rules"][rule_iter]["grafana_alert"].pop("uid", None)
+                rule["grafana_alert"].pop("uid", None)
 
             print("Add alerts " + jsonObject["name"])
 
