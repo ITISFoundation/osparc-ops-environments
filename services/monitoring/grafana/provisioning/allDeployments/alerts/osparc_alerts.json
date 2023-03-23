@@ -212,6 +212,141 @@
         "updated": "2023-03-20T15:52:29Z",
         "version": 2
       }
+    },
+    {
+      "annotations": {
+        "description": "When logspout is swapping, this can cause the nodes to become unresponsive due to heavy IO loads"
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "sum(container_memory_swap{image=~\".*logspout.*\"})",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 300,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "mean",
+              "refId": "B",
+              "settings": {
+                "mode": "replaceNN",
+                "replaceWithValue": 0
+              },
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 300,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      10000000
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 300,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "id": 26,
+        "intervalSeconds": 60,
+        "is_paused": false,
+        "namespace_id": 326,
+        "namespace_uid": "YrUJEmf4k",
+        "no_data_state": "NoData",
+        "orgId": 1,
+        "rule_group": "osparc_alerts",
+        "title": "logspout_swapping",
+        "uid": "hX31Pmf4kz",
+        "updated": "2023-03-22T09:18:25Z",
+        "version": 3
+      }
     }
   ]
 }

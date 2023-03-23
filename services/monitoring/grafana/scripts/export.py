@@ -106,15 +106,25 @@ def main(foldername: str = ""):
         with open(directory + "/alerts/" + alert["name"] + ".json", "w") as outfile:
             print("Export Alert " + alert["name"])
             # Remove UID if present
-            alert["rules"][0]["grafana_alert"].pop("uid", None)
-            # Remove orgId
-            alert["rules"][0]["grafana_alert"].pop("orgId", None)
-            # Remove id
-            alert["rules"][0]["grafana_alert"].pop("id", None)
-            # Remove id
-            alert["rules"][0]["grafana_alert"].pop("namespace_id", None)
-            # Remove id
-            alert["rules"][0]["grafana_alert"].pop("namespace_uid", None)
+            for ruleIter in range(len(alert["rules"])):
+                alert["rules"][ruleIter]["grafana_alert"].pop("uid", None)
+                # Remove orgId
+                alert["rules"][ruleIter]["grafana_alert"].pop("orgId", None)
+                # Remove id
+                alert["rules"][ruleIter]["grafana_alert"].pop("id", None)
+                # Remove id
+                alert["rules"][ruleIter]["grafana_alert"].pop("namespace_id", None)
+                # Remove id
+                alert["rules"][ruleIter]["grafana_alert"].pop("namespace_uid", None)
+                if (
+                    str(env.str("MACHINE_FQDN") + " - ")
+                    in alert["rules"][ruleIter]["grafana_alert"]["title"]
+                ):
+                    alert["rules"][ruleIter]["grafana_alert"]["title"] = alert["rules"][
+                        ruleIter
+                    ]["grafana_alert"]["title"].replace(
+                        str(env.str("MACHINE_FQDN") + " - "), ""
+                    )
             json.dump(alert, outfile, sort_keys=True, indent=2)
 
 
