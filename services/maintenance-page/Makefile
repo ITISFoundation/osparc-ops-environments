@@ -50,5 +50,5 @@ docker-compose.yml: .venv .env
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
-	docker-compose -f $< --env-file=.env --log-level=ERROR config > $@
+${TEMP_COMPOSE}: docker-compose.yml .env
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@

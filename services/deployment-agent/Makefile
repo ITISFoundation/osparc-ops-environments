@@ -69,15 +69,15 @@ ${DEPLOYMENT_AGENT_CONFIG}: .env
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: .env $(docker-compose-configs)
-	@docker-compose --file docker-compose.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml > $@
 
 .PHONY: ${TEMP_COMPOSE-devel}
 ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.devel.yml")' > .temp$@ && \
-	docker-compose --file .temp$@ --log-level=ERROR config > $@; \
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env .temp$@ > $@; \
 	rm .temp$@
 
 
 .PHONY: ${TEMP_COMPOSE-aws}
 ${TEMP_COMPOSE-aws}: .env $(docker-compose-configs)
-	@docker-compose --file docker-compose.yml --file docker-compose.aws.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml docker-compose.aws.yml > $@

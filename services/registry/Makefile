@@ -54,17 +54,17 @@ up-local: up
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml docker-compose.self-signed.yml
-	docker-compose -f $< -f docker-compose.self-signed.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}: docker-compose.yml docker-compose.self-signed.yml .env
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.self-signed.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	docker-compose -f $< -f docker-compose.letsencrypt.http.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	docker-compose -f $< -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml
-	docker-compose -f $< -f docker-compose.aws.yml -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml .env
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@

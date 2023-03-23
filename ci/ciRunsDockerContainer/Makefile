@@ -39,4 +39,4 @@ push-version: tag-version
 	set +o allexport; \
 	export DOCKER_IMAGE_TAG=latest; \
 	./dockerhub_login.bash && \
-	docker-compose --file docker-compose-deploy.yml push
+	docker compose --file docker-compose-deploy.yml push
