@@ -28,7 +28,7 @@ up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current s
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-local
-up-local: .init .env config.prometheus ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+up-local: .init .env config.prometheus.simcore ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
 
 .PHONY: up-letsencrypt-http
@@ -40,18 +40,18 @@ up-letsencrypt-dns: .init .env config.monitoring  config.prometheus  ${TEMP_COMP
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
 .PHONY: up-dalco
-up-dalco: .init .env  config.monitoring config.prometheus.minio.ceph.dalco ${TEMP_COMPOSE}-dalco ## Deploys monitoring stack for Dalco Cluster
+up-dalco: .init .env  config.monitoring config.prometheus.ceph.simcore ${TEMP_COMPOSE}-dalco ## Deploys monitoring stack for Dalco Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
 .PHONY: up-public
 up-public: up-dalco
 
 .PHONY: up-aws
-up-aws: .init .env config.monitoring config.prometheus.aws ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
+up-aws: .init .env config.monitoring config.prometheus.simcore ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-master
-up-master: .init .env config.monitoring  config.prometheus.ceph.master ${TEMP_COMPOSE}-master ## Deploys monitoring stack for Master Cluster
+up-master: .init .env config.monitoring  config.prometheus.ceph.simcore ${TEMP_COMPOSE}-master ## Deploys monitoring stack for Master Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
 .PHONY: ${TEMP_COMPOSE}
@@ -79,9 +79,11 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-comp
 	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.master.yml --log-level=ERROR config > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml docker-compose.letsencrypt.dns.yml config.monitoring
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml docker-compose.letsencrypt.dns.yml config.monitoring pgsql_query_exporter_config.yaml
 	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.local.yml --log-level=ERROR config > $@
 
+docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
+	$(call jinja,$<,$@)
 
 .PHONY: update.grafana.pwd
 update.grafana.pwd: .env ## Change grafana pwd
@@ -125,46 +127,29 @@ config.monitoring: grafana/template-config.monitoring ${REPO_CONFIG_LOCATION}
 	set +o allexport; \
 	envsubst < $< > grafana/$@
 
-.PHONY: config.prometheus.minio.ceph.dalco
-config.prometheus.minio.ceph.dalco: ${REPO_CONFIG_LOCATION} .venv
+.PHONY: config.prometheus.simcore
+config.prometheus.simcore: ${REPO_CONFIG_LOCATION}
+	@set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	set +o allexport; \
+	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' > prometheus/prometheus.yml; \
+	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
+	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
+
+.PHONY: config.prometheus.ceph.simcore
+config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
 	@set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	set +o allexport; \
 	$(call jinja, prometheus/prometheus-ceph.yml.j2, prometheus/prometheus-ceph.yml); \
-	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-dalco.yml")' | cat | \
+	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' | cat | \
 	$(_yq) '. *+ load("prometheus/prometheus-ceph.yml")' > prometheus/prometheus.yml; \
-	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
-	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
-
-.PHONY: config.prometheus.master
-config.prometheus.master: ${REPO_CONFIG_LOCATION}
-	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	set +o allexport; \
-	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-master.yml")' > prometheus/prometheus.yml; \
-	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
-	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
-
-.PHONY: config.prometheus.ceph.master
-config.prometheus.ceph.master: ${REPO_CONFIG_LOCATION} .venv
-	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	set +o allexport; \
-	$(call jinja, prometheus/prometheus-ceph.yml.j2, prometheus/prometheus-ceph.yml); \
-	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-master.yml")' | cat | \
-	$(_yq) '. *+ load("prometheus/prometheus-ceph.yml")' > prometheus/prometheus.yml; \
-	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
-	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
-
-.PHONY: config.prometheus.aws
-config.prometheus.aws: ${REPO_CONFIG_LOCATION}
-	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	set +o allexport; \
-	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-aws.yml")' > prometheus/prometheus.yml; \
 	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus
 config.prometheus: ${REPO_CONFIG_LOCATION}
 	@cp prometheus/prometheus-base.yml prometheus/prometheus.yml
+
+pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+	$(call jinja, pgsql_query_exporter_config.yaml.j2, pgsql_query_exporter_config.yaml);

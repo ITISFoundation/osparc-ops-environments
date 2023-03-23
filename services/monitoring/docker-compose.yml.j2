@@ -27,9 +27,11 @@ configs:
     file: ./prometheus/prometheus.rules.yml
   grafana_image_renderer_config:
     file: ./grafana-image-renderer/config.json
+  pgsql_query_exporter_config:
+    file: ./pgsql_query_exporter_config.yaml
 services:
   prometheus:
-    image: prom/prometheus:v2.38.0
+    image: prom/prometheus:v2.40.7
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -42,7 +44,7 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention=${PROMETHEUS_RETENTION}"
+      - "--storage.tsdb.retention=${MONITORING_PROMETHEUS_RETENTION}"
       - "--web.console.libraries=/usr/share/prometheus/console_libraries"
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
@@ -59,14 +61,14 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
-        - traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}
+        - traefik.http.services.prometheus.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
         - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
         - traefik.http.routers.prometheus.entrypoints=https
         - traefik.http.routers.prometheus.tls=true
         - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
         - traefik.http.routers.prometheus.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheus_stripprefixregex
         - prometheus-job=prometheus
-        - prometheus-port=${PROMETHEUS_PORT}
+        - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
         limits:
           memory: 4096M
@@ -84,7 +86,7 @@ services:
       - source: node_exporter_entrypoint
         target: /docker-entrypoint.sh
     environment:
-      - NODE_ID={{.Node.ID}}
+      - NODE_ID={{ '{{.Node.ID}}' }}
     command:
       - "--path.procfs=/host/proc"
       - "--path.rootfs=/rootfs"
@@ -152,7 +154,7 @@ services:
           memory: 64M
 
   cadvisor-exporter:
-    image: gcr.io/cadvisor/cadvisor:v0.45.0
+    image: gcr.io/cadvisor/cadvisor:v0.46.0
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -172,8 +174,9 @@ services:
           memory: 128M
         reservations:
           memory: 64M
+
   grafana:
-    image: grafana/grafana-oss:9.1.3
+    image: grafana/grafana-oss:9.4.3
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -221,7 +224,7 @@ services:
     cap_add:
       - SYS_ADMIN
     image: nvidia/dcgm-exporter:latest
-    hostname: '{{.Node.Hostname}}'
+    hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
       - internal
       - monitored
@@ -238,3 +241,59 @@ services:
     labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
+
+  pgsql-query-exporter:
+    image: adonato/query-exporter:2.8.3
+    volumes: []
+    dns: 8.8.8.8
+    configs:
+      - source: pgsql_query_exporter_config
+        target: /config.yaml
+    networks:
+      - internal
+      - monitored
+      - public
+    extra_hosts: []
+    deploy:
+      labels: []
+      placement:
+        constraints:
+          - node.labels.prometheus==true
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
+  {{_stack}}-postgres-exporter:
+    image: bitnami/postgres-exporter:0.8.0
+    networks:
+      - internal
+      - monitored
+    environment:
+      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+  {{_stack}}-redis-exporter:
+    image: oliver006/redis_exporter
+    networks:
+      - internal
+      - monitored
+    environment:
+      REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
+      REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M{% endfor %}
