@@ -159,6 +159,19 @@ services:
   invitations:
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
+    deploy:
+      labels:
+        # internal traefik
+        - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.service=${SWARM_STACK_NAME}_invitations
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=hostregexp(`{host:.+}`) && PathPrefix(`/invitations/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.priority=1
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations.loadbalancer.server.port=8000
+        - traefik.http.middlewares.${SWARM_STACK_NAME}_invitations_replace_regex.replacepathregex.regex=^/invitations/(.*)$$
+        - traefik.http.middlewares.${SWARM_STACK_NAME}_invitations_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.middlewares=${SWARM_STACK_NAME}_invitations_replace_regex@docker
   webserver:
     networks:
       - public
