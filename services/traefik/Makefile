@@ -56,49 +56,49 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.local.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose -f $< -f docker-compose.letsencrypt.http.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose -f $< -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose --file $< --file docker-compose.aws.yml --file docker-compose.letsencrypt.dns.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose -f $< --file docker-compose.dalco.yml --file docker-compose.letsencrypt.dns.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml docker-compose.letsencrypt.dns.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose -f $< -f docker-compose.public.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-compose.letsencrypt.dns.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	docker-compose --file $< --file docker-compose.master.yml --file docker-compose.letsencrypt.dns.yml --log-level=ERROR config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: docker-compose.letsencrypt.dns.yml
 docker-compose.letsencrypt.dns.yml: .venv .env

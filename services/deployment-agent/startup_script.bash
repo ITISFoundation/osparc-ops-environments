@@ -86,7 +86,7 @@ cp .env ..
 cp ../../.env-wb-garbage-collector ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
 # The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
-docker-compose --env-file .env -f docker-compose.simcore.yml -f docker-compose.deploy.yml config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > ../../stack.yml
+"$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
 #
 #
 ### Cleanup

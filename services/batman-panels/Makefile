@@ -26,20 +26,20 @@ up-devel: .init .env ${TEMP_COMPOSE}-devel
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose -f $< --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.http.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.http.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.master.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.master.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.dns.yml docker-compose.master.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-devel
 ${TEMP_COMPOSE}-devel: docker-compose.yml docker-compose.devel.yml
-	@docker-compose -f docker-compose.devel.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash docker-compose.devel.yml  > $@

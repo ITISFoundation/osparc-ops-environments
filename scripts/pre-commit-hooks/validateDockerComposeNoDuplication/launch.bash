@@ -18,9 +18,7 @@ fi
 # shellcheck disable=1091
 source .venv/bin/activate
 python -m pip install -r requirements.txt >/dev/null 2>&1
-curl -SL --silent https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64 -o ./docker-compose
-chmod +x ./docker-compose
 for i in "$@"; do
   # assert file not empty via https://www.cyberciti.biz/faq/linux-unix-script-check-if-file-empty-or-not/
-  [ -s ../../../"$i" ] && bash -c "! ./docker-compose -f ../../../$i config 2>&1 | cat | grep \"must be unique\""
+  [ -s ../../../"$i" ] && bash -c "! ../../../scripts/docker-compose-config.bash -e .env ../../../$i 2>&1 | cat | grep \"must be unique\""
 done

@@ -74,10 +74,7 @@ if [[ -z $(grep '[^[:space:]]' "$repo_basedir"/stack.yml) ]] ; then
   error_exit "stack.yml is empty"
   exit 1
 fi
-# Assert docker-copose config runs
-curl -SL --silent https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64 -o ./docker-compose
-chmod +x ./docker-compose
-./docker-compose --file "$repo_basedir"/stack.yml config 2>&1
+"$repo_basedir"/scripts/docker-compose-config.bash -e .env "$repo_basedir"/stack.yml 2>&1 | cat
 rm "$repo_basedir"/stack.yml 2>/dev/null || true
 rm "$repo_basedir"/docker-compose.yml 2>/dev/null || true
 rm "$repo_basedir"/.env-wb-garbage-collector 2>/dev/null || true

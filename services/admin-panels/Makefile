@@ -31,7 +31,7 @@ endef
 .PHONY: docker-compose.yml
 docker-compose.yml: docker-compose.yml.j2 .venv .data.json
 	$(call jinja, $<, .data.json, tmp.yml)
-	@docker-compose --file tmp.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash tmp.yml > $@
 	@rm tmp.yml
 
 .PHONY: up
@@ -68,23 +68,23 @@ up-public: up-dalco
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@docker-compose --file $< --file docker-compose.letsencrypt.http.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $<  docker-compose.letsencrypt.http.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@docker-compose --file $< --file docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml
-	@docker-compose --file $< --file docker-compose.letsencrypt.dns.yml --file docker-compose.dalco.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml
-	@docker-compose --file $< --file docker-compose.aws.yml --file docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@docker-compose --file $< --log-level=ERROR config > $@
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $<  > $@
 
 
 .PHONY: jupyter_server_config.py

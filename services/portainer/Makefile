@@ -62,28 +62,28 @@ configure-registry:  ## Add if necessary dockerhub registry configuration to por
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml ## bouh
-	@docker-compose -f $< --log-level=ERROR config > $@
+${TEMP_COMPOSE}: docker-compose.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.http.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml
-	@docker-compose -f $< -f docker-compose.letsencrypt.dns.yml -f docker-compose.dalco.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@docker-compose -f $< -f docker-compose.local.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml
-	@docker-compose -f $< -f docker-compose.aws.yml -f docker-compose.letsencrypt.dns.yml --log-level=ERROR config > $@
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: secrets
 secrets: .env ## Construct secrets for portainer pwd, to change pwd it need to be done manually :https://documentation.portainer.io/v2.0/users/reset-admin/

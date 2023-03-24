@@ -30,9 +30,9 @@ up-public: up
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: .venv
+${TEMP_COMPOSE}: .venv .env
 	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
-	docker-compose -f docker-compose.yml --log-level=ERROR config > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml > $@
 	rm docker-compose.yml >/dev/null 2>&1;
 
 .venv:
