@@ -247,7 +247,7 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    if [ "$stack_target" = "aws" ] || [ "$stack_target" = "local" ]; then
+    if [ "$stack_target" = "local" ]; then
         # -------------------------------- Mail -------------------------------
         log_info "starting mail server..."
         pushd "${repo_basedir}"/services/mail
