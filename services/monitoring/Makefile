@@ -79,8 +79,8 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-comp
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.local.yml > $@
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
 	$(call jinja,$<,$@)
