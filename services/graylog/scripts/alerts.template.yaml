@@ -271,12 +271,12 @@
     grace_period_ms: 0
     backlog_size:
   alert: true
-- title: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected. Please investigate."
-  description: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected. Please investigate."
+- title: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected."
+  description: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected. Human intervention required. Please investigate."
   priority: 3
   config:
     query: >
-      "unexpectedly failed [OEC" AND container_name:/.*director-v2.*/
+      "waiting for manual intervention" AND container_name:/.*director-v2.*/
     query_parameters: []
     search_within_ms: 3600000
     execute_every_ms: 3600000
@@ -305,7 +305,6 @@
   key_spec:
     - source
     - container_name
-    - full_message
   notification_settings:
     grace_period_ms: 0
     backlog_size:

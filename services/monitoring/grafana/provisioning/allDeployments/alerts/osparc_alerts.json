@@ -4,7 +4,7 @@
   "rules": [
     {
       "expr": "",
-      "for": "3m",
+      "for": "10m",
       "grafana_alert": {
         "condition": "B",
         "data": [
@@ -83,7 +83,7 @@
     },
     {
       "expr": "",
-      "for": "5m",
+      "for": "2h",
       "grafana_alert": {
         "condition": "C",
         "data": [
@@ -91,7 +91,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "editorMode": "code",
-              "expr": "sum(avg_over_time(swarm_manager_tasks_total{state=\"pending\"}[30m]))",
+              "expr": "sum(swarm_manager_tasks_total{state=\"pending\"})",
               "hide": false,
               "intervalMs": 1000,
               "legendFormat": "__auto",
@@ -102,7 +102,7 @@
             "queryType": "",
             "refId": "A",
             "relativeTimeRange": {
-              "from": 900,
+              "from": 1800,
               "to": 0
             }
           },
@@ -138,7 +138,7 @@
               "hide": false,
               "intervalMs": 1000,
               "maxDataPoints": 43200,
-              "reducer": "mean",
+              "reducer": "min",
               "refId": "B",
               "settings": {
                 "mode": "replaceNN",
@@ -149,7 +149,7 @@
             "queryType": "",
             "refId": "B",
             "relativeTimeRange": {
-              "from": 900,
+              "from": 1800,
               "to": 0
             }
           },
@@ -193,19 +193,15 @@
             "queryType": "",
             "refId": "C",
             "relativeTimeRange": {
-              "from": 900,
+              "from": 1800,
               "to": 0
             }
           }
         ],
         "exec_err_state": "Error",
-        "id": 12,
         "intervalSeconds": 60,
         "is_paused": false,
-        "namespace_id": 222,
-        "namespace_uid": "_Zc_rbJ4k",
         "no_data_state": "NoData",
-        "orgId": 1,
         "rule_group": "osparc_alerts",
         "title": "pending_services_alert",
         "uid": "rLDQaif4z",
@@ -218,7 +214,7 @@
         "description": "When logspout is swapping, this can cause the nodes to become unresponsive due to heavy IO loads"
       },
       "expr": "",
-      "for": "5m",
+      "for": "2h",
       "grafana_alert": {
         "condition": "C",
         "data": [
@@ -334,18 +330,13 @@
           }
         ],
         "exec_err_state": "Error",
-        "id": 26,
         "intervalSeconds": 60,
         "is_paused": false,
-        "namespace_id": 326,
-        "namespace_uid": "YrUJEmf4k",
         "no_data_state": "NoData",
-        "orgId": 1,
         "rule_group": "osparc_alerts",
         "title": "logspout_swapping",
-        "uid": "hX31Pmf4kz",
-        "updated": "2023-03-22T09:18:25Z",
-        "version": 3
+        "updated": "2023-03-29T16:08:32Z",
+        "version": 5
       }
     }
   ]
