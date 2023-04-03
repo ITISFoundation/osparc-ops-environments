@@ -276,7 +276,7 @@
   priority: 3
   config:
     query: >
-      "not contact dynamic-sidecar to save service state or output ports" AND container_name:/.*director-v2.*/
+      "waiting for manual intervention" AND container_name:/.*director-v2.*/
     query_parameters: []
     search_within_ms: 3600000
     execute_every_ms: 3600000
