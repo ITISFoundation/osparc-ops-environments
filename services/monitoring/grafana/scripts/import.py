@@ -3,11 +3,17 @@ import json
 import os
 import time
 from pathlib import Path
+import warnings
 
 import requests
 import typer
 import yaml
 from environs import Env
+
+warnings.filterwarnings(
+    "ignore",
+    ".*Adding certificate verification is strongly advised.*",
+)
 
 repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
 assert repo_config_location is not None
@@ -171,10 +177,10 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add datasources *******************")
     if overwrite:
         # Get all datasources
-        r = session.get(url + "datasources", headers=hed)
+        r = session.get(url + "datasources", headers=hed, verify=False)
         for i in r.json():
             print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
-            r = session.delete(url + "datasources/uid/" + str(i["uid"]), headers=hed)
+            r = session.delete(url + "datasources/uid/" + str(i["uid"]), headers=hed, verify=False)
             print("Response: ", r.status_code)
     listOfDatasources = []
     for file in directoriesDatasources:
@@ -199,7 +205,7 @@ def main(foldername: str = "", overwrite: bool = True):
             jsonObjectDatasource["url"] = "http://prometheus:" + env.str(
                 "MONITORING_PROMETHEUS_PORT"
             )
-        r = session.post(url + "datasources", json=jsonObjectDatasource, headers=hed)
+        r = session.post(url + "datasources", json=jsonObjectDatasource, headers=hed, verify=False)
         objectToKeepTrack = {
             "name": jsonObjectDatasource["name"],
             "uid": jsonObjectDatasource["uid"],
@@ -240,7 +246,7 @@ def main(foldername: str = "", overwrite: bool = True):
     directoriesData = list(set(directoriesData))
 
     print("Deleting alerts")
-    r = session.get(url + "prometheus/grafana/api/v1/rules", headers=hed)
+    r = session.get(url + "prometheus/grafana/api/v1/rules", headers=hed, verify=False)
     # Status code is 404 if no alerts are present. Handling it:
     if r.status_code != 404:
         for alert in r.json()["data"]["groups"]:
@@ -257,12 +263,12 @@ def main(foldername: str = "", overwrite: bool = True):
     if overwrite:
         print("Deleting all folders and dashboards")
         # Get all datasources
-        r = session.get(url + "folders", headers=hed)
+        r = session.get(url + "folders", headers=hed, verify=False)
         for i in r.json():
-            r = session.delete(url + "folders/" + str(i["uid"]), headers=hed)
+            r = session.delete(url + "folders/" + str(i["uid"]), headers=hed, verify=False)
     print("Adding folders")
     for directoryData in directoriesData:
-        r = session.post(url + "folders", json={"title": directoryData}, headers=hed)
+        r = session.post(url + "folders", json={"title": directoryData}, headers=hed, verify=False)
         if r.status_code != 200:
             print("Received non-200 status code upon import: ", str(r.status_code))
             print("JSON file failed uploading:")
@@ -280,7 +286,7 @@ def main(foldername: str = "", overwrite: bool = True):
             with open(file) as jsonFile:
                 jsonObject = json.load(jsonFile)
                 # We set the folder ID
-                r = session.get(url + "folders", headers=hed)
+                r = session.get(url + "folders", headers=hed, verify=False)
                 folderID = None
                 for i in r.json():
                     if i["title"] == file.split("/")[-2]:
@@ -306,7 +312,7 @@ def main(foldername: str = "", overwrite: bool = True):
                 dashboard["Dashboard"]["id"] = "null"
                 dashboard["overwrite"] = True
                 dashboard["folderId"] = folderID
-                r = session.post(url + "dashboards/db", json=dashboard, headers=hed)
+                r = session.post(url + "dashboards/db", json=dashboard, headers=hed, verify=False)
 
                 if r.status_code != 200:
                     print(
@@ -401,8 +407,8 @@ def main(foldername: str = "", overwrite: bool = True):
             mailAddressProvisioningJSON
             if grafanaAlertingMailTarget
             else slackWebhookProvisioningJSON
-        ),
-        headers=hed,
+        ), verify=False,
+        headers=hed
     )
     if r.status_code != 202:
         print(
@@ -469,7 +475,7 @@ def main(foldername: str = "", overwrite: bool = True):
             print("Add alerts " + jsonObject["name"])
 
             r = session.post(
-                url + "ruler/grafana/api/v1/rules/ops", json=jsonObject, headers=hed
+                url + "ruler/grafana/api/v1/rules/ops", json=jsonObject, headers=hed, verify=False
             )
             # with open(directory + "/debug.json", 'w') as outfile:
             #    json.dump(jsonObject, outfile, sort_keys=True, indent=2)
