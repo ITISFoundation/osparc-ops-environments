@@ -175,6 +175,25 @@ services:
         reservations:
           memory: 64M
 
+  docker-events-exporter:
+    image: ghcr.io/codestation/docker-events-exporter:latest@sha256:cdf365de6880f68cfba0a779faf6f5f9b0c5bbe3c6ddcddc903c1dbecfd11e93
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock:ro
+    user: root # only user root can use the docker socket
+    networks:
+      - internal
+      - monitored
+    deploy:
+      labels:
+        - prometheus-job=docker-events-exporter
+        - prometheus-port=8000
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
   grafana:
     image: grafana/grafana-oss:9.4.3
     volumes:
