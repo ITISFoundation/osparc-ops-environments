@@ -48,7 +48,7 @@
                   },
                   "reducer": {
                     "params": [],
-                    "type": "last"
+                    "type": "avg"
                   },
                   "type": "query"
                 }
@@ -77,8 +77,8 @@
         "no_data_state": "Alerting",
         "rule_group": "osparc_alerts",
         "title": "cpu_usage_alert",
-        "updated": "2023-04-12T12:19:35Z",
-        "version": 3
+        "updated": "2023-04-13T08:31:35Z",
+        "version": 2
       }
     },
     {
