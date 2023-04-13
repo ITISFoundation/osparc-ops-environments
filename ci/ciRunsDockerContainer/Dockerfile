@@ -34,7 +34,21 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-  gettext-base unzip wget apt-utils build-essential git python3-pip python3.10-venv openssl make curl openssh-client gettext-base gnupg software-properties-common \
+  apt-utils \
+  build-essential \
+  curl \
+  gettext-base \
+  gettext-base \
+  git \
+  gnupg \
+  make \
+  openssl \
+  openssh-client \
+  python3-pip \
+  python3.10-venv \
+  software-properties-common \
+  unzip \
+  wget \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
