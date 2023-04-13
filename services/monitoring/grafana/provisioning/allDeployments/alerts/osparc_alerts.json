@@ -77,7 +77,7 @@
         "no_data_state": "Alerting",
         "rule_group": "osparc_alerts",
         "title": "cpu_usage_alert",
-        "updated": "2023-03-20T15:52:29Z",
+        "updated": "2023-04-12T12:19:35Z",
         "version": 3
       }
     },
@@ -204,9 +204,8 @@
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "pending_services_alert",
-        "uid": "rLDQaif4z",
-        "updated": "2023-03-20T15:52:29Z",
-        "version": 2
+        "updated": "2023-04-12T12:19:35Z",
+        "version": 3
       }
     },
     {
@@ -335,8 +334,266 @@
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "logspout_swapping",
-        "updated": "2023-03-29T16:08:32Z",
-        "version": 5
+        "updated": "2023-04-12T12:19:35Z",
+        "version": 3
+      }
+    },
+    {
+      "annotations": {
+        "description": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert.",
+        "summary": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert."
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "absent(docker_events) or on() vector(0)",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0.9
+                    ],
+                    "type": "lt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "intervalSeconds": 60,
+        "is_paused": false,
+        "no_data_state": "NoData",
+        "rule_group": "osparc_alerts",
+        "title": "container_died_killed_oom_event",
+        "updated": "2023-04-12T12:19:35Z",
+        "version": 2
+      }
+    },
+    {
+      "annotations": {
+        "description": "A docker service or container might have limited CPU resources, but if excessive throttling is going on this might cause issues. Give the firing container more CPU resources, both in portainer and persistently in the docker-compose.yml file.",
+        "summary": "This container needs more CPU resources."
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "sum by (instance, image, name) (rate(container_cpu_cfs_throttled_seconds_total[3m]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "mean",
+              "refId": "B",
+              "settings": {
+                "mode": "dropNN"
+              },
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      1
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "intervalSeconds": 60,
+        "is_paused": false,
+        "no_data_state": "NoData",
+        "rule_group": "osparc_alerts",
+        "title": "High CPU throttling for container",
+        "updated": "2023-04-13T05:33:52Z",
+        "version": 2
       }
     }
   ]

@@ -56,6 +56,8 @@ pushd osparc-simcore
 tagregex=$(echo "$TAGS_SIMCORE_REPO" | sed -e "s/^tags: //")
 if [ -z "$tagregex" ]; then
   latestMatchingTag=HEAD
+elif [ "$tagregex" == \"\" ]; then
+  latestMatchingTag=HEAD
 else
   latestMatchingTag=$(git tag --list --sort=creatordate | grep -E "$tagregex" | tail -1 )
 fi
