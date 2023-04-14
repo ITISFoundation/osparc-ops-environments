@@ -1,0 +1,597 @@
+{
+  "v": "1",
+  "id": "b4e6a025-fe60-4cd6-b6c0-9683ae0e8a5d",
+  "rev": 3,
+  "name": "osparc_content_pack",
+  "summary": "osparc_content_pack",
+  "description": "osparc_content_pack",
+  "vendor": "osparc_content_pack",
+  "url": "",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "9e2afa6a-f90d-4ff1-b3b1-a0905a0b57e5",
+      "data": {
+        "name": "WORD",
+        "pattern": "\\b\\w+\\b"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "125e42bf-8cd1-4764-acce-b5a91fe14ef3",
+      "data": {
+        "name": "GREEDYDATA",
+        "pattern": ".*"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "08288fe3-c865-407e-97c2-83312095075c",
+      "data": {
+        "name": "TIMESTAMP_ISO8601",
+        "pattern": "%{YEAR}-%{MONTHNUM}-%{MONTHDAY}[T ]%{HOUR}:?%{MINUTE}(?::?%{SECOND})?%{ISO8601_TIMEZONE}?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "bf637d55-9a00-47a9-8662-02c5a5f3c513",
+      "data": {
+        "name": "DATA",
+        "pattern": ".*?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "57dc860c-6754-4364-8d8a-94f097288348",
+      "data": {
+        "name": "YEAR",
+        "pattern": "(?>\\d\\d){1,2}"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "50175c3d-2183-41f1-bd8b-eccbaaa04ae4",
+      "data": {
+        "name": "MONTHNUM",
+        "pattern": "(?:0?[1-9]|1[0-2])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "89fd7953-4f5f-4e7f-b83a-755b280f0dee",
+      "data": {
+        "name": "HOUR",
+        "pattern": "(?:2[0123]|[01]?[0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "9568a2ed-4f87-45e9-9921-638950fcd5e4",
+      "data": {
+        "name": "MINUTE",
+        "pattern": "(?:[0-5][0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "62da4241-65cd-4cba-8e2a-f040b26da97f",
+      "data": {
+        "name": "SECOND",
+        "pattern": "(?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "633518cf-1e3b-4f58-9f44-0c20297e9bdf",
+      "data": {
+        "name": "ISO8601_TIMEZONE",
+        "pattern": "(?:Z|[+-]%{HOUR}(?::?%{MINUTE}))"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "713c10f5-d6da-480a-bfb0-7a6e2f044f4a",
+      "data": {
+        "name": "MONTHDAY",
+        "pattern": "(?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "f1c9669c-f517-44c8-99bb-5a58f90c30f7",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "standard GELF UDP input"
+        },
+        "configuration": {
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12201
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.gelf.udp.GELFUDPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": [
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| log_msg=%{GREEDYDATA:log_msg} \\| log_service=%{WORD:log_service}"
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "osparc-simcore python extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "03bc4984-6dde-489c-ba9c-e8a1ff0f1b7f",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "osparc-simcore replace pipeline"
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"osparc-simcore replace pipeline\"\nstage 0 match either\nrule \"replace \\\\n with \\n for message\"\nstage 1 match either\nrule \"replace \\\\n with \\n for log_msg\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "000000000000000000000001"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "8dfa9f5e-df1b-4001-b4a2-f051c71cc51c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for message"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for message"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for message\"\nwhen\n  has_field(\"message\")\nthen\n  let newMessage = replace(to_string($message.message), \"\\\\n\", \"\\n\");\n  set_field(\"message\", newMessage);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "e38fd8f9-c5f4-432a-80f8-52d472f12954",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for log_msg"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for log_msg"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for log_msg\"\nwhen\n  has_field(\"log_msg\")\nthen\n  let newMessage = replace(to_string($message.log_msg), \"\\\\n\", \"\\n\");\n  set_field(\"log_msg\", newMessage);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "search",
+        "version": "1"
+      },
+      "id": "1676f838-142d-4031-ba95-a03dd8b280a6",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": ""
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "2c24a831-a834-4fe8-b129-78364e44ac00",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": null,
+                  "name": "chart",
+                  "timerange": null,
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "7025fc9d-ee87-4ef4-8b27-f4ef7e6d644f",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": null,
+                  "name": null,
+                  "timerange": null,
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "id": "74e66d19-d1b7-4a50-8705-1fd0214e533c",
+                  "limit": 150,
+                  "filters": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2023-04-14T08:54:16.419Z"
+        },
+        "created_at": "2023-04-14T08:54:16.410Z",
+        "requires": {},
+        "state": {
+          "2c24a831-a834-4fe8-b129-78364e44ac00": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "1eb422ee-bebd-4735-b16a-5df1acdd8a8c": "Message Count",
+                "899b8402-98e2-4783-8e76-2d3e7dbb775f": "All Messages"
+              }
+            },
+            "widgets": [
+              {
+                "id": "1eb422ee-bebd-4735-b16a-5df1acdd8a8c",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "visualization": "bar",
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": 1
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "899b8402-98e2-4783-8e76-2d3e7dbb775f",
+                "type": "messages",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "source",
+                    "container_name"
+                  ],
+                  "show_message_row": true,
+                  "show_summary": true,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "1eb422ee-bebd-4735-b16a-5df1acdd8a8c": [
+                "7025fc9d-ee87-4ef4-8b27-f4ef7e6d644f"
+              ],
+              "899b8402-98e2-4783-8e76-2d3e7dbb775f": [
+                "74e66d19-d1b7-4a50-8705-1fd0214e533c"
+              ]
+            },
+            "positions": {
+              "1eb422ee-bebd-4735-b16a-5df1acdd8a8c": {
+                "col": 1,
+                "row": 2,
+                "height": 2,
+                "width": "Infinity"
+              },
+              "899b8402-98e2-4783-8e76-2d3e7dbb775f": {
+                "col": 1,
+                "row": 4,
+                "height": 6,
+                "width": "Infinity"
+              }
+            },
+            "formatting": null,
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "osparc-default"
+        },
+        "type": "SEARCH",
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    }
+  ]
+}
