@@ -10,7 +10,7 @@ make up
 make down
 ```
 
-## Configuration
+## Configuration for graylog - The Principles
 
 1. Create a GELF UDP INPUT
 2. Show incoming messages
@@ -21,9 +21,11 @@ make down
 echo -n '{ "version": "1.1", "host": "example.org", "short_message": "A short message", "level": 5, "_some_info": "foo" }' | nc -w0 -u localhost 12201
 ```
 
-### alternative option: configure docker daemon to re-direct to gelf address
+### In oSparc: Use Dual Logging
 
-This needs to be added to /etc/docker/daemon.json
+Dual Logging is available, see: https://docs.docker.com/config/containers/logging/dual-logging/
+
+The file `/etc/docker/daemon.json` is configured to include the following options. (HINT: Restart the docker daemon after any modifications of the file)
 
 ```json
     "log-driver": "gelf",
@@ -32,9 +34,8 @@ This needs to be added to /etc/docker/daemon.json
     }
 ```
 
-Restart the docker daemon after the modifications.
+UDP Post 12201 is used by graylog and exposed as an ingress port.
 
-**Note:** In that case logspout is not necessary, BUT the downside is that all commands relying on "docker logs" will then fail.
 
 ## Accessing Web-browser API
 

@@ -34,7 +34,21 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-  build-essential git python3-pip python3.10-venv openssl make curl openssh-client gettext-base \
+  apt-utils \
+  build-essential \
+  curl \
+  gettext-base \
+  gettext-base \
+  git \
+  gnupg \
+  make \
+  openssl \
+  openssh-client \
+  python3-pip \
+  python3.10-venv \
+  software-properties-common \
+  unzip \
+  wget \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -49,7 +63,13 @@ RUN $HOME/minio-binaries/mc --help
 RUN pip install --no-cache-dir --upgrade \
   pip~=22.0  \
   wheel \
-  setuptools
+  setuptools \
+  ansible
+
+RUN echo "------------------------------------------------------ terraform" \
+    && cd /tmp && wget https://releases.hashicorp.com/terraform/1.4.4/terraform_1.4.4_linux_amd64.zip \
+    && unzip terraform_1.4.4_linux_amd64.zip  -d /usr/local/bin \
+    && rm /tmp/terraform_1.4.4_linux_amd64.zip
 
 WORKDIR /home/scu
 
