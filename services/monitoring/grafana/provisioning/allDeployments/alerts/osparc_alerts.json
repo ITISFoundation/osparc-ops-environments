@@ -4,7 +4,7 @@
   "rules": [
     {
       "expr": "",
-      "for": "3m",
+      "for": "10m",
       "grafana_alert": {
         "condition": "B",
         "data": [
@@ -48,7 +48,7 @@
                   },
                   "reducer": {
                     "params": [],
-                    "type": "last"
+                    "type": "avg"
                   },
                   "type": "query"
                 }
@@ -77,13 +77,13 @@
         "no_data_state": "Alerting",
         "rule_group": "osparc_alerts",
         "title": "cpu_usage_alert",
-        "updated": "2023-03-20T15:52:29Z",
-        "version": 3
+        "updated": "2023-04-13T08:31:35Z",
+        "version": 2
       }
     },
     {
       "expr": "",
-      "for": "5m",
+      "for": "2h",
       "grafana_alert": {
         "condition": "C",
         "data": [
@@ -91,7 +91,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "editorMode": "code",
-              "expr": "sum(avg_over_time(swarm_manager_tasks_total{state=\"pending\"}[30m]))",
+              "expr": "sum(swarm_manager_tasks_total{state=\"pending\"})",
               "hide": false,
               "intervalMs": 1000,
               "legendFormat": "__auto",
@@ -102,7 +102,7 @@
             "queryType": "",
             "refId": "A",
             "relativeTimeRange": {
-              "from": 900,
+              "from": 1800,
               "to": 0
             }
           },
@@ -138,7 +138,7 @@
               "hide": false,
               "intervalMs": 1000,
               "maxDataPoints": 43200,
-              "reducer": "mean",
+              "reducer": "min",
               "refId": "B",
               "settings": {
                 "mode": "replaceNN",
@@ -149,7 +149,7 @@
             "queryType": "",
             "refId": "B",
             "relativeTimeRange": {
-              "from": 900,
+              "from": 1800,
               "to": 0
             }
           },
@@ -193,29 +193,25 @@
             "queryType": "",
             "refId": "C",
             "relativeTimeRange": {
-              "from": 900,
+              "from": 1800,
               "to": 0
             }
           }
         ],
         "exec_err_state": "Error",
-        "id": 12,
         "intervalSeconds": 60,
         "is_paused": false,
-        "namespace_id": 222,
-        "namespace_uid": "_Zc_rbJ4k",
         "no_data_state": "NoData",
-        "orgId": 1,
         "rule_group": "osparc_alerts",
         "title": "pending_services_alert",
-        "uid": "rLDQaif4z",
-        "updated": "2023-03-20T15:52:29Z",
-        "version": 2
+        "updated": "2023-04-12T12:19:35Z",
+        "version": 3
       }
     },
     {
       "annotations": {
-        "description": "When logspout is swapping, this can cause the nodes to become unresponsive due to heavy IO loads"
+        "description": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert.",
+        "summary": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert."
       },
       "expr": "",
       "for": "5m",
@@ -226,7 +222,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "editorMode": "code",
-              "expr": "sum(container_memory_swap{image=~\".*logspout.*\"})",
+              "expr": "absent(docker_events) or on() vector(0)",
               "hide": false,
               "intervalMs": 1000,
               "legendFormat": "__auto",
@@ -237,7 +233,135 @@
             "queryType": "",
             "refId": "A",
             "relativeTimeRange": {
-              "from": 300,
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "last",
+              "refId": "B",
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      0.9
+                    ],
+                    "type": "lt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "intervalSeconds": 60,
+        "is_paused": false,
+        "no_data_state": "NoData",
+        "rule_group": "osparc_alerts",
+        "title": "container_died_killed_oom_event",
+        "updated": "2023-04-12T12:19:35Z",
+        "version": 2
+      }
+    },
+    {
+      "annotations": {
+        "description": "A docker service or container might have limited CPU resources, but if excessive throttling is going on this might cause issues. Give the firing container more CPU resources, both in portainer and persistently in the docker-compose.yml file.",
+        "summary": "This container needs more CPU resources."
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "sum by (instance, image, name) (rate(container_cpu_cfs_throttled_seconds_total[3m]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 600,
               "to": 0
             }
           },
@@ -276,15 +400,14 @@
               "reducer": "mean",
               "refId": "B",
               "settings": {
-                "mode": "replaceNN",
-                "replaceWithValue": 0
+                "mode": "dropNN"
               },
               "type": "reduce"
             },
             "queryType": "",
             "refId": "B",
             "relativeTimeRange": {
-              "from": 300,
+              "from": 600,
               "to": 0
             }
           },
@@ -295,7 +418,7 @@
                 {
                   "evaluator": {
                     "params": [
-                      10000000
+                      1
                     ],
                     "type": "gt"
                   },
@@ -328,24 +451,19 @@
             "queryType": "",
             "refId": "C",
             "relativeTimeRange": {
-              "from": 300,
+              "from": 600,
               "to": 0
             }
           }
         ],
         "exec_err_state": "Error",
-        "id": 26,
         "intervalSeconds": 60,
         "is_paused": false,
-        "namespace_id": 326,
-        "namespace_uid": "YrUJEmf4k",
         "no_data_state": "NoData",
-        "orgId": 1,
         "rule_group": "osparc_alerts",
-        "title": "logspout_swapping",
-        "uid": "hX31Pmf4kz",
-        "updated": "2023-03-22T09:18:25Z",
-        "version": 3
+        "title": "High CPU throttling for container",
+        "updated": "2023-04-13T05:33:52Z",
+        "version": 2
       }
     }
   ]
