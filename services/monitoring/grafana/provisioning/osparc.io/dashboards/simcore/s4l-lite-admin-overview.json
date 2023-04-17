@@ -37,7 +37,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "palette-classic"
+              "mode": "continuous-blues"
             },
             "decimals": 0,
             "mappings": [],
@@ -45,7 +45,7 @@
               "mode": "absolute",
               "steps": [
                 {
-                  "color": "green",
+                  "color": "dark-orange",
                   "value": null
                 },
                 {
@@ -104,7 +104,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "thresholds"
+              "mode": "continuous-BlPu"
             },
             "decimals": 0,
             "mappings": [],
@@ -171,7 +171,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "thresholds"
+              "mode": "continuous-BlPu"
             },
             "decimals": 0,
             "mappings": [],
@@ -240,7 +240,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "thresholds"
+              "mode": "continuous-blues"
             },
             "decimals": 0,
             "mappings": [],
@@ -307,7 +307,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "palette-classic"
+              "mode": "continuous-BlPu"
             },
             "custom": {
               "axisCenteredZero": false,
@@ -413,7 +413,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "palette-classic"
+              "mode": "continuous-BlPu"
             },
             "custom": {
               "axisCenteredZero": false,
@@ -507,7 +507,7 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "palette-classic"
+              "mode": "continuous-BlPu"
             },
             "custom": {
               "axisCenteredZero": false,
@@ -607,9 +607,9 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "s4l-lite-admin-overview",
+    "title": "s4l-lite admin overview",
     "uid": "Jg0sD8-4k",
-    "version": 4,
+    "version": 5,
     "weekStart": ""
   },
   "meta": {
