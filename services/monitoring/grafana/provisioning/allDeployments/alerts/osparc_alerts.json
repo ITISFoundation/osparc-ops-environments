@@ -222,7 +222,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "editorMode": "code",
-              "expr": "increase(docker_events{action=\"oom\"}[1m]) > 0",
+              "expr": "increase(docker_events{action=\"oom\"}[1m]) > 0 OR on() vector(0)",
               "hide": false,
               "intervalMs": 1000,
               "legendFormat": "__auto",
