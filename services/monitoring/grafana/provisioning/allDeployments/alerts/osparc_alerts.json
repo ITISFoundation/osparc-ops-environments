@@ -214,7 +214,7 @@
         "summary": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert."
       },
       "expr": "",
-      "for": "5m",
+      "for": "4m",
       "grafana_alert": {
         "condition": "C",
         "data": [
@@ -222,7 +222,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "editorMode": "code",
-              "expr": "absent(docker_events) or on() vector(0)",
+              "expr": "increase(docker_events{action=\"oom\"}[1m]) > 0",
               "hide": false,
               "intervalMs": 1000,
               "legendFormat": "__auto",
@@ -233,7 +233,7 @@
             "queryType": "",
             "refId": "A",
             "relativeTimeRange": {
-              "from": 600,
+              "from": 300,
               "to": 0
             }
           },
@@ -269,14 +269,17 @@
               "hide": false,
               "intervalMs": 1000,
               "maxDataPoints": 43200,
-              "reducer": "last",
+              "reducer": "max",
               "refId": "B",
+              "settings": {
+                "mode": "dropNN"
+              },
               "type": "reduce"
             },
             "queryType": "",
             "refId": "B",
             "relativeTimeRange": {
-              "from": 600,
+              "from": 300,
               "to": 0
             }
           },
@@ -287,9 +290,9 @@
                 {
                   "evaluator": {
                     "params": [
-                      0.9
+                      0.0001
                     ],
-                    "type": "lt"
+                    "type": "gt"
                   },
                   "operator": {
                     "type": "and"
@@ -320,7 +323,7 @@
             "queryType": "",
             "refId": "C",
             "relativeTimeRange": {
-              "from": 600,
+              "from": 300,
               "to": 0
             }
           }
@@ -331,8 +334,8 @@
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "container_died_killed_oom_event",
-        "updated": "2023-04-12T12:19:35Z",
-        "version": 2
+        "updated": "2023-04-17T09:34:58Z",
+        "version": 3
       }
     },
     {
