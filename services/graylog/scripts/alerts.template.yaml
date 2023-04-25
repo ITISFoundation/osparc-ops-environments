@@ -1,6 +1,6 @@
 - title: "${MACHINE_FQDN}: Interactive Study Data too large for AWS S3 and hanging"
   description: "${MACHINE_FQDN}: Study Hanging"
-  priority: 3
+  priority: 2
   config:
     query: >
       "EntityTooLarge" AND NOT container_name:/.*graylog_graylog.*/
@@ -35,11 +35,11 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: Writer Is None Error in Webserver"
   description: "${MACHINE_FQDN}: Alert if \"writer is None\" pops up. Communication with rabbitMQ is disrupted and this will make simcore go crazy"
-  priority: 3
+  priority: 2
   config:
     query: >
       "writer is None" AND NOT container_name:/.*graylog_graylog.*/
@@ -74,11 +74,11 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: Dynamic Sidecar failed to save with S3TransferError"
   description: "${MACHINE_FQDN}: Alert if Dynamic Sidecar failed to save with S3TransferError"
-  priority: 3
+  priority: 2
   config:
     query: >
       "simcore_sdk.node_ports_common.exceptions.S3TransferError: Could not upload file" AND NOT container_name:/.*graylog_graylog.*/
@@ -113,17 +113,17 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: Dynamic Sidecar failed to save - 2"
   description: "${MACHINE_FQDN}: Alert if Dynamic Sidecar failed to save - 2"
-  priority: 3
+  priority: 2
   config:
     query: >
       "Could not contact dynamic-sidecar to save service" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
-    search_within_ms: 600000
-    execute_every_ms: 600000
+    search_within_ms: 60000
+    execute_every_ms: 60000
     group_by: []
     series: []
     conditions: {}
@@ -152,11 +152,11 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
   description: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
-  priority: 3
+  priority: 2
   config:
     query: >
       container_name: /.*agent.*/ AND "Shell subprocesses yielded nonzero error code" AND NOT container_name:/.*graylog_graylog.*/
@@ -191,7 +191,7 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: CRITICAL director-v2 error. Plattform operations impaired. Director-v2 restart required."
   description: "${MACHINE_FQDN}: CRITICAL director-v2 error. Plattform operations impaired. Director-v2 restart required."
@@ -230,7 +230,7 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start"
   description: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start. See: https://github.com/moby/moby/issues/30820"
@@ -269,7 +269,7 @@
     - full_message
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected."
   description: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected. Human intervention required. Please investigate."
@@ -307,11 +307,11 @@
     - container_name
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
 - title: "${MACHINE_FQDN}: Syslogs indicate OOM-Event"
   description: "${MACHINE_FQDN}: Likely the oom-killer has reaped a container Please investigate and adjust service limitations."
-  priority: 3
+  priority: 2
   config:
     query: >
       "Memory cgroup out of memory:"
@@ -345,5 +345,5 @@
     - container_name
   notification_settings:
     grace_period_ms: 0
-    backlog_size:
+    backlog_size: 99
   alert: true
