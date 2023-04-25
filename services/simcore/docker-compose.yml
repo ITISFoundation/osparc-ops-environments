@@ -159,6 +159,16 @@ services:
   invitations:
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
+    deploy:
+      labels:
+        # internal traefik
+        - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.service=${SWARM_STACK_NAME}_invitations
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=Host(`invitations.${MACHINE_FQDN}`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.priority=1
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations.loadbalancer.server.port=8000
   webserver:
     networks:
       - public
@@ -502,7 +512,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=ops_gzip@docker, ops_sslheader@docker, ops_ratelimit@docker
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.service=${SWARM_STACK_NAME}_simcore_http
-        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`))
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`)) || Host(`invitations.${MACHINE_FQDN}`)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=1 # Lowest possible priority, maintenance page takes priority "2" (higher, maintenance page has precedent) if it is up
         # oSparc publicAPI
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.rule=(${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}) && PathPrefix(`/`)

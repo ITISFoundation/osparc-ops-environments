@@ -76,10 +76,11 @@ chmod +x yq
 _yq=$(realpath yq)
 export _yq
 pushd services/simcore
+rm .env 2>/dev/null || true
 make compose-"${OSPARC_DEPLOYMENT_TARGET}"
 mv .env .env.platform
 python3 envsubst_escape_dollar_sign.py .env.platform .env.platform.escaped
-cat ../../.env-devel >> .env.nosub
+envsubst < ../../.env-devel > .env.nosub
 cat .env.platform.escaped >> .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
