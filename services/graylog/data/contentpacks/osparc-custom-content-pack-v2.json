@@ -1,9 +1,9 @@
 {
   "v": 1,
-  "id": "eeab5a4a-2b8e-49f2-a1ea-b196a75f7592",
+  "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
   "rev": 1,
-  "name": "osparc-custom-content-pack",
-  "summary": "osparc-custom-content-pack",
+  "name": "osparc-custom-content-pack-v2",
+  "summary": "osparc-custom-content-pack-v2",
   "description": "",
   "vendor": "Osparc team",
   "url": "",
@@ -12,10 +12,10 @@
     {
       "v": "1",
       "type": {
-        "name": "search",
-        "version": "1"
+        "name": "dashboard",
+        "version": "2"
       },
-      "id": "031f56d9-8ab9-46e9-89a5-2197450a44d9",
+      "id": "1ef298f1-4269-4baa-9223-781c1519c507",
       "data": {
         "summary": {
           "@type": "string",
@@ -24,7 +24,7 @@
         "search": {
           "queries": [
             {
-              "id": "3effc4a2-7076-4cd1-bd86-5bfb18254294",
+              "id": "c0957cfb-6956-40c7-8878-cad8098ac155",
               "timerange": {
                 "from": 300,
                 "type": "relative"
@@ -35,6 +35,198 @@
                 "query_string": ""
               },
               "search_types": [
+                {
+                  "query": null,
+                  "name": "chart",
+                  "timerange": {
+                    "from": 300,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": false,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "log_service"
+                      ],
+                      "limit": 50
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "45b82eb0-a217-4eb2-bb6f-1938c4d62296",
+                  "filters": [],
+                  "column_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "log_level"
+                      ],
+                      "limit": 15
+                    }
+                  ],
+                  "sort": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2023-04-26T09:05:11.145Z"
+        },
+        "created_at": "2023-04-26T08:59:59.761Z",
+        "requires": {},
+        "state": {
+          "c0957cfb-6956-40c7-8878-cad8098ac155": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {},
+            "widgets": [
+              {
+                "id": "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "query": null,
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "column_limit": 15,
+                  "event_annotation": false,
+                  "row_limit": 50,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "log_service"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 50
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [
+                    {
+                      "fields": [
+                        "log_level"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "visualization_config": {
+                    "pinned_columns": []
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              }
+            ],
+            "widget_mapping": {
+              "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315": [
+                "45b82eb0-a217-4eb2-bb6f-1938c4d62296"
+              ]
+            },
+            "positions": {
+              "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315": {
+                "col": 1,
+                "row": 3,
+                "height": 5,
+                "width": "Infinity"
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "Log analysis"
+        },
+        "type": "DASHBOARD",
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "search",
+        "version": "1"
+      },
+      "id": "291c8633-9426-4f1a-b3fe-5e4eb39a7208",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": ""
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "9267194b-70b5-42b2-85c5-e47cf669e76f",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": null,
+                  "name": null,
+                  "timerange": null,
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "id": "9bcfbecc-d01a-4388-b663-ca9f334a3770",
+                  "limit": 150,
+                  "filters": []
+                },
                 {
                   "query": null,
                   "name": "chart",
@@ -64,23 +256,10 @@
                     }
                   ],
                   "type": "pivot",
-                  "id": "b05bb74f-bbca-4e7b-a2c8-d4b853dcdf57",
+                  "id": "390700bd-b286-47e1-8329-385e1a126f4a",
                   "filters": [],
                   "column_groups": [],
                   "sort": []
-                },
-                {
-                  "query": null,
-                  "name": null,
-                  "timerange": null,
-                  "offset": 0,
-                  "streams": [],
-                  "filter": null,
-                  "decorators": [],
-                  "type": "messages",
-                  "id": "387ced66-71f9-4118-b376-8e271095569d",
-                  "limit": 150,
-                  "filters": []
                 }
               ]
             }
@@ -88,23 +267,23 @@
           "parameters": [],
           "requires": {},
           "owner": "admin",
-          "created_at": "2023-04-18T08:55:32.021Z"
+          "created_at": "2023-04-18T08:56:32.737Z"
         },
-        "created_at": "2023-04-18T08:55:32.000Z",
+        "created_at": "2023-04-18T08:56:32.719Z",
         "requires": {},
         "state": {
-          "3effc4a2-7076-4cd1-bd86-5bfb18254294": {
+          "9267194b-70b5-42b2-85c5-e47cf669e76f": {
             "selected_fields": null,
             "static_message_list_id": null,
             "titles": {
               "widget": {
-                "64f236c9-1811-41de-97a2-990684af0055": "Message Count",
-                "027401ae-c766-4fb5-b53f-1d28b68ba022": "All Messages"
+                "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": "Message Count",
+                "64253c5a-f038-4a4f-b344-7815b678744b": "All Messages"
               }
             },
             "widgets": [
               {
-                "id": "64f236c9-1811-41de-97a2-990684af0055",
+                "id": "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44",
                 "type": "aggregation",
                 "filter": null,
                 "filters": [],
@@ -146,7 +325,7 @@
                 }
               },
               {
-                "id": "027401ae-c766-4fb5-b53f-1d28b68ba022",
+                "id": "64253c5a-f038-4a4f-b344-7815b678744b",
                 "type": "messages",
                 "filter": null,
                 "filters": [],
@@ -158,7 +337,8 @@
                     "timestamp",
                     "source",
                     "container_name",
-                    "message"
+                    "message",
+                    "full_message"
                   ],
                   "show_message_row": false,
                   "show_summary": false,
@@ -174,28 +354,30 @@
               }
             ],
             "widget_mapping": {
-              "64f236c9-1811-41de-97a2-990684af0055": [
-                "b05bb74f-bbca-4e7b-a2c8-d4b853dcdf57"
+              "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": [
+                "390700bd-b286-47e1-8329-385e1a126f4a"
               ],
-              "027401ae-c766-4fb5-b53f-1d28b68ba022": [
-                "387ced66-71f9-4118-b376-8e271095569d"
+              "64253c5a-f038-4a4f-b344-7815b678744b": [
+                "9bcfbecc-d01a-4388-b663-ca9f334a3770"
               ]
             },
             "positions": {
-              "64f236c9-1811-41de-97a2-990684af0055": {
+              "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": {
                 "col": 1,
-                "row": 6,
+                "row": 5,
                 "height": 2,
                 "width": "Infinity"
               },
-              "027401ae-c766-4fb5-b53f-1d28b68ba022": {
+              "64253c5a-f038-4a4f-b344-7815b678744b": {
                 "col": 1,
-                "row": 8,
+                "row": 7,
                 "height": 6,
                 "width": "Infinity"
               }
             },
-            "formatting": null,
+            "formatting": {
+              "highlighting": []
+            },
             "display_mode_settings": {
               "positions": {}
             }
@@ -205,7 +387,7 @@
         "owner": "admin",
         "title": {
           "@type": "string",
-          "@value": "osparc-default"
+          "@value": "osparc-csv-export"
         },
         "type": "SEARCH",
         "description": {
@@ -226,7 +408,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "d6a8bc81-ccc8-479f-b3ef-84547f581865",
+      "id": "591f7b1d-2f04-4226-b4be-348819ab18ad",
       "data": {
         "title": {
           "@type": "string",
@@ -257,38 +439,10 @@
     {
       "v": "1",
       "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "c114f82a-b629-41e3-b92d-80cd2e3a1e29",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "replace \\\\n with \\n for log_msg"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "replace new line char for log_msg"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "rule \"replace \\\\n with \\n for log_msg\"\nwhen\n  has_field(\"log_msg\")\nthen\n  let newMessage = replace(to_string($message.log_msg), \"\\\\n\", \"\\n\");\n  set_field(\"log_msg\", newMessage);\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "search",
         "version": "1"
       },
-      "id": "da4b05e2-dc7e-48e5-8ce2-fa126c27fb79",
+      "id": "f19d1800-09e7-45d0-a830-2faba9236c15",
       "data": {
         "summary": {
           "@type": "string",
@@ -503,19 +657,19 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "3f8c55f1-05ce-4451-beaa-a85da4e1d9be",
+      "id": "0b387456-7fea-4544-86ca-2857c538111d",
       "data": {
         "title": {
           "@type": "string",
-          "@value": "replace \\\\n with \\n for message"
+          "@value": "replace \\\\n with \\n for log_msg"
         },
         "description": {
           "@type": "string",
-          "@value": "replace new line char for message"
+          "@value": "replace new line char for log_msg"
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"replace \\\\n with \\n for message\"\nwhen\n  has_field(\"message\")\nthen\n  let newMessage = replace(to_string($message.message), \"\\\\n\", \"\\n\");\n  set_field(\"message\", newMessage);\nend"
+          "@value": "rule \"replace \\\\n with \\n for log_msg\"\nwhen\n  has_field(\"log_msg\")\nthen\n  let newMessage = replace(to_string($message.log_msg), \"\\\\n\", \"\\n\");\n  set_field(\"log_msg\", newMessage);\nend"
         }
       },
       "constraints": [
@@ -531,7 +685,7 @@
         "name": "search",
         "version": "1"
       },
-      "id": "23b60d05-4b9a-4a94-90ff-068cabab3ed1",
+      "id": "55cdd040-6c64-46fa-a38c-0a4fc4f3be3f",
       "data": {
         "summary": {
           "@type": "string",
@@ -540,7 +694,7 @@
         "search": {
           "queries": [
             {
-              "id": "9267194b-70b5-42b2-85c5-e47cf669e76f",
+              "id": "3effc4a2-7076-4cd1-bd86-5bfb18254294",
               "timerange": {
                 "from": 300,
                 "type": "relative"
@@ -580,7 +734,7 @@
                     }
                   ],
                   "type": "pivot",
-                  "id": "390700bd-b286-47e1-8329-385e1a126f4a",
+                  "id": "b05bb74f-bbca-4e7b-a2c8-d4b853dcdf57",
                   "filters": [],
                   "column_groups": [],
                   "sort": []
@@ -594,7 +748,7 @@
                   "filter": null,
                   "decorators": [],
                   "type": "messages",
-                  "id": "9bcfbecc-d01a-4388-b663-ca9f334a3770",
+                  "id": "387ced66-71f9-4118-b376-8e271095569d",
                   "limit": 150,
                   "filters": []
                 }
@@ -604,23 +758,23 @@
           "parameters": [],
           "requires": {},
           "owner": "admin",
-          "created_at": "2023-04-18T08:56:32.737Z"
+          "created_at": "2023-04-18T08:55:32.021Z"
         },
-        "created_at": "2023-04-18T08:56:32.719Z",
+        "created_at": "2023-04-18T08:55:32.000Z",
         "requires": {},
         "state": {
-          "9267194b-70b5-42b2-85c5-e47cf669e76f": {
+          "3effc4a2-7076-4cd1-bd86-5bfb18254294": {
             "selected_fields": null,
             "static_message_list_id": null,
             "titles": {
               "widget": {
-                "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": "Message Count",
-                "64253c5a-f038-4a4f-b344-7815b678744b": "All Messages"
+                "64f236c9-1811-41de-97a2-990684af0055": "Message Count",
+                "027401ae-c766-4fb5-b53f-1d28b68ba022": "All Messages"
               }
             },
             "widgets": [
               {
-                "id": "64253c5a-f038-4a4f-b344-7815b678744b",
+                "id": "027401ae-c766-4fb5-b53f-1d28b68ba022",
                 "type": "messages",
                 "filter": null,
                 "filters": [],
@@ -632,8 +786,7 @@
                     "timestamp",
                     "source",
                     "container_name",
-                    "message",
-                    "full_message"
+                    "message"
                   ],
                   "show_message_row": false,
                   "show_summary": false,
@@ -648,7 +801,7 @@
                 }
               },
               {
-                "id": "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44",
+                "id": "64f236c9-1811-41de-97a2-990684af0055",
                 "type": "aggregation",
                 "filter": null,
                 "filters": [],
@@ -691,23 +844,23 @@
               }
             ],
             "widget_mapping": {
-              "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": [
-                "390700bd-b286-47e1-8329-385e1a126f4a"
+              "64f236c9-1811-41de-97a2-990684af0055": [
+                "b05bb74f-bbca-4e7b-a2c8-d4b853dcdf57"
               ],
-              "64253c5a-f038-4a4f-b344-7815b678744b": [
-                "9bcfbecc-d01a-4388-b663-ca9f334a3770"
+              "027401ae-c766-4fb5-b53f-1d28b68ba022": [
+                "387ced66-71f9-4118-b376-8e271095569d"
               ]
             },
             "positions": {
-              "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": {
+              "64f236c9-1811-41de-97a2-990684af0055": {
                 "col": 1,
-                "row": 5,
+                "row": 6,
                 "height": 2,
                 "width": "Infinity"
               },
-              "64253c5a-f038-4a4f-b344-7815b678744b": {
+              "027401ae-c766-4fb5-b53f-1d28b68ba022": {
                 "col": 1,
-                "row": 7,
+                "row": 8,
                 "height": 6,
                 "width": "Infinity"
               }
@@ -722,7 +875,7 @@
         "owner": "admin",
         "title": {
           "@type": "string",
-          "@value": "osparc-andrei-export"
+          "@value": "osparc-default"
         },
         "type": "SEARCH",
         "description": {
@@ -743,7 +896,7 @@
         "name": "input",
         "version": "1"
       },
-      "id": "f8bdf565-3abc-466a-b78f-2113a7d9b399",
+      "id": "36895679-3b4f-499d-bee7-58fd5f2e1703",
       "data": {
         "title": {
           "@type": "string",
@@ -769,51 +922,6 @@
           "@value": true
         },
         "extractors": [
-          {
-            "target_field": {
-              "@type": "string",
-              "@value": ""
-            },
-            "condition_value": {
-              "@type": "string",
-              "@value": ""
-            },
-            "order": {
-              "@type": "integer",
-              "@value": 0
-            },
-            "converters": [],
-            "configuration": {
-              "grok_pattern": {
-                "@type": "string",
-                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| log_msg=%{GREEDYDATA:log_msg}"
-              },
-              "named_captures_only": {
-                "@type": "boolean",
-                "@value": false
-              }
-            },
-            "source_field": {
-              "@type": "string",
-              "@value": "message"
-            },
-            "title": {
-              "@type": "string",
-              "@value": "osparc-simcore python extractor"
-            },
-            "type": {
-              "@type": "string",
-              "@value": "GROK"
-            },
-            "cursor_strategy": {
-              "@type": "string",
-              "@value": "COPY"
-            },
-            "condition_type": {
-              "@type": "string",
-              "@value": "NONE"
-            }
-          },
           {
             "target_field": {
               "@type": "string",
@@ -858,8 +966,81 @@
               "@type": "string",
               "@value": "NONE"
             }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| (log_uid=%{WORD:log_uid} \\| )?log_msg=%{GREEDYDATA:log_msg}"
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "osparc-simcore python extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
           }
         ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "b7bf63cc-2c6a-4eb9-adfb-88035307db74",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for message"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for message"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for message\"\nwhen\n  has_field(\"message\")\nthen\n  let newMessage = replace(to_string($message.message), \"\\\\n\", \"\\n\");\n  set_field(\"message\", newMessage);\nend"
+        }
       },
       "constraints": [
         {
@@ -874,7 +1055,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "48914cf9-df00-4e55-80bf-1359158c322b",
+      "id": "379e167b-9a8e-48e2-8805-a3f986912366",
       "data": {
         "name": "WORD",
         "pattern": "\\b\\w+\\b"
@@ -892,7 +1073,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "654b9af7-1d6c-4d92-a6f6-1796ea546ccf",
+      "id": "f0416ab1-bf73-4402-a6e3-7f85f9644917",
       "data": {
         "name": "GREEDYDATA",
         "pattern": ".*"
@@ -910,7 +1091,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "9aaa74ad-e0c1-4163-a280-7be4a194b2e3",
+      "id": "0278d77a-6f64-4c02-aaf2-24ec7453852f",
       "data": {
         "name": "TIMESTAMP_ISO8601",
         "pattern": "%{YEAR}-%{MONTHNUM}-%{MONTHDAY}[T ]%{HOUR}:?%{MINUTE}(?::?%{SECOND})?%{ISO8601_TIMEZONE}?"
@@ -928,7 +1109,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "84dde9ff-1cdb-495a-b840-c90719b06d57",
+      "id": "b822cbef-ab2a-4474-a33b-c1b36e7bae06",
       "data": {
         "name": "DATA",
         "pattern": ".*?"
@@ -946,7 +1127,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "a310e8db-5928-4bd3-b53b-fed95dd7faf0",
+      "id": "56f56dbc-32ac-4bf2-b766-4efbb06ea0f3",
       "data": {
         "name": "YEAR",
         "pattern": "(?>\\d\\d){1,2}"
@@ -964,7 +1145,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "fe73e4b5-eccb-4c5e-bf0c-751d7cc14c89",
+      "id": "d1b59a8d-b84f-4255-bee9-9d82709778f0",
       "data": {
         "name": "MONTHNUM",
         "pattern": "(?:0?[1-9]|1[0-2])"
@@ -982,7 +1163,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "5d6992b7-a952-48c5-9872-5a941720851a",
+      "id": "19bf386e-f8c7-434c-bc42-df6ef38b20ce",
       "data": {
         "name": "HOUR",
         "pattern": "(?:2[0123]|[01]?[0-9])"
@@ -1000,7 +1181,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "aac627b5-0a7a-4999-b179-ae9809cd16a7",
+      "id": "00951d1f-0177-45ca-9e87-ae00f194168f",
       "data": {
         "name": "MINUTE",
         "pattern": "(?:[0-5][0-9])"
@@ -1018,7 +1199,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "e022a60d-93ae-4dce-b9a1-1b8165b11f32",
+      "id": "a78e9da5-392c-46ce-94e5-3d7acc0c2bbb",
       "data": {
         "name": "SECOND",
         "pattern": "(?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)"
@@ -1036,7 +1217,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "2da83fe4-d05b-4f34-8221-96ffdb68e622",
+      "id": "81ed6007-c686-4d5d-919c-67912dfcc622",
       "data": {
         "name": "ISO8601_TIMEZONE",
         "pattern": "(?:Z|[+-]%{HOUR}(?::?%{MINUTE}))"
@@ -1054,7 +1235,7 @@
         "name": "grok_pattern",
         "version": "1"
       },
-      "id": "d9689d94-13bb-465f-a5b0-b3cff023620f",
+      "id": "26805c0f-389f-49cf-832d-90b6a31f88cc",
       "data": {
         "name": "MONTHDAY",
         "pattern": "(?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])"
