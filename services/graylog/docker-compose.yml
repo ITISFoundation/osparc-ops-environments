@@ -42,7 +42,7 @@ services:
     # user: "1000:1001"
     configs:
     - source: graylog_config
-      target: /files/osparc-custom-content-pack.json
+      target: /files/osparc-custom-content-pack-v2.json
     volumes:
       # Mount local configuration directory into Docker container
       # - graylog_config:/usr/share/graylog/data/config
@@ -59,7 +59,7 @@ services:
       # Loading & install our custom content pack
       - GRAYLOG_CONTENT_PACKS_LOADER_ENABLED=true
       - GRAYLOG_CONTENT_PACKS_DIR=/files
-      - GRAYLOG_CONTENT_PACKS_AUTO_INSTALL=osparc-custom-content-pack.json
+      - GRAYLOG_CONTENT_PACKS_AUTO_INSTALL=osparc-custom-content-pack-v2.json
     networks:
       - public
       - default
@@ -102,4 +102,4 @@ networks:
 
 configs:
   graylog_config:
-    file: ./data/contentpacks/osparc-custom-content-pack.json
+    file: ./data/contentpacks/osparc-custom-content-pack-v2.json
