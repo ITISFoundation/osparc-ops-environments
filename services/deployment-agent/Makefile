@@ -3,7 +3,16 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # Makefile including function used by every services
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+# Helpers -------------------------------------------------
+.venv:
+	# creating virtual environment with tooling (jinja, etc)
+	@python3 -m venv .venv
+	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install jinja2 j2cli[yaml]
 
+define jinja
+	@.venv/bin/j2 --format=env $(1) $(2) -o $(3)
+endef
 
 #
 include ${REPO_CONFIG_LOCATION}
@@ -57,7 +66,6 @@ down: ## Stops and remove stack from swarm
 	-@docker stack rm ${SIMCORE_STACK_NAME}
 
 
-# Helpers -------------------------------------------------
 .PHONY: ${DEPLOYMENT_AGENT_CONFIG}
 ${DEPLOYMENT_AGENT_CONFIG}: .env
 	@set -o allexport; \
@@ -66,6 +74,10 @@ ${DEPLOYMENT_AGENT_CONFIG}: .env
 	set +o allexport; \
 	envsubst < ${DEPLOYMENT_AGENT_CONFIG_DEFAULT} > $@
 
+
+.PHONY: docker-compose.yml
+docker-compose.yml: .env docker-compose.yml.j2 .venv
+	$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: .env $(docker-compose-configs)
