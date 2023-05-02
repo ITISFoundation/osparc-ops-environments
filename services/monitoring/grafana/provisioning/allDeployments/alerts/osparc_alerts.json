@@ -1,5 +1,5 @@
 {
-  "interval": "1m",
+  "interval": "2m",
   "name": "osparc_alerts",
   "rules": [
     {
@@ -48,7 +48,7 @@
                   },
                   "reducer": {
                     "params": [],
-                    "type": "last"
+                    "type": "avg"
                   },
                   "type": "query"
                 }
@@ -72,16 +72,19 @@
           }
         ],
         "exec_err_state": "Alerting",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "Alerting",
         "rule_group": "osparc_alerts",
         "title": "cpu_usage_alert",
-        "updated": "2023-04-13T08:31:35Z",
-        "version": 2
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
       }
     },
     {
+      "annotations": {
+        "description": "Short term impact: High\nSeverity: High\nDocker services have been pending for a while."
+      },
       "expr": "",
       "for": "2h",
       "grafana_alert": {
@@ -199,21 +202,22 @@
           }
         ],
         "exec_err_state": "Error",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "pending_services_alert",
-        "updated": "2023-04-12T12:19:35Z",
-        "version": 3
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
       }
     },
     {
       "annotations": {
-        "description": "When logspout is swapping, this can cause the nodes to become unresponsive due to heavy IO loads"
+        "description": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert.",
+        "summary": "Checks for container killed, non-zero exit code shutdown or oom-event. Restart the docker-events-exporter after tracing the unexpected shutdown to reset the alert."
       },
       "expr": "",
-      "for": "2h",
+      "for": "4m",
       "grafana_alert": {
         "condition": "C",
         "data": [
@@ -221,7 +225,7 @@
             "datasourceUid": "RmZEr52nz",
             "model": {
               "editorMode": "code",
-              "expr": "sum(container_memory_swap{image=~\".*logspout.*\"})",
+              "expr": "increase(docker_events{action=\"oom\"}[1m]) > 0 OR on() vector(0)",
               "hide": false,
               "intervalMs": 1000,
               "legendFormat": "__auto",
@@ -268,11 +272,10 @@
               "hide": false,
               "intervalMs": 1000,
               "maxDataPoints": 43200,
-              "reducer": "mean",
+              "reducer": "max",
               "refId": "B",
               "settings": {
-                "mode": "replaceNN",
-                "replaceWithValue": 0
+                "mode": "dropNN"
               },
               "type": "reduce"
             },
@@ -290,7 +293,7 @@
                 {
                   "evaluator": {
                     "params": [
-                      10000000
+                      0.0001
                     ],
                     "type": "gt"
                   },
@@ -329,13 +332,270 @@
           }
         ],
         "exec_err_state": "Error",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
-        "title": "logspout_swapping",
-        "updated": "2023-03-29T16:41:25Z",
-        "version": 1
+        "title": "container_died_killed_oom_event",
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
+      }
+    },
+    {
+      "annotations": {
+        "description": "A docker service or container might have limited CPU resources, but if excessive throttling is going on this might cause issues. Give the firing container more CPU resources, both in portainer and persistently in the docker-compose.yml file.",
+        "summary": "This container needs more CPU resources."
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "sum by (instance, image, name) (rate(container_cpu_cfs_throttled_seconds_total[3m]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "mean",
+              "refId": "B",
+              "settings": {
+                "mode": "dropNN"
+              },
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      1
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 600,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "intervalSeconds": 120,
+        "is_paused": false,
+        "no_data_state": "NoData",
+        "rule_group": "osparc_alerts",
+        "title": "High CPU throttling for container",
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
+      }
+    },
+    {
+      "annotations": {
+        "summary": "Severity: Warning\nImmediate Impact: Small\n--> Contact Ops personel"
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "label_replace(count by(__name__) ({__name__=~\".+\"}), \"name\", \"$1\", \"__name__\", \"(.+)\") > 5000 or on() vector(0)",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 180,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "max",
+              "refId": "B",
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 180,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      5000
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 180,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "intervalSeconds": 120,
+        "is_paused": false,
+        "no_data_state": "NoData",
+        "rule_group": "osparc_alerts",
+        "title": "High Prometheus Cardinality Metric detected",
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 2
       }
     }
   ]
