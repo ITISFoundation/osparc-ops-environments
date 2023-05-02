@@ -37,18 +37,18 @@ $(info STACK_NAME set to ${STACK_NAME})
 
 
 .PHONY: up
-up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)"
+up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-devel
-up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} ## Deploys or updates current stack "$(STACK_NAME)"
+up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-devel} $(STACK_NAME)
 
 .PHONY: up-dalco
 up-dalco: up ## Deploys deploymentagent stack for Dalco Cluster
 
 .PHONY: up-aws
-up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1) on aws
+up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1) on aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-aws} $(STACK_NAME)
 
 .PHONY: up-master
