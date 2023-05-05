@@ -67,3 +67,7 @@ scrape_configs:
           - "tasks.pgsql-query-exporter"
         type: "A"
         port: 9560
+
+  - job_name: aggregated-trace-metrics
+    static_configs:
+    - targets: ['otel_collector:8889']
