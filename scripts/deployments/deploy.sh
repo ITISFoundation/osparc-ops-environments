@@ -317,9 +317,12 @@ if ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack
     log_info "Postgres container(s) started"
 
     # Wait for the "database system is ready to accept connections" message to appear in the logs
-    until docker logs "$postgres_container_name" 2>&1 | grep -q "database system is ready to accept connections"; do
-      log_info "Postgres not initialized yet. Waiting for 5 seconds..."
-      sleep 5
+    for postgres_container_name in $postgres_container_names; do
+        until docker logs "$postgres_container_name" 2>&1 | grep -q "database system is ready to accept connections"; do
+            log_info "Postgres not initialized yet for container $postgres_container_name. Waiting for 5 seconds..."
+            sleep 5
+        done
+        log_info "Postgres container $postgres_container_name is ready to accept connections"
     done
 
     log_info "All postgres are ready to accept connections. We can start pg-backup"
