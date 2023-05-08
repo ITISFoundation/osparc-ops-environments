@@ -391,7 +391,7 @@
   priority: 2
   config:
     query: >
-      "lock is no longer owned. This is unexpected and requires investigation"
+      "lock is no longer owned. This is unexpected and requires investigation" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 3600000
     execute_every_ms: 3600000
@@ -429,7 +429,7 @@
   priority: 2
   config:
     query: >
-      "LockNotOwnedError"
+      "LockNotOwnedError" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 3600000
     execute_every_ms: 3600000
