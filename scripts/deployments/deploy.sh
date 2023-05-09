@@ -293,9 +293,6 @@ if [ "$start_simcore" -eq 0 ]; then
 fi
 # shellcheck disable=2235
 
-# We pause 2 mns to be sure the deployment agent is launched
-sleep 120
-
 
 if ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]); then
 
