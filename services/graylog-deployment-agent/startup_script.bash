@@ -86,6 +86,7 @@ if ! docker stack deploy --prune --with-registry-auth --orchestrator swarm --com
 fi
 make configure || true
 echo "" > "$repo_basedir"/stack.yml 
+echo "DEBUG"
 #
 #
 ### Cleanup
