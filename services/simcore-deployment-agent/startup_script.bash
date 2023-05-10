@@ -75,19 +75,17 @@ mv yq_linux_amd64 yq
 chmod +x yq
 _yq=$(realpath yq)
 export _yq
-pushd services/simcore
+pushd services/simcore-deployment-agent/assets
 rm .env 2>/dev/null || true
 make compose-"${OSPARC_DEPLOYMENT_TARGET}"
 mv .env .env.platform
 python3 envsubst_escape_dollar_sign.py .env.platform .env.platform.escaped
-envsubst < ../../.env-devel > .env.nosub
+envsubst < "$repo_basedir"/.env-devel > .env.nosub
 cat .env.platform.escaped >> .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
-cp ../../.env-wb-garbage-collector ..
-cp ../../docker-compose.yml ./docker-compose.simcore.yml
-# The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
-"$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
+cp "$repo_basedir"/docker-compose.yml ./docker-compose.simcore.yml
+"$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > "$repo_basedir"/stack.yml
 #
 #
 ### Cleanup
