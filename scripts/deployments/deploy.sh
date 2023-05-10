@@ -144,14 +144,14 @@ log_info "Deploying osparc for $1 cluster on ${MACHINE_FQDN}, using credentials 
 # -------------------------------- ASSERTIONS -------------------------------
 if [ "$disable_vcs_check" -eq 1 ]; then
     log_info "Asserting that there are no uncommited changes in the config-files docker-compose-deploy and .env ..."
-    pushd "${repo_basedir}"/services/simcore;
+    pushd "${repo_basedir}"/services/simcore-deployment-agent;
     call_make "." compose-"$1" > /dev/null
     popd
 
-    # Check if current branch is up to date with origin/main
+    # Check if current branch is up to date with origin
     # shellcheck disable=SC1083
     if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
-        error_exit "Current branch is not up to date with origin/main. Aborting."
+        error_exit "Current branch is not up to date with origin. Aborting."
     fi
 
     # Check if current branch is clean
