@@ -77,12 +77,9 @@ _yq=$(realpath yq)
 export _yq
 pushd services/graylog-deployment-agent/assets
 rm .env 2>/dev/null || true
-#make configure || true
 make .stack.graylog.yaml-"${OSPARC_DEPLOYMENT_TARGET}" 
 cat .stack.graylog.yaml-"${OSPARC_DEPLOYMENT_TARGET}" > "$repo_basedir"/stack.yml
 docker stack deploy --prune --with-registry-auth --orchestrator swarm --compose-file "$repo_basedir"/stack.yml graylog
-#echo "version: \"3.7\"" > "$repo_basedir"/stack.yml 
-#echo "services:" > "$repo_basedir"/stack.yml 
 if ! docker stack deploy --prune --with-registry-auth --orchestrator swarm --compose-file "$repo_basedir"/stack.yml graylog; then
     make down || true
     make up-"${OSPARC_DEPLOYMENT_TARGET}"
