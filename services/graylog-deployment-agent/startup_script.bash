@@ -77,9 +77,9 @@ _yq=$(realpath yq)
 export _yq
 pushd services/graylog-deployment-agent/assets
 rm .env 2>/dev/null || true
-make configure
-make "${TEMP_COMPOSE}"-"${OSPARC_DEPLOYMENT_TARGET}" 
-cat "${TEMP_COMPOSE}"-"${OSPARC_DEPLOYMENT_TARGET}" > "$repo_basedir"/stack.yml
+#make configure || true
+make .stack."${STACK_NAME}".yml-"${OSPARC_DEPLOYMENT_TARGET}" 
+cat .stack."${STACK_NAME}".yml-"${OSPARC_DEPLOYMENT_TARGET}" > "$repo_basedir"/stack.yml
 #
 #
 ### Cleanup

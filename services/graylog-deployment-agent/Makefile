@@ -26,7 +26,8 @@ endif
 
 SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE = .stack.${STACK_NAME}.yml
-TEMP_COMPOSE-aws = .stack.${STACK_NAME}.aws.yml
+TEMP_COMPOSE-aws = .stack.${STACK_NAME}.aws.
+TEMP_COMPOSE-local = .stack.${STACK_NAME}.local.yml
 DEPLOYMENT_AGENT_CONFIG = deployment_config.yml
 DEPLOYMENT_AGENT_CONFIG_DEFAULT = deployment_config.template.yml
 
@@ -57,7 +58,8 @@ up-master: up-dalco ## Deploys deploymentagent stack for Master Cluster
 up-public: up-dalco
 
 .PHONY: up-local
-up-local: up
+up-local: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-local} docker-compose.yml docker-compose.local.yml .env .venv ## Deploys or updates current stack "$(STACK_NAME)"
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-local} $(STACK_NAME)
 
 .PHONY: down
 down: ## Stops and remove stack from swarm
@@ -78,10 +80,17 @@ docker-compose.yml: .env docker-compose.yml.j2 .venv
 docker-compose.aws.yml: .env docker-compose.aws.yml.j2 .venv
 	$(call jinja, docker-compose.aws.yml.j2, .env, docker-compose.aws.yml)
 
+docker-compose.local.yml: .env docker-compose.local.yml.j2 .venv
+	$(call jinja, docker-compose.local.yml.j2, .env, docker-compose.local.yml)
+
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: .env docker-compose.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml > $@
 
 .PHONY: ${TEMP_COMPOSE-aws}
-${TEMP_COMPOSE-aws}: .env docker-compose.yml
+${TEMP_COMPOSE-aws}: .env docker-compose.yml docker-compose.aws.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml docker-compose.aws.yml > $@
+
+.PHONY: ${TEMP_COMPOSE-local}
+${TEMP_COMPOSE-local}: .env docker-compose.yml docker-compose.local.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml docker-compose.local.yml > $@

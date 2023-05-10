@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  {{STACK_NAME}}-deployment-agent:
+    secrets:
+        - source: rootca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      # This is necessary to make python-botocore work with the self-signed certificate
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt # via https://stackoverflow.com/questions/31448854/how-to-force-requests-use-the-certificates-on-my-ubuntu-system#comment78596389_37447847
+      # minio sdk uses this env to use self-signed certs
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+
+secrets:
+  # These are needed for local=deployments
+  rootca.crt:
+    external: true

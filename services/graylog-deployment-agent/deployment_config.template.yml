@@ -26,7 +26,11 @@ main:
       password: ${GIT_DEPLOYEMENTCONFIG_PASSWORD}
       paths:
         - repo.config
-  docker_private_registries: []
+  docker_private_registries:
+    # lists registries and their credentials if necessary to check for services to download from
+    - url: ${DOCKER_HUB_URL}
+      username: ${DOCKER_HUB_LOGIN}
+      password: ${DOCKER_HUB_PASSWORD}
   docker_stack_recipe:
     # defines the recipe to generate the docker compose style stack file to be deployed in the swarm
     # An optional command line may be defined to that end that generate the docker compose file.
