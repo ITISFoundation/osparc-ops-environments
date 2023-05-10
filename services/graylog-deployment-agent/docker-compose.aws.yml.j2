@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  {{STACK_NAME}}-deployment-agent:
+    dns:
+      8.8.8.8
+    deploy:
+      placement:
+          constraints:
+            - node.labels.traefik==true

@@ -1,0 +1,105 @@
+version: "3.7"
+services:
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongodb:
+    image: mongo:6.0.3
+    init: true
+    volumes:
+      # data persistency
+      - mongo_data:/data/db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      default:
+        aliases:
+          - mongo # needed because of graylog configuration
+
+  # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    init: true
+    volumes:
+      # data persistency
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 1G
+  # Graylog: https://hub.docker.com/r/graylog/graylog/
+  graylog:
+    image: graylog/graylog:5.0.5
+    init: true
+    # user: "1000:1001"
+    configs:
+    - source: graylog_config
+      target: /files/osparc-custom-content-pack-v2.json
+    volumes:
+      # Mount local configuration directory into Docker container
+      # - graylog_config:/usr/share/graylog/data/config
+      # data persistency
+      - graylog_journal:/usr/share/graylog/data/journal
+    env_file:
+      - .env
+    environment:
+      # CHANGE ME (must be at least 16 characters)!
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
+      # Username: admin
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
+      - GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}
+      # Loading & install our custom content pack
+      - GRAYLOG_CONTENT_PACKS_LOADER_ENABLED=true
+      - GRAYLOG_CONTENT_PACKS_DIR=/files
+      - GRAYLOG_CONTENT_PACKS_AUTO_INSTALL=osparc-custom-content-pack-v2.json
+    networks:
+      - public
+      - default
+    ports:
+    - 12201:12201/udp
+    - 12202:12202/udp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "8.00"
+          memory: 8G
+        reservations:
+          cpus: "4.00"
+          memory: 4G
+
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.graylog.loadbalancer.server.port=9000
+        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)
+        - traefik.http.routers.graylog.entrypoints=https
+        - traefik.http.routers.graylog.tls=true
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, graylog_replace_regex
+
+volumes:
+  mongo_data:
+  elasticsearch_data:
+  graylog_journal:
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+
+configs:
+  graylog_config:
+    file: ./data/contentpacks/osparc-custom-content-pack-v2.json

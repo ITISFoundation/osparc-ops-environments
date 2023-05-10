@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  graylog-deployment-agent:
+    image: itisfoundation/deployment-agent:0.11.2
+    init: true
+    ports:
+      - "8888"
+    configs:
+      - source: graylog_master_deployment_config
+        target: /home/scu/config-prod.yaml
+      - source: graylog_master_create_stack
+        target: /home/scu/startup_script.bash
+        mode: 0555
+    networks:
+      - portainer_agent_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+networks:
+  portainer_agent_network:
+    external: true
+
+configs:
+  graylog_master_deployment_config:
+    file: ./deployment_config.yml
+  graylog_master_create_stack:
+    file: ./startup_script.bash

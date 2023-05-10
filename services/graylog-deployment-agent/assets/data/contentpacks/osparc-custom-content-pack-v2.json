@@ -1,0 +1,1251 @@
+{
+  "v": 1,
+  "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
+  "rev": 1,
+  "name": "osparc-custom-content-pack-v2",
+  "summary": "osparc-custom-content-pack-v2",
+  "description": "",
+  "vendor": "Osparc team",
+  "url": "",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "dashboard",
+        "version": "2"
+      },
+      "id": "1ef298f1-4269-4baa-9223-781c1519c507",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": ""
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "c0957cfb-6956-40c7-8878-cad8098ac155",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": null,
+                  "name": "chart",
+                  "timerange": {
+                    "from": 300,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": false,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "log_service"
+                      ],
+                      "limit": 50
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "45b82eb0-a217-4eb2-bb6f-1938c4d62296",
+                  "filters": [],
+                  "column_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "log_level"
+                      ],
+                      "limit": 15
+                    }
+                  ],
+                  "sort": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2023-04-26T09:05:11.145Z"
+        },
+        "created_at": "2023-04-26T08:59:59.761Z",
+        "requires": {},
+        "state": {
+          "c0957cfb-6956-40c7-8878-cad8098ac155": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {},
+            "widgets": [
+              {
+                "id": "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "query": null,
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "column_limit": 15,
+                  "event_annotation": false,
+                  "row_limit": 50,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "log_service"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 50
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [
+                    {
+                      "fields": [
+                        "log_level"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "visualization_config": {
+                    "pinned_columns": []
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              }
+            ],
+            "widget_mapping": {
+              "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315": [
+                "45b82eb0-a217-4eb2-bb6f-1938c4d62296"
+              ]
+            },
+            "positions": {
+              "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315": {
+                "col": 1,
+                "row": 3,
+                "height": 5,
+                "width": "Infinity"
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "Log analysis"
+        },
+        "type": "DASHBOARD",
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "search",
+        "version": "1"
+      },
+      "id": "291c8633-9426-4f1a-b3fe-5e4eb39a7208",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": ""
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "9267194b-70b5-42b2-85c5-e47cf669e76f",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": null,
+                  "name": null,
+                  "timerange": null,
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "id": "9bcfbecc-d01a-4388-b663-ca9f334a3770",
+                  "limit": 150,
+                  "filters": []
+                },
+                {
+                  "query": null,
+                  "name": "chart",
+                  "timerange": null,
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "390700bd-b286-47e1-8329-385e1a126f4a",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2023-04-18T08:56:32.737Z"
+        },
+        "created_at": "2023-04-18T08:56:32.719Z",
+        "requires": {},
+        "state": {
+          "9267194b-70b5-42b2-85c5-e47cf669e76f": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": "Message Count",
+                "64253c5a-f038-4a4f-b344-7815b678744b": "All Messages"
+              }
+            },
+            "widgets": [
+              {
+                "id": "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "visualization": "bar",
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": 1
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "64253c5a-f038-4a4f-b344-7815b678744b",
+                "type": "messages",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "source",
+                    "container_name",
+                    "message",
+                    "full_message"
+                  ],
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": [
+                "390700bd-b286-47e1-8329-385e1a126f4a"
+              ],
+              "64253c5a-f038-4a4f-b344-7815b678744b": [
+                "9bcfbecc-d01a-4388-b663-ca9f334a3770"
+              ]
+            },
+            "positions": {
+              "8c99e1fb-0b0b-4cc8-ab9d-c2c612b93a44": {
+                "col": 1,
+                "row": 5,
+                "height": 2,
+                "width": "Infinity"
+              },
+              "64253c5a-f038-4a4f-b344-7815b678744b": {
+                "col": 1,
+                "row": 7,
+                "height": 6,
+                "width": "Infinity"
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "osparc-csv-export"
+        },
+        "type": "SEARCH",
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "591f7b1d-2f04-4226-b4be-348819ab18ad",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "osparc-simcore replace pipeline"
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"osparc-simcore replace pipeline\"\nstage 0 match either\nrule \"replace \\\\n with \\n for message\"\nstage 1 match either\nrule \"replace \\\\n with \\n for log_msg\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "000000000000000000000001"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "search",
+        "version": "1"
+      },
+      "id": "f19d1800-09e7-45d0-a830-2faba9236c15",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": ""
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "4acc0912-d78e-46dc-8e80-7b1c73ba0b34",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": null,
+                  "name": "chart",
+                  "timerange": null,
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "b61cf32a-ac81-4caf-832e-7f65255f0f03",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": null,
+                  "name": null,
+                  "timerange": null,
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "id": "5d45b862-2d5e-4373-a86d-0f2412f73236",
+                  "limit": 150,
+                  "filters": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2023-04-17T14:37:30.130Z"
+        },
+        "created_at": "2023-04-17T14:37:30.122Z",
+        "requires": {},
+        "state": {
+          "4acc0912-d78e-46dc-8e80-7b1c73ba0b34": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "c11dab9a-14ef-460b-a639-2d16bc5aa9b1": "Message Count",
+                "13a54af2-3290-4c12-bbc0-45396b0a56e9": "All Messages"
+              }
+            },
+            "widgets": [
+              {
+                "id": "c11dab9a-14ef-460b-a639-2d16bc5aa9b1",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "visualization": "bar",
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": 1
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "13a54af2-3290-4c12-bbc0-45396b0a56e9",
+                "type": "messages",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "source",
+                    "log_level",
+                    "log_service",
+                    "log_msg",
+                    "log_source"
+                  ],
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "c11dab9a-14ef-460b-a639-2d16bc5aa9b1": [
+                "b61cf32a-ac81-4caf-832e-7f65255f0f03"
+              ],
+              "13a54af2-3290-4c12-bbc0-45396b0a56e9": [
+                "5d45b862-2d5e-4373-a86d-0f2412f73236"
+              ]
+            },
+            "positions": {
+              "13a54af2-3290-4c12-bbc0-45396b0a56e9": {
+                "col": 1,
+                "row": 8,
+                "height": 6,
+                "width": "Infinity"
+              },
+              "c11dab9a-14ef-460b-a639-2d16bc5aa9b1": {
+                "col": 1,
+                "row": 6,
+                "height": 2,
+                "width": "Infinity"
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "osparc-simcore-default"
+        },
+        "type": "SEARCH",
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "0b387456-7fea-4544-86ca-2857c538111d",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for log_msg"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for log_msg"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for log_msg\"\nwhen\n  has_field(\"log_msg\")\nthen\n  let newMessage = replace(to_string($message.log_msg), \"\\\\n\", \"\\n\");\n  set_field(\"log_msg\", newMessage);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "search",
+        "version": "1"
+      },
+      "id": "55cdd040-6c64-46fa-a38c-0a4fc4f3be3f",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": ""
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "3effc4a2-7076-4cd1-bd86-5bfb18254294",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": null,
+                  "name": "chart",
+                  "timerange": null,
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "b05bb74f-bbca-4e7b-a2c8-d4b853dcdf57",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": null,
+                  "name": null,
+                  "timerange": null,
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "id": "387ced66-71f9-4118-b376-8e271095569d",
+                  "limit": 150,
+                  "filters": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2023-04-18T08:55:32.021Z"
+        },
+        "created_at": "2023-04-18T08:55:32.000Z",
+        "requires": {},
+        "state": {
+          "3effc4a2-7076-4cd1-bd86-5bfb18254294": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "64f236c9-1811-41de-97a2-990684af0055": "Message Count",
+                "027401ae-c766-4fb5-b53f-1d28b68ba022": "All Messages"
+              }
+            },
+            "widgets": [
+              {
+                "id": "027401ae-c766-4fb5-b53f-1d28b68ba022",
+                "type": "messages",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "source",
+                    "container_name",
+                    "message"
+                  ],
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "64f236c9-1811-41de-97a2-990684af0055",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": null,
+                "query": null,
+                "streams": [],
+                "config": {
+                  "visualization": "bar",
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": 1
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              }
+            ],
+            "widget_mapping": {
+              "64f236c9-1811-41de-97a2-990684af0055": [
+                "b05bb74f-bbca-4e7b-a2c8-d4b853dcdf57"
+              ],
+              "027401ae-c766-4fb5-b53f-1d28b68ba022": [
+                "387ced66-71f9-4118-b376-8e271095569d"
+              ]
+            },
+            "positions": {
+              "64f236c9-1811-41de-97a2-990684af0055": {
+                "col": 1,
+                "row": 6,
+                "height": 2,
+                "width": "Infinity"
+              },
+              "027401ae-c766-4fb5-b53f-1d28b68ba022": {
+                "col": 1,
+                "row": 8,
+                "height": 6,
+                "width": "Infinity"
+              }
+            },
+            "formatting": null,
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "osparc-default"
+        },
+        "type": "SEARCH",
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "36895679-3b4f-499d-bee7-58fd5f2e1703",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "standard GELF UDP input"
+        },
+        "configuration": {
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12201
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.gelf.udp.GELFUDPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": [
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "log_service"
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "index": {
+                "@type": "integer",
+                "@value": 1
+              },
+              "split_by": {
+                "@type": "string",
+                "@value": "."
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "container_name"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "Extract service from container name"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "SPLIT_AND_INDEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| (log_uid=%{WORD:log_uid} \\| )?log_msg=%{GREEDYDATA:log_msg}"
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "osparc-simcore python extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "b7bf63cc-2c6a-4eb9-adfb-88035307db74",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for message"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for message"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for message\"\nwhen\n  has_field(\"message\")\nthen\n  let newMessage = replace(to_string($message.message), \"\\\\n\", \"\\n\");\n  set_field(\"message\", newMessage);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "379e167b-9a8e-48e2-8805-a3f986912366",
+      "data": {
+        "name": "WORD",
+        "pattern": "\\b\\w+\\b"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "f0416ab1-bf73-4402-a6e3-7f85f9644917",
+      "data": {
+        "name": "GREEDYDATA",
+        "pattern": ".*"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "0278d77a-6f64-4c02-aaf2-24ec7453852f",
+      "data": {
+        "name": "TIMESTAMP_ISO8601",
+        "pattern": "%{YEAR}-%{MONTHNUM}-%{MONTHDAY}[T ]%{HOUR}:?%{MINUTE}(?::?%{SECOND})?%{ISO8601_TIMEZONE}?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "b822cbef-ab2a-4474-a33b-c1b36e7bae06",
+      "data": {
+        "name": "DATA",
+        "pattern": ".*?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "56f56dbc-32ac-4bf2-b766-4efbb06ea0f3",
+      "data": {
+        "name": "YEAR",
+        "pattern": "(?>\\d\\d){1,2}"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "d1b59a8d-b84f-4255-bee9-9d82709778f0",
+      "data": {
+        "name": "MONTHNUM",
+        "pattern": "(?:0?[1-9]|1[0-2])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "19bf386e-f8c7-434c-bc42-df6ef38b20ce",
+      "data": {
+        "name": "HOUR",
+        "pattern": "(?:2[0123]|[01]?[0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "00951d1f-0177-45ca-9e87-ae00f194168f",
+      "data": {
+        "name": "MINUTE",
+        "pattern": "(?:[0-5][0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "a78e9da5-392c-46ce-94e5-3d7acc0c2bbb",
+      "data": {
+        "name": "SECOND",
+        "pattern": "(?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "81ed6007-c686-4d5d-919c-67912dfcc622",
+      "data": {
+        "name": "ISO8601_TIMEZONE",
+        "pattern": "(?:Z|[+-]%{HOUR}(?::?%{MINUTE}))"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "26805c0f-389f-49cf-832d-90b6a31f88cc",
+      "data": {
+        "name": "MONTHDAY",
+        "pattern": "(?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    }
+  ]
+}

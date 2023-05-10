@@ -1,0 +1,464 @@
+- title: "${MACHINE_FQDN}: Interactive Study Data too large for AWS S3 and hanging"
+  description: "${MACHINE_FQDN}: Study Hanging"
+  priority: 2
+  config:
+    query: >
+      "EntityTooLarge" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Writer Is None Error in Webserver"
+  description: "${MACHINE_FQDN}: Alert if \"writer is None\" pops up. Communication with rabbitMQ is disrupted and this will make simcore go crazy"
+  priority: 2
+  config:
+    query: >
+      "writer is None" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Dynamic Sidecar failed to save with S3TransferError"
+  description: "${MACHINE_FQDN}: Alert if Dynamic Sidecar failed to save with S3TransferError"
+  priority: 2
+  config:
+    query: >
+      "simcore_sdk.node_ports_common.exceptions.S3TransferError: Could not upload file" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Dynamic Sidecar failed to save - 2"
+  description: "${MACHINE_FQDN}: Alert if Dynamic Sidecar failed to save - 2"
+  priority: 2
+  config:
+    query: >
+      "Could not contact dynamic-sidecar to save service" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 60000
+    execute_every_ms: 60000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
+  description: "${MACHINE_FQDN}: simcore-agent failed pushing docker volume data to backup S3 bucket"
+  priority: 2
+  config:
+    query: >
+      container_name: /.*agent.*/ AND "Shell subprocesses yielded nonzero error code" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: faulty env-var setup"
+  description: "${MACHINE_FQDN}: Look e.g. here https://git.speag.com/oSparc/osparc-ops-environments/-/issues/564"
+  priority: 2
+  config:
+    query: >
+      "unresolved, defaulting to None" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: CRITICAL director-v2 error. Plattform operations impaired. Director-v2 restart required."
+  description: "${MACHINE_FQDN}: CRITICAL director-v2 error. Plattform operations impaired. Director-v2 restart required."
+  priority: 3
+  config:
+    query: >
+      container_name: /.*director-v2.*/ AND ":e=PoolTimeout('')" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start"
+  description: "${MACHINE_FQDN}: DOCKER IP POOL EXHAUSTED, no service can start. See: https://github.com/moby/moby/issues/30820"
+  priority: 3
+  config:
+    query: >
+      container_name: /.*director-v2.*/ AND "could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 600000
+    execute_every_ms: 600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+    - full_message
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected."
+  description: "${MACHINE_FQDN}: Potential hanging dy-sidecar service detected. Human intervention required. Please investigate."
+  priority: 3
+  config:
+    query: >
+      "waiting for manual intervention" AND container_name:/.*director-v2.*/
+    query_parameters: []
+    search_within_ms: 3600000
+    execute_every_ms: 3600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Syslogs indicate OOM-Event"
+  description: "${MACHINE_FQDN}: Likely the oom-killer has reaped a container Please investigate and adjust service limitations."
+  priority: 2
+  config:
+    query: >
+      "Memory cgroup out of memory:"
+    query_parameters: []
+    search_within_ms: 3600000
+    execute_every_ms: 3600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Unexpected error with redis lock detected"
+  description: "${MACHINE_FQDN}: This error should only occur in unit tests due to very low timings, maybe something happene here"
+  priority: 2
+  config:
+    query: >
+      "lock is no longer owned. This is unexpected and requires investigation" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 3600000
+    execute_every_ms: 3600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
+- title: "${MACHINE_FQDN}: Detected LockNotOwnedError please invetigate"
+  description: "${MACHINE_FQDN}: If LockNotOwnedError is raised the lock extension might have issues, which could be potentially very bad"
+  priority: 2
+  config:
+    query: >
+      "LockNotOwnedError" AND NOT container_name:/.*graylog_graylog.*/
+    query_parameters: []
+    search_within_ms: 3600000
+    execute_every_ms: 3600000
+    group_by: []
+    series: []
+    conditions: {}
+    type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
