@@ -79,9 +79,7 @@ pushd services/graylog-deployment-agent/assets
 rm .env 2>/dev/null || true
 #make configure || true
 make .stack.assets.yaml-"${OSPARC_DEPLOYMENT_TARGET}" 
-cat .stack.assets.yaml-"${OSPARC_DEPLOYMENT_TARGET}" 
 cat .stack.assets.yaml-"${OSPARC_DEPLOYMENT_TARGET}" > "$repo_basedir"/stack.yml
-cat "$repo_basedir"/stack.yml
 #
 #
 ### Cleanup

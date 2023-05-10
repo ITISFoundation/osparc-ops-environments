@@ -43,34 +43,34 @@ up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local c
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml ## Deploys stack
+${TEMP_COMPOSE}: docker-compose.yml .env ## Deploys stack
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http ## Deploys stack using let's encrypt http challenge
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master ## Deploys stack using let's encrypt dns challenge
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml  > $@
 
 
 .PHONY: ${TEMP_COMPOSE}-local ## Deploys stack on local deployment
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws ## Deploys stack on aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: .env
