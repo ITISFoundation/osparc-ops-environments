@@ -70,7 +70,7 @@ cp .env-wb-garbage-collector "$repo_basedir"
 cp .env-devel "$repo_basedir"
 popd
 rm -rf osparc-simcore 2>/dev/null || true
-"$repo_basedir"/services/deployment-agent/startup_script.bash
+"$repo_basedir"/services/simcore-deployment-agent/startup_script.bash
 # shellcheck disable=SC2143
 if [[ -z $(grep '[^[:space:]]' "$repo_basedir"/stack.yml) ]] ; then
   error_exit "stack.yml is empty"

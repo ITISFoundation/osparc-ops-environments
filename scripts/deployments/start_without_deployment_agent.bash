@@ -130,7 +130,7 @@ cd "$repo_basedir"
 rm -fr "$repo_basedir"/.temp
 #
 log_info "Creating stack.yml file..."
-services/deployment-agent/startup_script.bash
+services/simcore-deployment-agent/startup_script.bash
 log_info "Adding prefix $PREFIX_STACK_NAME to all services..."
 ./yq "with(.services; with_entries(.key |= \"${PREFIX_STACK_NAME}_\" + .))" stack.yml > stack_with_prefix.yml
 log_info "Deleting the $SIMCORE_STACK_NAME docker stack if present"

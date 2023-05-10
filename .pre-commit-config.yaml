@@ -57,7 +57,7 @@ repos:
         entry: 'scripts/pre-commit-hooks/stack-yml-generated-is-valid/launch.bash'
         always_run: true
         language: script
-        files: '^((.*)\/services\/simcore\/(.*))|((.*)\/services\/deployment-agent\/(.*))$'
+        files: '^((.*)\/services\/simcore\/(.*))|((.*)\/services\/simcore-deployment-agent\/(.*))$'
   # NOTE: Keep order as pyupgrade (will update code) then pycln (remove unused imports), then isort (sort them) and black (final formatting)
   - repo: https://github.com/roy-ht/pre-commit-jupyter
     rev: v1.2.1

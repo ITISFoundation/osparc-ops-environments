@@ -78,7 +78,7 @@ down: ## Stop all services
 
 .PHONY: down-simcore
 down-simcore:  ## Stop the simcore service
-	@cd services/deployment-agent; \
+	@cd services/simcore-deployment-agent; \
 	make down;
 
 .PHONY: .install-fqdn

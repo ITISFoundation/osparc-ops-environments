@@ -286,7 +286,7 @@ if [ "$start_simcore" -eq 0 ]; then
     else
         # -------------------------------- DEPlOYMENT-AGENT -------------------------------
         log_info "starting deployment-agent for simcore..."
-        pushd "${repo_basedir}"/services/deployment-agent;
+        pushd "${repo_basedir}"/services/simcore-deployment-agent;
         make down up-"$stack_target";
         popd
     fi
