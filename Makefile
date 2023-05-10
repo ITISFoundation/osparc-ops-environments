@@ -43,6 +43,10 @@ up-simcore-aws:  ## Deploy simcores stack only, on AWS
 up-simcore-dalco:  ## Deploy simcores stack only, on Dalco Cluster
 	./scripts/deployments/deploy.sh --stack_target=dalco --start_opsstack=1
 
+.PHONY: up-simcore-local
+up-simcore-local:  ## Deploy simcores stack only, on Dalco Cluster
+	./scripts/deployments/deploy.sh --stack_target=local --start_opsstack=1 --disable_vcs_check=0
+
 .PHONY: up-dalco
 up-dalco: ## Deploy ops and simcore stacks on the Dalco Cluster
 	./scripts/deployments/deploy.sh --stack_target=dalco

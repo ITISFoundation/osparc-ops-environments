@@ -37,18 +37,18 @@ $(info STACK_NAME set to ${STACK_NAME})
 
 
 .PHONY: up
-up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)"
+up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} docker-compose.yml .env .venv ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-devel
-up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)"
+up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} docker-compose.yml .env .venv ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-devel} $(STACK_NAME)
 
 .PHONY: up-dalco
 up-dalco: up ## Deploys deploymentagent stack for Dalco Cluster
 
 .PHONY: up-aws
-up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1) on aws
+up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} docker-compose.yml .env .venv ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1) on aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-aws} $(STACK_NAME)
 
 .PHONY: up-master
@@ -75,21 +75,20 @@ ${DEPLOYMENT_AGENT_CONFIG}: .env
 	envsubst < ${DEPLOYMENT_AGENT_CONFIG_DEFAULT} > $@
 
 
-.PHONY: docker-compose.yml
 docker-compose.yml: .env docker-compose.yml.j2 .venv
 	$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml)
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: .env $(docker-compose-configs)
+${TEMP_COMPOSE}: .env docker-compose.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml > $@
 
 .PHONY: ${TEMP_COMPOSE-devel}
-${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
+${TEMP_COMPOSE-devel}: .env docker-compose.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.devel.yml")' > .temp$@ && \
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env .temp$@ > $@; \
 	rm .temp$@
 
 
 .PHONY: ${TEMP_COMPOSE-aws}
-${TEMP_COMPOSE-aws}: .env $(docker-compose-configs)
+${TEMP_COMPOSE-aws}: .env docker-compose.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml docker-compose.aws.yml > $@
