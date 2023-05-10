@@ -85,6 +85,7 @@ cat .env.platform.escaped >> .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
 cp "$repo_basedir"/docker-compose.yml ./docker-compose.simcore.yml
+cp "$repo_basedir"/.env-wb-garbage-collector .. # This is necessary to get around docker-compose.simcore.yml requesting `../.env-wb-garbage-collector`
 "$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > "$repo_basedir"/stack.yml
 #
 #
