@@ -80,6 +80,15 @@ rm .env 2>/dev/null || true
 #make configure || true
 make .stack.assets.yaml-"${OSPARC_DEPLOYMENT_TARGET}" 
 cat .stack.assets.yaml-"${OSPARC_DEPLOYMENT_TARGET}" > "$repo_basedir"/stack.yml
+docker stack deploy --prune --orchestrator swarm --compose-file "$repo_basedir"/stack.yml graylog
+#echo "version: \"3.7\"" > "$repo_basedir"/stack.yml 
+#echo "services:" > "$repo_basedir"/stack.yml 
+if [ $? -ne 0 ]; then
+    make down || true
+    make up-"${OSPARC_DEPLOYMENT_TARGET}"
+fi
+make configure || true
+echo "" > "$repo_basedir"/stack.yml 
 #
 #
 ### Cleanup
