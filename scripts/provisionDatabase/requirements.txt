@@ -8,7 +8,7 @@ importlib-resources==5.7.1
 jsonschema==4.4.0
 pyrsistent==0.18.1
 python-dotenv==0.20.0
-requests==2.27.1
+requests==2.31.0
 tenacity==8.0.1
 typer==0.4.1
 urllib3==1.26.9
