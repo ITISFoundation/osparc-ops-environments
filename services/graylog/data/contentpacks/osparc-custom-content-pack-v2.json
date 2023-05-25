@@ -1,7 +1,7 @@
 {
-  "v": 1,
+  "v": "1",
   "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
-  "rev": 1,
+  "rev": 2,
   "name": "osparc-custom-content-pack-v2",
   "summary": "osparc-custom-content-pack-v2",
   "description": "",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "1ef298f1-4269-4baa-9223-781c1519c507",
+      "id": "05d3a47f-5a22-46a6-9348-3bf3abaf3569",
       "data": {
         "summary": {
           "@type": "string",
@@ -60,17 +60,71 @@
                       "fields": [
                         "log_service"
                       ],
-                      "limit": 50
+                      "limit": 150
                     }
                   ],
                   "type": "pivot",
-                  "id": "45b82eb0-a217-4eb2-bb6f-1938c4d62296",
+                  "id": "26594f90-9b7c-471f-a4b1-232c41ab2308",
                   "filters": [],
                   "column_groups": [
                     {
                       "type": "values",
                       "fields": [
                         "log_level"
+                      ],
+                      "limit": 10
+                    }
+                  ],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "log_service",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "log_level:ERROR "
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 300,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "Error Count",
+                      "field": "log_level"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": false,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "a5973d80-65e9-42e1-8bc2-e501cdb54028",
+                  "filters": [],
+                  "column_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "log_service"
                       ],
                       "limit": 15
                     }
@@ -83,7 +137,7 @@
           "parameters": [],
           "requires": {},
           "owner": "admin",
-          "created_at": "2023-04-26T09:05:11.145Z"
+          "created_at": "2023-05-25T06:03:27.415Z"
         },
         "created_at": "2023-04-26T08:59:59.761Z",
         "requires": {},
@@ -91,7 +145,11 @@
           "c0957cfb-6956-40c7-8878-cad8098ac155": {
             "selected_fields": null,
             "static_message_list_id": null,
-            "titles": {},
+            "titles": {
+              "widget": {
+                "a7065da8-191c-4a96-b215-876167305088": "Messages for log_level:ERROR AND log_service:staging\\-simcore_staging_webserver"
+              }
+            },
             "widgets": [
               {
                 "id": "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315",
@@ -106,9 +164,9 @@
                 "streams": [],
                 "config": {
                   "visualization": "table",
-                  "column_limit": 15,
+                  "column_limit": 10,
                   "event_annotation": false,
-                  "row_limit": 50,
+                  "row_limit": 150,
                   "row_pivots": [
                     {
                       "fields": [
@@ -116,7 +174,7 @@
                       ],
                       "type": "values",
                       "config": {
-                        "limit": 50
+                        "limit": 150
                       }
                     }
                   ],
@@ -136,12 +194,78 @@
                       ],
                       "type": "values",
                       "config": {
-                        "limit": 15
+                        "limit": 10
                       }
                     }
                   ],
                   "visualization_config": {
                     "pinned_columns": []
+                  },
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "log_service",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "96d6721e-36c6-4c28-b3a8-4c2bf0094b20",
+                "type": "aggregation",
+                "filter": null,
+                "filters": [],
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "log_level:ERROR "
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "bar",
+                  "column_limit": 15,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "timestamp"
+                      ],
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": 1
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "Error Count"
+                      },
+                      "function": "count(log_level)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [
+                    {
+                      "fields": [
+                        "log_service"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "visualization_config": {
+                    "barmode": "group"
                   },
                   "formatting_settings": null,
                   "sort": []
@@ -150,19 +274,38 @@
             ],
             "widget_mapping": {
               "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315": [
-                "45b82eb0-a217-4eb2-bb6f-1938c4d62296"
+                "26594f90-9b7c-471f-a4b1-232c41ab2308"
+              ],
+              "96d6721e-36c6-4c28-b3a8-4c2bf0094b20": [
+                "a5973d80-65e9-42e1-8bc2-e501cdb54028"
               ]
             },
             "positions": {
               "2caf5bf0-1826-47ea-8e8b-ecd4b0b6d315": {
                 "col": 1,
-                "row": 3,
+                "row": 32,
                 "height": 5,
+                "width": "Infinity"
+              },
+              "96d6721e-36c6-4c28-b3a8-4c2bf0094b20": {
+                "col": 1,
+                "row": 29,
+                "height": 4,
                 "width": "Infinity"
               }
             },
             "formatting": {
-              "highlighting": []
+              "highlighting": [
+                {
+                  "field": "log_level",
+                  "value": "ERROR",
+                  "color": {
+                    "color": "#a4a9ff",
+                    "type": "static"
+                  },
+                  "condition": "equal"
+                }
+              ]
             },
             "display_mode_settings": {
               "positions": {}
@@ -179,6 +322,425 @@
         "description": {
           "@type": "string",
           "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "379e167b-9a8e-48e2-8805-a3f986912366",
+      "data": {
+        "name": "WORD",
+        "pattern": "\\b\\w+\\b"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "f0416ab1-bf73-4402-a6e3-7f85f9644917",
+      "data": {
+        "name": "GREEDYDATA",
+        "pattern": ".*"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "0278d77a-6f64-4c02-aaf2-24ec7453852f",
+      "data": {
+        "name": "TIMESTAMP_ISO8601",
+        "pattern": "%{YEAR}-%{MONTHNUM}-%{MONTHDAY}[T ]%{HOUR}:?%{MINUTE}(?::?%{SECOND})?%{ISO8601_TIMEZONE}?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "b822cbef-ab2a-4474-a33b-c1b36e7bae06",
+      "data": {
+        "name": "DATA",
+        "pattern": ".*?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "56f56dbc-32ac-4bf2-b766-4efbb06ea0f3",
+      "data": {
+        "name": "YEAR",
+        "pattern": "(?>\\d\\d){1,2}"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "d1b59a8d-b84f-4255-bee9-9d82709778f0",
+      "data": {
+        "name": "MONTHNUM",
+        "pattern": "(?:0?[1-9]|1[0-2])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "19bf386e-f8c7-434c-bc42-df6ef38b20ce",
+      "data": {
+        "name": "HOUR",
+        "pattern": "(?:2[0123]|[01]?[0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "00951d1f-0177-45ca-9e87-ae00f194168f",
+      "data": {
+        "name": "MINUTE",
+        "pattern": "(?:[0-5][0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "a78e9da5-392c-46ce-94e5-3d7acc0c2bbb",
+      "data": {
+        "name": "SECOND",
+        "pattern": "(?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "81ed6007-c686-4d5d-919c-67912dfcc622",
+      "data": {
+        "name": "ISO8601_TIMEZONE",
+        "pattern": "(?:Z|[+-]%{HOUR}(?::?%{MINUTE}))"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "26805c0f-389f-49cf-832d-90b6a31f88cc",
+      "data": {
+        "name": "MONTHDAY",
+        "pattern": "(?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "36895679-3b4f-499d-bee7-58fd5f2e1703",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "standard GELF UDP input"
+        },
+        "configuration": {
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12201
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.gelf.udp.GELFUDPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": [
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "log_service"
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "index": {
+                "@type": "integer",
+                "@value": 1
+              },
+              "split_by": {
+                "@type": "string",
+                "@value": "."
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "container_name"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "Extract service from container name"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "SPLIT_AND_INDEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| (log_uid=%{WORD:log_uid} \\| )?log_msg=%{GREEDYDATA:log_msg}"
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "osparc-simcore python extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "591f7b1d-2f04-4226-b4be-348819ab18ad",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "osparc-simcore replace pipeline"
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"osparc-simcore replace pipeline\"\nstage 0 match either\nrule \"replace \\\\n with \\n for message\"\nstage 1 match either\nrule \"replace \\\\n with \\n for log_msg\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "000000000000000000000001"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "0b387456-7fea-4544-86ca-2857c538111d",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for log_msg"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for log_msg"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for log_msg\"\nwhen\n  has_field(\"log_msg\")\nthen\n  let newMessage = replace(to_string($message.log_msg), \"\\\\n\", \"\\n\");\n  set_field(\"log_msg\", newMessage);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.0.5+d61a926"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "b7bf63cc-2c6a-4eb9-adfb-88035307db74",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "replace \\\\n with \\n for message"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "replace new line char for message"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"replace \\\\n with \\n for message\"\nwhen\n  has_field(\"message\")\nthen\n  let newMessage = replace(to_string($message.message), \"\\\\n\", \"\\n\");\n  set_field(\"message\", newMessage);\nend"
         }
       },
       "constraints": [
@@ -405,40 +967,6 @@
     {
       "v": "1",
       "type": {
-        "name": "pipeline",
-        "version": "1"
-      },
-      "id": "591f7b1d-2f04-4226-b4be-348819ab18ad",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "osparc-simcore replace pipeline"
-        },
-        "description": {
-          "@type": "string",
-          "@value": ""
-        },
-        "source": {
-          "@type": "string",
-          "@value": "pipeline \"osparc-simcore replace pipeline\"\nstage 0 match either\nrule \"replace \\\\n with \\n for message\"\nstage 1 match either\nrule \"replace \\\\n with \\n for log_msg\"\nend"
-        },
-        "connected_streams": [
-          {
-            "@type": "string",
-            "@value": "000000000000000000000001"
-          }
-        ]
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "search",
         "version": "1"
       },
@@ -654,34 +1182,6 @@
     {
       "v": "1",
       "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "0b387456-7fea-4544-86ca-2857c538111d",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "replace \\\\n with \\n for log_msg"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "replace new line char for log_msg"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "rule \"replace \\\\n with \\n for log_msg\"\nwhen\n  has_field(\"log_msg\")\nthen\n  let newMessage = replace(to_string($message.log_msg), \"\\\\n\", \"\\n\");\n  set_field(\"log_msg\", newMessage);\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "search",
         "version": "1"
       },
@@ -882,363 +1382,6 @@
           "@type": "string",
           "@value": ""
         }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "input",
-        "version": "1"
-      },
-      "id": "36895679-3b4f-499d-bee7-58fd5f2e1703",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "standard GELF UDP input"
-        },
-        "configuration": {
-          "bind_address": {
-            "@type": "string",
-            "@value": "0.0.0.0"
-          },
-          "port": {
-            "@type": "integer",
-            "@value": 12201
-          }
-        },
-        "static_fields": {},
-        "type": {
-          "@type": "string",
-          "@value": "org.graylog2.inputs.gelf.udp.GELFUDPInput"
-        },
-        "global": {
-          "@type": "boolean",
-          "@value": true
-        },
-        "extractors": [
-          {
-            "target_field": {
-              "@type": "string",
-              "@value": "log_service"
-            },
-            "condition_value": {
-              "@type": "string",
-              "@value": ""
-            },
-            "order": {
-              "@type": "integer",
-              "@value": 0
-            },
-            "converters": [],
-            "configuration": {
-              "index": {
-                "@type": "integer",
-                "@value": 1
-              },
-              "split_by": {
-                "@type": "string",
-                "@value": "."
-              }
-            },
-            "source_field": {
-              "@type": "string",
-              "@value": "container_name"
-            },
-            "title": {
-              "@type": "string",
-              "@value": "Extract service from container name"
-            },
-            "type": {
-              "@type": "string",
-              "@value": "SPLIT_AND_INDEX"
-            },
-            "cursor_strategy": {
-              "@type": "string",
-              "@value": "COPY"
-            },
-            "condition_type": {
-              "@type": "string",
-              "@value": "NONE"
-            }
-          },
-          {
-            "target_field": {
-              "@type": "string",
-              "@value": ""
-            },
-            "condition_value": {
-              "@type": "string",
-              "@value": ""
-            },
-            "order": {
-              "@type": "integer",
-              "@value": 0
-            },
-            "converters": [],
-            "configuration": {
-              "grok_pattern": {
-                "@type": "string",
-                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| (log_uid=%{WORD:log_uid} \\| )?log_msg=%{GREEDYDATA:log_msg}"
-              },
-              "named_captures_only": {
-                "@type": "boolean",
-                "@value": false
-              }
-            },
-            "source_field": {
-              "@type": "string",
-              "@value": "message"
-            },
-            "title": {
-              "@type": "string",
-              "@value": "osparc-simcore python extractor"
-            },
-            "type": {
-              "@type": "string",
-              "@value": "GROK"
-            },
-            "cursor_strategy": {
-              "@type": "string",
-              "@value": "COPY"
-            },
-            "condition_type": {
-              "@type": "string",
-              "@value": "NONE"
-            }
-          }
-        ]
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "b7bf63cc-2c6a-4eb9-adfb-88035307db74",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "replace \\\\n with \\n for message"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "replace new line char for message"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "rule \"replace \\\\n with \\n for message\"\nwhen\n  has_field(\"message\")\nthen\n  let newMessage = replace(to_string($message.message), \"\\\\n\", \"\\n\");\n  set_field(\"message\", newMessage);\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "379e167b-9a8e-48e2-8805-a3f986912366",
-      "data": {
-        "name": "WORD",
-        "pattern": "\\b\\w+\\b"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "f0416ab1-bf73-4402-a6e3-7f85f9644917",
-      "data": {
-        "name": "GREEDYDATA",
-        "pattern": ".*"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "0278d77a-6f64-4c02-aaf2-24ec7453852f",
-      "data": {
-        "name": "TIMESTAMP_ISO8601",
-        "pattern": "%{YEAR}-%{MONTHNUM}-%{MONTHDAY}[T ]%{HOUR}:?%{MINUTE}(?::?%{SECOND})?%{ISO8601_TIMEZONE}?"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "b822cbef-ab2a-4474-a33b-c1b36e7bae06",
-      "data": {
-        "name": "DATA",
-        "pattern": ".*?"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "56f56dbc-32ac-4bf2-b766-4efbb06ea0f3",
-      "data": {
-        "name": "YEAR",
-        "pattern": "(?>\\d\\d){1,2}"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "d1b59a8d-b84f-4255-bee9-9d82709778f0",
-      "data": {
-        "name": "MONTHNUM",
-        "pattern": "(?:0?[1-9]|1[0-2])"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "19bf386e-f8c7-434c-bc42-df6ef38b20ce",
-      "data": {
-        "name": "HOUR",
-        "pattern": "(?:2[0123]|[01]?[0-9])"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "00951d1f-0177-45ca-9e87-ae00f194168f",
-      "data": {
-        "name": "MINUTE",
-        "pattern": "(?:[0-5][0-9])"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "a78e9da5-392c-46ce-94e5-3d7acc0c2bbb",
-      "data": {
-        "name": "SECOND",
-        "pattern": "(?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "81ed6007-c686-4d5d-919c-67912dfcc622",
-      "data": {
-        "name": "ISO8601_TIMEZONE",
-        "pattern": "(?:Z|[+-]%{HOUR}(?::?%{MINUTE}))"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "grok_pattern",
-        "version": "1"
-      },
-      "id": "26805c0f-389f-49cf-832d-90b6a31f88cc",
-      "data": {
-        "name": "MONTHDAY",
-        "pattern": "(?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])"
       },
       "constraints": [
         {
