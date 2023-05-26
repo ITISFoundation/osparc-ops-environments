@@ -1,5 +1,5 @@
 {
-  "interval": "1m",
+  "interval": "2m",
   "name": "osparc_alerts",
   "rules": [
     {
@@ -72,16 +72,19 @@
           }
         ],
         "exec_err_state": "Alerting",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "Alerting",
         "rule_group": "osparc_alerts",
         "title": "cpu_usage_alert",
-        "updated": "2023-04-13T08:31:35Z",
-        "version": 2
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
       }
     },
     {
+      "annotations": {
+        "description": "Short term impact: High\nSeverity: High\nDocker services have been pending for a while."
+      },
       "expr": "",
       "for": "2h",
       "grafana_alert": {
@@ -199,13 +202,13 @@
           }
         ],
         "exec_err_state": "Error",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "pending_services_alert",
-        "updated": "2023-04-12T12:19:35Z",
-        "version": 3
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
       }
     },
     {
@@ -329,13 +332,13 @@
           }
         ],
         "exec_err_state": "Error",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "container_died_killed_oom_event",
-        "updated": "2023-04-17T09:34:58Z",
-        "version": 3
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
       }
     },
     {
@@ -460,12 +463,138 @@
           }
         ],
         "exec_err_state": "Error",
-        "intervalSeconds": 60,
+        "intervalSeconds": 120,
         "is_paused": false,
         "no_data_state": "NoData",
         "rule_group": "osparc_alerts",
         "title": "High CPU throttling for container",
-        "updated": "2023-04-13T05:33:52Z",
+        "updated": "2023-04-27T08:49:12Z",
+        "version": 4
+      }
+    },
+    {
+      "annotations": {
+        "summary": "Severity: Warning\nImmediate Impact: Small\n--> Contact Ops personel"
+      },
+      "expr": "",
+      "for": "5m",
+      "grafana_alert": {
+        "condition": "C",
+        "data": [
+          {
+            "datasourceUid": "RmZEr52nz",
+            "model": {
+              "editorMode": "code",
+              "expr": "label_replace(count by(__name__) ({__name__=~\".+\"}), \"name\", \"$1\", \"__name__\", \"(.+)\") > 5000 or on() vector(0)",
+              "hide": false,
+              "intervalMs": 1000,
+              "legendFormat": "__auto",
+              "maxDataPoints": 43200,
+              "range": true,
+              "refId": "A"
+            },
+            "queryType": "",
+            "refId": "A",
+            "relativeTimeRange": {
+              "from": 180,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "B"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "A",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "reducer": "max",
+              "refId": "B",
+              "type": "reduce"
+            },
+            "queryType": "",
+            "refId": "B",
+            "relativeTimeRange": {
+              "from": 180,
+              "to": 0
+            }
+          },
+          {
+            "datasourceUid": "__expr__",
+            "model": {
+              "conditions": [
+                {
+                  "evaluator": {
+                    "params": [
+                      5000
+                    ],
+                    "type": "gt"
+                  },
+                  "operator": {
+                    "type": "and"
+                  },
+                  "query": {
+                    "params": [
+                      "C"
+                    ]
+                  },
+                  "reducer": {
+                    "params": [],
+                    "type": "last"
+                  },
+                  "type": "query"
+                }
+              ],
+              "datasource": {
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "B",
+              "hide": false,
+              "intervalMs": 1000,
+              "maxDataPoints": 43200,
+              "refId": "C",
+              "type": "threshold"
+            },
+            "queryType": "",
+            "refId": "C",
+            "relativeTimeRange": {
+              "from": 180,
+              "to": 0
+            }
+          }
+        ],
+        "exec_err_state": "Error",
+        "intervalSeconds": 120,
+        "is_paused": false,
+        "no_data_state": "NoData",
+        "rule_group": "osparc_alerts",
+        "title": "High Prometheus Cardinality Metric detected",
+        "updated": "2023-04-27T08:49:12Z",
         "version": 2
       }
     }
