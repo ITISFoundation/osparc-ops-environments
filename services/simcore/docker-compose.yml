@@ -412,6 +412,8 @@ services:
       - public
     environment:
       - LOGSPOUT_MULTILINE=true
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
     deploy:
       labels:
         - traefik.enable=true
@@ -617,6 +619,11 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
+
+volumes:
+  redis-data:
+    name: ${SWARM_STACK_NAME}_redis-data
 networks:
   public:
     external: true
