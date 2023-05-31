@@ -622,8 +622,8 @@ services:
 
 
 volumes:
-  redis-data:
-    name: ${SWARM_STACK_NAME}_redis-data
+  rabbit_data:
+    name: ${SWARM_STACK_NAME}_rabbit_data
 networks:
   public:
     external: true
