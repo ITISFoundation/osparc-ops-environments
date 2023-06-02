@@ -47,6 +47,7 @@ set +o allexport
 #####################
 rm "$repo_basedir"/docker-compose.yml 2>/dev/null || true
 rm "$repo_basedir"/.env-wb-garbage-collector 2>/dev/null || true
+rm "$repo_basedir"/.env-wb-db-event-listener 2>/dev/null || true
 rm "$repo_basedir"/.env-devel 2>/dev/null || true
 # via https://stackoverflow.com/a/2466755
 rm -rf osparc-simcore 2>/dev/null || true
@@ -64,9 +65,11 @@ fi
 echo Checking out "$latestMatchingTag" on osparc-simcore
 git checkout "$latestMatchingTag" services/docker-compose.yml
 git checkout "$latestMatchingTag" .env-wb-garbage-collector
+git checkout "$latestMatchingTag" .env-wb-db-event-listener
 git checkout "$latestMatchingTag" .env-devel
 cp services/docker-compose.yml "$repo_basedir"
 cp .env-wb-garbage-collector "$repo_basedir"
+cp .env-wb-db-event-listener "$repo_basedir"
 cp .env-devel "$repo_basedir"
 popd
 rm -rf osparc-simcore 2>/dev/null || true
@@ -80,4 +83,5 @@ fi
 rm "$repo_basedir"/stack.yml 2>/dev/null || true
 rm "$repo_basedir"/docker-compose.yml 2>/dev/null || true
 rm "$repo_basedir"/.env-wb-garbage-collector 2>/dev/null || true
+rm "$repo_basedir"/.env-wb-db-event-listener 2>/dev/null || true
 rm "$repo_basedir"/.env-devel 2>/dev/null || true
