@@ -146,6 +146,7 @@ yq
 **/.env.platform.escaped
 **/.env-devel
 **/.env-wb-garbage-collector
+**/.env-wb-db-event-listener
 **/.stack.*.yml
 **/.stack.*.yaml
 ./docker-compose.yml

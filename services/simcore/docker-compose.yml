@@ -213,6 +213,30 @@ services:
       replicas: 3
     extra_hosts: []
 
+  wb-db-event-listener:
+    environment:
+      - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
+    networks:
+      - default
+    deploy:
+      # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
+      # NOTE: this MUSTN'T change, or weird things might happen
+      # this will stay until all legacy dynamic services are gone.
+      replicas: 1
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
   wb-garbage-collector:
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
@@ -412,6 +436,8 @@ services:
       - public
     environment:
       - LOGSPOUT_MULTILINE=true
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
     deploy:
       labels:
         - traefik.enable=true
@@ -617,6 +643,10 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
+volumes:
+  rabbit_data:
+    name: ${SWARM_STACK_NAME}_rabbit_data
 networks:
   public:
     external: true
