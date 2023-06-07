@@ -248,7 +248,8 @@ services:
       - monitored
     volumes: []
     cap_add:
-      - SYS_ADMIN
+      - 'NET_ADMIN'
+      - 'NET_RAW'
     entrypoint:
       /bin/smokeping_prober --config.file=/smokeping_prober_config.yaml
     configs:
