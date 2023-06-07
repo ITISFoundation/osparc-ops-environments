@@ -29,6 +29,8 @@ configs:
     file: ./grafana-image-renderer/config.json
   pgsql_query_exporter_config:
     file: ./pgsql_query_exporter_config.yaml
+  smokeping_prober_config:
+    file: ./smokeping_prober_config.yaml
 services:
   prometheus:
     image: prom/prometheus:v2.40.7
@@ -236,6 +238,30 @@ services:
       resources:
         limits:
           memory: 512M
+        reservations:
+          memory: 64M
+
+  smokeping-prober-exporter:
+    image: quay.io/superq/smokeping-prober:latest
+    networks:
+      - internal
+      - monitored
+    volumes: []
+    cap_add:
+      - SYS_ADMIN
+    entrypoint:
+      /bin/smokeping_prober --config.file=/smokeping_prober_config.yaml
+    configs:
+      - source: smokeping_prober_config
+        target: /smokeping_prober_config.yaml
+    deploy:
+      labels:
+        - prometheus-job=smokeping-prober-exporter
+        - prometheus-port=9374
+      mode: global
+      resources:
+        limits:
+          memory: 128M
         reservations:
           memory: 64M
 
