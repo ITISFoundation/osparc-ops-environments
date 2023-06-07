@@ -1,0 +1,16 @@
+---
+targets:
+- hosts:
+  - osparc.speag.com
+  - tip.itis.swiss
+  - speag.com
+  - itis.swiss
+  - google.com
+  - facebook.com
+  - osparc-master.speag.com
+  - smtp.osparc.io # Hacky: This accepts ICMP for pinging, as this DNS name resolves to an EC2 instance directly, unlike the load-balanced https://osparc.io .
+  interval: 1s # Duration, Default 1s.
+  network: ip # One of ip, ip4, ip6. Default: ip (automatic IPv4/IPv6)
+  protocol: icmp # One of icmp, udp. Default: icmp (Requires privileged operation)
+  size: 56 # Packet data size in bytes. Default 56 (Range: 24 - 65535)
+# via https://github.com/SuperQ/smokeping_prober
