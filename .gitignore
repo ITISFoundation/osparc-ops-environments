@@ -135,7 +135,7 @@ services/monitoring/prometheus/prometheus.yml
 ### Auto-Generated (via jinja2) prometheus exporter configs
 /services/monitoring/pgsql_query_exporter_config.yaml
 /services/monitoring/docker-compose.yml
-/services/monitoring/smokeping_prober_config.yaml.yaml
+/services/monitoring/smokeping_prober_config.yaml
 
 
 # Simcore: Contains location of repo.config file on the machine
