@@ -153,3 +153,6 @@ config.prometheus: ${REPO_CONFIG_LOCATION}
 
 pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
 	$(call jinja, pgsql_query_exporter_config.yaml.j2, pgsql_query_exporter_config.yaml);
+
+smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+	$(call jinja, smokeping_prober_config.yaml.j2, smokeping_prober_config.yaml);
