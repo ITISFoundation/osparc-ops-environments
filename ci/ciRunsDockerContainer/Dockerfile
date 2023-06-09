@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION="jammy-20230522"
+ARG UBUNTU_VERSION="focal-20230412"
 FROM ubuntu:${UBUNTU_VERSION} as base
 #
 LABEL maintainer=dkaiser
@@ -46,14 +46,14 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   build-essential \
   curl \
-  firefox=114.0+build3-0ubuntu0.22.04.1~mt1 \
+  firefox=114.0+build3-0ubuntu0.20.04.1~mt1 \
   gettext-base \
   git \
   make \
   openssl \
   openssh-client \
   python3-pip \
-  python3.10-venv \
+  python3.9-venv \
   unzip \
   wget \
   && apt-get clean \
@@ -78,7 +78,7 @@ RUN pip install --no-cache-dir --upgrade \
   pip~=22.0  \
   wheel \
   setuptools \
-  ansible==8.0
+  ansible==6.7.0
 
 RUN echo "------------------------------------------------------ terraform" \
     && cd /tmp && wget https://releases.hashicorp.com/terraform/1.4.4/terraform_1.4.4_linux_amd64.zip \
