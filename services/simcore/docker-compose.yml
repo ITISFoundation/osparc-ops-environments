@@ -398,10 +398,10 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dask_scheduler.middlewares=${PREFIX_STACK_NAME}_dask_scheduler_replace_regex@docker, ops_gzip@docker, ops_auth@docker
       resources:
         limits:
-          memory: 128M
+          memory: 256M
           cpus: '1.000'
         reservations:
-          memory: 128M
+          memory: 256M
           cpus: '1.000'
   datcore-adapter:
     environment:
