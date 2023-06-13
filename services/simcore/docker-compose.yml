@@ -651,8 +651,6 @@ networks:
   public:
     external: true
     name: ${OPS_PUBLIC_NETWORK}
-  default:
-    attachable: true
   monitored:
     external: true
     name: ${OPS_MONITORED_NETWORK}
