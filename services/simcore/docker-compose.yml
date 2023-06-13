@@ -656,7 +656,9 @@ networks:
     name: ${OPS_MONITORED_NETWORK}
   storage_subnet:
     attachable: true
+    name: ${SWARM_STACK_NAME}_storage_subnet
   interactive_services_subnet:
+    name: ${SWARM_STACK_NAME}_interactive_services_subnet
     driver: overlay
     attachable: true
     internal: false
@@ -668,6 +670,7 @@ networks:
         # FIXME: move to base docker-compose.yml
         - subnet: ${SIMCORE_INTERACTIVE_NETWORK_SUBNET}
   computational_services_subnet:
+    name: ${SWARM_STACK_NAME}_computational_services_subnet
     attachable: true
 # self-signed only
 secrets:
