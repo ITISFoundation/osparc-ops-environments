@@ -214,6 +214,7 @@ services:
     extra_hosts: []
 
   wb-db-event-listener:
+    hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
     networks:
@@ -481,6 +482,31 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
+  resource-usage-tracker:
+    networks:
+      - monitored
+      - public
+    hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
+    deploy:
+      # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
+      # NOTE: this MUSTN'T change, or weird things might happen
+      # this will stay until all legacy dynamic services are gone.
+      replicas: 1
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
 
   postgres:
     networks:
