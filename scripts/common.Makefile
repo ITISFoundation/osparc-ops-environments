@@ -74,6 +74,22 @@ export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL=$(shell set -o allexport; 
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL; \
 	set +o allexport; )
 
+export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="(Host(\`invitations.${MACHINE_FQDN}\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="(Host(\`invitations.${MACHINE_FQDN}\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="$$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS || (Host(\`invitations.$$element\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="$$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
+	set +o allexport; )
+
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \

@@ -165,7 +165,7 @@ services:
         - traefik.enable=true
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.service=${SWARM_STACK_NAME}_invitations
-        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=Host(`invitations.${MACHINE_FQDN}`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=(${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS})
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.priority=1
         - traefik.http.services.${SWARM_STACK_NAME}_invitations.loadbalancer.server.port=8000
