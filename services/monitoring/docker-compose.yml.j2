@@ -25,7 +25,7 @@ configs:
   prometheus_config:
     file: ./prometheus/prometheus.yml
   prometheus_config_cadvisor:
-    file: ./prometheus/prometheus.yml
+    file: ./prometheus/prometheus-cadvisor.yml
   prometheus_rules:
     file: ./prometheus/prometheus.rules.yml
   grafana_image_renderer_config:
@@ -36,6 +36,7 @@ configs:
     file: ./smokeping_prober_config.yaml
 services:
   prometheus-catchall:
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.44.0
     volumes:
       - prometheus_data:/prometheus
@@ -66,12 +67,12 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
-        - traefik.http.services.prometheus.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
-        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
-        - traefik.http.routers.prometheus.entrypoints=https
-        - traefik.http.routers.prometheus.tls=true
-        - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
-        - traefik.http.routers.prometheus.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheus_stripprefixregex
+        - traefik.http.services.prometheuscatchall.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
+        - traefik.http.routers.prometheuscatchall.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheuscatchall.entrypoints=https
+        - traefik.http.routers.prometheuscatchall.tls=true
+        - traefik.http.middlewares.prometheuscatchall_stripprefixregex.stripprefixregex.regex=^/prometheus
+        - traefik.http.routers.prometheuscatchall.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheuscatchall_stripprefixregex
         - prometheus-job=prometheus-catchall
         - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
@@ -80,6 +81,7 @@ services:
         reservations:
           memory: 4096M
   prometheus-cadvisor:
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.44.0
     volumes:
       - prometheus_data_cadvisor:/prometheus
@@ -202,7 +204,7 @@ services:
           memory: 64M
 
   cadvisor-exporter:
-    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
