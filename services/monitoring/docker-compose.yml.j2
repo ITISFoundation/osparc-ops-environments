@@ -197,7 +197,7 @@ services:
           memory: 64M
 
   grafana:
-    image: grafana/grafana-oss:9.4.3
+    image: grafana/grafana-oss:9.5.3
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -228,7 +228,7 @@ services:
           memory: 64M
 
   grafana-image-renderer:
-    image: grafana/grafana-image-renderer:3.6.1
+    image: grafana/grafana-image-renderer:3.7.1
     configs:
       - source: grafana_image_renderer_config
         target: /usr/src/app/config.json
@@ -269,7 +269,7 @@ services:
   dcgm-exporter:
     cap_add:
       - SYS_ADMIN
-    image: nvidia/dcgm-exporter:latest
+    image: nvidia/dcgm-exporter:3.1.8-3.1.5-ubuntu20.04
     hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
       - internal
@@ -311,7 +311,7 @@ services:
         reservations:
           memory: 64M{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
   {{_stack}}-postgres-exporter:
-    image: bitnami/postgres-exporter:0.8.0
+    image: bitnami/postgres-exporter:0.12.1
     networks:
       - internal
       - monitored
@@ -327,7 +327,7 @@ services:
         reservations:
           memory: 64M
   {{_stack}}-redis-exporter:
-    image: oliver006/redis_exporter
+    image: oliver006/redis_exporter:v1.51.0-alpine
     networks:
       - internal
       - monitored
