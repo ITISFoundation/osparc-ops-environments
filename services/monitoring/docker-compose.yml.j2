@@ -4,6 +4,7 @@ volumes:
   prometheus_data: {}
   grafana_data: {}
   alertmanager_data: {}
+  prometheus_data_cadvisor: {}
 
 networks:
   internal:
@@ -22,6 +23,8 @@ configs:
   node_exporter_entrypoint:
     file: ./node-exporter/docker-entrypoint.sh
   prometheus_config:
+    file: ./prometheus/prometheus.yml
+  prometheus_config_cadvisor:
     file: ./prometheus/prometheus.yml
   prometheus_rules:
     file: ./prometheus/prometheus.rules.yml
@@ -76,21 +79,21 @@ services:
           memory: 4096M
         reservations:
           memory: 4096M
-prometheus-cadvisor:
-  image: prom/prometheus:v2.44.0
+  prometheus-cadvisor:
+    image: prom/prometheus:v2.44.0
     volumes:
       - prometheus_data_cadvisor:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
     user: root # only user root can use the docker socket
     configs:
-      - source: prometheus_config
-        target: /etc/prometheus/prometheus-cadvisor.yml
+      - source: prometheus_config_cadvisor
+        target: /etc/prometheus/prometheus.yml
       - source: prometheus_rules
         target: /etc/prometheus/prometheus.rules.yml
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention=30"
+      - "--storage.tsdb.retention=30d"
       - "--web.console.libraries=/usr/share/prometheus/console_libraries"
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus-cadvisor/"
@@ -107,12 +110,12 @@ prometheus-cadvisor:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
-        - traefik.http.services.prometheus.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
-        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus-cadvisor`)
-        - traefik.http.routers.prometheus.entrypoints=https
-        - traefik.http.routers.prometheus.tls=true
-        - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
-        - traefik.http.routers.prometheus.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheus_stripprefixregex
+        - traefik.http.services.prometheuscadvisor.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
+        - traefik.http.routers.prometheuscadvisor.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheuscadvisor`)
+        - traefik.http.routers.prometheuscadvisor.entrypoints=https
+        - traefik.http.routers.prometheuscadvisor.tls=true
+        - traefik.http.middlewares.prometheuscadvisor_stripprefixregex.stripprefixregex.regex=^/prometheuscadvisor
+        - traefik.http.routers.prometheuscadvisor.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheuscadvisor_stripprefixregex
         - prometheus-job=prometheus-cadvisor
         - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
@@ -120,7 +123,6 @@ prometheus-cadvisor:
           memory: 4096M
         reservations:
           memory: 4096M
-
   node-exporter:
     image: prom/node-exporter:v0.18.1
     volumes:
