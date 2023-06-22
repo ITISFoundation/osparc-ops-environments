@@ -16,7 +16,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.prometheus==true
+          - node.labels.prometheuscadvisor==true
       resources:
         limits:
           memory: 4096M
