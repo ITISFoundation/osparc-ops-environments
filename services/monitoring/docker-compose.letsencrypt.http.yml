@@ -1,11 +1,15 @@
 version: "3.7"
 services:
-  prometheus:
+  prometheus-catchall:
     deploy:
       labels:
         - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
-
   grafana:
     deploy:
       labels:
         - traefik.http.routers.grafana.tls.certresolver=lehttpchallenge
+  prometheus-cadvisor:
+    deploy:
+      placement:
+        constraints:
+          - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
