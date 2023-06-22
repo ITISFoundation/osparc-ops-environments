@@ -16,7 +16,7 @@ services:
       - source: nginx_config
         target: /etc/nginx/conf.d/default.conf
     # nginx config
-    image: nginx:1.23.3
+    image: nginx:1.25.1
     networks:
       - public
       - monitored
@@ -34,7 +34,7 @@ services:
 {% endfor %}
   maintenance_page_api:
     # nginx config
-    image: nginx:1.23.3
+    image: nginx:1.25.1
     configs:
       - source: maintenance_page_api_html
         target: /usr/share/nginx/html/index.html

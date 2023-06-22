@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   filestash:
-    image: machines/filestash:1f9a30c
+    image: machines/filestash:6b271d3
     configs:
       - source: filestash_config
         target: /app/data/state/config/config.json
@@ -23,7 +23,7 @@ services:
         limits:
           memory: 512M
   onlyoffice:
-    image: onlyoffice/documentserver:7.2.1
+    image: onlyoffice/documentserver:7.4.0
     networks:
       - public
       - monitored
