@@ -19,7 +19,7 @@
   "type": "prometheus",
   "typeLogoUrl": "",
   "uid": "RmZEr52nz",
-  "url": "http://prometheus:9090",
+  "url": "http://prometheus-catchall:9090",
   "user": "",
   "version": 1,
   "withCredentials": false
