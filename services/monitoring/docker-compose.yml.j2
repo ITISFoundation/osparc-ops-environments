@@ -336,32 +336,6 @@ services:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
 
-  s3-exporter:
-    image:  ghcr.io/traptitech/s3_exporter:latest
-    volumes: []
-    networks:
-      - internal
-      - monitored
-    extra_hosts: []
-    deploy:
-      labels: []
-      placement:
-        constraints:
-          - node.labels.prometheus==true
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 128M
-      labels:
-        - prometheus-job=s3-exporter
-        - prometheus-port=9340
-    environment:
-      - AWS_ACCESS_KEY_ID={{S3_ACCESS_KEY}}
-      - AWS_SECRET_ACCESS_KEY={{S3_SECRET_KEY}}
-      - S3_EXPORTER_S3_ENDPOINT_URL={{S3_ENDPOINT}}
-      - AWS_REGION=us-east-1
-
   pgsql-query-exporter:
     image: adonato/query-exporter:2.8.3
     volumes: []
