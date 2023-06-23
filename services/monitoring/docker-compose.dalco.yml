@@ -14,12 +14,12 @@ services:
         constraints:
           - node.labels.grafana==true
 
-  prometheus-catchall:
+  prometheuscatchall:
     deploy:
       placement:
         constraints:
           - node.labels.prometheus==true
-  prometheus-cadvisor:
+  prometheuscadvisor:
     deploy:
       placement:
         constraints:

@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  prometheus-catchall:
+  prometheuscatchall:
     deploy:
       labels:
         - traefik.http.routers.prometheus.tls.certresolver=myresolver
@@ -10,7 +10,7 @@ services:
       labels:
         - traefik.http.routers.grafana.tls.certresolver=myresolver
 
-  prometheus-cadvisor:
+  prometheuscadvisor:
     deploy:
       labels:
         - traefik.http.routers.prometheus.tls.certresolver=myresolver
