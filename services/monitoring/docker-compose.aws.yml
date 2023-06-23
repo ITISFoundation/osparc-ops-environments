@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  prometheus-catchall:
+  prometheuscatchall:
     dns: 8.8.8.8
     deploy:
       placement:
@@ -11,7 +11,7 @@ services:
           memory: 24576M
         reservations:
           memory: 24576M
-  prometheus-cadvisor:
+  prometheuscadvisor:
     dns: 8.8.8.8
     deploy:
       placement:
