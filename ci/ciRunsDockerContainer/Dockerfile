@@ -46,9 +46,10 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   build-essential \
   curl \
-  firefox=114.0+build3-0ubuntu0.20.04.1~mt1 \
+  firefox=114.0.2+build1-0ubuntu0.20.04.1 \
   gettext-base \
   git \
+  jq \
   make \
   openssl \
   openssh-client \
@@ -60,7 +61,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Install minio mc
-RUN curl https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2022-10-01T07-56-14Z    --create-dirs   -o $HOME/minio-binaries/mc \
+RUN echo "------------------------------------------------------ minio/mc" \
+  && curl https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2022-10-01T07-56-14Z    --create-dirs   -o $HOME/minio-binaries/mc \
   && chmod +x $HOME/minio-binaries/mc \
   && export PATH=$PATH:$HOME/minio-binaries/
 
@@ -68,7 +70,8 @@ RUN curl https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2022
 RUN $HOME/minio-binaries/mc --help
 
 # Install geckodriver
-RUN apt install wget -y \
+RUN echo "------------------------------------------------------ geckodriver" \
+  && apt install wget -y \
   && wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz \
   && tar -xvzf geckodriver* \
   && chmod +x geckodriver \
@@ -81,9 +84,9 @@ RUN pip install --no-cache-dir --upgrade \
   ansible==6.7.0
 
 RUN echo "------------------------------------------------------ terraform" \
-    && cd /tmp && wget https://releases.hashicorp.com/terraform/1.4.4/terraform_1.4.4_linux_amd64.zip \
-    && unzip terraform_1.4.4_linux_amd64.zip  -d /usr/local/bin \
-    && rm /tmp/terraform_1.4.4_linux_amd64.zip
+    && cd /tmp && wget https://releases.hashicorp.com/terraform/1.5.1/terraform_1.5.1_linux_amd64.zip \
+    && unzip terraform_1.5.1_linux_amd64.zip  -d /usr/local/bin \
+    && rm /tmp/terraform_1.5.1_linux_amd64.zip
 
 WORKDIR /home/scu
 
