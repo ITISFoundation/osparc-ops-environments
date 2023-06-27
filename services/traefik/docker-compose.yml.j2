@@ -121,7 +121,6 @@ services:
         # prometheus labels
         - prometheus-job=traefik_ops
         - prometheus-port=8082
-
         # wildcard certificate
         - traefik.http.routers.api.tls.domains[0].main=service.${MACHINE_FQDN}
         - traefik.http.routers.api.tls.domains[0].sans=*.services.${MACHINE_FQDN}
