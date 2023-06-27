@@ -91,7 +91,7 @@ ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml docker-comp
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-compose.letsencrypt.dns.yml .env
