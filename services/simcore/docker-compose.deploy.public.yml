@@ -56,6 +56,9 @@ services:
       placement:
         constraints:
           - node.labels.redis==true
+  resource-usage-tracker:
+    deploy:
+      replicas: 0
   static-webserver:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
     deploy:
