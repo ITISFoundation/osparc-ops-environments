@@ -52,6 +52,9 @@ services:
       placement:
         constraints:
           - node.labels.redis==true
+  resource-usage-tracker:
+    deploy:
+      replicas: 0
   storage:
     deploy:
       placement:
