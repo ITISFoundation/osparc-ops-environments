@@ -56,7 +56,21 @@ scrape_configs:
         action: labeldrop  # cAdvisor pruning
       - regex: "container_label_com_docker_compose_container_number"
         action: labeldrop  # cAdvisor pruning
-      - regex: "container_label_io_simcore_.*"
+      # - regex: "container_label_io_simcore_.*"
+      #   action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_authors"
+        action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_contact"
+        action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_description"
+        action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_inputs"
+        action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_outputs"
+        action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_name"
+        action: labeldrop  # cAdvisor pruning
+      - regex: "container_label_io_simcore_outputs"
         action: labeldrop  # cAdvisor pruning
       - regex: "container_label_simcore_service_compose_spec"
         action: labeldrop  # cAdvisor pruning
