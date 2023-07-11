@@ -329,9 +329,9 @@ services:
           - node.labels.gpu==true
       resources:
         limits:
-          memory: 128M
+          memory: 200M
         reservations:
-          memory: 64M
+          memory: 200M
     labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
