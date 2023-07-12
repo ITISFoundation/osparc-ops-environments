@@ -92,7 +92,7 @@ else
     export DOCKER_IMAGE_TAG=development;
     export DEV_PC_CPU_COUNT=8;
     # Download yq utility
-    python -c "import urllib.request,os,sys,urllib; f = open(os.path.basename(sys.argv[1]), 'wb'); f.write(urllib.request.urlopen(sys.argv[1]).read()); f.close();" https://github.com/mikefarah/yq/releases/download/v4.29.2/yq_linux_amd64
+    python3 -c "import urllib.request,os,sys,urllib; f = open(os.path.basename(sys.argv[1]), 'wb'); f.write(urllib.request.urlopen(sys.argv[1]).read()); f.close();" https://github.com/mikefarah/yq/releases/download/v4.29.2/yq_linux_amd64
     mv yq_linux_amd64 "$repo_basedir"/"$tempdirname"/yq
     chmod +x "$repo_basedir"/"$tempdirname"/yq
     _yq=$(realpath "$repo_basedir"/"$tempdirname"/yq)
@@ -102,6 +102,7 @@ else
     $_yq "del(.services.traefik)" "$osparcsimcoredeveldir"/services/docker-compose.local.yml > "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml
     #
     "$repo_basedir"/scripts/docker-compose-config.bash \
+            --no-interpolate \
             -e "$repo_basedir"/services/simcore/.env \
             "$osparcsimcoredeveldir"/services/docker-compose.yml \
             "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml \

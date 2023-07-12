@@ -151,7 +151,7 @@ yq
 **/.env-wb-db-event-listener
 **/.stack.*.yml
 **/.stack.*.yaml
-./docker-compose.yml
+docker-compose.yml
 stack.yml
 stack_with_prefix.yml
 docker-compose.simcore.yml
