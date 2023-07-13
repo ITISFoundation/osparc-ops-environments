@@ -189,6 +189,7 @@ services:
       - GUNICORN_CMD_ARGS=--timeout=90
       - PROJECTS_MAX_COPY_SIZE_BYTES=${PROJECTS_MAX_COPY_SIZE_BYTES}
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
+      - WEBSERVER_ANNOUNCEMENTS=${WEBSERVER_ANNOUNCEMENTS}
     deploy:
       labels:
         # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
