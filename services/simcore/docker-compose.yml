@@ -167,12 +167,12 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.service=${SWARM_STACK_NAME}_invitations
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=(${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS})
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.priority=50
         - traefik.http.services.${SWARM_STACK_NAME}_invitations.loadbalancer.server.port=8000
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.service=${SWARM_STACK_NAME}_invitations
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.rule=${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS} && PathPrefix(`/dev/doc`)
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.priority=3
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.priority=1
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_invitations_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_invitations_swagger_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
   webserver:
