@@ -120,8 +120,6 @@ fi
 
 ############
 cp .env-devel "$repo_basedir"
-cp .env-wb-garbage-collector "$repo_basedir"
-cp .env-wb-db-event-listener "$repo_basedir"
 ############
 popd
 ############
