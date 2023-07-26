@@ -17,24 +17,11 @@ show_error() {
 
 
 env_file=".env"
-no_interpolate=false
-
 # Parse command line arguments
-while getopts ":e:-:" opt; do
+while getopts ":e:" opt; do
   case $opt in
     e)
       env_file="$OPTARG"
-      ;;
-    -)
-      case "${OPTARG}" in
-        no-interpolate)
-          no_interpolate=true
-          ;;
-        *)
-          show_error "Invalid option: --${OPTARG}"
-          exit 1
-          ;;
-      esac
       ;;
     \?)
       show_error "Invalid option: -$OPTARG"
@@ -47,6 +34,7 @@ while getopts ":e:-:" opt; do
   esac
 done
 shift $((OPTIND-1))
+
 if [[ "$#" -eq 0 ]]; then
     show_error "No compose files specified!"
     exit 1
@@ -76,19 +64,12 @@ docker \
 compose \
 --env-file ${env_file}"
 
-for compose_file_path in "$@"
-do
-  docker_command+=" --file=${compose_file_path}"
-done
-
-
-docker_command+=" config"
-
-if [[ "$no_interpolate" = true ]]; then
-  docker_command+=" --no-interpolate"
-fi
-
-docker_command+=" \
+  for compose_file_path in "$@"
+  do
+    docker_command+=" --file=${compose_file_path}"
+  done
+  docker_command+="\
+ config \
 | sed '/published:/s/\"//g' \
 | sed '/size:/s/\"//g' \
 | sed '1 { /name:.*/d ; }' \
