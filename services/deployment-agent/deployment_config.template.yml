@@ -21,8 +21,6 @@ main:
         # lists the files where to look for changes in the repo
         - services/docker-compose.yml
         - .env-devel
-        - .env-wb-garbage-collector
-        - .env-wb-db-event-listener
     - id: simcore-ops-repo
       url: ${GIT_OPS_REPO_URL}
       branch: ${GIT_OPS_REPO_BRANCH}
@@ -54,8 +52,6 @@ main:
         paths:
           - services/docker-compose.yml
           - .env-devel
-          - .env-wb-garbage-collector
-          - .env-wb-db-event-listener
     workdir: simcore-ops-repo # defines where the files above shall be copied. Can be defined as temp also to copy them in a temporary directory
     # The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
     # It is very important (due to the deployment agent running git clean) no files are overwritten with files of the same name
