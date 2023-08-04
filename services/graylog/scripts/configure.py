@@ -193,7 +193,11 @@ if __name__ == "__main__":
 	    	    "channel": "#"""
                 + env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
                 + """\",
-                "custom_message":"--- [Event Definition] ---------------------------\\nTitle:       ${event_definition_title}\\nType:        ${event_definition_type}\\n--- [Event] --------------------------------------\\nTimestamp:            ${event.timestamp}\\nMessage:              ${event.message}\\nSource:               ${event.source}\\nKey:                  ${event.key}\\nPriority:             ${event.priority}\\nAlert:                ${event.alert}\\nTimestamp Processing: ${event.timestamp}\\nTimerange Start:      ${event.timerange_start}\\nTimerange End:        ${event.timerange_end}\\nEvent Fields:\\n${foreach event.fields field}\\n${field.key}: ${field.value}\\n${end}\\n${if backlog}\\n--- [Backlog] ------------------------------------\\nLast messages accounting for this alert:\\n${foreach backlog message}\\n${message.timestamp}  ::  ${message.source}  ::  ${message.message}\\n${message.message}\\n${end}${end}\\n",
+                "custom_message":"--- [Event Definition] ---------------------------\\nTitle:       ${event_definition_title}\\nType:        ${event_definition_type}\\n--- [Event] --------------------------------------\\nTimestamp:            ${event.timestamp}\\nMessage:              ${event.message}\\nSource:               ${event.source}\\nKey:                  ${event.key}\\nPriority:             ${event.priority}\\nAlert:                ${event.alert}\\nTimestamp Processing: ${event.timestamp}\\nTimerange Start:      ${event.timerange_start}\\nTimerange End:        ${event.timerange_end}\\nEvent Fields:\\n${foreach event.fields field}\\n${field.key}: ${field.value}\\n${end}\\n${if backlog}\\n--- [Backlog] ------------------------------------\\nLast messages accounting for this alert:\\n${foreach backlog message}\\n"""
+                + "https://monitoring."
+                + env.str("MACHINE_FQDN")
+                + "/graylog/messages"
+                + """/${message.index}/${message.id}\\n${end}${end}\\n",
 	    	    "user_name": "Graylog",
 	    	    "notify_channel": true,
 	    	    "link_names": false,
@@ -336,7 +340,7 @@ if __name__ == "__main__":
                 i
                 for i in streamsList
                 if "Stream containing all messages" in i["description"]
-                or "Stream containing all events" in i["description"]
+                or "default stream" == i["title"].lower()
             ]
             streamIDForAllMessages = streamAllEvents[0]["id"]
         else:

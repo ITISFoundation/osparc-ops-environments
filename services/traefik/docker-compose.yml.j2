@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   traefik:
-    image: traefik:v2.9.8
+    image: traefik:v2.10.3
     init: true
     command:
       - "--api=true"
@@ -51,10 +51,10 @@ services:
       resources:
         limits:
           memory: 2048M
-          cpus: '2.000'
+          cpus: '3.000'
         reservations:
           memory: 2048M
-          cpus: '2.000'
+          cpus: '3.000'
       placement:
         constraints:
           - node.role == manager
@@ -121,7 +121,6 @@ services:
         # prometheus labels
         - prometheus-job=traefik_ops
         - prometheus-port=8082
-
         # wildcard certificate
         - traefik.http.routers.api.tls.domains[0].main=service.${MACHINE_FQDN}
         - traefik.http.routers.api.tls.domains[0].sans=*.services.${MACHINE_FQDN}

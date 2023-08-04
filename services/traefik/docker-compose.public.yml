@@ -31,7 +31,7 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       # For debug purpose, to avoid being ban by let's encrypt servers
       #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=${CERTIFICATE_RESOLVE_DNS_CHALLANGE_IP}"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=${RFC2136_NAMESERVER}"
     volumes:
       - "letsencrypt_certs:/letsencrypt"
     environment:

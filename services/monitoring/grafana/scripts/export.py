@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import warnings
 
 import requests
 import typer
@@ -13,6 +14,11 @@ if "\n" in repo_config_location:
 
 env = Env()
 env.read_env(repo_config_location, recurse=False)
+
+warnings.filterwarnings(
+    "ignore",
+    ".*Adding certificate verification is strongly advised.*",
+)
 
 
 def main(foldername: str = ""):
@@ -36,10 +42,10 @@ def main(foldername: str = ""):
     session.auth = (env.str("SERVICES_USER"), env.str("SERVICES_PASSWORD"))
     hed = {"Content-Type": "application/json"}
 
-    r = session.get(url + "datasources", headers=hed)
+    r = session.get(url + "datasources", headers=hed, verify=False)
     for datasource in r.json():
         rDatasource = session.get(
-            url + "datasources/" + str(datasource["id"]), headers=hed
+            url + "datasources/" + str(datasource["id"]), headers=hed, verify=False
         )
         with open(
             directory + "/datasources/" + str(datasource["id"]) + ".json", "w"
@@ -55,10 +61,10 @@ def main(foldername: str = ""):
     # We export the dashboards
     print("**************** Export dashboards *******************")
     os.mkdir(directory + "/dashboards")
-    r = session.get(url + "search?query=%", headers=hed)
+    r = session.get(url + "search?query=%", headers=hed, verify=False)
     for dashboard in r.json():
         rDashboard = session.get(
-            url + "dashboards/uid/" + str(dashboard["uid"]), headers=hed
+            url + "dashboards/uid/" + str(dashboard["uid"]), headers=hed, verify=False
         )
         if rDashboard.json()["meta"]["isFolder"] is not True:
             if (
@@ -101,20 +107,30 @@ def main(foldername: str = ""):
     print("**************** Export alerts  *******************")
     if os.path.exists(directory + "/alerts/") == False:
         os.mkdir(directory + "/alerts/")
-    r = session.get(url + "ruler/grafana/api/v1/rules", headers=hed)
+    r = session.get(url + "ruler/grafana/api/v1/rules", headers=hed, verify=False)
     for alert in r.json()["ops"]:
         with open(directory + "/alerts/" + alert["name"] + ".json", "w") as outfile:
             print("Export Alert " + alert["name"])
             # Remove UID if present
-            alert["rules"][0]["grafana_alert"].pop("uid", None)
-            # Remove orgId
-            alert["rules"][0]["grafana_alert"].pop("orgId", None)
-            # Remove id
-            alert["rules"][0]["grafana_alert"].pop("id", None)
-            # Remove id
-            alert["rules"][0]["grafana_alert"].pop("namespace_id", None)
-            # Remove id
-            alert["rules"][0]["grafana_alert"].pop("namespace_uid", None)
+            for ruleIter in range(len(alert["rules"])):
+                alert["rules"][ruleIter]["grafana_alert"].pop("uid", None)
+                # Remove orgId
+                alert["rules"][ruleIter]["grafana_alert"].pop("orgId", None)
+                # Remove id
+                alert["rules"][ruleIter]["grafana_alert"].pop("id", None)
+                # Remove id
+                alert["rules"][ruleIter]["grafana_alert"].pop("namespace_id", None)
+                # Remove id
+                alert["rules"][ruleIter]["grafana_alert"].pop("namespace_uid", None)
+                if (
+                    str(env.str("MACHINE_FQDN") + " - ")
+                    in alert["rules"][ruleIter]["grafana_alert"]["title"]
+                ):
+                    alert["rules"][ruleIter]["grafana_alert"]["title"] = alert["rules"][
+                        ruleIter
+                    ]["grafana_alert"]["title"].replace(
+                        str(env.str("MACHINE_FQDN") + " - "), ""
+                    )
             json.dump(alert, outfile, sort_keys=True, indent=2)
 
 

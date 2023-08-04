@@ -61,17 +61,33 @@ endif
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.${MACHINE_FQDN}\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 	else \
 		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.${MACHINE_FQDN}\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
+			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$element\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
 		done; \
 		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL"; \
 	fi; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL; \
+	set +o allexport; )
+
+export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="(Host(\`invitations.${MACHINE_FQDN}\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="(Host(\`invitations.${MACHINE_FQDN}\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="$$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS || (Host(\`invitations.$$element\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="$$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
 	set +o allexport; )
 
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE=$(shell set -o allexport; \
@@ -183,6 +199,7 @@ clean-default: .check_clean ## Cleans all outputs
 	export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL='${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}'; \
 	export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
+	export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS='${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'; \
 	export DOLLAR='$$'; \
 	set +o allexport; \
 	envsubst < $< > .env

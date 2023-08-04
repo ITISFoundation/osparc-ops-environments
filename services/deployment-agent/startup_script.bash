@@ -54,7 +54,7 @@ source "$repo_basedir"/scripts/logger.bash
 #
 # This script assumes that the repo.config file is present at the top level of the ops-repo
 # This script assumes that the docker-compose.yml from the osparc-simcore repo is present at the repo_basedir.
-# This script assumes that the .env.devel && .env-wb-garbage-collector from the osparc-simcore repo is present at the repo_basedir
+# This script assumes that the .env.devel from the osparc-simcore repo is present at the repo_basedir
 #
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
@@ -76,17 +76,17 @@ chmod +x yq
 _yq=$(realpath yq)
 export _yq
 pushd services/simcore
+rm .env 2>/dev/null || true
 make compose-"${OSPARC_DEPLOYMENT_TARGET}"
 mv .env .env.platform
-python3 envsubst_escape_dollar_sign.py .env.platform .env.platform.escaped
-cat ../../.env-devel >> .env.nosub
+python envsubst_escape_dollar_sign.py .env.platform .env.platform.escaped
+envsubst < ../../.env-devel > .env.nosub
 cat .env.platform.escaped >> .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
-cp ../../.env-wb-garbage-collector ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
 # The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
-docker-compose --env-file .env -f docker-compose.simcore.yml -f docker-compose.deploy.yml config | sed -E "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > ../../stack.yml
+"$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
 #
 #
 ### Cleanup

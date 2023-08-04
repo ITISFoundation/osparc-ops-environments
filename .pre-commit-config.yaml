@@ -10,7 +10,7 @@ repos:
         args: ["--maxkb=499"] # ensures docker config compatability for all files
       - id: check-merge-conflict
       - id: check-yaml
-        exclude: ^(.*.go.yml)|(.*.template.yaml)$
+        exclude: ^(.*.go.yml)|(.*.template.y*ml)$
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-json
@@ -85,7 +85,7 @@ repos:
         args: [--all, --expand-stars]
         name: prune imports
   - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
+    rev: 5.12.0
     hooks:
       - id: isort
         args: ["--profile", "black"]

@@ -1779,7 +1779,7 @@
     "timezone": "",
     "title": "Docker Swarm Overview",
     "uid": "ssc2",
-    "version": 2,
+    "version": 1,
     "weekStart": ""
   },
   "meta": {
@@ -1809,6 +1809,7 @@
     "provisionedExternalId": "",
     "publicDashboardAccessToken": "",
     "publicDashboardEnabled": false,
+    "publicDashboardUid": "",
     "slug": "docker-swarm-overview",
     "type": "db",
     "updatedBy": "admin",

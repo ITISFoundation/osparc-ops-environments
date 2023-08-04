@@ -625,7 +625,20 @@
     "version": 1
   },
   "meta": {
+    "annotationsPermissions": {
+      "dashboard": {
+        "canAdd": true,
+        "canDelete": true,
+        "canEdit": true
+      },
+      "organization": {
+        "canAdd": true,
+        "canDelete": true,
+        "canEdit": true
+      }
+    },
     "canAdmin": true,
+    "canDelete": true,
     "canEdit": true,
     "canSave": true,
     "canStar": true,
@@ -636,6 +649,9 @@
     "isFolder": false,
     "provisioned": false,
     "provisionedExternalId": "",
+    "publicDashboardAccessToken": "",
+    "publicDashboardEnabled": false,
+    "publicDashboardUid": "",
     "slug": "cardinality-explorer",
     "type": "db",
     "updatedBy": "admin",

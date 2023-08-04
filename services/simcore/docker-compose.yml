@@ -159,6 +159,22 @@ services:
   invitations:
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
+    deploy:
+      labels:
+        # internal traefik
+        - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.service=${SWARM_STACK_NAME}_invitations
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=(${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS})
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations.priority=50
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations.loadbalancer.server.port=8000
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.service=${SWARM_STACK_NAME}_invitations
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.rule=${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS} && PathPrefix(`/dev/doc`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.priority=1
+        - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_invitations_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_invitations_swagger_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
   webserver:
     networks:
       - public
@@ -173,6 +189,7 @@ services:
       - GUNICORN_CMD_ARGS=--timeout=90
       - PROJECTS_MAX_COPY_SIZE_BYTES=${PROJECTS_MAX_COPY_SIZE_BYTES}
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
+      - WEBSERVER_ANNOUNCEMENTS=${WEBSERVER_ANNOUNCEMENTS}
     deploy:
       labels:
         # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
@@ -202,6 +219,31 @@ services:
         window: 120s
       replicas: 3
     extra_hosts: []
+
+  wb-db-event-listener:
+    hostname: "{{.Service.Name}}"
+    environment:
+      - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
+    networks:
+      - default
+    deploy:
+      # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
+      # NOTE: this MUSTN'T change, or weird things might happen
+      # this will stay until all legacy dynamic services are gone.
+      replicas: 1
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   wb-garbage-collector:
     environment:
@@ -256,7 +298,7 @@ services:
     environment:
       - LOGSPOUT_MULTILINE=true
       - SIMCORE_SERVICES_NETWORK_NAME=${SWARM_STACK_NAME}_interactive_services_subnet
-      - REGISTRY_SSL=true
+      - REGISTRY_SSL=${REGISTRY_SSL}
       # needed to pass the self-signed certificate to the spawned services
       #- DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
       # - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=some_id
@@ -283,7 +325,7 @@ services:
     environment:
       - LOGSPOUT_MULTILINE=true
       - SIMCORE_SERVICES_NETWORK_NAME=${SWARM_STACK_NAME}_interactive_services_subnet
-      - REGISTRY_SSL=true
+      - REGISTRY_SSL=${REGISTRY_SSL}
       - DIRECTOR_V2_DEV_FEATURES_ENABLED=${DIRECTOR_V2_DEV_FEATURES_ENABLED}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
@@ -319,7 +361,6 @@ services:
       - monitored
     environment:
       - LOGSPOUT_MULTILINE=true
-      - TARGET_MPI_NODE_CPU_COUNT=${TARGET_MPI_NODE_CPU_COUNT}
     deploy:
       update_config:
         parallelism: 2
@@ -365,10 +406,10 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dask_scheduler.middlewares=${PREFIX_STACK_NAME}_dask_scheduler_replace_regex@docker, ops_gzip@docker, ops_auth@docker
       resources:
         limits:
-          memory: 128M
+          memory: 256M
           cpus: '1.000'
         reservations:
-          memory: 128M
+          memory: 256M
           cpus: '1.000'
   datcore-adapter:
     environment:
@@ -393,16 +434,18 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 180M
           cpus: '1.000'
         reservations:
-          memory: 64M
+          memory: 180M
   rabbit:
     networks:
       - monitored
       - public
     environment:
       - LOGSPOUT_MULTILINE=true
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
     deploy:
       labels:
         - traefik.enable=true
@@ -446,6 +489,31 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
+  resource-usage-tracker:
+    networks:
+      - monitored
+      - public
+    hostname: "{{.Service.Name}}"
+    deploy:
+      # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
+      # NOTE: this MUSTN'T change, or weird things might happen
+      # this will stay until all legacy dynamic services are gone.
+      replicas: 1
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
 
   postgres:
     networks:
@@ -608,18 +676,22 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
+volumes:
+  rabbit_data:
+    name: ${SWARM_STACK_NAME}_rabbit_data
 networks:
   public:
     external: true
     name: ${OPS_PUBLIC_NETWORK}
-  default:
-    attachable: true
   monitored:
     external: true
     name: ${OPS_MONITORED_NETWORK}
   storage_subnet:
     attachable: true
+    name: ${SWARM_STACK_NAME}_storage_subnet
   interactive_services_subnet:
+    name: ${SWARM_STACK_NAME}_interactive_services_subnet
     driver: overlay
     attachable: true
     internal: false
@@ -631,6 +703,7 @@ networks:
         # FIXME: move to base docker-compose.yml
         - subnet: ${SIMCORE_INTERACTIVE_NETWORK_SUBNET}
   computational_services_subnet:
+    name: ${SWARM_STACK_NAME}_computational_services_subnet
     attachable: true
 # self-signed only
 secrets:

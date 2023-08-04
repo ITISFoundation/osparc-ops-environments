@@ -226,7 +226,7 @@ if [ "$start_opsstack" -eq 0 ]; then
         popd
 
         log_info "waiting for minio to run...don't worry..."
-        while [ ! "$(curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
+        while [ ! "$(/usr/bin/curl -s -o /dev/null -I -w "%{http_code}" --max-time 10 https://"${STORAGE_DOMAIN}"/minio/health/ready)" = 200 ]; do
             log_info "waiting for minio to run..."
             sleep 5s
         done
@@ -247,7 +247,7 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    if [ "$stack_target" = "aws" ] || [ "$stack_target" = "local" ]; then
+    if [ "$stack_target" = "local" ]; then
         # -------------------------------- Mail -------------------------------
         log_info "starting mail server..."
         pushd "${repo_basedir}"/services/mail
@@ -291,7 +291,7 @@ if [ "$start_simcore" -eq 0 ]; then
         popd
     fi
 fi
-
+# shellcheck disable=2235
 if [ "$start_opsstack" -eq 0 ] && ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]); then
     # -------------------------------- BACKUP PG -------------------------------
     # PG-backup has to wait for postgres container to be started and ready before starting, or it will fail.
@@ -306,7 +306,7 @@ if [ "$start_opsstack" -eq 0 ] && ([ "$stack_target" = "dalco" ] || [ "$stack_ta
     log_info "Postgres container started"
 
     # Wait for the "database system is ready to accept connections" message to appear in the logs
-    until docker logs $postgres_container_name 2>&1 | grep -q "database system is ready to accept connections"; do
+    until docker logs "$postgres_container_name" 2>&1 | grep -q "database system is ready to accept connections"; do
       log_info "Postgres not initialized yet. Waiting for 5 seconds..."
       sleep 5
     done

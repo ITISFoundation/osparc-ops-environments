@@ -41,8 +41,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
+          - node.labels.rabbit==true
   dask-sidecar:
     environment:
       - SIDECAR_LOGLEVEL=INFO
@@ -81,7 +80,7 @@ services:
       - "--ping=true"
       - "--entryPoints.ping.address=:9082"
       - "--ping.entryPoint=ping"
-      - "--log.level=WARNING"
+      - "--log.level=${SIMCORE_TRAEFIK_LOGLEVEL}"
       - "--accesslog=false"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addEntryPointsLabels=true"

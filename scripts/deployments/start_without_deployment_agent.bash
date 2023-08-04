@@ -101,13 +101,12 @@ else
 
     $_yq "del(.services.traefik)" "$osparcsimcoredeveldir"/services/docker-compose.local.yml > "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml
     #
-    docker-compose \
-            --env-file "$repo_basedir"/services/simcore/.env \
-            --file "$osparcsimcoredeveldir"/services/docker-compose.yml \
-            --file "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml \
-            --file "$osparcsimcoredeveldir"/services/docker-compose.devel.yml \
-            --log-level=ERROR \
-            config | sed --regexp-extended "s/cpus: ([0-9\\.]+)/cpus: '\\1'/" > "$osparcsimcoredeveldir"/.stack-simcore-development.yml
+    "$repo_basedir"/scripts/docker-compose-config.bash \
+            -e "$repo_basedir"/services/simcore/.env \
+            "$osparcsimcoredeveldir"/services/docker-compose.yml \
+            "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml \
+            "$osparcsimcoredeveldir"/services/docker-compose.devel.yml \
+            > "$osparcsimcoredeveldir"/.stack-simcore-development.yml
     # Ensures swarm is initialized
     # Ensures source-output folder always exists to avoid issues when mounting webclient->static-webserver dockers. Supports PowerShell
     mkdir -p "$osparcsimcoredeveldir"/services/static-webserver/client/source-output
@@ -120,7 +119,6 @@ fi
 
 ############
 cp .env-devel "$repo_basedir"
-cp .env-wb-garbage-collector "$repo_basedir"
 ############
 popd
 ############
