@@ -3,9 +3,6 @@ services:
   autoscaling:
     deploy:
       replicas: 0
-      placement:
-        constraints:
-          - node.role==manager
   agent:
     volumes:
       - /var/lib/docker/volumes:/var/lib/docker/volumes
