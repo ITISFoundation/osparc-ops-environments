@@ -2,10 +2,6 @@ services:
   agent:
     volumes:
       - /docker/volumes/:/docker/volumes/
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
   dask-sidecar:
     deploy:
       placement:

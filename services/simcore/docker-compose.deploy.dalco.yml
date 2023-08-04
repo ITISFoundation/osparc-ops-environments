@@ -3,10 +3,6 @@ services:
     deploy:
       replicas: 0
   agent:
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
     volumes:
       - /docker/volumes/:/docker/volumes/
   postgres:

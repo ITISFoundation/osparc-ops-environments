@@ -54,7 +54,6 @@ services:
           memory: "512M"
       placement:
         constraints:
-          - node.platform.os == linux
           - node.role == manager
   agent:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
@@ -79,7 +78,6 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.role == worker
           - node.labels.dynamicsidecar == true
     extra_hosts: []
   api-server:
@@ -168,7 +166,6 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.platform.os == linux
           - node.labels.simcore==true
   invitations:
     environment:
@@ -237,7 +234,6 @@ services:
       replicas: 3
       placement:
         constraints:
-          - node.platform.os == linux
           - node.labels.simcore==true
 
     extra_hosts: []
@@ -268,7 +264,6 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.platform.os == linux
           - node.labels.simcore == true
   wb-garbage-collector:
     environment:
@@ -292,7 +287,6 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.platform.os == linux
           - node.role==manager
   storage:
     environment:
@@ -355,7 +349,6 @@ services:
         window: 120s
       placement:
         constraints:
-        - node.platform.os == linux
         - node.role == manager
   director-v2:
     environment:
@@ -394,7 +387,6 @@ services:
         window: 120s
       placement:
         constraints:
-        - node.platform.os == linux
         - node.role == manager
   dask-sidecar:
     networks:
@@ -668,6 +660,7 @@ services:
         window: 120s
       placement:
         constraints:
+          - node.role == manager  # safety measure. traefik must be deployed on manager nodes
           - node.labels.traefik==true
   traefik_api:
     # NOTE: this is a trick to allow to access the internal traefik REST API
