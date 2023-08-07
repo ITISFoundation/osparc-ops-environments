@@ -292,26 +292,37 @@ if [ "$start_simcore" -eq 0 ]; then
     fi
 fi
 # shellcheck disable=2235
-if [ "$start_opsstack" -eq 0 ] && ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]); then
+
+
+if ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]); then
+
+    # How many deploys do we have ?
+    deploys_count=$(docker service ls --format "{{.Name}}" | grep "deployment-agent" | wc -l)
+    postgres_count=$(docker service ls --format "{{.Name}}" | grep "simcore_.*_postgres" | wc -l)
+
+
     # -------------------------------- BACKUP PG -------------------------------
     # PG-backup has to wait for postgres container to be started and ready before starting, or it will fail.
-    # Wait for potsgres container to start
-    log_info "Before starting PG-backup, we ensure that postgres is started and ready to accept connections."
-    until docker ps -a --format '{{.Names}}' | grep -q "postgres"; do
-      log_info "Postgres didn't start yet. Waiting for 5 seconds..."
-      sleep 5
+    # Wait for all potsgres container to start
+    log_info "Before starting PG-backup, we ensure that all postgres are started and ready to accept connections."
+    until [[ $(docker service ls --format "{{.Name}}" | grep "simcore_.*_postgres" | wc -l) -eq $deploys_count ]]; do
+        log_info "All postgres didn't start yet. Waiting for 5 seconds..."
+        sleep 5
     done
 
-    postgres_container_name=$(docker ps -a --format '{{.Names}}' | grep "postgres")
-    log_info "Postgres container started"
+    postgres_services_names=$(docker service ls --format "{{.Name}}" | grep "simcore_.*_postgres")
+    log_info "Postgres service(s) started"
 
     # Wait for the "database system is ready to accept connections" message to appear in the logs
-    until docker logs "$postgres_container_name" 2>&1 | grep -q "database system is ready to accept connections"; do
-      log_info "Postgres not initialized yet. Waiting for 5 seconds..."
-      sleep 5
+    for postgres_services_name in $postgres_services_names; do
+        until docker service logs "$postgres_services_name" 2>&1 | grep -q "database system is ready to accept connections"; do
+            log_info "Postgres not initialized yet for container $postgres_services_name. Waiting for 5 seconds..."
+            sleep 5
+        done
+        log_info "Postgres container $postgres_services_name is ready to accept connections"
     done
 
-    log_info "Postgres is ready to accept connections. We can start pg-backup"
+    log_info "All postgres are ready to accept connections. We can start pg-backup"
     log_info "starting PG-backup..."
     service_dir="${repo_basedir}"/services/pg-backup
     pushd "${service_dir}"
