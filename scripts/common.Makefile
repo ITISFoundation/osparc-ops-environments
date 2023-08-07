@@ -3,7 +3,6 @@ SHELL := /bin/bash
 MAKE_C := $(MAKE) --no-print-directory --directory
 PREDEFINED_VARIABLES := $(.VARIABLES)
 VERSION := $(shell uname -a)
-SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 
 
 # Checks for handling various operating systems
@@ -208,10 +207,28 @@ clean-default: .check_clean ## Cleans all outputs
 # Helpers -------------------------------------------------
 .PHONY: .init
 .init: ## initializeds swarm cluster
-	@$(if $(SWARM_HOSTS),  \
-		,                 \
-		echo "SWARM IS NOT INITIALIZED. ABORTING! (Tip to solve this: Run `docker swarm init` and create a swarm) " && exit 1\
-	)
+	@node_state="$$(docker info --format '{{ .Swarm.LocalNodeState }}')"; \
+	if [ "$$node_state" = "inactive" ]; then \
+		echo "This node is not in a swarm cluster. In production, use ansible to properly initialize a swarm cluster."; \
+		read -p "Do you want to initialize a swarm cluster? (y/n): " answer; \
+		if [ "$$answer" = "n" ]; then \
+			echo "Swarm initialization canceled. Script cannot proceed without an initialized swarm cluster"; \
+			exit 1; \
+		fi; \
+		echo "Initializing a swarm cluster"; \
+		docker swarm init > /dev/null; \
+		docker node ls --quiet | xargs -I {} sh -c ' \
+			docker node update --label-add simcore=true \
+				--label-add dynamicsidecar=true \
+				--label-add dasksidecar=true \
+				--label-add rabbit=true \
+				--label-add redis=true \
+				--label-add traefik=true \
+				--label-add ops=true \
+				--label-add prometheus=true \
+			 	--label-add minio=true {}' > /dev/null; \
+	fi
+
 	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		,  \
 		, docker network create --attachable --driver=overlay --subnet=10.10.0.0/16 $(PUBLIC_NETWORK) \
