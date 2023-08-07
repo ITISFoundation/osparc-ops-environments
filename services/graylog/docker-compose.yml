@@ -2,7 +2,7 @@ version: "3.7"
 services:
   # MongoDB: https://hub.docker.com/_/mongo/
   mongodb:
-    image: mongo:6.0.3
+    image: mongo:6.0.6
     init: true
     volumes:
       # data persistency
@@ -37,7 +37,7 @@ services:
           memory: 1G
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:5.0.5
+    image: graylog/graylog:5.1.4
     init: true
     # user: "1000:1001"
     configs:

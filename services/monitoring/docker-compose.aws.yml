@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  prometheus:
+  prometheuscatchall:
     dns: 8.8.8.8
     deploy:
       placement:
@@ -11,6 +11,17 @@ services:
           memory: 24576M
         reservations:
           memory: 24576M
+  prometheuscadvisor:
+    dns: 8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheuscadvisor==true
+      resources:
+        limits:
+          memory: 4096M
+        reservations:
+          memory: 4096M
   grafana:
     dns: 8.8.8.8
     deploy:

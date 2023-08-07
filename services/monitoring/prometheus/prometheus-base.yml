@@ -37,9 +37,16 @@ scrape_configs:
       - source_labels: [__meta_dockerswarm_node_address]
         target_label: __address__
         replacement: $${empty_var}1:9323
-      # Set hostname as instance label
       - source_labels: [__meta_dockerswarm_node_hostname]
         target_label: instance
+      # Set hostname as instance label
+      # Swarm manager give the address 0.0.0.0 and is then not scraped by Prometheus. Fixed thansk to https://github.com/prometheus/prometheus/issues/11060#issuecomment-1195278301
+      - source_labels:
+          - __meta_dockerswarm_node_manager_leader
+          - __meta_dockerswarm_node_manager_address
+        regex: 'true;(.+):[0-9]+'
+        target_label: __address__
+        replacement: $${empty_var}1:9323
 
   # Create a job for Docker Swarm containers.
   # Prometheus docker swarm discovery will automatically discover services that need to be scraped by prometheus

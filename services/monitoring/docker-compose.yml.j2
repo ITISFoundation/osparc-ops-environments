@@ -4,6 +4,7 @@ volumes:
   prometheus_data: {}
   grafana_data: {}
   alertmanager_data: {}
+  prometheus_data_cadvisor: {}
 
 networks:
   internal:
@@ -23,15 +24,20 @@ configs:
     file: ./node-exporter/docker-entrypoint.sh
   prometheus_config:
     file: ./prometheus/prometheus.yml
+  prometheus_config_cadvisor:
+    file: ./prometheus/prometheus-cadvisor.yml
   prometheus_rules:
     file: ./prometheus/prometheus.rules.yml
   grafana_image_renderer_config:
     file: ./grafana-image-renderer/config.json
   pgsql_query_exporter_config:
     file: ./pgsql_query_exporter_config.yaml
+  smokeping_prober_config:
+    file: ./smokeping_prober_config.yaml
 services:
-  prometheus:
-    image: prom/prometheus:v2.40.7
+  prometheuscatchall:
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
+    image: prom/prometheus:v2.46.0
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -61,22 +67,66 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
-        - traefik.http.services.prometheus.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
-        - traefik.http.routers.prometheus.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
-        - traefik.http.routers.prometheus.entrypoints=https
-        - traefik.http.routers.prometheus.tls=true
-        - traefik.http.middlewares.prometheus_stripprefixregex.stripprefixregex.regex=^/prometheus
-        - traefik.http.routers.prometheus.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheus_stripprefixregex
-        - prometheus-job=prometheus
+        - traefik.http.services.prometheuscatchall.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
+        - traefik.http.routers.prometheuscatchall.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheuscatchall.entrypoints=https
+        - traefik.http.routers.prometheuscatchall.tls=true
+        - traefik.http.middlewares.prometheuscatchall_stripprefixregex.stripprefixregex.regex=^/prometheus
+        - traefik.http.routers.prometheuscatchall.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheuscatchall_stripprefixregex
+        - prometheus-job=prometheuscatchall
         - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
         limits:
           memory: 4096M
         reservations:
-          memory: 64M
-
+          memory: 4096M
+  prometheuscadvisor:
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
+    image: prom/prometheus:v2.46.0
+    volumes:
+      - prometheus_data_cadvisor:/prometheus
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    user: root # only user root can use the docker socket
+    configs:
+      - source: prometheus_config_cadvisor
+        target: /etc/prometheus/prometheus.yml
+      - source: prometheus_rules
+        target: /etc/prometheus/prometheus.rules.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention=30d"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.external-url=https://${MONITORING_DOMAIN}/prometheuscadvisor/"
+      - "--web.route-prefix=/"
+      - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
+      #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
+    networks:
+      - internal
+      - monitored
+      - public
+    extra_hosts: []
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.prometheuscadvisor.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
+        - traefik.http.routers.prometheuscadvisor.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheuscadvisor`)
+        - traefik.http.routers.prometheuscadvisor.entrypoints=https
+        - traefik.http.routers.prometheuscadvisor.tls=true
+        - traefik.http.middlewares.prometheuscadvisor_stripprefixregex.stripprefixregex.regex=^/prometheuscadvisor
+        - traefik.http.routers.prometheuscadvisor.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheuscadvisor_stripprefixregex
+        - prometheus-job=prometheuscadvisor
+        - prometheus-port=${MONITORING_PROMETHEUS_PORT}
+      resources:
+        limits:
+          memory: 4096M
+        reservations:
+          memory: 4096M
   node-exporter:
-    image: prom/node-exporter:v0.18.1
+    image: prom/node-exporter:v1.6.1
     volumes:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
@@ -132,7 +182,7 @@ services:
           memory: 64M
 
   alertmanager:
-    image: prom/alertmanager:v0.20.0
+    image: prom/alertmanager:v0.25.0
     volumes:
       - alertmanager_data:/alertmanager
     command:
@@ -154,7 +204,7 @@ services:
           memory: 64M
 
   cadvisor-exporter:
-    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -195,7 +245,7 @@ services:
           memory: 64M
 
   grafana:
-    image: grafana/grafana-oss:9.4.3
+    image: grafana/grafana-oss:10.0.3
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -226,7 +276,7 @@ services:
           memory: 64M
 
   grafana-image-renderer:
-    image: grafana/grafana-image-renderer:3.6.1
+    image: grafana/grafana-image-renderer:3.7.1
     configs:
       - source: grafana_image_renderer_config
         target: /usr/src/app/config.json
@@ -239,10 +289,35 @@ services:
         reservations:
           memory: 64M
 
+  smokeping-prober-exporter:
+    image: quay.io/superq/smokeping-prober:v0.7.1
+    networks:
+      - internal
+      - monitored
+    volumes: []
+    cap_add:
+      - 'NET_ADMIN'
+      - 'NET_RAW'
+    entrypoint:
+      /bin/smokeping_prober --config.file=/smokeping_prober_config.yaml
+    configs:
+      - source: smokeping_prober_config
+        target: /smokeping_prober_config.yaml
+    deploy:
+      labels:
+        - prometheus-job=smokeping-prober-exporter
+        - prometheus-port=9374
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
   dcgm-exporter:
     cap_add:
       - SYS_ADMIN
-    image: nvidia/dcgm-exporter:latest
+    image: nvidia/dcgm-exporter:3.1.8-3.1.5-ubuntu20.04
     hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
       - internal
@@ -254,9 +329,9 @@ services:
           - node.labels.gpu==true
       resources:
         limits:
-          memory: 128M
+          memory: 350M #via trial and error test on tip-deployment DK Aug2023
         reservations:
-          memory: 64M
+          memory: 350M #via trial and error test on tip-deployment DK Aug2023
     labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
@@ -284,7 +359,7 @@ services:
         reservations:
           memory: 64M{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
   {{_stack}}-postgres-exporter:
-    image: bitnami/postgres-exporter:0.8.0
+    image: bitnami/postgres-exporter:0.13.2
     networks:
       - internal
       - monitored
@@ -300,7 +375,7 @@ services:
         reservations:
           memory: 64M
   {{_stack}}-redis-exporter:
-    image: oliver006/redis_exporter
+    image: oliver006/redis_exporter:v1.52.0-alpine
     networks:
       - internal
       - monitored

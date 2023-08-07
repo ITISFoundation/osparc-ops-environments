@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   redis-commander:
-    image: rediscommander/redis-commander:snyk-fix-1841981ea4b1abcbc4c13e21d5d2997d
+    image: rediscommander/redis-commander:snyk-fix-08c85f17c94a7f00df6fb21e8ea1d10d
     init: true
     ports:
       - 8081
@@ -9,7 +9,7 @@ services:
       - monitored
       - public
     environment:
-      REDIS_HOSTS: "resources:${REDIS_HOST}:${REDIS_PORT}:0,locks:${REDIS_HOST}:${REDIS_PORT}:1,validation_codes:${REDIS_HOST}:${REDIS_PORT}:2,scheduled_maintenance:${REDIS_HOST}:${REDIS_PORT}:3,user_notifications:${REDIS_HOST}:${REDIS_PORT}:4"
+      REDIS_HOSTS: "resources:${REDIS_HOST}:${REDIS_PORT}:0,locks:${REDIS_HOST}:${REDIS_PORT}:1,validation_codes:${REDIS_HOST}:${REDIS_PORT}:2,scheduled_maintenance:${REDIS_HOST}:${REDIS_PORT}:3,user_notifications:${REDIS_HOST}:${REDIS_PORT}:4,announcements:${REDIS_HOST}:${REDIS_PORT}:5"
       URL_PREFIX: /redis
     deploy:
       labels:
