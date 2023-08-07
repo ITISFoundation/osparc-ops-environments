@@ -37,7 +37,7 @@ services:
           memory: 1G
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:5.0.8
+    image: graylog/graylog:5.1.4
     init: true
     # user: "1000:1001"
     configs:

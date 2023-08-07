@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   redis-commander:
-    image: rediscommander/redis-commander:snyk-fix-1841981ea4b1abcbc4c13e21d5d2997d
+    image: rediscommander/redis-commander:snyk-fix-08c85f17c94a7f00df6fb21e8ea1d10d
     init: true
     ports:
       - 8081
