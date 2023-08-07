@@ -329,9 +329,9 @@ services:
           - node.labels.gpu==true
       resources:
         limits:
-          memory: 200M
+          memory: 350M #via trial and error test on tip-deployment DK Aug2023
         reservations:
-          memory: 200M
+          memory: 350M #via trial and error test on tip-deployment DK Aug2023
     labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
