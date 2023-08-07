@@ -52,9 +52,7 @@ services:
         limits:
           cpus: "0.5"
           memory: "512M"
-      placement:
-        constraints:
-          - node.role == manager
+
   agent:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
     volumes:
@@ -314,7 +312,6 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.platform.os == linux
           - node.labels.simcore==true
   director:
     # Certificate necessary for local deploiement only
@@ -347,9 +344,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      placement:
-        constraints:
-        - node.role == manager
   director-v2:
     environment:
       - LOGSPOUT_MULTILINE=true
@@ -385,9 +379,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      placement:
-        constraints:
-        - node.role == manager
   dask-sidecar:
     networks:
       - monitored
@@ -660,7 +651,6 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.role == manager  # safety measure. traefik must be deployed on manager nodes
           - node.labels.traefik==true
   traefik_api:
     # NOTE: this is a trick to allow to access the internal traefik REST API
