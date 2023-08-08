@@ -34,7 +34,7 @@ up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys graylog stack using let's enc
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-master ## Deploys graylog stack for master
-up-master: up-letsencrypt-dns
+up-master: up-dalco
 
 .PHONY: up-local ## Deploys graylog stack for local deployment
 up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local cluster
