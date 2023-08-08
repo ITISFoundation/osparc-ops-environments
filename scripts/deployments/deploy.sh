@@ -247,13 +247,6 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    if [ "$stack_target" = "local" ]; then
-        # -------------------------------- Mail -------------------------------
-        log_info "starting mail server..."
-        pushd "${repo_basedir}"/services/mail
-        call_make "." up-"$stack_target"
-        popd
-    fi
     # -------------------------------- MONITORING -------------------------------
 
     log_info "starting monitoring..."
