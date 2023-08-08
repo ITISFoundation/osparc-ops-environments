@@ -124,11 +124,6 @@ deployment_config.yaml
 /services/monitoring/grafana/provisioning/datasources/datasource.yml
 /services/monitoring/grafana/config.monitoring
 
-# Mail configuration
-/services/mail/config/*
-!/services/mail/config/amavis.cf
-services/monitoring/prometheus/prometheus.yml
-
 # Monitoring
 ### Grafana dashboard templated
 /services/monitoring/grafana/provisioning/dashboard/simcore/Metrics-dashboard.json
