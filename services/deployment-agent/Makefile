@@ -24,7 +24,6 @@ else
 STACK_NAME := $(PREFIX_STACK_NAME)-$(notdir $(shell pwd))
 endif
 
-SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE = .stack.${STACK_NAME}.yml
 TEMP_COMPOSE-devel = .stack.${STACK_NAME}.devel.yml
 TEMP_COMPOSE-aws = .stack.${STACK_NAME}.aws.yml
@@ -37,18 +36,18 @@ $(info STACK_NAME set to ${STACK_NAME})
 
 
 .PHONY: up
-up: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)"
+up: .init ${DEPLOYMENT_AGENT_CONFIG}  docker-compose.yml ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
 
 .PHONY: up-devel
-up-devel: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-devel} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)"
+up-devel: .init ${DEPLOYMENT_AGENT_CONFIG}  docker-compose.yml ${TEMP_COMPOSE-devel} ## Deploys or updates current stack "$(STACK_NAME)"
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-devel} $(STACK_NAME)
 
 .PHONY: up-dalco
 up-dalco: up ## Deploys deploymentagent stack for Dalco Cluster
 
 .PHONY: up-aws
-up-aws: .init ${DEPLOYMENT_AGENT_CONFIG} ${TEMP_COMPOSE-aws} docker-compose.yml ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1) on aws
+up-aws: .init ${DEPLOYMENT_AGENT_CONFIG}  docker-compose.yml ${TEMP_COMPOSE-aws} ## Deploys or updates current stack "$(STACK_NAME)" using replicas=X (defaults to 1) on aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE-aws} $(STACK_NAME)
 
 .PHONY: up-master
@@ -65,7 +64,6 @@ down: ## Stops and remove stack from swarm
 	-@docker stack rm $(STACK_NAME)
 	-@docker stack rm ${SIMCORE_STACK_NAME}
 
-
 .PHONY: ${DEPLOYMENT_AGENT_CONFIG}
 ${DEPLOYMENT_AGENT_CONFIG}: .env
 	@set -o allexport; \
@@ -73,7 +71,6 @@ ${DEPLOYMENT_AGENT_CONFIG}: .env
 	DOLLAR='$$'; \
 	set +o allexport; \
 	envsubst < ${DEPLOYMENT_AGENT_CONFIG_DEFAULT} > $@
-
 
 .PHONY: docker-compose.yml
 docker-compose.yml: .env docker-compose.yml.j2 .venv
@@ -88,7 +85,6 @@ ${TEMP_COMPOSE-devel}: .env $(docker-compose-configs)
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.devel.yml")' > .temp$@ && \
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env .temp$@ > $@; \
 	rm .temp$@
-
 
 .PHONY: ${TEMP_COMPOSE-aws}
 ${TEMP_COMPOSE-aws}: .env $(docker-compose-configs)

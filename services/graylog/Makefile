@@ -4,7 +4,6 @@
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(shell pwd))
-SWARM_HOSTS = $(shell docker node ls --format={{.Hostname}} 2>/dev/null)
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
@@ -35,7 +34,7 @@ up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys graylog stack using let's enc
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-master ## Deploys graylog stack for master
-up-master: up-letsencrypt-dns
+up-master: up-dalco
 
 .PHONY: up-local ## Deploys graylog stack for local deployment
 up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local cluster
