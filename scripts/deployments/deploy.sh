@@ -247,13 +247,6 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    if [ "$stack_target" = "local" ]; then
-        # -------------------------------- Mail -------------------------------
-        log_info "starting mail server..."
-        pushd "${repo_basedir}"/services/mail
-        call_make "." up-"$stack_target"
-        popd
-    fi
     # -------------------------------- MONITORING -------------------------------
 
     log_info "starting monitoring..."
@@ -294,18 +287,16 @@ fi
 # shellcheck disable=2235
 
 
-if ([ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]); then
+if [ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]; then
 
     # How many deploys do we have ?
-    deploys_count=$(docker service ls --format "{{.Name}}" | grep "deployment-agent" | wc -l)
-    postgres_count=$(docker service ls --format "{{.Name}}" | grep "simcore_.*_postgres" | wc -l)
-
+    deploys_count=$(docker service ls --format "{{.Name}}" | grep -c "deployment-agent")
 
     # -------------------------------- BACKUP PG -------------------------------
     # PG-backup has to wait for postgres container to be started and ready before starting, or it will fail.
     # Wait for all potsgres container to start
     log_info "Before starting PG-backup, we ensure that all postgres are started and ready to accept connections."
-    until [[ $(docker service ls --format "{{.Name}}" | grep "simcore_.*_postgres" | wc -l) -eq $deploys_count ]]; do
+    until [[ $(docker service ls --format "{{.Name}}" | grep -c "simcore_.*_postgres") -eq $deploys_count ]]; do
         log_info "All postgres didn't start yet. Waiting for 5 seconds..."
         sleep 5
     done
