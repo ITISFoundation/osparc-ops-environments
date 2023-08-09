@@ -1,6 +1,6 @@
 databases:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
   postgres_{{_stack}}:
-    dsn: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}{% endfor %}
+    dsn: postgresql://{{POSTGRES_USER}}:{{MONITORED_POSTGRES_PASSWORDS.split(",")[loop.index0]}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}{% endfor %}
 
 metrics:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}
   {{_stack}}_members_in_gid_{{_gid}}:
