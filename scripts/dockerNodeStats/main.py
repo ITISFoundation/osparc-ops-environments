@@ -38,162 +38,202 @@ if __name__ == "__main__":
     if service_ids == [""]:
         logger.warning("No docker services found. Exiting.")
         exit(0)
-    node_used_resources_limits = defaultdict(lambda: {"NanoCPU": 0, "MemoryBytes": 0})
-    node_used_resources_reservations = defaultdict(
-        lambda: {"NanoCPU": 0, "MemoryBytes": 0}
-    )
-    node_max_resources = defaultdict(lambda: {"NanoCPU": 0, "MemoryBytes": 0})
+    node_max_resources = defaultdict(lambda: {"cpu": 0, "memory_gib": 0})
 
     docker_node_names = [
         x for x in docker.node.ls("--format", "{{.Hostname}}").split("\n") if x != ""
     ]
 
     for node_name in docker_node_names:
-        machine_max_resources = [
-            x
-            for x in docker.node.inspect(
+        machine_max_resources = json.loads(
+            docker.node.inspect(
                 node_name,
                 "--format",
-                "{{ .Description.Resources.NanoCPUs }} {{ .Description.Resources.MemoryBytes }}",
-            ).split("\n")
-            if x != ""
-        ][0]
-        logger.debug(f"machine_max_resources {machine_max_resources}")
-        nano_cpu, memory_bytes = machine_max_resources.split(" ")
-        node_max_resources[node_name]["NanoCPU"] = int(nano_cpu)
-        node_max_resources[node_name]["MemoryBytes"] = int(memory_bytes)
+                "json",
+            )
+        )[0]["Description"]["Resources"]
+
+        node_max_resources[node_name]["cpu"] = (
+            int(machine_max_resources["NanoCPUs"]) * 1 / 1000000000
+        )
+        node_max_resources[node_name]["memory_gib"] = (
+            int(machine_max_resources["MemoryBytes"]) / 1073741824
+        )
+        if "GenericResources" in machine_max_resources.keys():
+            for item in machine_max_resources["GenericResources"]:
+                kind = item["DiscreteResourceSpec"]["Kind"]
+                value = item["DiscreteResourceSpec"]["Value"]
+                node_max_resources[node_name][kind] = int(value)
+
     logger.info(
         f"Found the following node specs\n{json.dumps(node_max_resources, indent=2)}"
     )
-    with open("dockerstats.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        field = [
-            "node_name",
-            "service_name",
-            "cpu_limit",
-            "memory_gib_limit",
-            "cpu_reservation",
-            "memory_gib_reservation",
+
+    node_used_resources_limits = defaultdict(lambda: {"cpu": 0, "memory_gib": 0})
+    node_used_resources_reservations = defaultdict(lambda: {"cpu": 0, "memory_gib": 0})
+    for service_id in tqdm.tqdm(service_ids):
+        service_name = [
+            x
+            for x in docker.service.inspect(
+                "--format", "{{json .Spec.Name}}", service_id
+            ).split("\n")
+            if x != ""
+        ][0]
+        logger.debug(f"service_name {service_name}")
+        service_resources = [
+            x
+            for x in docker.service.inspect(
+                "--format", "{{json .Spec.TaskTemplate.Resources}}", service_id
+            ).split("\n")
+            if x != ""
+        ][0]
+        logger.debug(f"service_resources {service_resources}")
+        current_state = [
+            x
+            for x in docker.service.ps(
+                "--format", "{{json .CurrentState}}", service_id
+            ).split("\n")
+            if x != ""
         ]
-        writer.writerow(field)
-
-        for service_id in tqdm.tqdm(service_ids):
-            service_name = [
-                x
-                for x in docker.service.inspect(
-                    "--format", "{{json .Spec.Name}}", service_id
-                ).split("\n")
-                if x != ""
-            ][0]
-            logger.debug(f"service_name {service_name}")
-            service_resources = [
-                x
-                for x in docker.service.inspect(
-                    "--format", "{{json .Spec.TaskTemplate.Resources}}", service_id
-                ).split("\n")
-                if x != ""
-            ][0]
-            logger.debug(f"service_resources {service_resources}")
-            current_state = [
-                x
-                for x in docker.service.ps(
-                    "--format", "{{json .CurrentState}}", service_id
-                ).split("\n")
-                if x != ""
-            ]
-            logger.debug(f"current_state {current_state}")
-            if not current_state or "Running" not in current_state[0]:
-                logger.warning(
-                    f"Service {service_name} has current-state != `running`. Ignoring it."
-                )
-                continue
-            node_ids = [
-                x
-                for x in docker.service.ps(
-                    "--filter",
-                    "desired-state=running",
-                    "--format",
-                    "{{.Node}}",
-                    service_id,
-                ).split("\n")
-                if x != ""
-            ]
-            logger.debug(
-                f"service_id {service_id} --> node_id {node_ids} (len {len(node_ids)})"
+        logger.debug(f"current_state {current_state}")
+        if not current_state or "Running" not in current_state[0]:
+            logger.warning(
+                f"Service {service_name} has current-state != `running`. Ignoring it."
             )
-            resources_dict = json.loads(
-                service_resources
-            )  # Parse the resources as a dictionary
-            logger.debug(f"resources_dict {resources_dict}")
+            continue
+        node_ids = [
+            x
+            for x in docker.service.ps(
+                "--filter",
+                "desired-state=running",
+                "--format",
+                "{{.Node}}",
+                service_id,
+            ).split("\n")
+            if x != ""
+        ]
+        resources_dict = json.loads(
+            service_resources
+        )  # Parse the resources as a dictionary
 
-            if "Limits" not in resources_dict and "Reservations" in resources_dict:
-                logger.warning(
-                    f"Reservations set but not limits. Please audit this docker service: {service_id} / {service_name}"
+        if "Limits" not in resources_dict and "Reservations" in resources_dict:
+            logger.warning(
+                f"Reservations set but not limits. Please audit this docker service: {service_id} / {service_name}"
+            )
+        if "Limits" not in resources_dict and "Reservations" not in resources_dict:
+            logger.warning(
+                f"No limits set. Please audit this docker service: {service_id} / {service_name}"
+            )
+        if "Limits" in resources_dict:
+            if "Reservations" in resources_dict:
+                if resources_dict["Limits"].get("NanoCPUs", 0) != resources_dict[
+                    "Reservations"
+                ].get("NanoCPUs", 0):
+                    logger.warning(
+                        f"CPU Limits != Reservations. Please audit this docker service: {service_id} / {service_name}"
+                    )
+                if resources_dict["Limits"].get("MemoryBytes", 0) != resources_dict[
+                    "Reservations"
+                ].get("MemoryBytes", 0):
+                    logger.warning(
+                        f"Memory Limits != Reservations. Please audit this docker service: {service_id} / {service_name}"
+                    )
+            else:
+                resources_dict["Reservations"] = {"NanoCPUs": 0, "MemoryBytes": 0}
+            for key in resources_dict:
+                resources_dict[key]["cpu"] = (
+                    resources_dict[key].get("NanoCPUs", 0) * 1 / 1000000000
                 )
-            if "Limits" not in resources_dict and "Reservations" not in resources_dict:
-                logger.warning(
-                    f"No limits set. Please audit this docker service: {service_id} / {service_name}"
+                resources_dict[key]["memory_gib"] = (
+                    resources_dict[key].get("MemoryBytes", 0) / 1073741824
                 )
-            if "Limits" in resources_dict:
-                if "Reservations" in resources_dict:
-                    if resources_dict["Limits"].get("NanoCPUs", 0) != resources_dict[
-                        "Reservations"
-                    ].get("NanoCPUs", 0):
-                        logger.warning(
-                            f"CPU Limits != Reservations. Please audit this docker service: {service_id} / {service_name}"
-                        )
-                    if resources_dict["Limits"].get("MemoryBytes", 0) != resources_dict[
-                        "Reservations"
-                    ].get("MemoryBytes", 0):
-                        logger.warning(
-                            f"Memory Limits != Reservations. Please audit this docker service: {service_id} / {service_name}"
-                        )
-                else:
-                    resources_dict["Reservations"] = {"NanoCPUs": 0, "MemoryBytes": 0}
+                if "GenericResources" in resources_dict[key]:
+                    for resource in resources_dict[key]["GenericResources"]:
+                        value = resource["DiscreteResourceSpec"]["Value"]
+                        kind = resource["DiscreteResourceSpec"]["Kind"]
+                        resources_dict[key][kind] = value
+                        logger.debug(f"GenericResources - kind {kind} value {value}")
+                    resources_dict[key].pop("GenericResources", None)
+                resources_dict[key].pop("NanoCPUs", None)
+                resources_dict[key].pop("MemoryBytes", None)
+            with open("dockerstats.csv", "w", newline="") as file:
+                writer = csv.writer(file)
+                resource_names = {
+                    key
+                    for inner_dict in node_max_resources.values()
+                    for key in inner_dict
+                }
+                csv_header_static = [
+                    "node_name",
+                    "service_name",
+                ]
+                csv_header_dynamic = [name + "__Limits" for name in resource_names] + [
+                    name + "__Reservations" for name in resource_names
+                ]
+                csv_header = csv_header_static + csv_header_dynamic
+                logger.debug(f"csv_header {csv_header}")
+                writer.writerow(csv_header)
                 for node in node_ids:
                     logger.debug(f"node {node}")
-                    writer.writerow(
-                        [
-                            node,
-                            service_name,
-                            resources_dict["Limits"].get("NanoCPUs", 0)
-                            * 1
-                            / 1000000000,
-                            resources_dict["Limits"].get("MemoryBytes", 0) / 1073741824,
-                            resources_dict["Reservations"].get("NanoCPUs", 0)
-                            * 1
-                            / 1000000000,
-                            resources_dict["Reservations"].get("MemoryBytes", 0)
-                            / 1073741824,
-                        ]
-                    )
-                    node_used_resources_limits[node]["NanoCPU"] += resources_dict[
-                        "Limits"
-                    ].get("NanoCPUs", 0)
-                    node_used_resources_limits[node]["MemoryBytes"] += resources_dict[
-                        "Limits"
-                    ].get("MemoryBytes", 0)
-                    node_used_resources_reservations[node]["NanoCPU"] += resources_dict[
-                        "Reservations"
-                    ].get("NanoCPUs", 0)
-                    node_used_resources_reservations[node][
-                        "MemoryBytes"
-                    ] += resources_dict["Reservations"].get("MemoryBytes", 0)
+                    static_data_csv = [node, service_name]
+                    dynamic_data_csv = []
+                    for i in range(len(csv_header_dynamic)):
+                        item = csv_header_dynamic[i]
+                        if "__Limits" in item:
+                            resource_name = item.split("__Limits")[0]
+                            dynamic_data_csv.append(
+                                resources_dict["Limits"][resource_name]
+                                if resource_name in resources_dict["Limits"].keys()
+                                else 0
+                            )
+                            if (
+                                resource_name
+                                not in node_used_resources_limits[node].keys()
+                            ):
+                                node_used_resources_limits[node][resource_name] = 0
+                            node_used_resources_limits[node][
+                                resource_name
+                            ] += resources_dict["Limits"].get(resource_name, 0)
+                        if "__Reservations" in item:
+                            resource_name = item.split("__Reservations")[0]
+                            dynamic_data_csv.append(
+                                resources_dict["Reservations"][resource_name]
+                                if resource_name
+                                in resources_dict["Reservations"].keys()
+                                else 0
+                            )
+                            if (
+                                resource_name
+                                not in node_used_resources_reservations[node].keys()
+                            ):
+                                node_used_resources_reservations[node][
+                                    resource_name
+                                ] = 0
+                            node_used_resources_reservations[node][
+                                resource_name
+                            ] += resources_dict["Reservations"].get(resource_name, 0)
+                    data_csv = static_data_csv + dynamic_data_csv
+                    writer.writerow(data_csv)
 
     results_dict = {"Limits": {}, "Reservations": {}}
+
     for node_id, resources in node_used_resources_limits.items():
         results_dict["Limits"][node_id] = {
-            "cpu_used": resources["NanoCPU"] * 1 / 1000000000,
-            "cpu_total": node_max_resources[node_id]["NanoCPU"] * 1 / 1000000000,
-            "mem_used_gib": resources["MemoryBytes"] / 1073741824,
-            "mem_total_gib": node_max_resources[node_id]["MemoryBytes"] / 1073741824,
+            resource + "_services": resources[resource] for resource in resources.keys()
+        } | {
+            resource + "_machine": node_max_resources[node_id][resource]
+            if resource in node_max_resources[node_id].keys()
+            else 0
+            for resource in resources.keys()
         }
     for node_id, resources in node_used_resources_reservations.items():
         results_dict["Reservations"][node_id] = {
-            "cpu_used": resources["NanoCPU"] * 1 / 1000000000,
-            "cpu_total": node_max_resources[node_id]["NanoCPU"] * 1 / 1000000000,
-            "mem_used_gib": resources["MemoryBytes"] / 1073741824,
-            "mem_total_gib": node_max_resources[node_id]["MemoryBytes"] / 1073741824,
+            resource + "_services": resources[resource] for resource in resources.keys()
+        } | {
+            resource + "_machine": node_max_resources[node_id][resource]
+            if resource in node_max_resources[node_id].keys()
+            else 0
+            for resource in resources.keys()
         }
     with open("dockerstats.json", "w") as jsonfile:
         jsonfile.write(json.dumps(results_dict, indent=2, sort_keys=True))
