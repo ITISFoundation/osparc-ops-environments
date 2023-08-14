@@ -668,7 +668,7 @@
             "configuration": {
               "grok_pattern": {
                 "@type": "string",
-                "@value": "level=%{WORD:log_level} \\| time=%{TIMESTAMP_ISO8601:log_timestamp} \\| msg=%{GREEDYDATA:log_msg}"
+                "@value": "time=\"%{TIMESTAMP_ISO8601:log_timestamp}\" level=%{WORD:log_level} msg=\"%{GREEDYDATA:log_msg}\""
               },
               "named_captures_only": {
                 "@type": "boolean",
