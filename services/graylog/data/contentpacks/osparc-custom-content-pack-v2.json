@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
-  "rev": 2,
+  "rev": 3,
   "name": "osparc-custom-content-pack-v2",
   "summary": "osparc-custom-content-pack-v2",
   "description": "",
@@ -637,6 +637,51 @@
             "title": {
               "@type": "string",
               "@value": "osparc-simcore python extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "level=%{WORD:log_level} \\| time=%{TIMESTAMP_ISO8601:log_timestamp} \\| msg=%{GREEDYDATA:log_msg}"
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "traefik log extractor"
             },
             "type": {
               "@type": "string",
