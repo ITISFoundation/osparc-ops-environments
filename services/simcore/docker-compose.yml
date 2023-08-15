@@ -1,7 +1,6 @@
 version: "3.8"
 services:
   clusters-keeper:
-    hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-WARNING}
       - LOG_FORMAT_LOCAL_DEV_ENABLED=${LOG_FORMAT_LOCAL_DEV_ENABLED}
