@@ -27,7 +27,7 @@ certificates/domain.key:
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
-	@bash scripts/deployments/deploy.sh --stack_target=local --minio_enabled=0 --disable_vcs_check=0
+	@bash scripts/deployments/deploy.sh --stack_target=local --minio_enabled=0 --vcs_check=1
 	@$(MAKE) info-local
 
 .PHONY: up-vagrant
@@ -45,15 +45,15 @@ up-simcore-dalco:  ## Deploy simcores stack only, on Dalco Cluster
 
 .PHONY: up-dalco
 up-dalco: ## Deploy ops and simcore stacks on the Dalco Cluster
-	./scripts/deployments/deploy.sh --stack_target=dalco
+	./scripts/deployments/deploy.sh --stack_target=dalco --vcs_check=1
 
 .PHONY: up-public
 up-public: ## Deploy ops and simcore stacks on the Public Cluster
-	./scripts/deployments/deploy.sh --stack_target=public
+	./scripts/deployments/deploy.sh --stack_target=public --vcs_check=1
 
 .PHONY: up-aws
 up-aws: ## Deploy opt and simcore stacks on the AWS Cluster
-	./scripts/deployments/deploy.sh --stack_target=aws
+	./scripts/deployments/deploy.sh --stack_target=aws --vcs_check=1
 
 .PHONY: up-master
 up-master: ## Deploy opt and simcore stacks on the Master Cluster
