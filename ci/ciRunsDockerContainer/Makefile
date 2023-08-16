@@ -1,6 +1,4 @@
-.DEFAULT_GOAL := help
 # Makefile including function used by every services
-include ../../scripts/common.Makefile
 include .env
 ## DOCKER TAGS  -------------------------------
 
