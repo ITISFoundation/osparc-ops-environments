@@ -20,13 +20,12 @@ build-container: .env ## Build the common docker container that runs the CI runs
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
 	set +o allexport; \
-	docker build  --no-cache -t local/${DOCKER_IMAGE_NAME}:dev .;
+	docker build  --no-cache -t local/$$DOCKER_IMAGE_NAME:dev .;
 
-
+.PHONY: build
+build: build-container ## Build the docker container that runs the CI runs
 ## DOCKER PULL/PUSH  -------------------------------
-#
-# TODO: do not allow pushing modified/untracked
-# TODO: do not allow pushing disceted
+
 #
 
 .PHONY: push-version push-latest
@@ -38,7 +37,6 @@ push-latest: tag-latest
 	export DOCKER_IMAGE_TAG=latest; \
 	$(MAKE) push-version
 
-# below BUILD_TARGET gets overwritten but is required when merging yaml files
 push-version: tag-version
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \

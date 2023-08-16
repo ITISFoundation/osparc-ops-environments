@@ -1,5 +1,6 @@
 ARG UBUNTU_VERSION="focal-20230412"
 FROM ubuntu:${UBUNTU_VERSION} as base
+ENV PYTHON_VERSION 3.10.12
 #
 LABEL maintainer=dkaiser
 
@@ -63,8 +64,8 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Install pyenv
-ENV PYTHON_VERSION 3.10.12
+# Install pyenv, modified from https://gist.github.com/jprjr/7667947?permalink_comment_id=3684823#gistcomment-3684823
+
 #Set of all dependencies needed for pyenv to work on Ubuntu
 RUN apt-get update \
         && apt-get install -y --no-install-recommends \
