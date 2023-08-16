@@ -38,7 +38,7 @@ rootca.crt: rootca.key
 		-sha384 -days 10000 -out $@;
 
 extfile.cnf:
-	@echo "subjectAltName = DNS:${MACHINE_FQDN}, DNS:testing.${MACHINE_FQDN}, DNS:services.testing.${MACHINE_FQDN}, DNS:*.services.testing.${MACHINE_FQDN}, DNS:services.${MACHINE_FQDN}, DNS:*.services.${MACHINE_FQDN}, DNS:${MAILSERVER_DOMAIN}, DNS:traefikdashboard.${MACHINE_FQDN}, DNS:invitations.${MACHINE_FQDN}, DNS:${MONITORING_DOMAIN}, DNS:${STORAGE_DOMAIN}, DNS:${FILESTASH_DOMAIN}, DNS:${REGISTRY_DOMAIN}, DNS:${API_DOMAIN}, DNS:testing.${API_DOMAIN}" > $@ #You can use IP:your_IP or DNS:host_name
+	@echo "subjectAltName = DNS:${MACHINE_FQDN}, DNS:testing.${MACHINE_FQDN}, DNS:services.testing.${MACHINE_FQDN}, DNS:*.services.testing.${MACHINE_FQDN}, DNS:services.${MACHINE_FQDN}, DNS:*.services.${MACHINE_FQDN}, DNS:traefikdashboard.${MACHINE_FQDN}, DNS:invitations.${MACHINE_FQDN}, DNS:${MONITORING_DOMAIN}, DNS:${STORAGE_DOMAIN}, DNS:${FILESTASH_DOMAIN}, DNS:${REGISTRY_DOMAIN}, DNS:${API_DOMAIN}, DNS:testing.${API_DOMAIN}" > $@ #You can use IP:your_IP or DNS:host_name
 
 domain.key:
 	# Creating private key
