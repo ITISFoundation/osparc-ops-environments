@@ -11,7 +11,7 @@ tag-version: .env ## Tags 'local/${DOCKER_IMAGE_NAME}):dev' images as versioned 
 	docker tag local/$$DOCKER_IMAGE_NAME:dev $$DOCKER_REGISTRY/$$DOCKER_IMAGE_NAME:$$DOCKER_IMAGE_TAG;
 
 tag-latest: .env ## Tags last locally built production images as '${DOCKER_REGISTRY}/{service}:latest'
-	set -o allexport; \
+	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
 	set +o allexport; \
 	docker tag local/$$DOCKER_IMAGE_NAME:dev $$DOCKER_REGISTRY/$$DOCKER_IMAGE_NAME:latest;
