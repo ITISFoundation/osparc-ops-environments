@@ -46,7 +46,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   build-essential \
   curl \
-  firefox=114.0.2+build1-0ubuntu0.20.04.1 \
+  firefox=116.0.2+build1-0ubuntu0.20.04.1 \
   gettext-base \
   git \
   jq \
@@ -55,6 +55,7 @@ RUN apt-get update \
   openssh-client \
   python3-pip \
   python3.9-venv \
+  python-is-python3 \
   unzip \
   wget \
   && apt-get clean \
@@ -87,6 +88,17 @@ RUN echo "------------------------------------------------------ terraform" \
     && cd /tmp && wget https://releases.hashicorp.com/terraform/1.5.1/terraform_1.5.1_linux_amd64.zip \
     && unzip terraform_1.5.1_linux_amd64.zip  -d /usr/local/bin \
     && rm /tmp/terraform_1.5.1_linux_amd64.zip
+
+# Install dind docker
+RUN mkdir -p /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
+  docker-ce-cli \
+  containerd.io \
+  docker-compose-plugin
 
 WORKDIR /home/scu
 

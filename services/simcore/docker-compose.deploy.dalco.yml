@@ -2,15 +2,7 @@ services:
   autoscaling:
     deploy:
       replicas: 0
-      placement:
-        constraints:
-          - node.role==manager
   agent:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar==true
-          - node.role==worker
     volumes:
       - /docker/volumes/:/docker/volumes/
   postgres:
@@ -19,80 +11,15 @@ services:
     deploy:
       placement:
           constraints:
-            - node.labels.postgres==true
-  api-server:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
-  catalog:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
-  migration:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
-  rabbit:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.rabbit==true
+            - node.labels.postgres == true
   dask-sidecar:
     deploy:
       placement:
         constraints:
-          - node.labels.dasksidecar==true
           - node.role == worker
-  dask-scheduler:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
-  datcore-adapter:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
-  redis:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.redis==true
   resource-usage-tracker:
     deploy:
       replicas: 0
-  storage:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
   traefik:
     command:
       - "--api=true"
@@ -136,39 +63,5 @@ services:
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.service=${SWARM_STACK_NAME}_postgresRoute
         - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432
         - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
-      placement:
-        constraints:
-          - node.labels.traefik==true
-  traefik_api:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.traefik==true
-  webserver:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
   wb-garbage-collector:
     hostname: "{{.Service.Name}}"
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
-  whoami:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.labels.dynamicsidecar!=true
-          - node.labels.personalizedworker!=true
-          - node.labels.leader!=true
-          - node.role==manager
