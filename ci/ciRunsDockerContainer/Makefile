@@ -30,14 +30,14 @@ build: build-container ## Build the docker container that runs the CI runs
 
 .PHONY: push-version push-latest
 
-push-latest: tag-latest
+push-latest: tag-latest ## Pushes '${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:latest' images to the registry
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
 	set +o allexport; \
 	export DOCKER_IMAGE_TAG=latest; \
 	$(MAKE) push-version
 
-push-version: tag-version
+push-version: tag-version ## Pushes '${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:{DOCKER_IMAGE_TAG}' images to the registry
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
 	set +o allexport; \
