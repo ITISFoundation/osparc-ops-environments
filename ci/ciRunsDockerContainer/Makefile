@@ -1,16 +1,25 @@
 # Makefile including function used by every services
-include .env
+include ../../scripts/common.Makefile
 ## DOCKER TAGS  -------------------------------
 
 .PHONY: tag-local tag-version tag-latest build-container
 
 tag-version: .env ## Tags 'local/${DOCKER_IMAGE_NAME}):dev' images as versioned '${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
-	docker tag local/${DOCKER_IMAGE_NAME}:dev ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG};
+	@set -o allexport; \
+	source $(realpath $(CURDIR)/.env); \
+	set +o allexport; \
+	docker tag local/$$DOCKER_IMAGE_NAME:dev $$DOCKER_REGISTRY/$$DOCKER_IMAGE_NAME:$$DOCKER_IMAGE_TAG;
 
 tag-latest: .env ## Tags last locally built production images as '${DOCKER_REGISTRY}/{service}:latest'
-	docker tag local/${DOCKER_IMAGE_NAME}:dev ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:latest;
+	set -o allexport; \
+	source $(realpath $(CURDIR)/.env); \
+	set +o allexport; \
+	docker tag local/$$DOCKER_IMAGE_NAME:dev $$DOCKER_REGISTRY/$$DOCKER_IMAGE_NAME:latest;
 
 build-container: .env ## Build the common docker container that runs the CI runs
+	@set -o allexport; \
+	source $(realpath $(CURDIR)/.env); \
+	set +o allexport; \
 	docker build  --no-cache -t local/${DOCKER_IMAGE_NAME}:dev .;
 
 
@@ -31,10 +40,9 @@ push-latest: tag-latest
 
 # below BUILD_TARGET gets overwritten but is required when merging yaml files
 push-version: tag-version
-	# pushing '${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
 	set +o allexport; \
-	export DOCKER_IMAGE_TAG=latest; \
+	echo "Pushing $$DOCKER_REGISTRY/$$DOCKER_IMAGE_NAME:$$DOCKER_IMAGE_TAG"; \
 	./dockerhub_login.bash && \
 	docker compose --file docker-compose-deploy.yml push
