@@ -44,7 +44,7 @@ source "$repo_basedir"/scripts/logger.bash
 # Define script variables, initialize with defaults
 # 0: True
 # 1: False
-disable_vcs_check=1
+vcs_check=0
 minio_enabled=1
 start_simcore=0
 start_opsstack=0
@@ -61,7 +61,7 @@ where keys are:
     --minio_enabled             (default: ${minio_enabled})
     --start_opsstack            (default: ${start_opsstack})
     --stack_target              (default: ${stack_target})
-    --disable_vcs_check         (default: ${disable_vcs_check})
+    --vcs_check         (default: ${vcs_check})
     --without_deploy_agent      (default: ${without_deploy_agent})"
 
 for i in "$@"; do
@@ -82,8 +82,8 @@ for i in "$@"; do
         stack_target="${i#*=}"
         ;;
         ##
-        --disable_vcs_check=*)
-        disable_vcs_check="${i#*=}"
+        --vcs_check=*)
+        vcs_check="${i#*=}"
         ;;
         ##
         --without_deploy_agent=*)
@@ -116,11 +116,6 @@ set -o allexport
 source "${repo_config}"
 set +o allexport
 
-# Version Control System (VCS) info on current repo --> Currently unused
-# current_git_url=$(git config --get remote.origin.url)
-# current_git_branch=$(git rev-parse --abbrev-ref HEAD)
-
-
 
 # Generate WEBSERVER_SESSION_SECRET_KEY if the key is empty in repo_config
 if [[ -z "${WEBSERVER_SESSION_SECRET_KEY}" ]]; then
@@ -142,7 +137,7 @@ log_info "Deploying osparc for $1 cluster on ${MACHINE_FQDN}, using credentials 
 
 
 # -------------------------------- ASSERTIONS -------------------------------
-if [ "$disable_vcs_check" -eq 1 ]; then
+if [ "$vcs_check" -eq 0 ]; then
     log_info "Asserting that there are no uncommited changes in the config-files docker-compose-deploy and .env ..."
     pushd "${repo_basedir}"/services/simcore;
     call_make "." compose-"$1" > /dev/null
@@ -212,9 +207,7 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    # FIXME (DK): Add proper handling for when to (not) start minio
-    # As of Oct2022, this should only be the case for vagrant/local.
-    # Potentially, this can be done according to a S3_START_MINIO flag in the config?
+    # We onl start minio for the local deployment
     #
     if [ "$minio_enabled" -eq 0 ]; then
         # -------------------------------- Minio -------------------------------
