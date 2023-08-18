@@ -1,4 +1,4 @@
-FROM itisfoundation/ci-provisioned-ubuntu:0.3.0 as base
+FROM itisfoundation/ci-provisioned-ubuntu:0.4.0 as base
 
 
 COPY requirements.txt /requirements.txt

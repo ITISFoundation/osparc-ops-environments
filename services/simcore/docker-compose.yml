@@ -1,9 +1,43 @@
-# osparc-simcore stack (framework stack)
-# NOTES :
-# LOGSPOUT_MULTILINE is used to tell to Logspout, which is used by GrayLog, to handle multiline support of the logs of the concerned container. Please add with every new osparc-simcore service.
-# See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 version: "3.8"
 services:
+  clusters-keeper:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-WARNING}
+      - LOG_FORMAT_LOCAL_DEV_ENABLED=${LOG_FORMAT_LOCAL_DEV_ENABLED}
+      - CLUSTERS_KEEPER_LOGLEVEL=${LOG_LEVEL:-INFO}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - RABBIT_HOST=${RABBIT_HOST}
+      - RABBIT_PASSWORD=${RABBIT_PASSWORD}
+      - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_SECURE=${RABBIT_SECURE}
+      - RABBIT_USER=${RABBIT_USER}
+    deploy:
+      labels: []
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
+          cpus: '0.5' # For now: same as autoscaling service
+        reservations:
+          memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
+          cpus: '0.5' # For now: same as autoscaling service
+      placement:
+        constraints:
+          - node.labels.simcore==true
+
   autoscaling:
     environment:
       - EC2_ACCESS_KEY_ID=${AUTOSCALING_EC2_ACCESS_KEY_ID} # defines the access key to EC2
