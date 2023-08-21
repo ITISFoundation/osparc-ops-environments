@@ -1,5 +1,7 @@
 import copy
 import json
+import logging
+import os
 import random
 import uuid
 import warnings
@@ -10,6 +12,9 @@ import yaml
 from environs import Env, EnvError
 from tenacity import retry, stop_after_attempt, wait_random
 from yaml.loader import SafeLoader
+
+logging.basicConfig(level="INFO")
+logger = logging.getLogger()
 
 warnings.filterwarnings(
     "ignore",
@@ -66,174 +71,124 @@ def getGraylogInputs(session, headers, url):
         raise Exception
 
 
-if __name__ == "__main__":
-    print(
-        "Waiting for graylog to run for provisioning. This can take up to some minutes, please be patient..."
+def configure_slack_notifications():
+    url = (
+        "https://monitoring."
+        + env.str("MACHINE_FQDN")
+        + "/graylog/api/events/notifications"
     )
-    try:
-        checkGraylogOnline()
-    except Exception as e:
-        print(e)
-        print("Exception or: Graylog is still not online.")
-        print("Graylog script will now stop.")
-        exit(1)
-
-    session = requests.Session()
-    session.auth = (
-        "admin",
-        env.str("SERVICES_PASSWORD"),
-    )  # Graylog username is always "admin"
-    hed = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "X-Requested-By": "cli",
-    }
-    url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/system/inputs"
-    r = getGraylogInputs(session, hed, url)
-    if int(r.json()["total"]) == 0:
-        print("No input found.")
-        json_data = {
-            "title": "standard GELF UDP input",
-            "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
-            "global": "true",
-            "configuration": {"bind_address": "0.0.0.0", "port": 12201},
-        }
-        json_dump = json.dumps(json_data)
-        r = session.post(url, headers=hed, data=json_dump, verify=False)
-        if r.status_code == 201:
-            print("Input added with success !")
+    r = session.get(url, headers=hed, verify=False)
+    if (
+        len(
+            [
+                noti
+                for noti in r.json()["notifications"]
+                if noti["title"]
+                == "Graylog " + env.str("MACHINE_FQDN") + " Slack notification"
+            ]
+        )
+        == 0
+    ):
+        raw_data = (
+            '{"title":"Graylog '
+            + env.str("MACHINE_FQDN")
+            + """ Slack notification","description":"Slack notification","config": {
+            "color": "#FF0000",
+            "webhook_url": \""""
+            + env.str("GRAYLOG_SLACK_WEBHOOK_URL")
+            + """\",
+            "channel": "#"""
+            + env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
+            + """\",
+            "custom_message":"--- [Event Definition] ---------------------------\\nTitle:       ${event_definition_title}\\nType:        ${event_definition_type}\\n--- [Event] --------------------------------------\\nTimestamp:            ${event.timestamp}\\nMessage:              ${event.message}\\nSource:               ${event.source}\\nKey:                  ${event.key}\\nPriority:             ${event.priority}\\nAlert:                ${event.alert}\\nTimestamp Processing: ${event.timestamp}\\nTimerange Start:      ${event.timerange_start}\\nTimerange End:        ${event.timerange_end}\\nEvent Fields:\\n${foreach event.fields field}\\n${field.key}: ${field.value}\\n${end}\\n${if backlog}\\n--- [Backlog] ------------------------------------\\nLast messages accounting for this alert:\\n${foreach backlog message}\\n"""
+            + "https://monitoring."
+            + env.str("MACHINE_FQDN")
+            + "/graylog/messages"
+            + """/${message.index}/${message.id}\\n${end}${end}\\n",
+            "user_name": "Graylog",
+            "notify_channel": true,
+            "link_names": false,
+            "icon_url": \""""
+            + env.str("GRAYLOG_SLACK_WEBHOOK_ICON_URL")
+            + """\",
+            "icon_emoji": "",
+            "backlog_size": 5,
+            "type": "slack-notification-v1"}}"""
+        )
+        r = session.post(url, headers=hed, verify=False, data=raw_data.encode("utf-8"))
+        if r.status_code == 200:
+            print("Slack Notification added with success !")
         else:
             print(
-                "Error while adding the input. Status code of the request : "
+                "Error while adding the Slack Notification. Status code of the request : "
                 + str(r.status_code)
                 + " "
                 + r.text
             )
-            print(r.json())
+            exit(1)
     else:
-        print(str(r.json()["total"]) + " input(s) have been found.")
+        print("Graylog Slack Notification already present - skipping...")
+    # Keeping notification ID
+    r = session.get(url, headers=hed, verify=False)
+    slackNotificationID = [
+        noti
+        for noti in r.json()["notifications"]
+        if noti["title"] == "Graylog " + env.str("MACHINE_FQDN") + " Slack notification"
+    ][0]["id"]
 
-    #
-    # Configure sending email notifications
-    if env.str("GRAYLOG_ALERT_MAIL_ADDRESS") != "":
-        url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/events/notifications"
+    return slackNotificationID
+
+
+def configure_email_notifications():
+    url = (
+        "https://monitoring."
+        + env.str("MACHINE_FQDN")
+        + "/graylog/api/events/notifications"
+    )
+    r = session.get(url, headers=hed, verify=False)
+    if (
+        len(
+            [
+                noti
+                for noti in r.json()["notifications"]
+                if noti["title"]
+                == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
+            ]
         )
-        r = session.get(url, headers=hed, verify=False)
-        if (
-            len(
-                [
-                    noti
-                    for noti in r.json()["notifications"]
-                    if noti["title"]
-                    == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
-                ]
-            )
-            == 0
-        ):
-            raw_data = (
-                '{"title":"Graylog '
-                + env.str("MACHINE_FQDN")
-                + ' mail notification","description":"","config":{"sender":"","subject":"Graylog event notification: ${event_definition_title}","user_recipients":[],"email_recipients":["'
-                + env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
-                + '"],"type":"email-notification-v1"}}'
-            )
-            r = session.post(url, headers=hed, data=raw_data, verify=False)
-            if r.status_code == 200:
-                print("Mail Notification added with success !")
-            else:
-                print(
-                    "Error while adding the Mail Notification. Status code of the request : "
-                    + str(r.status_code)
-                    + " "
-                    + r.text
-                )
-                exit(1)
-        else:
-            print("Graylog Mail Notification already present - skipping...")
-        # Keeping notification ID
-        r = session.get(url, headers=hed, verify=False)
-        mailNotificationID = [
-            noti
-            for noti in r.json()["notifications"]
-            if noti["title"]
-            == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
-        ][0]["id"]
-
-    #
-    # Configure sending Slack notifications
-    if env.str("GRAYLOG_SLACK_WEBHOOK_URL") != "":
-        url = (
-            "https://monitoring."
+        == 0
+    ):
+        raw_data = (
+            '{"title":"Graylog '
             + env.str("MACHINE_FQDN")
-            + "/graylog/api/events/notifications"
+            + ' mail notification","description":"","config":{"sender":"","subject":"Graylog event notification: ${event_definition_title}","user_recipients":[],"email_recipients":["'
+            + env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
+            + '"],"type":"email-notification-v1"}}'
         )
-        r = session.get(url, headers=hed, verify=False)
-        if (
-            len(
-                [
-                    noti
-                    for noti in r.json()["notifications"]
-                    if noti["title"]
-                    == "Graylog " + env.str("MACHINE_FQDN") + " Slack notification"
-                ]
-            )
-            == 0
-        ):
-            raw_data = (
-                '{"title":"Graylog '
-                + env.str("MACHINE_FQDN")
-                + """ Slack notification","description":"Slack notification","config": {
-	    	    "color": "#FF0000",
-	    	    "webhook_url": \""""
-                + env.str("GRAYLOG_SLACK_WEBHOOK_URL")
-                + """\",
-	    	    "channel": "#"""
-                + env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
-                + """\",
-                "custom_message":"--- [Event Definition] ---------------------------\\nTitle:       ${event_definition_title}\\nType:        ${event_definition_type}\\n--- [Event] --------------------------------------\\nTimestamp:            ${event.timestamp}\\nMessage:              ${event.message}\\nSource:               ${event.source}\\nKey:                  ${event.key}\\nPriority:             ${event.priority}\\nAlert:                ${event.alert}\\nTimestamp Processing: ${event.timestamp}\\nTimerange Start:      ${event.timerange_start}\\nTimerange End:        ${event.timerange_end}\\nEvent Fields:\\n${foreach event.fields field}\\n${field.key}: ${field.value}\\n${end}\\n${if backlog}\\n--- [Backlog] ------------------------------------\\nLast messages accounting for this alert:\\n${foreach backlog message}\\n"""
-                + "https://monitoring."
-                + env.str("MACHINE_FQDN")
-                + "/graylog/messages"
-                + """/${message.index}/${message.id}\\n${end}${end}\\n",
-	    	    "user_name": "Graylog",
-	    	    "notify_channel": true,
-	    	    "link_names": false,
-	    	    "icon_url": \""""
-                + env.str("GRAYLOG_SLACK_WEBHOOK_ICON_URL")
-                + """\",
-	    	    "icon_emoji": "",
-	    	    "backlog_size": 5,
-	    	    "type": "slack-notification-v1"}}"""
-            )
-            r = session.post(
-                url, headers=hed, verify=False, data=raw_data.encode("utf-8")
-            )
-            if r.status_code == 200:
-                print("Slack Notification added with success !")
-            else:
-                print(
-                    "Error while adding the Slack Notification. Status code of the request : "
-                    + str(r.status_code)
-                    + " "
-                    + r.text
-                )
-                exit(1)
+        r = session.post(url, headers=hed, data=raw_data, verify=False)
+        if r.status_code == 200:
+            print("Mail Notification added with success !")
         else:
-            print("Graylog Slack Notification already present - skipping...")
-        # Keeping notification ID
-        r = session.get(url, headers=hed, verify=False)
-        slackNotificationID = [
-            noti
-            for noti in r.json()["notifications"]
-            if noti["title"]
-            == "Graylog " + env.str("MACHINE_FQDN") + " Slack notification"
-        ][0]["id"]
+            print(
+                "Error while adding the Mail Notification. Status code of the request : "
+                + str(r.status_code)
+                + " "
+                + r.text
+            )
+            exit(1)
+    else:
+        print("Graylog Mail Notification already present - skipping...")
+    # Keeping notification ID
+    r = session.get(url, headers=hed, verify=False)
+    mailNotificationID = [
+        noti
+        for noti in r.json()["notifications"]
+        if noti["title"] == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
+    ][0]["id"]
 
-    #
-    # Configure log retention time
+    return mailNotificationID
+
+
+def configure_log_retention():
     try:
         url = (
             "https://monitoring."
@@ -328,7 +283,8 @@ if __name__ == "__main__":
     except EnvError as e:
         print("Error setting up graylog syslog capturing.")
 
-    # Configure Alerts
+
+def configure_alerts():
     print("Configuring Graylog Alerts...")
     with open("alerts.yaml") as f:
         data = yaml.load(f, Loader=SafeLoader)
@@ -356,11 +312,14 @@ if __name__ == "__main__":
         r = session.get(url, headers=hed, params={"per_page": 2500}, verify=False)
         if r.status_code == 200:
             alreadyPresentAlerts = r.json()["event_definitions"]
-            for presentAlert in alreadyPresentAlerts:
+            for presentAlert in filter(
+                lambda e: e["title"] != "System notification events",
+                alreadyPresentAlerts,
+            ):
                 resp = session.delete(
                     url + "/" + str(presentAlert["id"]), headers=hed, verify=False
                 )
-                if resp.status_code == 204:
+                if resp.ok:
                     print("Alert successfully deleted: " + str(presentAlert["title"]))
                 else:
                     print(
@@ -368,6 +327,7 @@ if __name__ == "__main__":
                         + str(resp.status_code)
                         + "!"
                     )
+                    print(resp.status_code)
                     print(resp.json())
                     exit(1)
         for i in data:
@@ -389,8 +349,10 @@ if __name__ == "__main__":
                 print("Could not add alert. Failure:", resp.status_code)
                 print(resp.json())
                 exit(1)
-    # Configure Dashboards
-    print("Configuring Graylog Dashbaords...")
+
+
+def configure_dashboards():
+    print("Configuring Graylog Dashboards...")
     with open("dashboards.yaml") as f:
         data = yaml.load(f, Loader=SafeLoader)
         url = (
@@ -402,13 +364,13 @@ if __name__ == "__main__":
         if r.status_code == 200:
             totalDashboards = r.json()["total"]
             totalDashboards = int(totalDashboards)
-            alreadyPresentDashboards = r.json()["views"]
+            alreadyPresentDashboards = r.json()
             url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/views"
-            for presentDashboard in alreadyPresentDashboards:
+            for presentDashboard in alreadyPresentDashboards["elements"]:
                 resp = session.delete(
                     url + "/" + str(presentDashboard["id"]), headers=hed, verify=False
                 )
-                if resp.status_code == 200:
+                if resp.ok:
                     print(
                         "Dashboard successfully deleted: "
                         + str(presentDashboard["title"])
@@ -519,3 +481,152 @@ if __name__ == "__main__":
         print("[Such as: Remove & Re-Add a single letter]")
         print("Then, the dashboard will work. Make sure to save it.")
         print("###################################")
+
+
+def configure_content_packs(session, headers, base_url):
+    def get_installation(content_pack):
+        logger.debug(f"Getting installations for content pack {content_pack['id']}")
+        resp = session.get(
+            base_url + "/system/content_packs/" + content_pack["id"] + "/installations"
+        )
+
+        if not resp.ok:
+            raise RuntimeError(
+                f"Unexpected error while getting installations for content pack {content_pack['id']}"
+            )
+
+        installations = resp.json()["installations"]
+
+        if len(installations) > 1:
+            raise RuntimeError(f"<= 1 installations expected got {len(installations)}")
+
+        return installations[0] if installations else None
+
+    def delete_installation(content_pack, installation):
+        logger.debug(f"Deleting installation {installation['_id']}")
+
+        resp = session.delete(
+            base_url
+            + "/system/content_packs/"
+            + content_pack["id"]
+            + "/installations/"
+            + installation["_id"],
+            headers=headers,
+        )
+
+        if not resp.ok:
+            raise RuntimeError(
+                f"Error while deleting installation {installation['_id']} for content pack {content_pack['id']}"
+            )
+
+    def create_content_pack_revision(content_pack):
+        logger.debug(
+            f"Uploading content pack {content_pack['id']} revision {content_pack['rev']}"
+        )
+        resp = session.post(
+            base_url + "/system/content_packs", json=content_pack, headers=headers
+        )
+
+        if resp.ok:
+            pass
+        elif resp.status_code == 400:
+            logger.debug(
+                f"Content pack {content_pack['id']} revision {content_pack['rev']} is already uploaded"
+            )
+        else:
+            raise RuntimeError(
+                f"Unexpected {resp.status_code=} while uploading content pack {content_pack['id']} revision {content_pack['rev']}. Error: {resp.text}"
+            )
+
+    def install_content_pack_revision(content_pack):
+        logger.debug(
+            f"Installing content pack {content_pack['id']} revision {content_pack['rev']}"
+        )
+
+        resp = session.post(
+            base_url
+            + f"/system/content_packs/{content_pack['id']}/{content_pack['rev']}/installations",
+            json={"comment": "Installed by configure.py script"},
+            headers=headers,
+        )
+
+        if not resp.ok:
+            raise RuntimeError(f"Unexpected {resp.status_code=} {resp.text=}")
+
+    logger.info("Configuring content packs")
+
+    for file in os.listdir("../data/contentpacks"):
+        with open(f"../data/contentpacks/{file}") as f:
+            logger.debug(f"Configuring content pack {f.name}")
+            content_pack = json.loads(f.read())
+
+        create_content_pack_revision(content_pack)
+
+        installation = get_installation(content_pack)
+
+        if not installation:
+            install_content_pack_revision(content_pack)
+        elif installation["content_pack_revision"] != content_pack["rev"]:
+            delete_installation(content_pack, installation)
+            install_content_pack_revision(content_pack)
+        else:
+            logger.debug(
+                "This revision of content pack is already installed. Nothing to do..."
+            )
+
+        logging.info(f"{f.name} content pack has been configured")
+
+
+if __name__ == "__main__":
+    print(
+        "Waiting for graylog to run for provisioning. This can take up to some minutes, please be patient..."
+    )
+    try:
+        checkGraylogOnline()
+    except Exception as e:
+        print(e)
+        print("Exception or: Graylog is still not online.")
+        print("Graylog script will now stop.")
+        exit(1)
+
+    session = requests.Session()
+    session.verify = False
+    session.auth = (
+        "admin",
+        env.str("SERVICES_PASSWORD"),
+    )  # Graylog username is always "admin"
+    hed = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-Requested-By": "cli",
+    }
+    url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/system/inputs"
+    r = getGraylogInputs(session, hed, url)
+
+    # Configure sending email notifications
+    if env.str("GRAYLOG_ALERT_MAIL_ADDRESS") != "":
+        mailNotificationID = configure_email_notifications()
+
+    # Configure sending Slack notifications
+    if env.str("GRAYLOG_SLACK_WEBHOOK_URL") != "":
+        slackNotificationID = configure_slack_notifications
+
+    # Configure log retention time
+    configure_log_retention()
+
+    # Configure Alerts
+    configure_alerts()
+
+    # Configure Dashboards
+    configure_dashboards()
+
+    # content pack will create GELF UDP Input
+    # NOTE: When you introduce changes, revision number increase is mandatory
+    # we cannot use auto loader since it doesn't properly update content packs.
+    # Autoloader is only good at loading content packs first time but not updating / adding new ones to existing.
+    # https://community.graylog.org/t/update-content-packs-using-autoloading-functionality/6205
+    # https://github.com/Graylog2/graylog2-server/issues/14672
+    content_pack_base_url = (
+        "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api"
+    )
+    configure_content_packs(session, hed, content_pack_base_url)

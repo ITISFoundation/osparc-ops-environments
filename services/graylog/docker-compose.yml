@@ -56,10 +56,6 @@ services:
       # Username: admin
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
       - GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}
-      # Loading & install our custom content pack
-      - GRAYLOG_CONTENT_PACKS_LOADER_ENABLED=true
-      - GRAYLOG_CONTENT_PACKS_DIR=/files
-      - GRAYLOG_CONTENT_PACKS_AUTO_INSTALL=osparc-custom-content-pack-v2.json
     networks:
       - public
       - default

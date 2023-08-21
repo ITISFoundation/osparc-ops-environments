@@ -1,5 +1,6 @@
 ARG UBUNTU_VERSION="focal-20230412"
 FROM ubuntu:${UBUNTU_VERSION} as base
+ENV PYTHON_VERSION 3.10.12
 #
 LABEL maintainer=dkaiser
 
@@ -45,20 +46,54 @@ COPY mozillateam.pref /etc/apt/preferences.d/mozillateam.pref
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   build-essential \
+  ca-certificates \
   curl \
-  firefox=114.0.2+build1-0ubuntu0.20.04.1 \
+  firefox=116.0.2+build1-0ubuntu0.20.04.1 \
   gettext-base \
   git \
   jq \
+  llvm \
   make \
   openssl \
   openssh-client \
   python3-pip \
   python3.9-venv \
+  python-is-python3 \
   unzip \
   wget \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Install pyenv, modified from https://gist.github.com/jprjr/7667947?permalink_comment_id=3684823#gistcomment-3684823
+
+#Set of all dependencies needed for pyenv to work on Ubuntu
+RUN apt-get update \
+        && apt-get install -y --no-install-recommends \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libncurses5-dev \
+        xz-utils \
+        tk-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        libffi-dev \
+        liblzma-dev \
+        mecab-ipadic-utf8 git
+
+# Set-up necessary Env vars for PyEnv
+ENV PYENV_ROOT /root/.pyenv
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+
+# Install pyenv
+RUN set -ex \
+    && curl https://pyenv.run | bash \
+    && pyenv update \
+    && pyenv install $PYTHON_VERSION \
+    && pyenv global $PYTHON_VERSION \
+    && pyenv rehash
 
 # Install minio mc
 RUN echo "------------------------------------------------------ minio/mc" \
@@ -87,6 +122,17 @@ RUN echo "------------------------------------------------------ terraform" \
     && cd /tmp && wget https://releases.hashicorp.com/terraform/1.5.1/terraform_1.5.1_linux_amd64.zip \
     && unzip terraform_1.5.1_linux_amd64.zip  -d /usr/local/bin \
     && rm /tmp/terraform_1.5.1_linux_amd64.zip
+
+# Install dind docker
+RUN mkdir -p /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
+  docker-ce-cli \
+  containerd.io \
+  docker-compose-plugin
 
 WORKDIR /home/scu
 

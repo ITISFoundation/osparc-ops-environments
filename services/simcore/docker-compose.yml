@@ -1,9 +1,43 @@
-# osparc-simcore stack (framework stack)
-# NOTES :
-# LOGSPOUT_MULTILINE is used to tell to Logspout, which is used by GrayLog, to handle multiline support of the logs of the concerned container. Please add with every new osparc-simcore service.
-# See this issue to have more informations : https://github.com/ITISFoundation/osparc-ops/issues/40
 version: "3.8"
 services:
+  clusters-keeper:
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-WARNING}
+      - LOG_FORMAT_LOCAL_DEV_ENABLED=${LOG_FORMAT_LOCAL_DEV_ENABLED}
+      - CLUSTERS_KEEPER_LOGLEVEL=${LOG_LEVEL:-INFO}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - RABBIT_HOST=${RABBIT_HOST}
+      - RABBIT_PASSWORD=${RABBIT_PASSWORD}
+      - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_SECURE=${RABBIT_SECURE}
+      - RABBIT_USER=${RABBIT_USER}
+    deploy:
+      labels: []
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
+          cpus: '0.5' # For now: same as autoscaling service
+        reservations:
+          memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
+          cpus: '0.5' # For now: same as autoscaling service
+      placement:
+        constraints:
+          - node.labels.simcore==true
+
   autoscaling:
     environment:
       - EC2_ACCESS_KEY_ID=${AUTOSCALING_EC2_ACCESS_KEY_ID} # defines the access key to EC2
@@ -23,6 +57,7 @@ services:
       - RABBIT_HOST=${RABBIT_HOST}
       - RABBIT_PASSWORD=${RABBIT_PASSWORD}
       - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_SECURE=${RABBIT_SECURE}
       - RABBIT_USER=${RABBIT_USER}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
@@ -61,9 +96,6 @@ services:
       - LOGLEVEL=WARNING
       - AGENT_VOLUMES_CLEANUP_TARGET_SWARM_STACK_NAME=${AGENT_VOLUMES_CLEANUP_TARGET_SWARM_STACK_NAME}
     deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar==true
       update_config:
         parallelism: 2
         order: stop-first
@@ -77,6 +109,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.dynamicsidecar == true
     extra_hosts: []
   api-server:
     networks:
@@ -107,6 +142,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
     extra_hosts: []
 
   catalog:
@@ -129,6 +167,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
 
   static-webserver:
     environment:
@@ -156,6 +197,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
   invitations:
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
@@ -175,6 +219,9 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.priority=1
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_invitations_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations_swagger.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_invitations_swagger_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
+      placement:
+        constraints:
+          - node.labels.simcore==true
   webserver:
     networks:
       - public
@@ -218,6 +265,10 @@ services:
         max_attempts: 3
         window: 120s
       replicas: 3
+      placement:
+        constraints:
+          - node.labels.simcore==true
+
     extra_hosts: []
 
   wb-db-event-listener:
@@ -244,7 +295,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+      placement:
+        constraints:
+          - node.labels.simcore == true
   wb-garbage-collector:
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
@@ -265,7 +318,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+      placement:
+        constraints:
+          - node.role==manager
   storage:
     environment:
       - LOGSPOUT_MULTILINE=true
@@ -290,6 +345,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
   director:
     # Certificate necessary for local deploiement only
     #secrets:
@@ -375,6 +433,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.dasksidecar==true
   dask-scheduler:
     networks:
       - public
@@ -394,6 +455,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
@@ -428,6 +492,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
   migration:
     environment:
       - LOGSPOUT_MULTILINE=true
@@ -438,6 +505,9 @@ services:
           cpus: '1.000'
         reservations:
           memory: 180M
+      placement:
+        constraints:
+          - node.labels.simcore==true
   rabbit:
     networks:
       - monitored
@@ -470,6 +540,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.rabbit==true
   redis:
     networks:
       - monitored
@@ -489,7 +562,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+      placement:
+        constraints:
+          - node.labels.redis==true
   resource-usage-tracker:
     networks:
       - monitored
@@ -513,7 +588,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+      placement:
+        constraints:
+          - node.labels.simcore==true
 
   postgres:
     networks:
@@ -607,6 +684,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.traefik==true
   traefik_api:
     # NOTE: this is a trick to allow to access the internal traefik REST API
     # A comment
@@ -645,6 +725,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.labels.traefik==true
   whoami:
     image: "containous/whoami:v1.5.0"
     networks:
@@ -676,7 +759,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+      placement:
+        constraints:
+          - node.labels.ops==true
 volumes:
   rabbit_data:
     name: ${SWARM_STACK_NAME}_rabbit_data
