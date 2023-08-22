@@ -180,7 +180,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/electrode-selector.*$\",container_label_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/electrode-selector.*$\",container_label_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/electrode-selector.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/electrode-selector.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -273,7 +273,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/sim4life-postpro.*$\",container_label_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/sim4life-postpro.*$\",container_label_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/sim4life-postpro.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/sim4life-postpro.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -366,7 +366,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/ti-postpro.*$\",container_label_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/ti-postpro.*$\",container_label_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/ti-postpro.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*/simcore/services/dynamic/ti-postpro.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
