@@ -383,7 +383,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
