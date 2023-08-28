@@ -20,6 +20,13 @@ services:
       placement:
         constraints:
           - node.labels.pgbackup==true
+      resources:
+        limits:
+          memory: 6G
+          cpus: "0.01"
+        reservations:
+          memory: 6G
+          cpus: "0.01"
 networks:
   monitored:
     name: ${MONITORED_NETWORK}

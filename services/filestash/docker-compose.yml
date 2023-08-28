@@ -21,7 +21,11 @@ services:
         - traefik.http.routers.filestash.middlewares=ops_whitelist_ips@docker
       resources:
         limits:
-          memory: 512M
+          memory: 120M
+          cpus: "0.01"
+        reservations:
+          memory: 120M
+          cpus: "0.01"
   onlyoffice:
     image: onlyoffice/documentserver:7.4.0
     networks:

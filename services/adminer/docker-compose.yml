@@ -25,8 +25,11 @@ services:
       resources:
         limits:
           memory: 128M
+          cpus: "0.01"
         reservations:
           memory: 64M
+          cpus: "0.01"
+
 
 networks:
   public:
