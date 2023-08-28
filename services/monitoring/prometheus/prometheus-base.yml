@@ -97,47 +97,9 @@ scrape_configs:
       # this would require soffisticated regex parsing
       # To use these: # KEEP: container_label_simcore_service_settings
       #
-      #- source_labels: [container_label_simcore_service_settings]
-      #  separator: ;
-      #  regex: '^\"(.*)?(\"type\": \"Resources\", \"value\": \{\"Limits\": (\{".*\})?\{\"NanoCPUs\": )(\d*)([,\}])'
-      #  target_label: docker_service_resources_nanocpu_limit
-      #  replacement: ${4}
-      #  action: replace
-      #- source_labels: [container_label_simcore_service_settings]
-      #  separator: ;
-      #  regex: '^\"(.*)?(\"type\": \"Resources\", \"value\": \{\"Limits\": \{)(\{".*\})?(\".*\"\: \d+[,\}] )?(\"MemoryBytes\": )(\d*)([\}])'
-      #  target_label: docker_service_resources_memorybytes_limit
-      #  replacement: ${6}
-      #  action: replace
-      #- source_labels: [container_label_simcore_service_settings]
-      #  separator: ;
-      #  regex: '^\"(.*)?(\"type\": \"Resources\", \"value\": \{)("Limits".*, )?(\"Reservations\": (\{".*\})?\{\"NanoCPUs\": )(\d*)([,\}])'
-      #  target_label: docker_service_resources_nanocpu_reservation
-      #  replacement: ${6}
-      #  action: replace
-      #- source_labels: [container_label_simcore_service_settings]
-      #  separator: ;
-      #  regex: '^\"(.*)?(\"type\": \"Resources\", \"value\": \{)(.*, )?(\"Reservations\": )(\{".*\})?\{(".*": \d+[,\}] )?(\"MemoryBytes\": )(\d*)([,\}])'
-      #  target_label: docker_service_resources_nanocpu_reservation
-      #  replacement: ${8}
-      #  action: replace
-      #- source_labels: [container_label_simcore_service_settings]
-      #  separator: ;
-      #  regex: '^"(.*)?("GenericResources": \[\{"DiscreteResourceSpec": )(.*)(\{"Kind": "VRAM", "Value": )(\d+)'
-      #  target_label: docker_service_resources_vram_reservation
-      #  replacement: ${5}
-      #  action: replace
-      #- source_labels: [container_label_simcore_service_settings]
-      #  separator: ;
-      #  regex: '^"(.*)?("GenericResources": \[\{"DiscreteResourceSpec": )(.*)(\{"Kind": "AIRAM", "Value": )(\d+)'
-      #  target_label: docker_service_resources_vram_reservation
-      #  replacement: ${5}
-      #  action: replace
       - regex: "container_label_com_docker_compose_config_hash"
         action: labeldrop  # cAdvisor pruning
       - regex: "container_label_com_docker_compose_container_number"
-        action: labeldrop  # cAdvisor pruning
-      - regex: "container_label_io_simcore_.*"
         action: labeldrop  # cAdvisor pruning
       - regex: "container_label_simcore_service_compose_spec"
         action: labeldrop  # cAdvisor pruning
@@ -157,7 +119,26 @@ scrape_configs:
         action: labeldrop  # cAdvisor pruning
       - regex: "container_label_maintainer"
         action: labeldrop  # cAdvisor pruning
-
+      - regex: "container_label_com_docker_compose_project_working_dir"
+        action: labeldrop
+      - regex: "container_label_io_simcore_contact"
+        action: labeldrop
+      - regex: "container_label_io_simcore_authors"
+        action: labeldrop
+      - regex: "container_label_io_simcore_description"
+        action: labeldrop
+      - regex: "container_label_io_simcore_inputs"
+        action: labeldrop
+      - regex: "container_label_io_simcore_key"
+        action: labeldrop
+      - regex: "container_label_io_simcore_outputs"
+        action: labeldrop
+      - regex: "container_label_io_simcore_runtime_swarm_stack_name"
+        action: labeldrop
+      - regex: "container_label_io_simcore_thumbnail"
+        action: labeldrop
+      - regex: "container_label_simcore_service_settings"
+        action: labeldrop
 
 ### Used:
 # container_label_com_docker_swarm_node_id
