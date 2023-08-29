@@ -24,10 +24,10 @@ services:
       resources:
         limits:
           memory: 192M
-          cpus: "0.05"
+          cpus: "0.5"
         reservations:
           memory: 64M
-          cpus: "0.05"
+          cpus: "0.5"
 
 networks:
   public:

@@ -25,10 +25,10 @@ services:
       resources:
         limits:
           memory: 128M
-          cpus: "0.01"
+          cpus: "0.5"
         reservations:
           memory: 64M
-          cpus: "0.01"
+          cpus: "0.5"
 
 
 networks:
