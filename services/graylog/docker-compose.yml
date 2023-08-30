@@ -11,6 +11,13 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+      resources:
+        limits:
+          memory: 1.2G
+          cpus: "1"
+        reservations:
+          memory: 1.2G
+          cpus: "1"
     networks:
       default:
         aliases:
@@ -35,6 +42,10 @@ services:
       resources:
         limits:
           memory: 1G
+          cpus: "1"
+        reservations:
+          memory: 1G
+          cpus: "1"
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:5.1.4
@@ -68,11 +79,11 @@ services:
         condition: on-failure
       resources:
         limits:
-          cpus: "8.00"
-          memory: 8G
+          cpus: "2.00"
+          memory: 5G
         reservations:
-          cpus: "4.00"
-          memory: 4G
+          cpus: "2.00"
+          memory: 5G
 
       labels:
         - traefik.enable=true
