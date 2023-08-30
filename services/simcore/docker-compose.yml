@@ -393,6 +393,7 @@ services:
       - R_CLONE_PROVIDER=${R_CLONE_PROVIDER}
       - R_CLONE_ENABLED=${R_CLONE_ENABLED}
       - DYNAMIC_SIDECAR_LOG_LEVEL=${DYNAMIC_SIDECAR_LOG_LEVEL}
+      - DIRECTOR_V2_LOGLEVEL=${DIRECTOR_V2_LOGLEVEL}
       # needed to pass the self-signed certificate to the spawned services
       #- DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
       # - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=some_id
