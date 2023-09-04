@@ -23,9 +23,11 @@ services:
         - traefik.http.routers.redis.middlewares=ops_auth@docker, ops_gzip@docker, ops_whitelist_ips@docker
       resources:
         limits:
-          memory: 128M
+          memory: 192M
+          cpus: "0.5"
         reservations:
           memory: 64M
+          cpus: "0.5"
 
 networks:
   public:

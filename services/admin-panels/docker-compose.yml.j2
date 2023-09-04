@@ -97,7 +97,11 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: 2048M
+          memory: "2G"
+          cpus: "1"
+        reservations:
+          memory: "2G"
+          cpus: "1"
 
 networks:
   public:
