@@ -14,7 +14,7 @@ services:
       replicas: 0
   resource-usage-tracker:
     deploy:
-      replicas: 0
+      replicas: 3
   static-webserver:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
   traefik:
