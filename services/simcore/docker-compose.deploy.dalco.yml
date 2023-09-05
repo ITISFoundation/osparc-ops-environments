@@ -19,7 +19,7 @@ services:
           - node.role == worker
   resource-usage-tracker:
     deploy:
-      replicas: 0
+      replicas: 3
   traefik:
     command:
       - "--api=true"
