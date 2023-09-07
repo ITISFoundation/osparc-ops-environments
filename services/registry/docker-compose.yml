@@ -37,7 +37,8 @@ services:
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.registry.loadbalancer.server.port=5000
-        - traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)
+        # temp fix by YH 09/2023 to handle new domain `osparc-staging.io`
+        - traefik.http.routers.registry.rule=(Host(`${REGISTRY_DOMAIN}`) || Host('registry.osparc-staging.io'))
         - traefik.http.routers.registry.entrypoints=https
         - traefik.http.routers.registry.tls=true
         - traefik.http.routers.registry.priority=10
