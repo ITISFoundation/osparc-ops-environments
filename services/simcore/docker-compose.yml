@@ -54,6 +54,7 @@ services:
       - EC2_INSTANCES_KEY_NAME=${AUTOSCALING_EC2_INSTANCES_KEY_NAME} # defines the used Key name for the EC2 instances
       - NODES_MONITORING_NODE_LABELS=${AUTOSCALING_NODES_MONITORING_NODE_LABELS} # defines the labels to check for on the nodes (i.e. ["dynamicsidecar"])
       - NODES_MONITORING_SERVICE_LABELS=${AUTOSCALING_NODES_MONITORING_SERVICE_LABELS} # optional defines the label to check for on the monitored services
+      - NODES_MONITORING_NEW_NODES_LABELS=${NODES_MONITORING_NEW_NODES_LABELS} # optional defines the name of the monitored service
       - RABBIT_HOST=${RABBIT_HOST}
       - RABBIT_PASSWORD=${RABBIT_PASSWORD}
       - RABBIT_PORT=${RABBIT_PORT}
