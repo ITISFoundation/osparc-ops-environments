@@ -19,7 +19,7 @@ services:
       - .env
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
       placement:
         constraints: [node.role == manager]
       resources:
