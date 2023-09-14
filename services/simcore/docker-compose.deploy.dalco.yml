@@ -65,3 +65,6 @@ services:
         - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
   wb-garbage-collector:
     hostname: "{{.Service.Name}}"
+  clusters-keeper:
+    deploy:
+      replicas: 0
