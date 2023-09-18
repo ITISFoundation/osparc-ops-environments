@@ -46,7 +46,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   build-essential \
   curl \
-  firefox=114.0.2+build1-0ubuntu0.20.04.1 \
+  firefox=117.0.1+build2-0ubuntu0.20.04.1 \
   gettext-base \
   git \
   jq \
@@ -55,6 +55,8 @@ RUN apt-get update \
   openssh-client \
   python3-pip \
   python3.9-venv \
+  python-is-python3 \
+  sshpass \
   unzip \
   wget \
   && apt-get clean \
