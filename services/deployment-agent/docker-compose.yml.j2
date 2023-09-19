@@ -19,9 +19,16 @@ services:
       - .env
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
       placement:
         constraints: [node.role == manager]
+      resources:
+        limits:
+          memory: "400M"
+          cpus: "1"
+        reservations:
+          memory: "400M"
+          cpus: "1"
 networks:
   portainer_agent_network:
     external: true

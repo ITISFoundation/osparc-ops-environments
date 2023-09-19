@@ -11,6 +11,13 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+      resources:
+        limits:
+          memory: 1.2G
+          cpus: "1"
+        reservations:
+          memory: 1.2G
+          cpus: "1"
     networks:
       default:
         aliases:
@@ -35,6 +42,10 @@ services:
       resources:
         limits:
           memory: 1G
+          cpus: "1"
+        reservations:
+          memory: 1G
+          cpus: "1"
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:5.1.4
@@ -56,10 +67,6 @@ services:
       # Username: admin
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
       - GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}
-      # Loading & install our custom content pack
-      - GRAYLOG_CONTENT_PACKS_LOADER_ENABLED=true
-      - GRAYLOG_CONTENT_PACKS_DIR=/files
-      - GRAYLOG_CONTENT_PACKS_AUTO_INSTALL=osparc-custom-content-pack-v2.json
     networks:
       - public
       - default
@@ -72,11 +79,11 @@ services:
         condition: on-failure
       resources:
         limits:
-          cpus: "8.00"
-          memory: 8G
+          cpus: "2.00"
+          memory: 5G
         reservations:
-          cpus: "4.00"
-          memory: 4G
+          cpus: "2.00"
+          memory: 5G
 
       labels:
         - traefik.enable=true

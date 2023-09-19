@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   redis-commander:
-    image: rediscommander/redis-commander:snyk-fix-08c85f17c94a7f00df6fb21e8ea1d10d
+    image: rediscommander/redis-commander:snyk-fix-1841981ea4b1abcbc4c13e21d5d2997d
     init: true
     ports:
       - 8081
@@ -23,9 +23,11 @@ services:
         - traefik.http.routers.redis.middlewares=ops_auth@docker, ops_gzip@docker, ops_whitelist_ips@docker
       resources:
         limits:
-          memory: 128M
+          memory: 192M
+          cpus: "0.5"
         reservations:
           memory: 64M
+          cpus: "0.5"
 
 networks:
   public:

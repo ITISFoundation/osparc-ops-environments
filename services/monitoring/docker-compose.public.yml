@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  cadvisor-exporter:
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+  grafana:
+    dns: 8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.grafana==true
+
+  prometheuscatchall:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
+  prometheuscadvisor:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true

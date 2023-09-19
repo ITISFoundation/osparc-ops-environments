@@ -1,10 +1,10 @@
 # See https://pre-commit.com/hooks.html for more hooks
 exclude: "^.venv$|^.cache$|^.pytest_cache$"
 default_language_version:
-  python: python3.9
+  python: python3.10
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.2.0
+    rev: v4.4.0
     hooks:
       - id: check-added-large-files
         args: ["--maxkb=499"] # ensures docker config compatability for all files
@@ -75,11 +75,9 @@ repos:
     rev: v2.34.0
     hooks:
       - id: pyupgrade
-        args:
-          - "--py39-plus"
         name: upgrade code
   - repo: https://github.com/hadialqattan/pycln
-    rev: v1.2.5
+    rev: v2.2.2
     hooks:
       - id: pycln
         args: [--all, --expand-stars]
@@ -91,7 +89,7 @@ repos:
         args: ["--profile", "black"]
         name: sort imports
   - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.9.0
+    rev: v1.10.0
     hooks:
       - id: python-no-eval
         name: check for the `eval()` built-in python function
@@ -104,7 +102,6 @@ repos:
         (?x)^(
           services/monitoring/prometheus/.*\.rules\.yml
         )$
-
   #- repo: https://github.com/PyCQA/bandit
   #  rev: 1.7.4
   #  hooks:
@@ -116,7 +113,7 @@ repos:
       - id: shellcheck
         name: Shell scripts conform to shellcheck
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.7.0
     hooks:
       - id: black
         name: black format code

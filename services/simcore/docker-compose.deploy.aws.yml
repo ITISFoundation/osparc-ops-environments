@@ -2,65 +2,16 @@ services:
   agent:
     volumes:
       - /docker/volumes/:/docker/volumes/
-    deploy:
-      placement:
-        constraints:
-          - node.role==worker
-  api-server:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  catalog:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  migration:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  rabbit:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.rabbit==true
   dask-sidecar:
     deploy:
       placement:
         constraints:
-          - node.labels.dasksidecar==true
           - node.role == worker
-  dask-scheduler:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  datcore-adapter:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  redis:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.redis==true
   resource-usage-tracker:
     deploy:
-      replicas: 0
-  storage:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
+      replicas: 3
+  static-webserver:
+    hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
   traefik:
     command:
       - "--api=true"
@@ -97,31 +48,3 @@ services:
       resources:
         limits:
           memory: 2048M
-      placement:
-        constraints:
-          - node.labels.traefik==true
-  traefik_api:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  webserver:
-    deploy:
-      replicas: 3
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker
-  wb-garbage-collector:
-    deploy:
-      placement:
-        constraints:
-          - node.platform.os == linux
-          - node.role==manager
-  whoami:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.dynamicsidecar!=true
-          - node.role == worker

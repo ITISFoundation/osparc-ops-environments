@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
-  "rev": 2,
+  "rev": 40,
   "name": "osparc-custom-content-pack-v2",
   "summary": "osparc-custom-content-pack-v2",
   "description": "",
@@ -650,6 +650,51 @@
               "@type": "string",
               "@value": "NONE"
             }
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 0
+            },
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "time=\"%{TIMESTAMP_ISO8601:log_timestamp}\" level=%{WORD:log_level} msg=\"%{GREEDYDATA:log_msg}\""
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "traefik log extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
           }
         ]
       },
@@ -692,6 +737,40 @@
           "type": "server-version",
           "version": ">=5.0.5+d61a926"
         }
+      ]
+    },
+    {
+      "id": "4f5294d2-1d1e-4293-bd59-df5ed21db8e3",
+      "type": {
+          "name": "pipeline",
+          "version": "1"
+      },
+      "v": "1",
+      "data": {
+          "title": {
+              "@type": "string",
+              "@value": "Standardize common values"
+          },
+          "description": {
+              "@type": "string",
+              "@value": "Make common values (e.g. LOG LEVEL) follow the same format (e.g. upper case)"
+          },
+          "source": {
+              "@type": "string",
+              "@value": "pipeline \"Standardize common values\"\nstage 0 match pass\nrule \"uppercase log level\"\nend"
+          },
+          "connected_streams": [
+              {
+                  "@type": "string",
+                  "@value": "000000000000000000000001"
+              }
+          ]
+      },
+      "constraints": [
+          {
+              "type": "server-version",
+              "version": ">=5.1.4+6fa2de3"
+          }
       ]
     },
     {
@@ -748,6 +827,34 @@
           "type": "server-version",
           "version": ">=5.0.5+d61a926"
         }
+      ]
+    },
+    {
+      "id": "e5cd3009-3bbc-4a91-ae8c-41141da55239",
+      "type": {
+          "name": "pipeline_rule",
+          "version": "1"
+      },
+      "v": "1",
+      "data": {
+          "title": {
+              "@type": "string",
+              "@value": "uppercase log level"
+          },
+          "description": {
+              "@type": "string",
+              "@value": "Uppercase log level to have the same format"
+          },
+          "source": {
+              "@type": "string",
+              "@value": "rule \"uppercase log level\"\nwhen\n  has_field(\"log_level\")\nthen\n  let upper_case_level = uppercase(to_string($message.log_level));\n  set_field(\"log_level\", upper_case_level);\nend"
+          }
+      },
+      "constraints": [
+          {
+              "type": "server-version",
+              "version": ">=5.1.4+6fa2de3"
+          }
       ]
     },
     {

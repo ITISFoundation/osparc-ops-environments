@@ -24,7 +24,11 @@ services:
         - prometheus-port=14269
       resources:
         limits:
-          memory: 2048M
+          memory: 200M
+          cpus: "1"
+        reservations:
+          memory: 200M
+          cpus: "1"
 
 networks:
   public:
