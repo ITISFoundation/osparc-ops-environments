@@ -15,7 +15,8 @@ make down
 1. Create a GELF UDP INPUT
 2. Show incoming messages
 3. All the docker container messages shall be visible
-4. Send a message following through the console:
+4. Use *content packs* to preconfigure dashboards, alerts, pipelines, ...
+5. Send a message following through the console:
 
 ```console
 echo -n '{ "version": "1.1", "host": "example.org", "short_message": "A short message", "level": 5, "_some_info": "foo" }' | nc -w0 -u localhost 12201
