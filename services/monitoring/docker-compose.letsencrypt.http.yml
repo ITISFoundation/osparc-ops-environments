@@ -8,8 +8,8 @@ services:
     deploy:
       labels:
         - traefik.http.routers.grafana.tls.certresolver=lehttpchallenge
-  prometheuscadvisor:
-    deploy:
-      placement:
-        constraints:
-          - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge
+  # prometheuscadvisor:
+  #   deploy:
+  #     placement:
+  #       constraints:
+  #         - traefik.http.routers.prometheus.tls.certresolver=lehttpchallenge

@@ -10,7 +10,7 @@ services:
       labels:
         - traefik.http.routers.grafana.tls.certresolver=myresolver
 
-  prometheuscadvisor:
-    deploy:
-      labels:
-        - traefik.http.routers.prometheus.tls.certresolver=myresolver
+  # prometheuscadvisor:
+  #   deploy:
+  #     labels:
+  #       - traefik.http.routers.prometheus.tls.certresolver=myresolver
