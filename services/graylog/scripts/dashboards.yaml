@@ -143,7 +143,7 @@
           from: 86400
         query:
           type: elasticsearch
-          query_string: "message:\"[0;31mERROR\e[0m:\" OR (message:\"ERROR\" AND NOT
+          query_string: "message:\"[0;31mERROR\" OR (message:\"ERROR\" AND NOT
             container_name:Syslog*)"
         streams: []
       - id: 28b07da9-28ef-4b0b-a505-02bdd7585da4
@@ -165,7 +165,7 @@
           from: 86400
         query:
           type: elasticsearch
-          query_string: "message:\"[0;31mERROR\e[0m:\" OR (message:\"ERROR\" AND NOT
+          query_string: "message:\"[0;31mERROR\" OR (message:\"ERROR\" AND NOT
             container_name:Syslog*)"
         streams: []
       - id: 02e34a4f-e248-4026-8e4d-109b88ca2617
