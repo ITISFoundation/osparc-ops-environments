@@ -48,7 +48,7 @@ RUN apt-get update \
   build-essential \
   ca-certificates \
   curl \
-  firefox=116.0.2+build1-0ubuntu0.20.04.1 \
+  firefox=117.0.1+build2-0ubuntu0.20.04.1 \
   gettext-base \
   git \
   jq \
@@ -59,6 +59,7 @@ RUN apt-get update \
   python3-pip \
   python3.9-venv \
   python-is-python3 \
+  sshpass \
   unzip \
   wget \
   && apt-get clean \
