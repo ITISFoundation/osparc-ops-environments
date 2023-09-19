@@ -350,8 +350,6 @@ def configure_alerts():
                 print(resp.json())
                 exit(1)
 
-
-def configure_dashboards():
     print("Configuring Graylog Dashboards...")
     with open("dashboards.yaml") as f:
         data = yaml.load(f, Loader=SafeLoader)
@@ -616,9 +614,6 @@ if __name__ == "__main__":
 
     # Configure Alerts
     configure_alerts()
-
-    # Configure Dashboards
-    configure_dashboards()
 
     # content pack will create GELF UDP Input
     # NOTE: When you introduce changes, revision number increase is mandatory
