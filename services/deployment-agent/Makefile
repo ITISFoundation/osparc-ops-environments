@@ -62,7 +62,6 @@ up-local: up
 .PHONY: down
 down: ## Stops and remove stack from swarm
 	-@docker stack rm $(STACK_NAME)
-	-@docker stack rm ${SIMCORE_STACK_NAME}
 
 .PHONY: ${DEPLOYMENT_AGENT_CONFIG}
 ${DEPLOYMENT_AGENT_CONFIG}: .env
