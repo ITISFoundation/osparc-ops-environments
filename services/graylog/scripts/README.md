@@ -1,6 +1,7 @@
 # Purpose
 
 This python scripts check if Graylog is running, and add the necessary inputs if the Graylos instance is a new one..
+**Nota bene**:  Use content packs to preconfigure dashboards, ...
 
 # Installation
 

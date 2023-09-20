@@ -1,9 +1,6 @@
-import copy
 import json
 import logging
 import os
-import random
-import uuid
 import warnings
 from time import sleep
 
@@ -351,138 +348,6 @@ def configure_alerts():
                 exit(1)
 
 
-def configure_dashboards():
-    print("Configuring Graylog Dashboards...")
-    with open("dashboards.yaml") as f:
-        data = yaml.load(f, Loader=SafeLoader)
-        url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/dashboards?query=&page=1&per_page=10&sort=title&order=asc"
-        )
-        r = session.get(url, headers=hed)
-        if r.status_code == 200:
-            totalDashboards = r.json()["total"]
-            totalDashboards = int(totalDashboards)
-            alreadyPresentDashboards = r.json()
-            url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/views"
-            for presentDashboard in alreadyPresentDashboards["elements"]:
-                resp = session.delete(
-                    url + "/" + str(presentDashboard["id"]), headers=hed, verify=False
-                )
-                if resp.ok:
-                    print(
-                        "Dashboard successfully deleted: "
-                        + str(presentDashboard["title"])
-                    )
-                else:
-                    print(
-                        "Could not delete a Dashboard. Failure: "
-                        + str(resp.status_code)
-                        + "!"
-                    )
-                    print(resp.json())
-                    exit(1)
-        else:
-            print(
-                "Could not fetch dashboards. Is graylog misconfigured? Exiting with error!"
-            )
-            exit(1)
-
-        for i in data:
-            url = (
-                "https://monitoring."
-                + env.str("MACHINE_FQDN")
-                + "/graylog/api/views/search"
-            )
-            randSearchid = "".join(random.choice("0123456789abcdef") for n in range(24))
-            randUuid = str(uuid.uuid4())
-            print(randSearchid, randUuid)
-            content = {
-                "id": randSearchid,
-                "queries": [
-                    {
-                        "id": randUuid,
-                        "query": {"type": "elasticsearch", "query_string": ""},
-                        "timerange": {"type": "relative", "from": 300},
-                        "search_types": [],
-                    }
-                ],
-                "parameters": [],
-            }
-            resp = session.post(url, headers=hed, json=content)
-            if resp.status_code == 201:
-                print("Search successfully added. ")
-            else:
-                print("Could not add search. Failure:", resp.status_code)
-                print(resp.json())
-                exit(1)
-            url = (
-                "https://monitoring."
-                + env.str("MACHINE_FQDN")
-                + "/graylog/api/views/search/"
-                + str(randSearchid)
-                + "/execute"
-            )
-            resp = session.post(url, headers=hed)
-            if resp.status_code == 201:
-                print("Search successfully executed. ")
-            else:
-                print("Could not execute search. Failure:", resp.status_code)
-                print(resp.json())
-                exit(1)
-            ####
-            url = (
-                "https://monitoring."
-                + env.str("MACHINE_FQDN")
-                + "/graylog/api/views/search/metadata"
-            )
-            content = {
-                "id": randSearchid,
-                "queries": [
-                    {
-                        "id": curQuery["id"],
-                        "query": curQuery["query"],
-                        "timerange": curQuery["timerange"],
-                        "filter": None,
-                        "search_types": [],
-                    }
-                    for curQuery in i["state"][list(i["state"].keys())[0]]["widgets"]
-                ],
-                "parameters": [],
-            }
-            resp = session.post(url, headers=hed, json=content)
-            if resp.status_code == 200:
-                print("Search metadata executed. ")
-            else:
-                print("Could not add metadata for search. Failure:", resp.status_code)
-                print(resp.json())
-                exit(1)
-            ####
-            url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/views"
-            i["search_id"] = str(randSearchid)
-            uuidInFile = list(i["state"].keys())[0]
-            i["state"][randUuid] = copy.deepcopy(i["state"][uuidInFile])
-            del i["state"][uuidInFile]
-            del i["state"][randUuid]["widget_mapping"]
-            i["state"][randUuid]["widget_mapping"] = {}
-            resp = session.post(url, headers=hed, json=i)
-            if resp.status_code == 200:
-                print("Dashboard successfully added: " + str(i["title"]))
-            else:
-                print("Could not add dashboard. Failure:", resp.status_code)
-                print(resp.json())
-                exit(1)
-        print("###################################")
-        print("WARNING: CURRENTLY THERE IS A MINOR BUG W.R.T. DASHBOARDS, PLEASE READ:")
-        print(
-            "Graylog dashboards will be empty, you need to open the dashboard, go to a widget, and modify the graylog search query"
-        )
-        print("[Such as: Remove & Re-Add a single letter]")
-        print("Then, the dashboard will work. Make sure to save it.")
-        print("###################################")
-
-
 def configure_content_packs(session, headers, base_url):
     def get_installation(content_pack):
         logger.debug(f"Getting installations for content pack {content_pack['id']}")
@@ -616,9 +481,6 @@ if __name__ == "__main__":
 
     # Configure Alerts
     configure_alerts()
-
-    # Configure Dashboards
-    configure_dashboards()
 
     # content pack will create GELF UDP Input
     # NOTE: When you introduce changes, revision number increase is mandatory
