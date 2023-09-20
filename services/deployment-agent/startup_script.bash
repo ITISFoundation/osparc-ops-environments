@@ -9,7 +9,7 @@ set -o pipefail
 
 # Argparse via https://stackoverflow.com/a/33826763
 workdir=0
-debug=1
+debug=0
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -w|--workdir) workdir="$2"; shift ;;

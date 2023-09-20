@@ -20,44 +20,6 @@ repos:
       - id: detect-aws-credentials
         exclude: "^certificates/(.*)$"
         args: ["--allow-missing-credentials"]
-  - repo: local
-    hooks:
-      - id: validate-template-dotenv
-        name: Validate template.env
-        description: Validate template.env
-        entry: 'scripts/pre-commit-hooks/validateTemplateDotEnv/launch.bash'
-        always_run: true
-        language: script
-        files: '^(.*)\/services\/(.*)(template\.env)$'
-      - id: validateDockerComposeNoDuplication
-        name: validateDockerComposeNoDuplication
-        description: validateDockerComposeNoDuplication
-        entry: 'scripts/pre-commit-hooks/validateDockerComposeNoDuplication/launch.bash'
-        always_run: true
-        language: script
-        files: '^(.*)(docker-compose.*\.y([a])?ml)$'
-      - id: validateMakeComposeSimcoreRuns
-        name: validateMakeComposeSimcoreRuns
-        description: validateMakeComposeSimcoreRuns
-        entry: 'scripts/pre-commit-hooks/validateMakeComposeSimcoreRuns/launch.bash'
-        always_run: true
-        language: script
-        files: '^(.*)\/services\/simcore/(docker-compose.*\.y([a])?ml)$'
-      - id: no-env-vars-exported-in-critical-pipeline-files
-        name: no-env-vars-exported-in-critical-pipeline-files
-        description: no-env-vars-exported-in-critical-pipeline-files
-        entry: 'scripts/pre-commit-hooks/no-env-vars-exported-in-critical-pipeline-files/launch.bash'
-        exclude: ^(services/maintenance-page/Makefile)$
-        always_run: true
-        language: script
-        files: '^(.*\/Makefile.*)|(.*\.deploy.sh)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
-      - id: stack-yml-generated-is-valid
-        name: stack-yml-generated-is-valid
-        description: stack-yml-generated-is-valid
-        entry: 'scripts/pre-commit-hooks/stack-yml-generated-is-valid/launch.bash'
-        always_run: true
-        language: script
-        files: '^((.*)\/services\/simcore\/(.*))|((.*)\/services\/deployment-agent\/(.*))$'
   # NOTE: Keep order as pyupgrade (will update code) then pycln (remove unused imports), then isort (sort them) and black (final formatting)
   - repo: https://github.com/roy-ht/pre-commit-jupyter
     rev: v1.2.1
@@ -117,3 +79,41 @@ repos:
     hooks:
       - id: black
         name: black format code
+  - repo: local
+    hooks:
+      - id: validate-template-dotenv
+        name: Validate template.env
+        description: Validate template.env
+        entry: 'scripts/pre-commit-hooks/validateTemplateDotEnv/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*)\/services\/(.*)(template\.env)$'
+      - id: validateDockerComposeNoDuplication
+        name: validateDockerComposeNoDuplication
+        description: validateDockerComposeNoDuplication
+        entry: 'scripts/pre-commit-hooks/validateDockerComposeNoDuplication/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*)(docker-compose.*\.y([a])?ml)$'
+      - id: validateMakeComposeSimcoreRuns
+        name: validateMakeComposeSimcoreRuns
+        description: validateMakeComposeSimcoreRuns
+        entry: 'scripts/pre-commit-hooks/validateMakeComposeSimcoreRuns/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*)\/services\/simcore/(docker-compose.*\.y([a])?ml)$'
+      - id: no-env-vars-exported-in-critical-pipeline-files
+        name: no-env-vars-exported-in-critical-pipeline-files
+        description: no-env-vars-exported-in-critical-pipeline-files
+        entry: 'scripts/pre-commit-hooks/no-env-vars-exported-in-critical-pipeline-files/launch.bash'
+        exclude: ^(services/maintenance-page/Makefile)$
+        always_run: true
+        language: script
+        files: '^(.*\/Makefile.*)|(.*\.deploy.sh)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
+      - id: stack-yml-generated-is-valid
+        name: stack-yml-generated-is-valid
+        description: stack-yml-generated-is-valid
+        entry: 'scripts/pre-commit-hooks/stack-yml-generated-is-valid/launch.bash'
+        always_run: true
+        language: script
+        files: '^((.*)\/services\/simcore\/(.*))|((.*)\/services\/deployment-agent\/(.*))$'
