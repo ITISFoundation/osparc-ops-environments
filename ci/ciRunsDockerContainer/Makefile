@@ -20,7 +20,7 @@ build-container: .env ## Build the common docker container that runs the CI runs
 	@set -o allexport; \
 	source $(realpath $(CURDIR)/.env); \
 	set +o allexport; \
-	docker build  --no-cache -t local/$$DOCKER_IMAGE_NAME:dev .;
+	docker build --no-cache -t local/$$DOCKER_IMAGE_NAME:dev .;
 
 .PHONY: build
 build: build-container ## Build the docker container that runs the CI runs
