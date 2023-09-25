@@ -23,3 +23,6 @@ services:
         - prometheus-job=traefik_simcore_production
   wb-garbage-collector:
     hostname: "{{.Service.Name}}"
+  payments:
+    deploy:
+      replicas: 0
