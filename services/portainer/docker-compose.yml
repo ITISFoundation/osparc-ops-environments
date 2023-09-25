@@ -17,8 +17,6 @@ services:
       - agent_network
     deploy:
       mode: global
-      placement:
-        constraints: [node.platform.os == linux]
 
   portainer:
     image: portainer/portainer-ce:2.18.4
