@@ -25,6 +25,7 @@ services:
       - RABBIT_USER=${RABBIT_USER}
     deploy:
       labels: []
+      replicas: 0
       update_config:
         parallelism: 2
         order: start-first
@@ -403,7 +404,6 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - S3_SECURE=${S3_SECURE}
       - R_CLONE_PROVIDER=${R_CLONE_PROVIDER}
-      - R_CLONE_ENABLED=${R_CLONE_ENABLED}
       - DYNAMIC_SIDECAR_LOG_LEVEL=${DYNAMIC_SIDECAR_LOG_LEVEL}
       - DIRECTOR_V2_LOGLEVEL=${DIRECTOR_V2_LOGLEVEL}
       # needed to pass the self-signed certificate to the spawned services
