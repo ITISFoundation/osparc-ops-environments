@@ -68,3 +68,6 @@ services:
   clusters-keeper:
     deploy:
       replicas: 0
+  payments:
+    deploy:
+      replicas: 0

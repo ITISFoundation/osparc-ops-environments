@@ -51,3 +51,7 @@ services:
       resources:
         limits:
           memory: 2048M
+
+  payments:
+    deploy:
+      replicas: 0
