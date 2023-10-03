@@ -11,6 +11,6 @@ python-dotenv==0.20.0
 requests==2.31.0
 tenacity==8.0.1
 typer==0.4.1
-urllib3==1.26.9
+urllib3==1.26.17
 websocket-client==1.3.2
 zipp==3.8.0
