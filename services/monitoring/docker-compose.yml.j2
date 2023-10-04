@@ -78,8 +78,10 @@ services:
       resources:
         limits:
           memory: 4096M
+          cpus: "2"
         reservations:
           memory: 4096M
+          cpus: "0.1"
   prometheuscadvisor:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.46.0
@@ -123,8 +125,11 @@ services:
       resources:
         limits:
           memory: 4096M
+          cpus: ""
         reservations:
-          memory: 4096M
+          memory: 2048M
+          cpus: ""
+
   node-exporter:
     image: prom/node-exporter:v1.6.1
     volumes:
@@ -159,9 +164,10 @@ services:
       resources:
         limits:
           memory: 128M
+          cpus: ""
         reservations:
           memory: 64M
-
+          cpus: ""
   nvidia-exporter:
     image: mindprince/nvidia_gpu_prometheus_exporter:0.1
     networks:
@@ -177,9 +183,11 @@ services:
       mode: global
       resources:
         limits:
-          memory: 128M
-        reservations:
           memory: 64M
+          cpus: ""
+        reservations:
+          memory: 32M
+          cpus: ""
 
   alertmanager:
     image: prom/alertmanager:v0.25.0
@@ -199,9 +207,11 @@ services:
           - node.role==manager
       resources:
         limits:
-          memory: 128M
+          memory: 32M
+          cpus: ""
         reservations:
-          memory: 64M
+          memory: 16M
+          cpus: ""
 
   cadvisor-exporter:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
@@ -222,8 +232,10 @@ services:
       resources:
         limits:
           memory: 256M
+          cpus: ""
         reservations:
-          memory: 256M
+          memory: 128M
+          cpus: ""
 
   docker-events-exporter:
     image: itisfoundation/docker-events-exporter:latest
@@ -240,9 +252,10 @@ services:
       mode: global
       resources:
         limits:
-          memory: 128M
-        reservations:
           memory: 64M
+
+        reservations:
+          memory: 32M
 
   grafana:
     image: grafana/grafana-oss:10.0.3
@@ -271,9 +284,11 @@ services:
         - traefik.http.routers.grafana.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, grafana_replace_regex
       resources:
         limits:
-          memory: 128M
+          memory: 256M
+          cpus: ""
         reservations:
-          memory: 64M
+          memory: 128M
+          cpus: ""
 
   grafana-image-renderer:
     image: grafana/grafana-image-renderer:3.7.1
@@ -286,8 +301,10 @@ services:
       resources:
         limits:
           memory: 512M
+          cpus: ""
         reservations:
           memory: 64M
+          cpus: ""
 
   smokeping-prober-exporter:
     image: quay.io/superq/smokeping-prober:v0.7.1
@@ -311,8 +328,10 @@ services:
       resources:
         limits:
           memory: 128M
+          cpus: ""
         reservations:
-          memory: 64M
+          memory: 32M
+          cpus: ""
 
   dcgm-exporter:
     cap_add:
@@ -329,9 +348,11 @@ services:
           - node.labels.gpu==true
       resources:
         limits:
-          memory: 350M #via trial and error test on tip-deployment DK Aug2023
+          memory: 512M
+          cpus: ""
         reservations:
-          memory: 350M #via trial and error test on tip-deployment DK Aug2023
+          memory: 256M
+          cpus: ""
     labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
@@ -372,8 +393,10 @@ services:
       resources:
         limits:
           memory: 128M
+          cpus: ""
         reservations:
-          memory: 64M
+          memory: 32M
+          cpus: ""
   {{_stack}}-redis-exporter:
     image: oliver006/redis_exporter:v1.52.0-alpine
     networks:
@@ -388,6 +411,8 @@ services:
           - node.labels.prometheus==true
       resources:
         limits:
-          memory: 128M
+          memory: 64M
+          cpus: ""
         reservations:
-          memory: 64M{% endfor %}
+          memory: 32M
+          cpus: ""{% endfor %}
