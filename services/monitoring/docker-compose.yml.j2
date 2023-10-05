@@ -78,10 +78,9 @@ services:
       resources:
         limits:
           memory: 4096M
-          cpus: "2"
         reservations:
           memory: 4096M
-          cpus: "0.1"
+
   prometheuscadvisor:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.46.0
