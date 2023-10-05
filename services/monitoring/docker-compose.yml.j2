@@ -334,7 +334,7 @@ services:
           memory: 512M
         reservations:
           memory: 256M
-              labels:
+      labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
 
@@ -376,7 +376,7 @@ services:
           memory: 128M
         reservations:
           memory: 32M
-            {{_stack}}-redis-exporter:
+  {{_stack}}-redis-exporter:
     image: oliver006/redis_exporter:v1.52.0-alpine
     networks:
       - internal
