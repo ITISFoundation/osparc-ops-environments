@@ -80,6 +80,7 @@ services:
           memory: 4096M
         reservations:
           memory: 4096M
+
   prometheuscadvisor:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.46.0
@@ -124,7 +125,8 @@ services:
         limits:
           memory: 4096M
         reservations:
-          memory: 4096M
+          memory: 2048M
+
   node-exporter:
     image: prom/node-exporter:v1.6.1
     volumes:
@@ -177,9 +179,9 @@ services:
       mode: global
       resources:
         limits:
-          memory: 128M
-        reservations:
           memory: 64M
+        reservations:
+          memory: 32M
 
   alertmanager:
     image: prom/alertmanager:v0.25.0
@@ -199,9 +201,9 @@ services:
           - node.role==manager
       resources:
         limits:
-          memory: 128M
+          memory: 32M
         reservations:
-          memory: 64M
+          memory: 16M
 
   cadvisor-exporter:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
@@ -223,7 +225,7 @@ services:
         limits:
           memory: 256M
         reservations:
-          memory: 256M
+          memory: 128M
 
   docker-events-exporter:
     image: itisfoundation/docker-events-exporter:latest
@@ -240,9 +242,9 @@ services:
       mode: global
       resources:
         limits:
-          memory: 128M
-        reservations:
           memory: 64M
+        reservations:
+          memory: 32M
 
   grafana:
     image: grafana/grafana-oss:10.0.3
@@ -271,9 +273,9 @@ services:
         - traefik.http.routers.grafana.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, grafana_replace_regex
       resources:
         limits:
-          memory: 128M
+          memory: 256M
         reservations:
-          memory: 64M
+          memory: 128M
 
   grafana-image-renderer:
     image: grafana/grafana-image-renderer:3.7.1
@@ -312,7 +314,7 @@ services:
         limits:
           memory: 128M
         reservations:
-          memory: 64M
+          memory: 32M
 
   dcgm-exporter:
     cap_add:
@@ -329,10 +331,10 @@ services:
           - node.labels.gpu==true
       resources:
         limits:
-          memory: 350M #via trial and error test on tip-deployment DK Aug2023
+          memory: 512M
         reservations:
-          memory: 350M #via trial and error test on tip-deployment DK Aug2023
-    labels:
+          memory: 256M
+      labels:
       - prometheus-job=dcgm-exporter
       - prometheus-port=9400
 
@@ -373,7 +375,7 @@ services:
         limits:
           memory: 128M
         reservations:
-          memory: 64M
+          memory: 32M
   {{_stack}}-redis-exporter:
     image: oliver006/redis_exporter:v1.52.0-alpine
     networks:
@@ -388,6 +390,6 @@ services:
           - node.labels.prometheus==true
       resources:
         limits:
-          memory: 128M
+          memory: 64M
         reservations:
-          memory: 64M{% endfor %}
+          memory: 32M{% endfor %}

@@ -53,8 +53,8 @@ services:
           memory: 2048M
           cpus: '3.000'
         reservations:
-          memory: 2048M
-          cpus: '3.000'
+          memory: 500M
+          cpus: '1.000'
       placement:
         constraints:
           - node.role == manager
@@ -147,6 +147,11 @@ services:
         - traefik.http.routers.whoami.tls=true
         - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@docker,
           ops_auth@docker, ops_gzip@docker
+      resources:
+        limits:
+          memory: 50M
+        reservations:
+          memory: 6M
     networks:
       - public
 
