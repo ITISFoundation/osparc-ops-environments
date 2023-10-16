@@ -3,8 +3,7 @@ services:
   prometheuscatchall:
     deploy:
       labels:
-        - traefik.http.routers.prometheus.tls.certresolver=myresolver
-
+        - traefik.http.routers.prometheuscatchall.tls.certresolver=myresolver
   grafana:
     deploy:
       labels:
