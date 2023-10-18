@@ -27,7 +27,7 @@ services:
       - "--entryPoints.https.forwardedHeaders.insecure"
       - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=rfc2136"
       - "--certificatesresolvers.myresolver.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.delaybeforecheck=120"
+      # - "--certificatesresolvers.myresolver.acme.dnschallenge.delaybeforecheck=120"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       # For debug purpose, to avoid being ban by let's encrypt servers
       #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
