@@ -25,7 +25,6 @@ services:
       - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
       - "--entryPoints.https.forwardedHeaders.insecure"
       - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=rfc2136"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.delaybeforecheck=120"
       - "--certificatesresolvers.myresolver.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       # For debug purpose, to avoid being ban by let's encrypt servers
