@@ -784,11 +784,9 @@ services:
       labels:
         - traefik.enable=true
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments_api.service=${SWARM_STACK_NAME}_payments
         - traefik.http.routers.${SWARM_STACK_NAME}_payments_api.rule=(${DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS}) && PathPrefix(`/v1`)
         - traefik.http.routers.${SWARM_STACK_NAME}_payments_api.entrypoints=http
         - traefik.http.services.${SWARM_STACK_NAME}_payments.loadbalancer.server.port=8000
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments.service=${SWARM_STACK_NAME}_payments
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.rule=(${DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS})
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.entrypoints=http
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
