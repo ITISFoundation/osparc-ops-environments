@@ -35,8 +35,8 @@ services:
     volumes:
       - "letsencrypt_certs:/letsencrypt"
     environment:
-      -  AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      -  AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      -  AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
+      -  AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
     deploy:
       replicas: ${OPS_TRAEFIK_REPLICAS}
       placement:
