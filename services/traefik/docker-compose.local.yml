@@ -9,7 +9,7 @@ services:
       - "/customEntrypoint.sh"
       - "--api=true"
       - "--api.dashboard=true"
-      - "--log.level=DEBUG"
+      - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
       - "--accesslog=true"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addEntryPointsLabels=true"

@@ -5,7 +5,7 @@ services:
     command:
       - '--api=true'
       - '--api.dashboard=true'
-      - '--log.level=INFO'
+      - '--log.level=${OPS_TRAEFIK_LOGLEVEL}'
       - '--accesslog=false'
       - '--metrics.prometheus=true'
       - '--metrics.prometheus.addEntryPointsLabels=true'
