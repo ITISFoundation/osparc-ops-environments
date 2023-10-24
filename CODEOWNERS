@@ -1,0 +1,9 @@
+# Maps code in repository with maintainers
+# Order is important. The last matching pattern has the most precedence.
+# SEE https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/about-code-owners#example-of-a-codeowners-file
+
+
+# files and folders recursively
+*                                    @mrnicegyu11 @YuryHrytsuk
+
+
