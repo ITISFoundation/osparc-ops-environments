@@ -15,6 +15,9 @@ services:
       replicas: 3
   static-webserver:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
+  postgres:
+    deploy:
+      replicas: 0
   traefik:
     command:
       - "--api=true"

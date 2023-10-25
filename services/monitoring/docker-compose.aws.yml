@@ -28,11 +28,6 @@ services:
       placement:
         constraints:
           - node.labels.grafana==true
-  alertmanager:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.grafana==true
   cadvisor-exporter:
     volumes:
       - /:/rootfs:ro

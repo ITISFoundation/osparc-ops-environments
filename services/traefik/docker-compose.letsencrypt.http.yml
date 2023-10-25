@@ -4,7 +4,7 @@ services:
     command:
       - "--api=true"
       - "--api.dashboard=true"
-      - "--log.level=INFO"
+      - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
       - "--accesslog=false"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addEntryPointsLabels=true"
@@ -26,7 +26,7 @@ services:
       - "--certificatesresolvers.lehttpchallenge.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
       - "--certificatesresolvers.lehttpchallenge.acme.storage=/letsencrypt/acme.json"
       # uncomment the caserver when testing such that let's encrypt does not ban us
-  #    - '--certificatesresolvers.lehttpchallenge.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory'
+      - '--certificatesresolvers.lehttpchallenge.acme.caserver=${OPS_TRAEFIK_LETSENCRYPT_ACME_CA_SERVER}'
     volumes:
       - "letsencrypt_certs:/letsencrypt"
     deploy:

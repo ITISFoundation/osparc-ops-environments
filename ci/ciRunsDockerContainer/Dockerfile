@@ -48,7 +48,7 @@ RUN apt-get update \
   build-essential \
   ca-certificates \
   curl \
-  firefox=117.0.1+build2-0ubuntu0.20.04.1 \
+  firefox \
   gettext-base \
   git \
   jq \
@@ -117,7 +117,9 @@ RUN pip install --no-cache-dir --upgrade \
   pip~=22.0  \
   wheel \
   setuptools \
-  ansible==6.7.0
+  ansible==6.7.0 \
+  dnspython==2.4.2
+
 
 RUN echo "------------------------------------------------------ terraform" \
     && cd /tmp && wget https://releases.hashicorp.com/terraform/1.5.1/terraform_1.5.1_linux_amd64.zip \
