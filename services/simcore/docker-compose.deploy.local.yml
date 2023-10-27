@@ -136,3 +136,6 @@ services:
   whoami:
     deploy:
       replicas: 1
+  clusters-keeper:
+    deploy:
+      replicas: 0
