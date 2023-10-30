@@ -83,7 +83,7 @@ services:
           memory: 5G
         reservations:
           cpus: "2.00"
-          memory: 5G
+          memory: 2560M
 
       labels:
         - traefik.enable=true
