@@ -26,3 +26,6 @@ services:
   payments:
     deploy:
       replicas: 0
+  clusters-keeper:
+    deploy:
+      replicas: 0
