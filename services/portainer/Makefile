@@ -85,7 +85,10 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.le
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: secrets
-secrets: .env ## Construct secrets for portainer pwd, to change pwd it need to be done manually :https://documentation.portainer.io/v2.0/users/reset-admin/
+secrets: .env ## Construct secrets for portainer pwd, to change pwd it need to be done manually https://git.speag.com/oSparc/osparc-ops-deployment-configuration/-/wikis/Update-Portainer-Password
 	@if [ -z $(IS_PORTAINER_SERVICE_RUNNING) ]; then\
-		echo "Updating secret portainer_admin_password" && docker secret rm portainer_admin_password 2>/dev/null; set -o allexport; source .env; set +o allexport; echo -n "$${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
+		echo "Setting portainer_admin_password (can only set but not update password!)" \
+		&& docker secret rm portainer_admin_password 2>/dev/null; \
+		set -o allexport; source .env; set +o allexport; \
+		echo -n "$${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \
     fi
