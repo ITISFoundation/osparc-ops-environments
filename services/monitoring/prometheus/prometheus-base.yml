@@ -8,7 +8,7 @@ global:
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
   external_labels:
-    monitor: "sim-core-monitor"
+    monitor: "simcore-monitor"
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
@@ -57,6 +57,9 @@ scrape_configs:
   #     - prometheus-job=traefik_ops
   #     - prometheus-port=8082
   #
+  #
+  # Swarm tasks prometheus service discovery:
+  # There is one task discovered per network that the containe is associated to.
   - job_name: "dockerswarm-tasks"
     dockerswarm_sd_configs:
       - host: unix:///var/run/docker.sock
