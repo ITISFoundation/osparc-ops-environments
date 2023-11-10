@@ -57,4 +57,4 @@ services:
 
   payments:
     deploy:
-      replicas: 0
+      replicas: 1
