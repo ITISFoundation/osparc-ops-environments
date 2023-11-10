@@ -35,7 +35,6 @@ cd "$repo_basedir" || exit 1
 
 pushd "$repo_basedir"/../osparc-simcore
 cp services/docker-compose.yml "$repo_basedir"
-cp .env-devel "$repo_basedir"
 popd
 
 cp "$repo_config" "$repo_basedir"

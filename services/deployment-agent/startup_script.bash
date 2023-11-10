@@ -79,9 +79,7 @@ pushd services/simcore
 rm .env 2>/dev/null || true
 make compose-"${OSPARC_DEPLOYMENT_TARGET}"
 mv .env .env.platform
-python envsubst_escape_dollar_sign.py .env.platform .env.platform.escaped
-envsubst < ../../.env-devel > .env.nosub
-cat .env.platform.escaped >> .env.nosub
+python envsubst_escape_dollar_sign.py .env.platform .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
