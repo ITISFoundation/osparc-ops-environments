@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
-  "rev": 41,
+  "rev": 42,
   "name": "osparc-custom-content-pack-v2",
   "summary": "osparc-custom-content-pack-v2",
   "description": "",
@@ -668,7 +668,7 @@
             "configuration": {
               "grok_pattern": {
                 "@type": "string",
-                "@value": "time=\"%{TIMESTAMP_ISO8601:log_timestamp}\" level=%{WORD:log_level} msg=\"%{GREEDYDATA:log_msg}\""
+                "@value": "level=%{WORD:log_level} msg=\"%{GREEDYDATA:log_msg}\""
               },
               "named_captures_only": {
                 "@type": "boolean",

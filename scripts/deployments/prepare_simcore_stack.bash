@@ -42,7 +42,7 @@ cp "$repo_config" "$repo_basedir"
 cd "$repo_basedir"
 
 log_info "Creating stack.yml file..."
-services/deployment-agent/startup_script.bash
+scripts/deployments/startup_script.bash
 
 log_info "Adding prefix $PREFIX_STACK_NAME to all services..."
 ./yq "with(.services; with_entries(.key |= \"${PREFIX_STACK_NAME}_\" + .))" stack.yml > "$this_script_dir"/stack_with_prefix.yml
