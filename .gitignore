@@ -102,8 +102,6 @@ docs/_build
 
 # Mypy Cache
 .mypy_cache/
-# deployment config
-deployment_config.yaml
 
 # all fake files from makefile
 .make*
