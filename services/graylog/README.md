@@ -10,6 +10,9 @@ make up
 make down
 ```
 
+## Graylog workflow overview
+![Graylog workflow overview](./GraylogWorkflow.png)
+
 ## Configuration for graylog - The Principles
 
 1. Create a GELF UDP INPUT

@@ -29,6 +29,7 @@ warnings.filterwarnings(
 )
 #
 
+
 ############
 ############ Common functionality
 def isObjectPresentOnBucket(botobucket, filepath, allObjectsBucket=None):
@@ -223,7 +224,6 @@ def main(
     decryption: bool = typer.Option(False, "--decryption"),
     password: str = "",
 ):
-
     if nooverwrites:
         print("CONFIG: WILL NOT OVERWRITE ANY FILES.")
     if (encryption or decryption) and password != "":
