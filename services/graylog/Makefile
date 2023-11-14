@@ -13,6 +13,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+	$(MAKE) configure
 
 .PHONY: up-letsencrypt-http ## Deploys graylog stack using let's encrypt http challenge
 up-letsencrypt-http: .init .env ${TEMP_COMPOSE}-letsencrypt-http
@@ -25,6 +26,7 @@ up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns
 .PHONY: up-dalco ## Deploys graylog stack for Dalco Cluster
 up-dalco: .init .env ${TEMP_COMPOSE}-letsencrypt-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dalco ${STACK_NAME}
+	$(MAKE) configure
 
 .PHONY: up-public  ## Deploys graylog stack for public access Cluster
 up-public: up-dalco
@@ -32,6 +34,7 @@ up-public: up-dalco
 .PHONY: up-aws  ## Deploys graylog stack for aws
 up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys graylog stack using let's encrypt
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	$(MAKE) configure
 
 .PHONY: up-master ## Deploys graylog stack for master
 up-master: up-dalco
@@ -39,6 +42,7 @@ up-master: up-dalco
 .PHONY: up-local ## Deploys graylog stack for local deployment
 up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
+	$(MAKE) configure
 
 # Helpers -------------------------------------------------
 
