@@ -46,7 +46,7 @@ WHERE
 DROP DATABASE simcoredb;
 quit
 ```
-- Finally, restore the DB : 
+- Finally, restore the DB :
 ```
 psql simcoredb < /PG_osparc-master.speag.com_simcoredb.05-March-2023.dmp
 ```
