@@ -14,7 +14,6 @@ jobs:
         run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
 
       - name: Install python version
-
         uses: gabrielfalcao/pyenv-action@v11
         with:
           default: "${{ env.PYTHON_VERSION }}"
