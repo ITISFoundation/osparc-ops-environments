@@ -150,8 +150,10 @@ services:
       resources:
         limits:
           memory: 50M
+          cpus: '0.5'
         reservations:
           memory: 6M
+          cpus: '0.1'
     networks:
       - public
 
