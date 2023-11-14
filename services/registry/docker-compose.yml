@@ -32,6 +32,13 @@ services:
       - public
       - monitored
     deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2'
+        reservations:
+          memory: 150M
+          cpus: '0.5'
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
