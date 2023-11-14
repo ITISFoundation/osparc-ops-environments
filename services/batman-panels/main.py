@@ -350,7 +350,6 @@ def runTableGeneration():
     assert len(branches) == len(test_repo_ids)
 
     for gitlabID_iter in range(len(test_repo_ids)):  # e2e p2e opse2e ...
-
         gitlabID = test_repo_ids[gitlabID_iter]
         gitlabName = test_repo_names[gitlabID_iter]
         dictListTestResultsNow = []
