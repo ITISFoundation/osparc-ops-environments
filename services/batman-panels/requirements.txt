@@ -1,8 +1,0 @@
-environs
-requests
-tenacity
-pyyaml
-dateparser
-colour
-jinja2
-rocketry
