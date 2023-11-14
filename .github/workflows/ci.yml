@@ -18,7 +18,7 @@ jobs:
         uses: gabrielfalcao/pyenv-action@v11pa
         with:
           default: "${{ env.PYTHON_VERSION }}"
-          command: pip install -U pip  # upgrade pip after installing python
+          command: pip install -U pip
 
       - name: Show python version
         run: python --version
