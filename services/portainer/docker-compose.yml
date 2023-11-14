@@ -17,6 +17,13 @@ services:
       - agent_network
     deploy:
       mode: global
+      resources:
+        limits:
+          cpus: "1"
+          memory: 100M
+        reservations:
+          cpus: "0.5"
+          memory: 50M
 
   portainer:
     image: portainer/portainer-ce:2.18.4
@@ -35,6 +42,13 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      resources:
+        limits:
+          cpus: "1"
+          memory: 250M
+        reservations:
+          cpus: "0.5"
+          memory: 80M
       placement:
         constraints: [node.role == manager]
       labels:
