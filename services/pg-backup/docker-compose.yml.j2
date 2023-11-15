@@ -4,6 +4,9 @@ services:
     image: kartoza/pg-backup:14-3.3@sha256:4d1867707b1da879324199fb3c0d542122113bfc50cd2418764efb8f4309d6c1
     volumes:
       - /tank/${MACHINE_FQDN}:/backups
+      - ./custom-backups-cron:/build_data/backups-cron  # https://github.com/kartoza/docker-pg-backup/issues/97#issuecomment-1812504162
+      - ./custom-backups-cron-default:/build_data/backups-cron-default
+      - ./custom-backups.sh:/backup-scripts/backups.sh
     environment:
       - DUMPPREFIX=PG_${MACHINE_FQDN}
       - DUMP_ARGS="--format=plain"

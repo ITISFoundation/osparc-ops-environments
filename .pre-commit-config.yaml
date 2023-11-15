@@ -15,6 +15,12 @@ repos:
       - id: trailing-whitespace
       - id: check-json
       - id: check-executables-have-shebangs
+        exclude: |
+            (?x)^(
+                services/pg-backup/custom-backups-cron|
+                services/pg-backup/custom-backups-cron-default|
+                services/pg-backup/custom-backups.sh
+            )$
       - id: detect-private-key
         exclude: "^certificates/(.*)$"
       - id: detect-aws-credentials
@@ -74,6 +80,12 @@ repos:
     hooks:
       - id: shellcheck
         name: Shell scripts conform to shellcheck
+        exclude: |
+            (?x)^(
+                services/pg-backup/custom-backups-cron|
+                services/pg-backup/custom-backups-cron-default|
+                services/pg-backup/custom-backups.sh
+            )$
   - repo: https://github.com/psf/black
     rev: 23.7.0
     hooks:
