@@ -4,10 +4,11 @@ set -o pipefail
 set -x
 export COMPOSE_FILE=simcore_stack.yml
 export SETTINGS_BINARY_PATH=/home/scu/.venv/bin
+export SERVICES_PREFIX=${PREFIX_STACK_NAME}
+exit_code=0
 for service in $(yq e '.services | keys | .[]' ${COMPOSE_FILE})
 do
-
-    export TARGETNAME=${service#master_}
+    export TARGETNAME=${service#"${SERVICES_PREFIX}"_}
     #  continue if the service == director since it doesnt have settings
     if [ "${TARGETNAME}" == "director" ]; then
         continue
@@ -45,6 +46,7 @@ do
         else
             echo "ERROR: Validation of environment variables for ${service} failed"
             docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json
+            exit_code=1
         fi
     else
         echo "WARN: Settings executable not found for ${service}"
@@ -53,3 +55,4 @@ do
 
     echo "--------------------------"
 done
+exit $exit_code
