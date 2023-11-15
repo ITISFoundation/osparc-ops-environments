@@ -1,7 +1,6 @@
 #!/bin/bash
 set -o nounset
 set -o pipefail
-set -x
 export COMPOSE_FILE=simcore_stack.yml
 export SETTINGS_BINARY_PATH=/home/scu/.venv/bin
 export SERVICES_PREFIX=${PREFIX_STACK_NAME}
@@ -11,8 +10,9 @@ python -c "import urllib.request,os,sys,urllib; f = open(os.path.basename(sys.ar
 mv yq_linux_amd64 yq
 chmod +x yq
 _yq=$(realpath ./yq)
+export _yq
 # start
-for service in $(_yq e '.services | keys | .[]' ${COMPOSE_FILE})
+for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE})
 do
     export TARGETNAME=${service#"${SERVICES_PREFIX}"_}
     #  continue if the service == director since it doesnt have settings
