@@ -40,6 +40,7 @@ services:
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.47.2
+    replicas: 0
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
