@@ -5,6 +5,7 @@ volumes:
   grafana_data: {}
   alertmanager_data: {}
   prometheus_data_cadvisor: {}
+  prometheus_data_federation: {}
 
 networks:
   internal:
@@ -40,7 +41,6 @@ services:
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.47.2
-    replicas: 0
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -85,7 +85,7 @@ services:
         reservations:
           memory: 2048M
           cpus: "0.2"
-prometheusfederation:
+  prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.47.2
     volumes:
@@ -160,6 +160,7 @@ prometheusfederation:
       - public
     extra_hosts: []
     deploy:
+      replicas: 0
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
