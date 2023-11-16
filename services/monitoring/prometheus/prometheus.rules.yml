@@ -1,49 +1,39 @@
 groups:
-  - name: http_requests_total-rate-5min
+  - name: osparc_webserver_services_started_total-sum_by_key_tag
     rules:
-      - record: http_requests_total:rate5m
-        expr: rate(http_requests_total[5m])
-
-  - name: container_tasks_state-count_by_image
-    rules:
-      - record: container_tasks_state:count_by_image
-        expr: count by (image)(container_tasks_state{state="running", image=~".*/simcore/services/.*"})
-
-  - name: simcore_simcore_service_webserver_services_started_total-sum_by_key_tag
-    rules:
-      - record: simcore_simcore_service_webserver_services_started_total:sum_by_service_key_service_tag
+      - record: osparc_webserver_services_started_total_sum_by_service_key_service_tag
         expr: sum by (service_key, service_tag, deployment)(simcore_simcore_service_webserver_services_started_total)
-
-  - name: simcore_simcore_service_director_services_started_total-sum_by_key_tag
+  - name: osparc_director_services_started_total-sum_by_key_tag
     rules:
-      - record: simcore_simcore_service_director_services_started_total:sum_by_service_key_service_tag
+      - record: osparc_director_services_started_total_sum_by_service_key_service_tag
         expr: sum by (service_key, service_tag, deployment)(simcore_simcore_service_director_services_started_total)
-  - name: node_cpu_seconds_total-nonidle-sum_over_nodes
-    rules:
-      - record: node_cpu_seconds_total:nonidle_sum_over_nodes
-        expr: sum(node_cpu_seconds_total{mode!="idle"})
-  - name: node_cpu_seconds_total-nonidle-increase-over-nodes-12weeks
-    interval: 1h
-    rules:
-      - record: node_cpu_seconds_total:nonidle_increase_over_nodes_12weeks
-        expr: sum(increase(node_cpu_seconds_total{mode!="idle"}[12w]))
-  - name: cpu_usage_per_simcore_service
-    interval: 120s
-    rules:
-      - record: osparc_metrics:cpu_usage_per_simcore_service
-        expr: sum by (service_name, instance, node_name) (label_replace(irate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~".*simcore.*"}[1m]), "service_name", "$1", "container_label_com_docker_swarm_service_name", ".*_(.*)")) * 100
-  - name: cpu_usage_per_node
+  - name: osparc_cpu_usage_per_node
     interval: 60s
     rules:
-      - record: osparc_metrics:cpu_usage_per_node_percentage
+      - record: osparc_cpu_usage_per_node_percentage
         expr: 100 - (avg(irate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[50s])) by (instance,node_name) * 100)
-  - name: cpu_seconds_per_node
+  - name: osparc_cpu_seconds_per_node
     interval: 60s
     rules:
-      - record: osparc_metrics:cpu_seconds_per_node
+      - record: osparc_osparc_cpu_seconds_per_node
         expr: sum by (instance) (node_cpu_seconds_total{mode!="idle", job="node-exporter"})
-  - name: node_cpu_seconds_total-nonidle-increase-over-nodes-12weeks-v2
+  - name: osparc_node_cpu_seconds_total-nonidle-increase-over-nodes-12weeks
     interval: 180s
     rules:
-      - record: node_cpu_seconds_total_v2:nonidle_increase_over_nodes_12weeks_v2
-        expr: sum(increase(osparc_metrics:cpu_seconds_per_node[12w]))
+      - record: osparc_node_cpu_seconds_total_nonidle_increase_over_nodes_12weeks
+        expr: sum(increase(osparc_cpu_seconds_per_node[12w]))
+  - name: osparc_container_instances_s4lcorelite
+    interval: 60s
+    rules:
+      - record: osparc_cpu_usage_per_node_percentage
+        expr: count(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$",container_label_simcore_user_agent!="puppeteer"}) OR clamp_max(absent(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$",container_label_simcore_user_agent!="puppeteer"}),0)
+  - name: osparc_autoscaling_machines_active
+    interval: 60s
+    rules:
+      - record: osparc_autoscaling_machines_active
+        expr: sum(count_values("instance",node_exporter_build_info{instance=~"^ip-.*$"}))
+  - name: osparc_autoscaling_machines_buffer
+    interval: 60s
+    rules:
+      - record: osparc_autoscaling_machines_buffer
+        expr: sum(swarm_node_info{instance=~"^ip-.*$"}) - ( sum(count_values("instance",node_boot_time_seconds{instance=~"^ip-.*$"})) OR clamp_max(absent(node_boot_time_seconds{instance=~"^ip-.*$"}),0) )

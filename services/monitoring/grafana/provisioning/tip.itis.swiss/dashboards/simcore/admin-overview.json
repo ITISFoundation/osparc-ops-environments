@@ -87,7 +87,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "avg(production_members_in_gid_1)",
+            "expr": "avg(osparc_production_members_in_gid_1)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
