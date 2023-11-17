@@ -1,11 +1,11 @@
 groups:
-  - name: osparc_webserver_services_started_total-sum_by_key_tag
+  - name: osparc_webserver_services_started_total_sum_by_key_tag
     rules:
-      - record: osparc_webserver_services_started_total_sum_by_service_key_service_tag
+      - record: osparc_webserver_services_started_total_sum_by_key_tag
         expr: sum by (service_key, service_tag, deployment)(simcore_simcore_service_webserver_services_started_total)
-  - name: osparc_director_services_started_total-sum_by_key_tag
+  - name: osparc_director_services_started_total_sum_by_key_tag
     rules:
-      - record: osparc_director_services_started_total_sum_by_service_key_service_tag
+      - record: osparc_director_services_started_total_sum_by_key_tag
         expr: sum by (service_key, service_tag, deployment)(simcore_simcore_service_director_services_started_total)
   - name: osparc_cpu_usage_per_node
     interval: 60s
