@@ -1,8 +1,13 @@
 #!/bin/bash
 set -o nounset
 set -o pipefail
+#
+# This bash script expects the following environment variables to be set:
+# - PREFIX_STACK_NAME: prefix of the stack name
+#
 export COMPOSE_FILE=simcore_stack.yml
 export SETTINGS_BINARY_PATH=/home/scu/.venv/bin
+#
 export SERVICES_PREFIX=${PREFIX_STACK_NAME}
 exit_code=0
 # Download version-pinned yq binary
@@ -11,7 +16,9 @@ mv yq_linux_amd64 yq
 chmod +x yq
 _yq=$(realpath ./yq)
 export _yq
+#
 # start
+#
 for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE})
 do
     export TARGETNAME=${service#"${SERVICES_PREFIX}"_}
