@@ -87,11 +87,11 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docke
 .PHONY: configure
 configure: .env ## Test is Graylog is online and configure Graylog inputs
 	@cd scripts;\
-	if [ ! -d "venv" ]; \
+	if [ ! -d ".venv" ]; \
 	then\
-		python3 -m venv venv;\
+		python3 -m venv .venv;\
 	fi;\
-	source venv/bin/activate;\
+	source .venv/bin/activate;\
 	pip install -r requirements.txt > /dev/null 2>&1;\
 	set -o allexport; \
 	source ../$<;\
