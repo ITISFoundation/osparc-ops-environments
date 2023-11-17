@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 29s # Set the scrape interval to every 29 seconds. Default is every 1 minute.
+  evaluation_interval: 29s # Evaluate rules every 29 seconds. The default is every 1 minute.
+
+scrape_configs:
+  - job_name: 'federate' # A job defines a series of targets and parameters describing how to scrape them.
+    scrape_interval: 29s # Overwrite the global scrape interval for this job, set to every 29 seconds.
+    honor_labels: true # Do not overwrite labels in scraped data.
+    scheme: http
+    metrics_path: '/federate' # Path to fetch the metrics from, '/federate' is for federation.
+
+    params:
+      'match[]': # The match[] parameter is used to select the metrics to retrieve. Logical OR is used between match[] parameters.
+        - '{__name__=~"s4l_.*"}' # Regex to select all metrics that start with 's4l_'
+        - '{__name__=~"osparc_.*"}' # Regex to select all metrics that start with 'osparc_'
+
+    static_configs:
+      - targets: ['prometheuscatchall:9090'] # The targets section is where you specify the host and port of the Prometheus instances to scrape.

@@ -49,7 +49,6 @@ minio_enabled=1
 start_simcore=0
 start_opsstack=0
 stack_target=local
-without_deploy_agent=1
 
 usage="$(basename "$0") [-h] [--key=value]
 
@@ -61,8 +60,7 @@ where keys are:
     --minio_enabled             (default: ${minio_enabled})
     --start_opsstack            (default: ${start_opsstack})
     --stack_target              (default: ${stack_target})
-    --vcs_check         (default: ${vcs_check})
-    --without_deploy_agent      (default: ${without_deploy_agent})"
+    --vcs_check         (default: ${vcs_check})"
 
 for i in "$@"; do
     case $i in # Infos on bash case statements https://linuxize.com/post/bash-case-statement/
@@ -84,10 +82,6 @@ for i in "$@"; do
         ##
         --vcs_check=*)
         vcs_check="${i#*=}"
-        ;;
-        ##
-        --without_deploy_agent=*)
-        without_deploy_agent="${i#*=}"
         ;;
         ##
         :|--help|-h)
@@ -266,16 +260,8 @@ if [ "$start_opsstack" -eq 0 ]; then
     popd
 fi
 if [ "$start_simcore" -eq 0 ]; then
-    if [ "$without_deploy_agent" -eq 0 ]; then
-        log_info "starting simcore without deployment agent..."
-        "${repo_basedir}"/scripts/deployments/start_without_deployment_agent.bash
-    else
-        # -------------------------------- DEPlOYMENT-AGENT -------------------------------
-        log_info "starting deployment-agent for simcore..."
-        pushd "${repo_basedir}"/services/deployment-agent;
-        make down up-"$stack_target";
-        popd
-    fi
+    log_info "starting simcore..."
+    "${repo_basedir}"/scripts/deployments/start_without_deployment_agent.bash
 fi
 # shellcheck disable=2235
 
