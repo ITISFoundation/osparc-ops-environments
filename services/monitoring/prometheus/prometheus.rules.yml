@@ -15,7 +15,7 @@ groups:
   - name: osparc_cpu_seconds_per_node
     interval: 60s
     rules:
-      - record: osparc_osparc_cpu_seconds_per_node
+      - record: osparc_cpu_seconds_per_node
         expr: sum by (instance) (node_cpu_seconds_total{mode!="idle", job="node-exporter"})
   - name: osparc_node_cpu_seconds_total-nonidle-increase-over-nodes-12weeks
     interval: 180s
