@@ -51,7 +51,7 @@ do
     echo TARGETFILE="${TARGETFILE}"
     echo "Assuming targetfile in ${SETTINGS_BINARY_PATH}/${TARGETFILE}"
     echo "Checking ${SETTINGS_BINARY_PATH}/${TARGETFILE}"
-    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGETFILE}"; then
+    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGETFILE}" > /dev/null 2>&1; then
         echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/$TARGETFILE"
         export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/$TARGETFILE"
         if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json > /dev/null 2>&1; then
