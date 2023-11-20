@@ -29,7 +29,7 @@ endif
 export PUBLIC_NETWORK
 
 # Network that includes all services to monitor
-#  - the idea is that it shall connect osparc stack network so that some services can monitor ALL the stack
+#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
 #  - by default it will create an overal attachable network called monitored_network
 ifeq ($(monitored_network),)
 MONITORED_NETWORK = monitored_network
