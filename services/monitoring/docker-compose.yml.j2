@@ -35,6 +35,29 @@ configs:
   smokeping_prober_config:
     file: ./smokeping_prober_config.yaml
 services:
+  cadvisor-exporter:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - internal
+      - monitored
+    command: --logtostderr --docker_only --allow_dynamic_housekeeping=true
+    deploy:
+      labels:
+        - prometheus-job=cadvisor
+        - prometheus-port=8080
+      mode: global
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+        reservations:
+          memory: 128M
+          cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v2.47.2
