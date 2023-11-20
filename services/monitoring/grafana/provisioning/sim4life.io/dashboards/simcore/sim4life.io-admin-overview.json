@@ -87,7 +87,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "avg(osparc_production_members_in_gid_135745)",
+            "expr": "avg(osparc_production_members_in_gid_4)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -383,7 +383,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -490,7 +490,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "sum without (cpu, mode, instance, job) (rate(node_cpu_seconds_total{instance=~\"^ip-.*$\",mode!=\"idle\"}[2m])) / count(count by (cpu) (node_cpu_seconds_total{instance=~\"^ip-.*$\"}))  OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\"}),0)",
+            "expr": "sum without (cpu, mode, instance, job) (rate(node_cpu_seconds_total{instance=~\"^ip-.*$\",mode!=\"idle\"}[2m])) / count(count by (cpu) (node_cpu_seconds_total{instance=~\"^ip-.*$\"}))  OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -583,7 +583,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "sum(container_memory_usage_bytes{instance=~\"ip-.*\",image=~\"^.*[.osparc.io].*/simcore/services/dynamic/((s4l-.)|(sym-server)).*$\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\"}),0)",
+            "expr": "sum(container_memory_usage_bytes{instance=~\"ip-.*\",image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/((s4l-.)|(sym-server)).*$\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
