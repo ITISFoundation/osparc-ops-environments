@@ -22,6 +22,17 @@ services:
           memory: 4096M
         reservations:
           memory: 4096M
+  prometheusfederation:
+    dns: 8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
+      resources:
+        limits:
+          memory: 4096M
+        reservations:
+          memory: 4096M
   grafana:
     dns: 8.8.8.8
     deploy:

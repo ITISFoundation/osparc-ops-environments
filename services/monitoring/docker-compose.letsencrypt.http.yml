@@ -8,6 +8,10 @@ services:
     deploy:
       labels:
         - traefik.http.routers.grafana.tls.certresolver=lehttpchallenge
+  prometheusfederation:
+    deploy:
+      labels:
+        - traefik.http.routers.prometheusfederation.tls.certresolver=lehttpchallenge
   # prometheuscadvisor:
   #   deploy:
   #     placement:

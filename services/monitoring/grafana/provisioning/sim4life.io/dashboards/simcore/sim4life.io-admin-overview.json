@@ -31,7 +31,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "description": "",
         "fieldConfig": {
@@ -84,22 +84,22 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "avg(osparc_production_members_in_gid_135745)",
+            "expr": "avg(osparc_production_members_in_gid_4)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Number of registered s4l-lite users",
+        "title": "Number of registered s4l users",
         "type": "stat"
       },
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -151,7 +151,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
             "expr": "sum(swarm_node_info{instance=~\"^ip-.*$\"})",
@@ -160,13 +160,13 @@
             "refId": "A"
           }
         ],
-        "title": "Number of total (buffer+active) s4l-lite machines",
+        "title": "Number of total (buffer+active) s4l machines",
         "type": "stat"
       },
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -220,7 +220,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
             "expr": "sum(count_values(\"instance\",node_exporter_build_info{instance=~\"^ip-.*$\"}))",
@@ -229,13 +229,13 @@
             "refId": "A"
           }
         ],
-        "title": "Number of active (\"hot\") s4l-lite machines",
+        "title": "Number of active (\"hot\") s4l machines",
         "type": "stat"
       },
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -287,7 +287,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
             "expr": "sum(swarm_node_info{instance=~\"^ip-.*$\"}) - ( sum(count_values(\"instance\",node_boot_time_seconds{instance=~\"^ip-.*$\"})) OR clamp_max(absent(node_boot_time_seconds{instance=~\"^ip-.*$\"}),0) )",
@@ -296,13 +296,13 @@
             "refId": "A"
           }
         ],
-        "title": "Number of s4l-lite buffer machines",
+        "title": "Number of s4l buffer machines",
         "type": "stat"
       },
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -380,10 +380,10 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -408,7 +408,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -487,10 +487,10 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "sum without (cpu, mode, instance, job) (rate(node_cpu_seconds_total{instance=~\"^ip-.*$\",mode!=\"idle\"}[2m])) / count(count by (cpu) (node_cpu_seconds_total{instance=~\"^ip-.*$\"}))  OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\"}),0)",
+            "expr": "sum without (cpu, mode, instance, job) (rate(node_cpu_seconds_total{instance=~\"^ip-.*$\",mode!=\"idle\"}[2m])) / count(count by (cpu) (node_cpu_seconds_total{instance=~\"^ip-.*$\"}))  OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -502,7 +502,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -580,10 +580,10 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "sum(container_memory_usage_bytes{instance=~\"ip-.*\",image=~\"^.*[.osparc.io].*/simcore/services/dynamic/((s4l-.)|(sym-server)).*$\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\"}),0)",
+            "expr": "sum(container_memory_usage_bytes{instance=~\"ip-.*\",image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/((s4l-.)|(sym-server)).*$\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -640,7 +640,7 @@
     "publicDashboardAccessToken": "",
     "publicDashboardEnabled": false,
     "publicDashboardUid": "",
-    "slug": "s4l-lite-admin-overview",
+    "slug": "sim4life.io-admin-overview",
     "type": "db",
     "updatedBy": "admin",
     "url": "/grafana/d/Jg0sD8-4k/s4l-lite-admin-overview"
