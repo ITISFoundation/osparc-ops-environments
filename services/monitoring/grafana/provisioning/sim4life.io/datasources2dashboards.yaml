@@ -1,3 +1,6 @@
 defaults:
   - type: "prometheus"
     datasource_name: "Prometheus"
+datasources2dashboards:
+  - dashboard_name: "sim4life.io-admin-overview"
+    datasource_name: "Prometheus-Federation"
