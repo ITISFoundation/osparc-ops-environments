@@ -15,7 +15,7 @@ scrape_configs:
         target_label: service_name
         replacement: $1
         action: replace
-    # Handle with "tasks." when there are multiple replica accrding to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
+    # Handle with "tasks." when there are multiple replica according to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
     dns_sd_configs:
       - names:
           - "tasks.production_webserver"

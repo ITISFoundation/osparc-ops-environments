@@ -3,10 +3,10 @@ databases:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
     dsn: postgresql://{{POSTGRES_USER}}:{{MONITORED_POSTGRES_PASSWORDS.split(",")[loop.index0]}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}{% endfor %}
 
 metrics:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}
-  {{_stack}}_members_in_gid_{{_gid}}:
+  osparc_{{_stack}}_members_in_gid_{{_gid}}:
     type: gauge
     description: Number of users in group {{_gid}}{% endfor %}
-  {{_stack}}_total_number_of_users:
+  osparc_{{_stack}}_total_number_of_users:
     type: gauge
     description: Total nuber of registered users{% endfor %}
 
@@ -15,7 +15,7 @@ queries:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% f
   query_{{_stack}}_members_in_gid_{{_gid}}:
     interval: 55
     databases: [postgres_{{_stack}}]
-    metrics: [{{_stack}}_members_in_gid_{{_gid}}]
+    metrics: [osparc_{{_stack}}_members_in_gid_{{_gid}}]
     sql: |
       SELECT COUNT(*) as {{_stack}}_members_in_gid_{{_gid}}
       FROM users
@@ -25,14 +25,14 @@ queries:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% f
   query_{{_stack}}_total_number_of_users:
     interval: 55
     databases: [postgres_{{_stack}}]
-    metrics: [{{_stack}}_total_number_of_users]
+    metrics: [osparc_{{_stack}}_total_number_of_users]
     sql: |
       SELECT COUNT(*) as {{_stack}}_total_number_of_users
       FROM users;
   query_{{_stack}}_total_number_of_users_excluding_guests:
     interval: 55
     databases: [postgres_{{_stack}}]
-    metrics: [{{_stack}}_total_number_of_users]
+    metrics: [osparc_{{_stack}}_total_number_of_users]
     sql: |
       SELECT COUNT(*) as {{_stack}}_total_number_of_users
       FROM users WHERE role <> 'GUEST';{% endfor %}

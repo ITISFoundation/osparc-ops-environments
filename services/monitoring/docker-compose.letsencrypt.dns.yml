@@ -8,7 +8,10 @@ services:
     deploy:
       labels:
         - traefik.http.routers.grafana.tls.certresolver=myresolver
-
+  prometheusfederation:
+    deploy:
+      labels:
+        - traefik.http.routers.prometheusfederation.tls.certresolver=myresolver
   # prometheuscadvisor:
   #   deploy:
   #     labels:
