@@ -25,12 +25,12 @@ groups:
   - name: osparc_container_instances_s4lcore
     interval: 60s
     rules:
-      - record: osparc_cpu_usage_per_node_percentage
+      - record: osparc_container_instances_s4lcore
         expr: count(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core.*$",container_label_simcore_user_agent!="puppeteer"}) OR clamp_max(absent(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core.*$",container_label_simcore_user_agent!="puppeteer"}),0)
-  - name: osparc_container_instances_s4lcore
+  - name: osparc_container_instances_s4lcorelite
     interval: 60s
     rules:
-      - record: osparc_cpu_usage_per_node_percentage
+      - record: osparc_container_instances_s4lcorelite
         expr: count(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$",container_label_simcore_user_agent!="puppeteer"}) OR clamp_max(absent(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$",container_label_simcore_user_agent!="puppeteer"}),0)
   - name: osparc_autoscaling_machines_active
     interval: 60s
