@@ -22,7 +22,12 @@ groups:
     rules:
       - record: osparc_node_cpu_seconds_total_nonidle_increase_over_nodes_12weeks
         expr: sum(increase(osparc_cpu_seconds_per_node[12w]))
-  - name: osparc_container_instances_s4lcorelite
+  - name: osparc_container_instances_s4lcore
+    interval: 60s
+    rules:
+      - record: osparc_cpu_usage_per_node_percentage
+        expr: count(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core.*$",container_label_simcore_user_agent!="puppeteer"}) OR clamp_max(absent(container_memory_usage_bytes{image=~"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core.*$",container_label_simcore_user_agent!="puppeteer"}),0)
+  - name: osparc_container_instances_s4lcore
     interval: 60s
     rules:
       - record: osparc_cpu_usage_per_node_percentage
