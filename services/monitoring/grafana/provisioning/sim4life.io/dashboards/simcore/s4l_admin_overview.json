@@ -29,6 +29,19 @@
     "liveNow": false,
     "panels": [
       {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 14,
+        "panels": [],
+        "title": "plattform overview",
+        "type": "row"
+      },
+      {
         "datasource": {
           "type": "prometheus",
           "uid": "AAAks95hb"
@@ -90,7 +103,7 @@
           "h": 28,
           "w": 18,
           "x": 0,
-          "y": 0
+          "y": 1
         },
         "id": 4,
         "options": {
@@ -155,7 +168,7 @@
           "h": 7,
           "w": 6,
           "x": 18,
-          "y": 0
+          "y": 1
         },
         "id": 2,
         "options": {
@@ -192,7 +205,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "RmZEr52nz"
+          "uid": "AAAks95hb"
         },
         "fieldConfig": {
           "defaults": {
@@ -222,7 +235,7 @@
           "h": 7,
           "w": 6,
           "x": 18,
-          "y": 7
+          "y": 8
         },
         "id": 8,
         "options": {
@@ -244,7 +257,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "RmZEr52nz"
+              "uid": "AAAks95hb"
             },
             "editorMode": "code",
             "expr": "osparc_autoscaling_machines_buffer",
@@ -291,7 +304,7 @@
           "h": 7,
           "w": 6,
           "x": 18,
-          "y": 14
+          "y": 15
         },
         "id": 12,
         "options": {
@@ -358,7 +371,7 @@
           "h": 7,
           "w": 6,
           "x": 18,
-          "y": 21
+          "y": 22
         },
         "id": 10,
         "options": {
@@ -391,6 +404,174 @@
         ],
         "title": "Number of total (buffer+active) s4l machines",
         "type": "stat"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 29
+        },
+        "id": 15,
+        "panels": [],
+        "title": "s4l-deepdive",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "AAAks95hb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": [
+              {
+                "options": {
+                  "{feature_name=\"": {
+                    "index": 0
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 15,
+          "w": 13,
+          "x": 0,
+          "y": 30
+        },
+        "id": 13,
+        "options": {
+          "displayLabels": [
+            "value",
+            "name"
+          ],
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true,
+            "values": [
+              "percent"
+            ]
+          },
+          "pieType": "donut",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "asc"
+          }
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "AAAks95hb"
+            },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "sum without(instance, job, monitor, node_id) (s4l_user_feature_time{node_id=\"$serviceuuid\"})",
+            "instant": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Time spent in ...",
+        "type": "piechart"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "AAAks95hb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "purple",
+              "mode": "shades"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "purple",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 15,
+          "w": 11,
+          "x": 13,
+          "y": 30
+        },
+        "id": 16,
+        "options": {
+          "displayMode": "gradient",
+          "minVizHeight": 10,
+          "minVizWidth": 0,
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showUnfilled": true,
+          "valueMode": "color"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "AAAks95hb"
+            },
+            "editorMode": "code",
+            "expr": "sum without(instance, job, monitor, node_id) (s4l_user_feature_count{node_id=\"$serviceuuid\"})",
+            "instant": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Clicked on ...",
+        "type": "bargauge"
       }
     ],
     "refresh": "",
@@ -399,7 +580,36 @@
     "style": "dark",
     "tags": [],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "selected": true,
+            "text": "61c8745f-3d5a-46e6-9f17-5cbce2b4321c",
+            "value": "61c8745f-3d5a-46e6-9f17-5cbce2b4321c"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "AAAks95hb"
+          },
+          "definition": "label_values(s4l_user_feature_time,node_id)",
+          "description": "Deepdive: Service UUID",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Deepdive: Service UUID",
+          "multi": false,
+          "name": "serviceuuid",
+          "options": [],
+          "query": {
+            "query": "label_values(s4l_user_feature_time,node_id)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 2,
+          "type": "query"
+        }
+      ]
     },
     "time": {
       "from": "now-6h",
@@ -409,7 +619,7 @@
     "timezone": "",
     "title": "s4l admin overview",
     "uid": "Jg0sD8-4k",
-    "version": 7,
+    "version": 13,
     "weekStart": ""
   },
   "meta": {
