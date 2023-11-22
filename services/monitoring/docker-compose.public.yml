@@ -7,6 +7,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+
   grafana:
     dns: 8.8.8.8
     deploy:
@@ -19,11 +20,7 @@ services:
       placement:
         constraints:
           - node.labels.prometheus==true
-  prometheuscadvisor:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.prometheus==true
+
   prometheusfederation:
     deploy:
       placement:

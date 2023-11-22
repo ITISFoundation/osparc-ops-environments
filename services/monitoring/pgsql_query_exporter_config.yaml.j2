@@ -17,7 +17,7 @@ queries:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% f
     databases: [postgres_{{_stack}}]
     metrics: [osparc_{{_stack}}_members_in_gid_{{_gid}}]
     sql: |
-      SELECT COUNT(*) as {{_stack}}_members_in_gid_{{_gid}}
+      SELECT COUNT(*) as osparc_{{_stack}}_members_in_gid_{{_gid}}
       FROM users
       JOIN user_to_groups ON users.id = user_to_groups.uid
       JOIN groups ON groups.gid = user_to_groups.gid
@@ -27,12 +27,12 @@ queries:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% f
     databases: [postgres_{{_stack}}]
     metrics: [osparc_{{_stack}}_total_number_of_users]
     sql: |
-      SELECT COUNT(*) as {{_stack}}_total_number_of_users
+      SELECT COUNT(*) as osparc_{{_stack}}_total_number_of_users
       FROM users;
   query_{{_stack}}_total_number_of_users_excluding_guests:
     interval: 55
     databases: [postgres_{{_stack}}]
     metrics: [osparc_{{_stack}}_total_number_of_users]
     sql: |
-      SELECT COUNT(*) as {{_stack}}_total_number_of_users
+      SELECT COUNT(*) as osparc_{{_stack}}_total_number_of_users
       FROM users WHERE role <> 'GUEST';{% endfor %}

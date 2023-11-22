@@ -1,5 +1,13 @@
 version: "3.7"
 services:
+  cadvisor-exporter:
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
   prometheuscatchall:
     dns: 8.8.8.8
     deploy:
@@ -11,17 +19,6 @@ services:
           memory: 24576M
         reservations:
           memory: 24576M
-  prometheuscadvisor:
-    dns: 8.8.8.8
-    deploy:
-      placement:
-        constraints:
-          - node.labels.prometheuscadvisor==true
-      resources:
-        limits:
-          memory: 4096M
-        reservations:
-          memory: 4096M
   prometheusfederation:
     dns: 8.8.8.8
     deploy:
@@ -39,10 +36,3 @@ services:
       placement:
         constraints:
           - node.labels.grafana==true
-  cadvisor-exporter:
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro

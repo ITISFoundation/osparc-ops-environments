@@ -10,11 +10,6 @@ services:
       placement:
         constraints:
           - node.labels.prometheus==true
-  prometheuscadvisor:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.prometheus==true
   prometheusfederation:
     deploy:
       placement:
