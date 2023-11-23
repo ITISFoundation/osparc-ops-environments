@@ -179,12 +179,22 @@ _git_get_current_branch = $(shell git rev-parse --abbrev-ref HEAD)
 _git_get_formatted_staging_tag = ${staging_prefix}${name}$(version)
 _git_get_formatted_release_tag = ${release_prefix}$(version)
 _git_list_remote_tags = $(shell git ls-remote --tags origin)
-
+_prettify_logs = $$(git log \
+		$$(git describe --match="$(if $(findstring -staging, $@),$(staging_prefix),$(release_prefix))*" --abbrev=0 --tags)..$(if $(git_sha),$(git_sha),HEAD) \
+		--pretty=format:"- %s")
 # NOTE: be careful that GNU Make replaces newlines with space which is why this command cannot work using a Make function
+
+
+define create_github_release_url
+	# ensure tags are uptodate
+	echo -e "\e[33mChangelog:\e[0m" && \
+	echo -e "\e[34m$(_prettify_logs)\e[0m"
+endef
 
 .PHONY: release-prod
 release-prod: ## Helper to create a staging or production release in Github (usage: make release-prod version=1.2.3)
-	@currentDesiredTag=$(_git_get_formatted_release_tag) && \
+	@echo $(create_github_release_url); \
+	currentDesiredTag=$(_git_get_formatted_release_tag) && \
 	if $$(echo $(_git_list_remote_tags) | grep -q "refs/tags/$$currentDesiredTag"); then \
         echo "Tag $$currentDesiredTag is already present on remote"; \
 		echo -n "Are you sure you want to retag? This will delete the old tag on the git remote. [y/N] " && read ans && [ $${ans:-N} = y ] && \
@@ -204,7 +214,8 @@ release-prod: ## Helper to create a staging or production release in Github (usa
 
 .PHONY: release-staging
 release-staging:  ## Helper to create a staging or production release in Github (usage: make release-staging name=sprint version=1 )
-	@currentDesiredTag=$(_git_get_formatted_staging_tag) && \
+	@echo $(create_github_release_url); \
+	currentDesiredTag=$(_git_get_formatted_staging_tag) && \
 	if $$(echo $(_git_list_remote_tags) | grep -q "refs/tags/$$currentDesiredTag"); then \
         echo "Tag $$currentDesiredTag is already present on remote"; \
 		echo -n "Are you sure you want to retag? This will delete the old tag on the git remote. [y/N] " && read ans && [ $${ans:-N} = y ] && \

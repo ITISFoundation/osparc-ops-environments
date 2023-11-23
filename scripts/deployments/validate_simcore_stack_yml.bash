@@ -47,7 +47,7 @@ do
     if [ "${TARGETNAME}" == "whoami" ]; then
         continue
     fi
-    export TARGETFILE="simcore-service-${TARGETNAME}"
+    export TARGETFILE="simcore-service"
     echo TARGETFILE="${TARGETFILE}"
     echo "Assuming targetfile in ${SETTINGS_BINARY_PATH}/${TARGETFILE}"
     echo "Checking ${SETTINGS_BINARY_PATH}/${TARGETFILE}"

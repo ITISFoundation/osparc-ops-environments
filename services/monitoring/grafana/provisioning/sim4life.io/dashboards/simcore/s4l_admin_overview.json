@@ -29,275 +29,17 @@
     "liveNow": false,
     "panels": [
       {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "AAAks95hb"
-        },
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-blues"
-            },
-            "decimals": 0,
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "dark-orange",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "none"
-          },
-          "overrides": []
-        },
+        "collapsed": false,
         "gridPos": {
-          "h": 7,
-          "w": 5,
+          "h": 1,
+          "w": 24,
           "x": 0,
           "y": 0
         },
-        "id": 2,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "textMode": "auto"
-        },
-        "pluginVersion": "9.4.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "AAAks95hb"
-            },
-            "editorMode": "code",
-            "expr": "avg(osparc_production_members_in_gid_4)",
-            "legendFormat": "__auto",
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "title": "Number of registered s4l users",
-        "type": "stat"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "AAAks95hb"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-BlPu"
-            },
-            "decimals": 0,
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "none"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 7,
-          "x": 5,
-          "y": 0
-        },
-        "id": 10,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "textMode": "auto"
-        },
-        "pluginVersion": "9.4.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "AAAks95hb"
-            },
-            "editorMode": "code",
-            "expr": "sum(swarm_node_info{instance=~\"^ip-.*$\"})",
-            "legendFormat": "__auto",
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "title": "Number of total (buffer+active) s4l machines",
-        "type": "stat"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "AAAks95hb"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-BlPu"
-            },
-            "decimals": 0,
-            "mappings": [],
-            "min": 0,
-            "noValue": "0",
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "none"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 6,
-          "x": 12,
-          "y": 0
-        },
-        "id": 12,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "textMode": "auto"
-        },
-        "pluginVersion": "9.4.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "AAAks95hb"
-            },
-            "editorMode": "code",
-            "expr": "sum(count_values(\"instance\",node_exporter_build_info{instance=~\"^ip-.*$\"}))",
-            "legendFormat": "__auto",
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "title": "Number of active (\"hot\") s4l machines",
-        "type": "stat"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "AAAks95hb"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-blues"
-            },
-            "decimals": 0,
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "none"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 6,
-          "x": 18,
-          "y": 0
-        },
-        "id": 8,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "textMode": "auto"
-        },
-        "pluginVersion": "9.4.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "AAAks95hb"
-            },
-            "editorMode": "code",
-            "expr": "sum(swarm_node_info{instance=~\"^ip-.*$\"}) - ( sum(count_values(\"instance\",node_boot_time_seconds{instance=~\"^ip-.*$\"})) OR clamp_max(absent(node_boot_time_seconds{instance=~\"^ip-.*$\"}),0) )",
-            "legendFormat": "__auto",
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "title": "Number of s4l buffer machines",
-        "type": "stat"
+        "id": 14,
+        "panels": [],
+        "title": "plattform overview",
+        "type": "row"
       },
       {
         "datasource": {
@@ -358,10 +100,10 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 7,
-          "w": 24,
+          "h": 28,
+          "w": 18,
           "x": 0,
-          "y": 7
+          "y": 1
         },
         "id": 4,
         "options": {
@@ -383,27 +125,149 @@
               "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "osparc_container_instances_s4lcore",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Number of s4l-lite studies running (excluding puppeteer from v1.52.0)",
+        "title": "Number of s4l running (excluding automated testing)",
         "type": "timeseries"
       },
       {
-        "collapsed": false,
-        "gridPos": {
-          "h": 1,
-          "w": 24,
-          "x": 0,
-          "y": 14
+        "datasource": {
+          "type": "prometheus",
+          "uid": "AAAks95hb"
         },
-        "id": 18,
-        "panels": [],
-        "title": "Resource Usage",
-        "type": "row"
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "yellow",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 6,
+          "x": 18,
+          "y": 1
+        },
+        "id": 2,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "AAAks95hb"
+            },
+            "editorMode": "code",
+            "expr": "avg(osparc_master_members_in_gid_4)",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Number of registered s4l users",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "AAAks95hb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-blues"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 6,
+          "x": 18,
+          "y": 8
+        },
+        "id": 8,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "AAAks95hb"
+            },
+            "editorMode": "code",
+            "expr": "osparc_autoscaling_machines_buffer",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Number of s4l buffer machines",
+        "type": "stat"
       },
       {
         "datasource": {
@@ -415,37 +279,9 @@
             "color": {
               "mode": "continuous-BlPu"
             },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "smooth",
-              "lineWidth": 2,
-              "pointSize": 7,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
+            "decimals": 0,
             "mappings": [],
+            "min": 0,
             "noValue": "0",
             "thresholds": {
               "mode": "absolute",
@@ -460,29 +296,32 @@
                 }
               ]
             },
-            "unit": "percentunit"
+            "unit": "none"
           },
           "overrides": []
         },
         "gridPos": {
-          "h": 8,
-          "w": 24,
-          "x": 0,
+          "h": 7,
+          "w": 6,
+          "x": 18,
           "y": 15
         },
-        "id": 16,
+        "id": 12,
         "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": false
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
           },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
+          "textMode": "auto"
         },
+        "pluginVersion": "10.0.3",
         "targets": [
           {
             "datasource": {
@@ -490,14 +329,14 @@
               "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "sum without (cpu, mode, instance, job) (rate(node_cpu_seconds_total{instance=~\"^ip-.*$\",mode!=\"idle\"}[2m])) / count(count by (cpu) (node_cpu_seconds_total{instance=~\"^ip-.*$\"}))  OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\"}),0)",
+            "expr": "osparc_autoscaling_machines_active",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Total CPU usage of active s4l-lite nodes",
-        "type": "timeseries"
+        "title": "Number of active (\"hot\") s4l machines",
+        "type": "stat"
       },
       {
         "datasource": {
@@ -509,36 +348,7 @@
             "color": {
               "mode": "continuous-BlPu"
             },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 2,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
+            "decimals": 0,
             "mappings": [],
             "thresholds": {
               "mode": "absolute",
@@ -553,29 +363,126 @@
                 }
               ]
             },
-            "unit": "bytes"
+            "unit": "none"
           },
           "overrides": []
         },
         "gridPos": {
           "h": 7,
+          "w": 6,
+          "x": 18,
+          "y": 22
+        },
+        "id": 10,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "AAAks95hb"
+            },
+            "editorMode": "builder",
+            "expr": "osparc_autoscaling_machines_active + osparc_autoscaling_machines_buffer",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Number of total (buffer+active) s4l machines",
+        "type": "stat"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
           "w": 24,
           "x": 0,
-          "y": 23
+          "y": 29
         },
-        "id": 6,
+        "id": 15,
+        "panels": [],
+        "title": "s4l-deepdive",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "AAAks95hb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": [
+              {
+                "options": {
+                  "{feature_name=\"": {
+                    "index": 0
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 15,
+          "w": 13,
+          "x": 0,
+          "y": 30
+        },
+        "id": 13,
         "options": {
+          "displayLabels": [
+            "value",
+            "name"
+          ],
           "legend": {
-            "calcs": [],
             "displayMode": "list",
             "placement": "bottom",
-            "showLegend": false
+            "showLegend": true,
+            "values": [
+              "percent"
+            ]
+          },
+          "pieType": "donut",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
           },
           "tooltip": {
             "mode": "single",
-            "sort": "none"
+            "sort": "asc"
           }
         },
+        "pluginVersion": "10.0.3",
         "targets": [
           {
             "datasource": {
@@ -583,14 +490,88 @@
               "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "sum(container_memory_usage_bytes{instance=~\"ip-.*\",image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/((s4l-.)|(sym-server)).*$\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.sim4life.io].*/simcore/services/dynamic/s4l-core-.*$\"}),0)",
+            "exemplar": false,
+            "expr": "sum without(instance, job, monitor, node_id) (s4l_user_feature_time{node_id=\"$serviceuuid\"})",
+            "instant": false,
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Real-time RAM usage for s4l-lite services",
-        "type": "timeseries"
+        "title": "Time spent in ...",
+        "type": "piechart"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "AAAks95hb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "purple",
+              "mode": "shades"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "purple",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 15,
+          "w": 11,
+          "x": 13,
+          "y": 30
+        },
+        "id": 16,
+        "options": {
+          "displayMode": "gradient",
+          "minVizHeight": 10,
+          "minVizWidth": 0,
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showUnfilled": true,
+          "valueMode": "color"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "AAAks95hb"
+            },
+            "editorMode": "code",
+            "expr": "sum without(instance, job, monitor, node_id) (s4l_user_feature_count{node_id=\"$serviceuuid\"})",
+            "instant": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Clicked on ...",
+        "type": "bargauge"
       }
     ],
     "refresh": "",
@@ -599,7 +580,36 @@
     "style": "dark",
     "tags": [],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "selected": true,
+            "text": "61c8745f-3d5a-46e6-9f17-5cbce2b4321c",
+            "value": "61c8745f-3d5a-46e6-9f17-5cbce2b4321c"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "AAAks95hb"
+          },
+          "definition": "label_values(s4l_user_feature_time,node_id)",
+          "description": "Deepdive: Service UUID",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Deepdive: Service UUID",
+          "multi": false,
+          "name": "serviceuuid",
+          "options": [],
+          "query": {
+            "query": "label_values(s4l_user_feature_time,node_id)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 2,
+          "type": "query"
+        }
+      ]
     },
     "time": {
       "from": "now-6h",
@@ -607,9 +617,9 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "s4l-lite admin overview",
+    "title": "s4l admin overview",
     "uid": "Jg0sD8-4k",
-    "version": 5,
+    "version": 13,
     "weekStart": ""
   },
   "meta": {
@@ -640,9 +650,9 @@
     "publicDashboardAccessToken": "",
     "publicDashboardEnabled": false,
     "publicDashboardUid": "",
-    "slug": "sim4life.io-admin-overview",
+    "slug": "s4l-admin-overview",
     "type": "db",
     "updatedBy": "admin",
-    "url": "/grafana/d/Jg0sD8-4k/s4l-lite-admin-overview"
+    "url": "/grafana/d/Jg0sD8-4k/s4l-admin-overview"
   }
 }
