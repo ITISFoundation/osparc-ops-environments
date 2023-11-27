@@ -1,6 +1,6 @@
 version: '3.8'
 configs:
-  maintenance_page_api_html:
+  maintenance_api_html:
     file: ./page/api/index.html
   nginx_config:
     file: ./nginx-config/default.conf
@@ -9,7 +9,7 @@ configs:
     file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + j2item.replace(" ","") + ".html" }}{% endfor %}
 services:
 {% for j2item in DEPLOYMENT_FQDNS.replace(" ","").split(",") + [MACHINE_FQDN.replace(" ","")] if j2item != "" %}
-  maintenance_page_{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}:
+  maintenance_{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}:
     configs:
       - source: {{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}
         target: /usr/share/nginx/html/index.html
@@ -32,11 +32,11 @@ services:
         - traefik.http.services.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.loadbalancer.server.port=80
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.entrypoints=https
 {% endfor %}
-  maintenance_page_api:
+  maintenance_api:
     # nginx config
     image: nginx:1.25.1
     configs:
-      - source: maintenance_page_api_html
+      - source: maintenance_api_html
         target: /usr/share/nginx/html/index.html
       - source: nginx_config
         target: /etc/nginx/conf.d/default.conf
