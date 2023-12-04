@@ -541,7 +541,6 @@ services:
         - traefik.tcp.routers.postgres.service=${SWARM_STACK_NAME}_postgres
         - traefik.tcp.routers.postgres.entrypoints=postgres
         - traefik.tcp.routers.postgres.tls=false
-        - traefik.tcp.routers.postgres.tls.certresolver=myresolver
         - traefik.tcp.routers.postgres.rule=HostSNI(`*`)
       update_config:
         parallelism: 2

@@ -1,0 +1,6 @@
+tls:
+  certificates:
+    - certFile: /etc/traefik_certs/filestash.monitoring.osparc-master.speag.com.cert
+      keyFile: /etc/traefik_certs/filestash.monitoring.osparc-master.speag.com.key
+    - certFile: /etc/traefik_certs/osparc-master.speag.com.cert
+      keyFile: /etc/traefik_certs/osparc-master.speag.com.key

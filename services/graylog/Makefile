@@ -36,8 +36,10 @@ up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys graylog stack using let's enc
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) configure
 
-.PHONY: up-master ## Deploys graylog stack for master
-up-master: up-dalco
+.PHONY: up-master ## Deploys graylog stack for master Cluster
+up-master: .init .env ${TEMP_COMPOSE}-master
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+	$(MAKE) configure
 
 .PHONY: up-local ## Deploys graylog stack for local deployment
 up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local cluster
@@ -62,6 +64,11 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dalco
 ${TEMP_COMPOSE}-letsencrypt-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml  > $@
+
+.PHONY: ${TEMP_COMPOSE}-master .env ## Deploys stack on master deployment
+# Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local ## Deploys stack on local deployment
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
