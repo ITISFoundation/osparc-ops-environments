@@ -7,11 +7,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -33,11 +30,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -62,11 +56,8 @@ services:
       update_config:
         parallelism: 2
         order: stop-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -92,11 +83,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -115,11 +103,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -143,11 +128,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -205,11 +187,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -236,11 +215,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -259,11 +235,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -285,11 +258,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -318,11 +288,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -352,11 +319,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -369,11 +333,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -389,11 +350,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -424,11 +382,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -468,11 +423,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -488,11 +440,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -514,11 +463,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -545,11 +491,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -602,11 +545,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -643,11 +583,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -677,11 +614,8 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
-      rollback_config:
-        parallelism: 0
-        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
