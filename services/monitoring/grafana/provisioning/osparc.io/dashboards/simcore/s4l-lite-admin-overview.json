@@ -37,7 +37,38 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "continuous-blues"
+              "fixedColor": "blue",
+              "mode": "fixed"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineWidth": 5,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
             },
             "decimals": 0,
             "mappings": [],
@@ -66,20 +97,18 @@
         },
         "id": 2,
         "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
           },
-          "textMode": "auto"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
         },
-        "pluginVersion": "9.4.3",
+        "pluginVersion": "10.0.3",
         "targets": [
           {
             "datasource": {
@@ -87,14 +116,14 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "avg(osparc_production_members_in_gid_135745)",
+            "expr": "osparc_production_members_in_gid_135745",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
           }
         ],
         "title": "Number of registered s4l-lite users",
-        "type": "stat"
+        "type": "timeseries"
       },
       {
         "datasource": {
@@ -104,7 +133,38 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "continuous-BlPu"
+              "fixedColor": "blue",
+              "mode": "fixed"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 16,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "stepBefore",
+              "lineWidth": 3,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
             },
             "decimals": 0,
             "mappings": [],
@@ -112,11 +172,11 @@
               "mode": "absolute",
               "steps": [
                 {
-                  "color": "green",
+                  "color": "blue",
                   "value": null
                 },
                 {
-                  "color": "red",
+                  "color": "blue",
                   "value": 80
                 }
               ]
@@ -133,20 +193,18 @@
         },
         "id": 10,
         "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
           },
-          "textMode": "auto"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
         },
-        "pluginVersion": "9.4.3",
+        "pluginVersion": "10.0.3",
         "targets": [
           {
             "datasource": {
@@ -161,7 +219,7 @@
           }
         ],
         "title": "Number of total (buffer+active) s4l-lite machines",
-        "type": "stat"
+        "type": "timeseries"
       },
       {
         "datasource": {
@@ -171,7 +229,38 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "continuous-BlPu"
+              "fixedColor": "blue",
+              "mode": "fixed"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "stepAfter",
+              "lineWidth": 4,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
             },
             "decimals": 0,
             "mappings": [],
@@ -202,20 +291,18 @@
         },
         "id": 12,
         "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
           },
-          "textMode": "auto"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
         },
-        "pluginVersion": "9.4.3",
+        "pluginVersion": "10.0.3",
         "targets": [
           {
             "datasource": {
@@ -230,7 +317,7 @@
           }
         ],
         "title": "Number of active (\"hot\") s4l-lite machines",
-        "type": "stat"
+        "type": "timeseries"
       },
       {
         "datasource": {
@@ -240,7 +327,38 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "continuous-blues"
+              "fixedColor": "blue",
+              "mode": "fixed"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineWidth": 4,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
             },
             "decimals": 0,
             "mappings": [],
@@ -269,20 +387,18 @@
         },
         "id": 8,
         "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
           },
-          "textMode": "auto"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
         },
-        "pluginVersion": "9.4.3",
+        "pluginVersion": "10.0.3",
         "targets": [
           {
             "datasource": {
@@ -297,7 +413,7 @@
           }
         ],
         "title": "Number of s4l-lite buffer machines",
-        "type": "stat"
+        "type": "timeseries"
       },
       {
         "datasource": {
@@ -383,13 +499,13 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_io_simcore_runtime_simcore_user_agent!=\"puppeteer\"}),0)",
+            "expr": "count(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_simcore_user_agent!=\"puppeteer\"}) OR clamp_max(absent(container_memory_usage_bytes{image=~\"^.*[.osparc.io].*/simcore/services/dynamic/s4l-core-lite.*$\",container_label_simcore_user_agent!=\"puppeteer\"}),0)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Number of s4l-lite studies running (excluding puppeteer from v1.52.0)",
+        "title": "Number of s4l-lite studies running",
         "type": "timeseries"
       },
       {
@@ -593,7 +709,7 @@
         "type": "timeseries"
       }
     ],
-    "refresh": "",
+    "refresh": false,
     "revision": 1,
     "schemaVersion": 38,
     "style": "dark",
@@ -609,7 +725,7 @@
     "timezone": "",
     "title": "s4l-lite admin overview",
     "uid": "Jg0sD8-4k",
-    "version": 5,
+    "version": 4,
     "weekStart": ""
   },
   "meta": {
