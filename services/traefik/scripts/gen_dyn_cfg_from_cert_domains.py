@@ -5,10 +5,9 @@ from pathlib import Path
 import yaml
 
 if len(sys.argv) != 3:
-    print(
+    raise TypeError(
         "Usage: gen_dyn_cfg_from_cert_domains.py <cert_domains.json> <output_file.yml>"
     )
-    exit(1)
 
 CERT_DOMAINS_FILE = sys.argv[1]
 OUTPUT_FILE = sys.argv[2]
