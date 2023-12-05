@@ -35,7 +35,7 @@ up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns .create-secrets #
 up-dalco: up-letsencrypt-dns ## Deploys minio stack for Dalco Cluster
 
 .PHONY: up-master
-up-master: up-dalco ## Deploys minio stack for Master Cluster
+up-master: up ## Deploys minio stack for Master Cluster
 
 .PHONY: up-local
 up-local: up

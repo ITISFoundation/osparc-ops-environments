@@ -28,7 +28,8 @@ services:
       - "--tracing.jaeger=true"
       - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
       - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
-      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
+      - '--providers.file.directory=/etc/traefik/'
+      - '--providers.file.watch=true'
     networks:
       public:
       monitored:
@@ -59,9 +60,10 @@ services:
 
 configs:
   traefik_dynamic_config.yml:
-    file: ./config/dynamic_conf.yml
+    file: ./config/osparc.local_dyn_cfg.yml
   customEntrypoint.sh:
     file: ./config/customCAInit.sh
+
 secrets:
   domain.key:
     external: true
