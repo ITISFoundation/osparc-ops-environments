@@ -37,7 +37,6 @@ services:
           - node.labels.traefik==true
     volumes:
     - /etc/traefik_certs:/etc/traefik_certs
-    - ./config/master/:/etc/traefik/
 
 configs:
   traefik_dynamic_config.yml:
