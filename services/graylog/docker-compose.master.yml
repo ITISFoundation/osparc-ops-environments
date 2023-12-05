@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  mongodb:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.graylog==true
+
+  elasticsearch:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.graylog==true
+
+  graylog:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.graylog==true
