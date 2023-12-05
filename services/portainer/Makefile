@@ -31,6 +31,7 @@ up-letsencrypt-dns: .init .env secrets ${TEMP_COMPOSE}-letsencrypt-dns
 .PHONY: up-dalco ## Deploys portainer stack for Dalco Cluster
 up-dalco: .init .env secrets ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+
 .PHONY: up-aws ## Deploys portainer stack for AWS
 up-aws: .init .env secrets ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
@@ -38,8 +39,10 @@ up-aws: .init .env secrets ${TEMP_COMPOSE}-aws
 .PHONY: up-public ## Deploys portainer stack for public access Cluster
 up-public: up-dalco
 
-.PHONY: up-master ## Deploys portainer on master
-up-master: up-dalco
+.PHONY: up-master ## Deploys portainer stack for master Cluster
+up-master: .init .env secrets ${TEMP_COMPOSE}-master
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+
 
 .PHONY: configure-registry
 configure-registry:  ## Add if necessary dockerhub registry configuration to portainer.
@@ -75,6 +78,10 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml  > $@
+
+.PHONY: ${TEMP_COMPOSE}-master
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env

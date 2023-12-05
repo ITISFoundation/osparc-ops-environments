@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  adminpanels:
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager

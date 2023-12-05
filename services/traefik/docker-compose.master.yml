@@ -22,26 +22,22 @@ services:
       - '--tracing.jaeger=true'
       - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
       - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
-      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
-      - "--entryPoints.https.forwardedHeaders.insecure"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=rfc2136"
-      - "--certificatesresolvers.myresolver.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      # For debug purpose, to avoid being ban by let's encrypt servers
-      #  - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=${CERTIFICATE_RESOLVE_DNS_CHALLANGE_IP}"
-    volumes:
-      - "letsencrypt_certs:/letsencrypt"
+      - '--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
+      - '--entryPoints.https.forwardedHeaders.insecure'
+      - '--providers.file.directory=/etc/traefik/'
+      - '--providers.file.watch=true'
     env_file:
       - .env
+    configs:
+      - source: traefik_dynamic_config.yml
+        target: /etc/traefik/dynamic_conf.yml
     deploy:
       placement:
         constraints:
           - node.labels.traefik==true
-  whoami:
-    deploy:
-      labels:
-        - traefik.http.routers.whoami.tls.certresolver=myresolver
+    volumes:
+    - /etc/traefik_certs:/etc/traefik_certs
 
-volumes:
-  letsencrypt_certs:
+configs:
+  traefik_dynamic_config.yml:
+    file: ./config/osparc-master.speag.com_dyn_cfg.yaml

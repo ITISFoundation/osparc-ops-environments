@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  portainer:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.portainer==true

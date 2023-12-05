@@ -64,8 +64,8 @@ ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml docker-comp
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.public.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
+${TEMP_COMPOSE}-master: docker-compose.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml .env
