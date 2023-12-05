@@ -642,6 +642,20 @@ services:
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
 
+  dynamic-scheduler:
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        limits:
+          memory: 500M
+          cpus: '1.000'
+        reservations:
+          memory: 50M
+          cpus: '0.1'
+
 volumes:
   rabbit_data:
     name: ${SWARM_STACK_NAME}_rabbit_data
