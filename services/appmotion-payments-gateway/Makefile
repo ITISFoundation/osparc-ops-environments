@@ -13,17 +13,17 @@ help: ## help on rule's targets
 #
 
 
-.PHONY: .env .api_env  appmotion_payments_gateway_env
+.PHONY: .env .api_env api_env_config
 
 .env: .secrets  template.env ## captures necessary vars from `.secrets` into `.env` (TIP: `ln -s path/to/osparc-config/deployments/foo.com/repo.config .secrets`)
-	@set -o allexport; source $<  ; set +o allexport; envsubst < $(word 2,$^) > $@
+	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
 .api_env: .env template.api_env
-	@set -o allexport; source $<  ; set +o allexport; envsubst < $(word 2,$^) > $@
+	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
-appmotion_payments_gateway_env: .api_env  ## re-creates docker config
+api_env_config: .api_env  ## re-creates docker config
 	@docker config inspect $@ > /dev/null 2>&1 && docker config rm $@ || true
 	@docker config create $@ $<
 
@@ -42,7 +42,7 @@ appmotion_payments_gateway_env: .api_env  ## re-creates docker config
 
 
 .PHONY: stack
-stack: .stack/docker-compose.yml appmotion_payments_gateway_env ## deploys stack in current swarm (swarm must be initiated)
+stack: .stack/docker-compose.yml api_env_config ## deploys stack in current swarm (swarm must be initiated)
 	docker stack deploy --with-registry-auth --prune --compose-file $< ${SWARM_STACK_NAME}
 
 

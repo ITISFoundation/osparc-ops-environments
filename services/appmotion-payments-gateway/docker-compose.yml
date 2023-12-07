@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+    db:
+        image: mariadb:10.11
+        environment:
+            - MYSQL_USER=${APPMOTION_PAYMENTS_GATEWAY_DB_USER}
+            - MYSQL_PASSWORD=${APPMOTION_PAYMENTS_GATEWAY_DB_PASSWORD}
+            - MYSQL_DATABASE=${APPMOTION_PAYMENTS_GATEWAY_DB_DATABASE}
+            - MYSQL_RANDOM_ROOT_PASSWORD=1
+        volumes:
+            - db_volume:/var/lib/mysql
+        networks:
+            - internal
+
+    api:
+        image: appmotion-payment-gateway-php-apache-8.2:latest
+        environment:
+            - WEB_DOCUMENT_ROOT=/app/public
+        configs:
+          - source: api_env_config
+            target: /app/.env
+        networks:
+            - internal
+            - simcore_default
+        deploy: {}
+          
+configs:
+    # SEE https://docs.docker.com/compose/compose-file/05-services/#configs
+    api_env_config:
+        # file: .api_env
+        external: true
+
+volumes:
+    # SEE https://docs.docker.com/compose/compose-file/07-volumes/
+    db_volume:
+
+networks:
+    # SEE https://docs.docker.com/compose/compose-file/06-networks/
+    internal:
+        external: false
+    simcore_default:
+        external: true
