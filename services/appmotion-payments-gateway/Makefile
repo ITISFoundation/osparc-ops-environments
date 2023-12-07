@@ -1,41 +1,56 @@
+SHELL := /bin/bash
 
-# something to resolve
-#  repo.config + template.env  -> .env
+current_dir := $(shell pwd)
+SWARM_STACK_NAME  := $(notdir $(shell pwd))
+
+.PHONY: help
+help: ## help on rule's targets
+	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+
+#
+# CONFIG from templates & osparc-config secrets
 #
 
-# resolve .env
-source repo.config
-envsubst < template.env > .env
+
+.PHONY: .env .api_env  appmotion_payments_gateway_env
+
+.env: .secrets  template.env ## captures necessary vars from `.secrets` into `.env` (TIP: `ln -s path/to/osparc-config/deployments/foo.com/repo.config .secrets`)
+	@set -o allexport; source $<  ; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
-# create
-source .env
-envsubst < docker_config.template > secret_docker_config
-docker config create appmotion_payments_gateway_env ./secret_docker_config
-rm secret_docker_config
+.api_env: .env template.api_env
+	@set -o allexport; source $<  ; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
-# resolve config
+appmotion_payments_gateway_env: .api_env  ## re-creates docker config
+	@docker config inspect $@ > /dev/null 2>&1 && docker config rm $@ || true
+	@docker config create $@ $<
 
-# SEE https://skofgar.ch/dev/2020/08/how-to-quickly-replace-environment-variables-in-a-file/
+
+## NOTE: docker compose --env-file=$< config --output $@   DOES NOT WORK!!
+.stack/docker-compose.yml: .env docker-compose.yml ## creates compose specs for swarm
+	@mkdir -p .stack	
+	@set -o allexport; source $<; set +o allexport; \
+	docker stack config --compose-file $(word 2,$^) >$@
 
 
-# Regarding mariadb
 
-PLEASE REMEMBER TO SET A PASSWORD FOR THE MariaDB root USER !
-appmotion-payments-gateway-db-1   | To do so, start the server, then issue the following command:
-appmotion-payments-gateway-db-1   | 
-appmotion-payments-gateway-db-1   | '/usr/bin/mariadb-secure-installation'
-appmotion-payments-gateway-db-1   | 
-appmotion-payments-gateway-db-1   | which will also give you the option of removing the test
-appmotion-payments-gateway-db-1   | databases and anonymous user created by default.  This is
-appmotion-payments-gateway-db-1   | strongly recommended for production servers.
-appmotion-payments-gateway-db-1   | 
-appmotion-payments-gateway-db-1   | See the MariaDB Knowledgebase at https://mariadb.com/kb
-appmotion-payments-gateway-db-1   | 
-appmotion-payments-gateway-db-1   | Please report any problems at https://mariadb.org/jira
-appmotion-payments-gateway-db-1   | 
-appmotion-payments-gateway-db-1   | The latest information about MariaDB is available at https://mariadb.org/.
-appmotion-payments-gateway-db-1   | 
-appmotion-payments-gateway-db-1   | Consider joining MariaDB's strong and vibrant community:
-appmotion-payments-gateway-db-1   | https://mariadb.org/get-involved/
+#
+# docker SWARM
+#
+
+
+.PHONY: stack
+stack: .stack/docker-compose.yml appmotion_payments_gateway_env ## deploys stack in current swarm (swarm must be initiated)
+	docker stack deploy --with-registry-auth --prune --compose-file $< ${SWARM_STACK_NAME}
+
+
+.PHONY: stack-rm
+stack-rm: ## removes stack from current swarm
+	docker stack rm ${SWARM_STACK_NAME}
+
+
+.PHONY: stack-ls
+stack-ls: ## lists stack in current swarm
+	docker stack list
