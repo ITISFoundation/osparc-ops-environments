@@ -19,8 +19,8 @@ services:
           memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
           cpus: '0.5' # For now: same as autoscaling service
         reservations:
-          memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
-          cpus: '0.5' # For now: same as autoscaling service
+          memory: 100M # Determined from prometheus cadvisor actual usage on master, which was <100M
+          cpus: '0.1' # For now: same as autoscaling service
       placement:
         constraints:
           - node.labels.simcore==true
@@ -39,8 +39,8 @@ services:
         window: 120s
       resources:
         reservations:
-          cpus: "0.5"
-          memory: "256M"
+          cpus: "0.1"
+          memory: "128M"
         limits:
           cpus: "0.5"
           memory: "512M"
@@ -66,6 +66,13 @@ services:
       placement:
         constraints:
           - node.labels.dynamicsidecar == true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "64M"
+        limits:
+          cpus: "0.2"
+          memory: "256M"
     extra_hosts: []
   api-server:
     networks:
@@ -93,6 +100,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "128M"
+        limits:
+          cpus: "0.2"
+          memory: "512M"
     extra_hosts: []
 
   catalog:
@@ -113,7 +127,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
-
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "128M"
+        limits:
+          cpus: "1"
+          memory: "512M"
   static-webserver:
     deploy:
       labels:
@@ -138,6 +158,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "64M"
+        limits:
+          cpus: "0.1"
+          memory: "128M"
   invitations:
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
@@ -156,6 +183,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "64M"
+        limits:
+          cpus: "0.2"
+          memory: "256M"
   webserver:
     networks:
       - public
@@ -198,7 +232,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
-
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "512M"
+        limits:
+          cpus: "2"
+          memory: "2G"
     extra_hosts: []
 
   wb-db-event-listener:
@@ -225,6 +265,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore == true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "0.2"
+          memory: "512M"
   wb-garbage-collector:
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
@@ -245,6 +292,14 @@ services:
       placement:
         constraints:
           - node.role==manager
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "0.2"
+          memory: "512M"
+
   storage:
     environment:
       - S3_ENDPOINT=${S3_ENDPOINT}
@@ -268,6 +323,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "0.2"
+          memory: "1G"
   director:
     # Certificate necessary for local deploiement only
     #secrets:
@@ -295,6 +357,13 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "1"
+          memory: "1G"
   director-v2:
     environment:
       - SIMCORE_SERVICES_NETWORK_NAME=${SWARM_STACK_NAME}_interactive_services_subnet
@@ -326,6 +395,13 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "1"
+          memory: "1G"
   dask-sidecar:
     networks:
       - monitored
@@ -343,6 +419,13 @@ services:
       placement:
         constraints:
           - node.labels.dasksidecar==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "2"
+          memory: "1G"
   dask-scheduler:
     networks:
       - public
@@ -372,8 +455,8 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dask_scheduler.middlewares=${PREFIX_STACK_NAME}_dask_scheduler_replace_regex@docker, ops_gzip@docker, ops_auth@docker
       resources:
         limits:
-          memory: 256M
-          cpus: '1.000'
+          memory: 128M
+          cpus: '0.1'
         reservations:
           memory: 256M
           cpus: '1.000'
@@ -392,14 +475,22 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+        reservations:
+          memory: 256M
+          cpus: '0.2'
   migration:
     deploy:
       resources:
         limits:
-          memory: 180M
+          memory: 128M
           cpus: '1.000'
         reservations:
-          memory: 180M
+          memory: 16M
+          cpus: '0.1'
       placement:
         constraints:
           - node.labels.simcore==true
@@ -433,6 +524,13 @@ services:
       placement:
         constraints:
           - node.labels.rabbit==true
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.000'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
   redis:
     networks:
       - monitored
@@ -450,6 +548,13 @@ services:
       placement:
         constraints:
           - node.labels.redis==true
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.000'
+        reservations:
+          memory: 32M
+          cpus: '0.1'
   resource-usage-tracker:
     networks:
       - monitored
@@ -473,7 +578,13 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
-
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
   postgres:
     networks:
       - monitored
@@ -501,6 +612,13 @@ services:
       placement:
         constraints:
           - node.role==manager
+      resources:
+        limits:
+          memory: 3G
+          cpus: '3.0'
+        reservations:
+          memory: 1.5G
+          cpus: '0.1'
   traefik:
     networks:
       - monitored
@@ -555,6 +673,13 @@ services:
       placement:
         constraints:
           - node.labels.traefik==true
+      resources:
+        limits:
+          memory: 3G
+          cpus: '1.0'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
   traefik_api:
     # NOTE: this is a trick to allow to access the internal traefik REST API
     # A comment
@@ -593,6 +718,13 @@ services:
       placement:
         constraints:
           - node.labels.traefik==true
+      resources:
+        limits:
+          memory: 16M
+          cpus: '0.1'
+        reservations:
+          memory: 2M
+          cpus: '0.1'
   whoami:
     image: "containous/whoami:v1.5.0"
     networks:
@@ -624,7 +756,13 @@ services:
       placement:
         constraints:
           - node.labels.ops==true
-
+      resources:
+        limits:
+          memory: 16M
+          cpus: '0.1'
+        reservations:
+          memory: 2M
+          cpus: '0.1'
   payments:
     deploy:
       placement:
@@ -640,7 +778,13 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.entrypoints=http
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
-
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
   dynamic-scheduler:
     deploy:
       replicas: 2
