@@ -1,6 +1,4 @@
 SHELL := /bin/bash
-
-current_dir := $(shell pwd)
 SWARM_STACK_NAME  := $(notdir $(shell pwd))
 
 .PHONY: help
