@@ -15,7 +15,7 @@ help: ## help on rule's targets
 
 .PHONY: .env .api_env api_env_config
 
-.env: .secrets  template.env ## captures necessary vars from `.secrets` into `.env` (TIP: `ln -s path/to/osparc-config/deployments/foo.com/repo.config .secrets`)
+.env: .secrets  template.env ## resolves `.env` using `.secrets` (TIP: `ln -s path/to/osparc-config/deployments/foo.com/repo.config .secrets`)
 	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
@@ -46,11 +46,11 @@ stack: .stack/docker-compose.yml api_env_config ## deploys stack in current swar
 	docker stack deploy --with-registry-auth --prune --compose-file $< ${SWARM_STACK_NAME}
 
 
-.PHONY: stack-rm
-stack-rm: ## removes stack from current swarm
+.PHONY: rm-stack
+rm-stack: ## removes stack from current swarm
 	docker stack rm ${SWARM_STACK_NAME}
 
 
 .PHONY: stack-ls
-stack-ls: ## lists stack in current swarm
+ls-stack: ## lists stack in current swarm
 	docker stack list
