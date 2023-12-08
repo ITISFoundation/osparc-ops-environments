@@ -487,7 +487,6 @@ services:
         - traefik.tcp.routers.postgres.service=${SWARM_STACK_NAME}_postgres
         - traefik.tcp.routers.postgres.entrypoints=postgres
         - traefik.tcp.routers.postgres.tls=false
-        - traefik.tcp.routers.postgres.tls.certresolver=myresolver
         - traefik.tcp.routers.postgres.rule=HostSNI(`*`)
       update_config:
         parallelism: 2
@@ -641,6 +640,20 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.entrypoints=http
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_payments.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
+
+  dynamic-scheduler:
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        limits:
+          memory: 500M
+          cpus: '1.000'
+        reservations:
+          memory: 50M
+          cpus: '0.1'
 
 volumes:
   rabbit_data:

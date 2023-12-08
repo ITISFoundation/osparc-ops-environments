@@ -1,0 +1,58 @@
+tls:
+  certificates:
+  - certFile: /etc/traefik_certs/filestash.monitoring.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/filestash.monitoring.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.s4l-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.s4l-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.testing.s4l-lite-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.testing.s4l-lite-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.tip-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.tip-master.speag.com.key
+  - certFile: /etc/traefik_certs/testing.api.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/testing.api.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/registry.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/registry.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.testing.tip-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.testing.tip-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.testing.s4l-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.testing.s4l-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.s4l-lite-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.s4l-lite-master.speag.com.key
+  - certFile: /etc/traefik_certs/admin.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/admin.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/testing.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/testing.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/api.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/api.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/www.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/www.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.testing.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.testing.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/monitoring.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/monitoring.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/invitations.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/invitations.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/invitations.tip-master.speag.com.crt
+    keyFile: /etc/traefik_certs/invitations.tip-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.testing.s4l-acad-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.testing.s4l-acad-master.speag.com.key
+  - certFile: /etc/traefik_certs/testing.s4l-acad-master.speag.com.crt
+    keyFile: /etc/traefik_certs/testing.s4l-acad-master.speag.com.key
+  - certFile: /etc/traefik_certs/payments.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/payments.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/api.s4l-acad-master.speag.com.crt
+    keyFile: /etc/traefik_certs/api.s4l-acad-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.testing.s4l-desktop-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.testing.s4l-desktop-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.s4l-acad-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.s4l-acad-master.speag.com.key
+  - certFile: /etc/traefik_certs/api.testing.s4l-acad-master.speag.com.crt
+    keyFile: /etc/traefik_certs/api.testing.s4l-acad-master.speag.com.key
+  - certFile: /etc/traefik_certs/service.s4l-desktop-master.speag.com.crt
+    keyFile: /etc/traefik_certs/service.s4l-desktop-master.speag.com.key
+  - certFile: /etc/traefik_certs/_.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/_.osparc-master.speag.com.key

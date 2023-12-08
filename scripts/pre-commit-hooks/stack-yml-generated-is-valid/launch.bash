@@ -42,7 +42,7 @@ source "$repo_basedir"/scripts/logger.bash
 repo_config=$(cat "$repo_basedir"/.config.location)
 set -o allexport
 # shellcheck disable=SC1090
-export SIMCORE_IMAGE_TAG=master-github-latest
+export DOCKER_IMAGE_TAG=master-github-latest
 # shellcheck source=/dev/null.
 source "$repo_config"
 set +o allexport

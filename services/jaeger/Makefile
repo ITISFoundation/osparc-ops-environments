@@ -31,8 +31,9 @@ up-dalco: .init .env ${TEMP_COMPOSE}-dalco
 up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys jaeger stack in aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-.PHONY: up-master ## Deploys jaeger stack for master
-up-master: up-dalco
+.PHONY: up-master ## Deploys jaeger stack for master Cluster
+up-master: .init .env ${TEMP_COMPOSE}-master
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
 .PHONY: up-public ## Deploys jaeger stack for public acess deploy
 up-public: up-dalco
@@ -57,6 +58,10 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.letsencrypt.dns.yml docker-compose.dalco.yml > $@
+
+.PHONY: ${TEMP_COMPOSE}-master .env
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml

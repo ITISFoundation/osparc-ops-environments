@@ -72,8 +72,8 @@ ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml docker-comp
 ${TEMP_COMPOSE}-aws:  docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@
 
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml docker-compose.master.yml > $@
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
 
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
