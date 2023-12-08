@@ -11,24 +11,28 @@ help: ## help on rule's targets
 #
 
 
-.PHONY: .env .api_env api_env_config
+.PHONY: .secrets .env .api_env api_env_config
 
-.env: .secrets  template.env ## resolves `.env` using `.secrets` (TIP: `ln -s path/to/osparc-config/deployments/foo.com/repo.config .secrets`)
+.secrets:
+	@test -e $@ || (echo "Error: '$@' file not found. TIP: ln -s path/to/repo.config .secrets" && false)
+
+
+.env: .secrets template.env ## resolves '.env' using '.secrets'
 	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
-.api_env: .env template.api_env
+.api_env: .env template.api_env ## resolves '.api_env' using '.env'
 	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
 
 
-api_env_config: .api_env  ## re-creates docker config
+api_env_config: .api_env  ## (re)creates docker config with '.api_env' 
 	@docker config inspect $@ > /dev/null 2>&1 && docker config rm $@ || true
 	@docker config create $@ $<
 
 
 ## NOTE: docker compose --env-file=$< config --output $@   DOES NOT WORK!!
-.stack/docker-compose.yml: .env docker-compose.yml ## creates compose specs for swarm
-	@mkdir -p .stack	
+.stack/docker-compose.yml: .env docker-compose.yml ## creates compose-specs for swarm
+	@mkdir -p $(dir $@)
 	@set -o allexport; source $<; set +o allexport; \
 	docker stack config --compose-file $(word 2,$^) >$@
 
