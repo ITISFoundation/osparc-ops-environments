@@ -15,8 +15,11 @@ services:
         max_attempts: 3
         window: 120s
       resources:
+        # Instruction how to measure resources: https://github.com/ITISFoundation/osparc-ops-environments/issues/330#issuecomment-1746359262
+        # for limits cpu / memory see the max usage and increase it by some percent or multiple by 2 depending on the criticality
+        # for reservations cpu / memory see the min usage
         limits:
-          memory: 200M # Determined from prometheus cadvisor actual usage on master, which was <100M
+          memory: 300M # Determined from prometheus cadvisor actual usage on master, which was <100M
           cpus: '0.5' # For now: same as autoscaling service
         reservations:
           memory: 100M # Determined from prometheus cadvisor actual usage on master, which was <100M
@@ -74,6 +77,7 @@ services:
           cpus: "0.2"
           memory: "256M"
     extra_hosts: []
+
   api-server:
     networks:
       - public
@@ -106,7 +110,7 @@ services:
           memory: "128M"
         limits:
           cpus: "0.2"
-          memory: "512M"
+          memory: "600M"
     extra_hosts: []
 
   catalog:
@@ -132,8 +136,9 @@ services:
           cpus: "0.1"
           memory: "128M"
         limits:
-          cpus: "1"
+          cpus: "0.2"
           memory: "512M"
+
   static-webserver:
     deploy:
       labels:
@@ -165,6 +170,7 @@ services:
         limits:
           cpus: "0.1"
           memory: "128M"
+
   invitations:
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
@@ -190,6 +196,7 @@ services:
         limits:
           cpus: "0.2"
           memory: "256M"
+
   webserver:
     networks:
       - public
@@ -237,7 +244,7 @@ services:
           cpus: "0.1"
           memory: "512M"
         limits:
-          cpus: "2"
+          cpus: "1"
           memory: "2G"
     extra_hosts: []
 
@@ -272,6 +279,7 @@ services:
         limits:
           cpus: "0.2"
           memory: "512M"
+
   wb-garbage-collector:
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
@@ -328,8 +336,9 @@ services:
           cpus: "0.1"
           memory: "256M"
         limits:
-          cpus: "0.2"
+          cpus: "1"
           memory: "1G"
+
   director:
     # Certificate necessary for local deploiement only
     #secrets:
@@ -362,8 +371,9 @@ services:
           cpus: "0.1"
           memory: "256M"
         limits:
-          cpus: "1"
+          cpus: "0.5"
           memory: "1G"
+
   director-v2:
     environment:
       - SIMCORE_SERVICES_NETWORK_NAME=${SWARM_STACK_NAME}_interactive_services_subnet
@@ -402,6 +412,7 @@ services:
         limits:
           cpus: "1"
           memory: "1G"
+
   dask-sidecar:
     networks:
       - monitored
@@ -424,8 +435,9 @@ services:
           cpus: "0.1"
           memory: "256M"
         limits:
-          cpus: "2"
+          cpus: "1"
           memory: "1G"
+
   dask-scheduler:
     networks:
       - public
@@ -455,11 +467,12 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dask_scheduler.middlewares=${PREFIX_STACK_NAME}_dask_scheduler_replace_regex@docker, ops_gzip@docker, ops_auth@docker
       resources:
         limits:
+          memory: 512M
+          cpus: '0.2'
+        reservations:
           memory: 128M
           cpus: '0.1'
-        reservations:
-          memory: 256M
-          cpus: '1.000'
+
   datcore-adapter:
     deploy:
       update_config:
@@ -477,16 +490,17 @@ services:
           - node.labels.simcore==true
       resources:
         limits:
-          memory: 128M
-          cpus: '0.1'
-        reservations:
           memory: 256M
           cpus: '0.2'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+
   migration:
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 1G
           cpus: '1.000'
         reservations:
           memory: 16M
@@ -494,6 +508,7 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
+
   rabbit:
     networks:
       - monitored
@@ -531,6 +546,7 @@ services:
         reservations:
           memory: 256M
           cpus: '0.1'
+
   redis:
     networks:
       - monitored
@@ -555,6 +571,7 @@ services:
         reservations:
           memory: 32M
           cpus: '0.1'
+
   resource-usage-tracker:
     networks:
       - monitored
@@ -585,6 +602,7 @@ services:
         reservations:
           memory: 64M
           cpus: '0.1'
+
   postgres:
     networks:
       - monitored
@@ -619,6 +637,7 @@ services:
         reservations:
           memory: 1.5G
           cpus: '0.1'
+
   traefik:
     networks:
       - monitored
@@ -723,7 +742,7 @@ services:
           memory: 16M
           cpus: '0.1'
         reservations:
-          memory: 2M
+          memory: 8M
           cpus: '0.1'
   whoami:
     image: "containous/whoami:v1.5.0"
@@ -761,7 +780,7 @@ services:
           memory: 16M
           cpus: '0.1'
         reservations:
-          memory: 2M
+          memory: 8M
           cpus: '0.1'
   payments:
     deploy:
@@ -785,6 +804,7 @@ services:
         reservations:
           memory: 128M
           cpus: '0.1'
+
   dynamic-scheduler:
     deploy:
       replicas: 2
