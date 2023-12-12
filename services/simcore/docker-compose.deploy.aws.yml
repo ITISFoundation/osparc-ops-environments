@@ -18,6 +18,9 @@ services:
   postgres:
     deploy:
       replicas: 0
+  rabbit:
+    deploy:
+      replicas: 0
   traefik:
     command:
       - "--api=true"
