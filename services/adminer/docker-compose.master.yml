@@ -5,3 +5,6 @@ services:
       placement:
         constraints:
           - node.labels.adminer==true
+      resources:
+        reservations:
+          cpus: '0.0'  # not enough resources on master | YH Dec 2023
