@@ -112,10 +112,15 @@ down-simcore:  ## Stop the simcore service
 	,)
 
 
+.vscode/settings.json: .vscode/settings.template.json
+	$(if $(wildcard $@), \
+	@echo "WARNING #####  $< is newer than $@ ####"; diff -uN $@ $<; false;,\
+	@echo "WARNING ##### $@ does not exist, cloning $< as $@ ############"; cp $< $@)
+
 .PHONY: venv
 # WARNING: this is not windows friendly
 venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
-.venv:
+.venv: .vscode/settings.json
 	@python3 -m venv .venv
 	@.venv/bin/pip3 install --upgrade pip wheel setuptools
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
