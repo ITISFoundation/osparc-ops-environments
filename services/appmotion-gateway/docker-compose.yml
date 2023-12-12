@@ -6,6 +6,7 @@ services:
         image: adminer:latest
         init: true
         ports:
+        # PC -> Yuri: you should
         - 8080
         environment:
             ADMINER_DEFAULT_SERVER: db
@@ -46,6 +47,7 @@ configs:
 
 volumes:
     # SEE https://docs.docker.com/compose/compose-file/07-volumes/
+    # PC -> Yuri: this volume needs to be backuped
     db_volume:
 
 networks:
@@ -53,4 +55,5 @@ networks:
     internal:
         external: false
     simcore_default:
+        # PC -> Yuri: this network should allow talking internally with the payments service (can be the default or a new one)
         external: true
