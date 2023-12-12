@@ -26,7 +26,8 @@ services:
             - internal
 
     api:
-        image: appmotion-payment-gateway-php-apache-8.2:latest
+        # PC -> Yuri: should we pass this image name via a env var?
+        image: itisfoundation/appmotion-gateway-php-apache-8.2:latest
         environment:
             - WEB_DOCUMENT_ROOT=/app/public
         configs:
