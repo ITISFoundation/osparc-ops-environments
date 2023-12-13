@@ -1,0 +1,28 @@
+tls:
+  certificates:
+  - certFile: /etc/traefik_certs/filestash.monitoring.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/filestash.monitoring.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/testing.api.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/testing.api.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/admin.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/admin.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/testing.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/testing.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/registry.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/registry.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/api.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/api.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/monitoring.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/monitoring.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/service.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/service.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/www.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/www.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/invitations.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/invitations.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/service.testing.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/service.testing.tip.itis.swiss.key
+  - certFile: /etc/traefik_certs/payments.tip.itis.swiss.crt
+    keyFile: /etc/traefik_certs/payments.tip.itis.swiss.key

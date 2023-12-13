@@ -24,8 +24,8 @@ up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys graylog stack for Dalco Cluster
-up-dalco: .init .env ${TEMP_COMPOSE}-letsencrypt-dalco
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dalco ${STACK_NAME}
+up-dalco: .init .env ${TEMP_COMPOSE}-dalco
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 	$(MAKE) configure
 
 .PHONY: up-public  ## Deploys graylog stack for public access Cluster
@@ -61,9 +61,9 @@ ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dalco
-${TEMP_COMPOSE}-letsencrypt-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml  > $@
+.PHONY: ${TEMP_COMPOSE}-dalco
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master .env ## Deploys stack on master deployment
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771

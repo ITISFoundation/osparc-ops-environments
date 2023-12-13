@@ -21,8 +21,8 @@ define create-s3-bucket
 	# bucket is available in S3
 endef
 
-.PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploys registry stack
+.PHONY: up-local
+up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys registry stack
 	@$(create-s3-bucket)
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
@@ -35,7 +35,8 @@ up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys registry stack for Dalco Cluster
-up-dalco: up-letsencrypt-dns
+up-dalco: .init .env ${TEMP_COMPOSE}
+	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-aws
 up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys registry on AWS
@@ -52,8 +53,8 @@ up-local: up
 
 # Helpers -------------------------------------------------
 
-.PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml docker-compose.self-signed.yml .env
+.PHONY: ${TEMP_COMPOSE}-local
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.self-signed.yml .env
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.self-signed.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
@@ -63,6 +64,10 @@ ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
+
+.PHONY: ${TEMP_COMPOSE}
+${TEMP_COMPOSE}: docker-compose.yml .env
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml .env
