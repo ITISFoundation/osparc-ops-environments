@@ -35,6 +35,9 @@ services:
       placement:
         constraints:
           - node.labels.traefik==true
+    volumes:
+    - /etc/traefik_certs:/etc/traefik_certs
+
 configs:
   traefik_dynamic_config.yml:
     file: ./config/tip.itis.swiss_dyn_cfg.yaml
