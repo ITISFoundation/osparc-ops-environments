@@ -637,7 +637,7 @@ services:
           cpus: '3.0'
         reservations:
           memory: 1.5G
-          cpus: '0.1'
+          # cpus: '0.1'  # tmp fix due to lack of resources on master | YH Dec 2023
 
   traefik:
     networks:
