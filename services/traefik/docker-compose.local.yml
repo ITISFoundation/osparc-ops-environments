@@ -60,7 +60,7 @@ services:
 
 configs:
   traefik_dynamic_config.yml:
-    file: ./config/osparc.local_dyn_cfg.yml
+    file: ./config/local_dyn_cfg.yml
   customEntrypoint.sh:
     file: ./config/customCAInit.sh
 

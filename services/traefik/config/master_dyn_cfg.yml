@@ -1,5 +1,7 @@
 tls:
   certificates:
+
+  # osparc-master.speag.com
   - certFile: /etc/traefik_certs/filestash.monitoring.osparc-master.speag.com.crt
     keyFile: /etc/traefik_certs/filestash.monitoring.osparc-master.speag.com.key
   - certFile: /etc/traefik_certs/service.s4l-master.speag.com.crt

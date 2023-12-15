@@ -40,4 +40,4 @@ services:
 
 configs:
   traefik_dynamic_config.yml:
-    file: ./config/tip.itis.swiss_dyn_cfg.yaml
+    file: ./config/public_dyn_cfg.yml
