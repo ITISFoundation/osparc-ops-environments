@@ -48,4 +48,3 @@ services:
 configs:
   traefik_dynamic_config.yml:
     file: ./config/aws_dyn_cfg.yml
-
