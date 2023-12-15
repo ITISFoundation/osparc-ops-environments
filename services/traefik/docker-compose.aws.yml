@@ -21,19 +21,13 @@ services:
       - '--tracing.jaeger=true'
       - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
       - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
-      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
-      - "--entryPoints.https.forwardedHeaders.insecure"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=route53"
-      - "--certificatesresolvers.myresolver.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    #  - "--certificatesresolvers.lehttpchallenge.acme.httpchallenge=true"
-    #  - "--certificatesresolvers.lehttpchallenge.acme.httpchallenge.entrypoint=http"
-    #  - "--certificatesresolvers.lehttpchallenge.acme.email=${OSPARC_DEVOPS_MAIL_ADRESS}"
-    #  - "--certificatesresolvers.lehttpchallenge.acme.storage=/letsencrypt/acme.json"
-    # For debug purpose, to avoid being ban by let's encrypt servers
-      - "--certificatesresolvers.myresolver.acme.caserver=${OPS_TRAEFIK_LETSENCRYPT_ACME_CA_SERVER}"
-    volumes:
-      - "letsencrypt_certs:/letsencrypt"
+      - '--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
+      - '--entryPoints.https.forwardedHeaders.insecure'
+      - '--providers.file.directory=/etc/traefik/'
+      - '--providers.file.watch=true'
+    configs:
+      - source: traefik_dynamic_config.yml
+        target: /etc/traefik/dynamic_conf.yml
     environment:
       -  AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
       -  AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
@@ -51,5 +45,6 @@ services:
     dns:
       8.8.8.8
 
-volumes:
-  letsencrypt_certs:
+configs:
+  traefik_dynamic_config.yml:
+    file: ./config/aws_dyn_cfg.yml

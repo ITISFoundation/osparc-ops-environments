@@ -40,4 +40,4 @@ services:
 
 configs:
   traefik_dynamic_config.yml:
-    file: ./config/osparc-master.speag.com_dyn_cfg.yaml
+    file: ./config/master_dyn_cfg.yml
