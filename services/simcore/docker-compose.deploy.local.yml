@@ -9,7 +9,7 @@ services:
   # need to pass self-signed certificate in /usr/local/share/ca-certificates and call update-ca-certificates
   catalog:
     deploy:
-      replicas: 1
+      replicas: ${SIMCORE_CATALOG_REPLICAS}
   storage:
     secrets:
         - source: storageca.crt
@@ -21,7 +21,7 @@ services:
       - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
   director:
     deploy:
-      replicas: 1
+      replicas: ${SIMCORE_DIRECTOR_V0_REPLICAS}
     environment:
       # needed to pass the self-signed certificate to the spawned services
       - DIRECTOR_SELF_SIGNED_SSL_FILENAME=/usr/local/share/ca-certificates/osparc.crt
@@ -65,9 +65,6 @@ services:
     deploy:
       replicas: 1
   rabbit:
-    deploy:
-      replicas: 1
-  dask-scheduler:
     deploy:
       replicas: 1
   datcore-adapter:

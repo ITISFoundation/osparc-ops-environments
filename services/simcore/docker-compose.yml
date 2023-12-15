@@ -117,7 +117,7 @@ services:
     networks:
       - monitored
     deploy:
-      replicas: 10
+      replicas: ${SIMCORE_CATALOG_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
@@ -355,7 +355,7 @@ services:
     networks:
       - monitored
     deploy:
-      replicas: 5
+      replicas: ${SIMCORE_DIRECTOR_V0_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
@@ -442,6 +442,7 @@ services:
     networks:
       - public
     deploy:
+      replicas: ${SIMCORE_DASK_SCHEDULER_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
