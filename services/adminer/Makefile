@@ -65,5 +65,5 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
 
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml  > $@
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@

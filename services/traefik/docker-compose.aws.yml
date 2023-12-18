@@ -37,8 +37,6 @@ services:
         constraints:
           - node.labels.traefik==true
       labels:
-        - traefik.http.routers.api.tls.certresolver=myresolver
-        - traefik.http.routers.wwwsecure-catchall.tls.certresolver=myresolver
         - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
     volumes:
     - /etc/traefik_certs:/etc/traefik_certs
