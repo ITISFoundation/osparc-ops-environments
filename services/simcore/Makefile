@@ -46,21 +46,17 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.deploy.letsen
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.letsencrypt.dns.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.deploy.aws.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.aws.yml")' | cat | \
-	$(_yq) '. *+ load("docker-compose.deploy.letsencrypt.dns.yml")' > ${TEMP_COMPOSE}
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.deploy.aws.yml
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.aws.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.deploy.dalco.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.dalco.yml")' | cat | \
-	$(_yq) '. *+ load("docker-compose.deploy.letsencrypt.dns.yml")' > ${TEMP_COMPOSE}
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.deploy.dalco.yml
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.dalco.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-public
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.deploy.public.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")' | cat | \
-	$(_yq) '. *+ load("docker-compose.deploy.letsencrypt.dns.yml")' > ${TEMP_COMPOSE}
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")'  > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.master.yml")' | cat | \
-	$(_yq) '. *+ load("docker-compose.deploy.letsencrypt.dns.yml")' > ${TEMP_COMPOSE}
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.master.yml")' > ${TEMP_COMPOSE}
