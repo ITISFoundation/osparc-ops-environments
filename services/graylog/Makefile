@@ -76,8 +76,8 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws ## Deploys stack on aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.letsencrypt.dns.yml docker-compose.aws.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml  > $@
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
 
 .PHONY: .env
 .env: template.env $(REPO_CONFIG_LOCATION)
