@@ -72,32 +72,32 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml docker-compose.letsencrypt.dns.yml .env
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml docker-compose.letsencrypt.dns.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml .env
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml docker-compose.letsencrypt.dns.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml docker-compose.letsencrypt.dns.yml .env
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml docker-compose.letsencrypt.dns.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml docker-compose.letsencrypt.dns.yml .env
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml docker-compose.letsencrypt.dns.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: docker-compose.letsencrypt.dns.yml
 docker-compose.letsencrypt.dns.yml: .venv .env
