@@ -38,6 +38,12 @@ MONITORED_NETWORK := $(monitored_network)
 endif
 export MONITORED_NETWORK
 
+ifeq ($(payment_network),)
+PAYMENT_NETWORK = payment-network
+else
+PAYMENT_NETWORK := $(payment_network)
+endif
+export PAYMENT_NETWORK
 
 # Check that a valid location to a config file is set.
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
@@ -87,22 +93,6 @@ export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=$(shell set -o allexport; \
 		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="$$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS"; \
 	fi; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
-	set +o allexport; )
-
-export DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS=$(shell set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="(Host(\`payments.${MACHINE_FQDN}\`))"; \
-	else \
-		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="(Host(\`payments.${MACHINE_FQDN}\`))"; \
-		for element in "$${hosts[@]}"; \
-		do \
-			DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="$$DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS || (Host(\`payments.$$element\`))";\
-		done; \
-		DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="$$DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS"; \
-	fi; \
-	echo $$DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS; \
 	set +o allexport; )
 
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE=$(shell set -o allexport; \
@@ -253,6 +243,10 @@ clean-default: .check_clean ## Cleans all outputs
 	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		,  \
 		, docker network create --attachable --driver=overlay --subnet=10.11.0.0/16 $(MONITORED_NETWORK) \
+	)
+	@$(if $(filter $(PAYMENT_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		,  \
+		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/28 $(PAYMENT_NETWORK) \
 	)
 
 

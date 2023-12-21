@@ -788,16 +788,7 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
-      labels:
-        - traefik.enable=true
-        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments_api.rule=(${DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS}) && PathPrefix(`/v1`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments_api.entrypoints=http
-        - traefik.http.services.${SWARM_STACK_NAME}_payments.loadbalancer.server.port=8000
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments.rule=(${DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS})
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments.entrypoints=http
-        - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
-        - traefik.http.routers.${SWARM_STACK_NAME}_payments.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_payments_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
+
       resources:
         limits:
           memory: 512M
@@ -805,6 +796,8 @@ services:
         reservations:
           memory: 128M
           cpus: '0.1'
+    networks:
+      - payments
 
   dynamic-scheduler:
     deploy:
@@ -830,6 +823,9 @@ networks:
   monitored:
     external: true
     name: ${OPS_MONITORED_NETWORK}
+  payments:
+    external: true
+    name: ${OPS_PAYMENT_NETWORK}
   storage_subnet:
     attachable: true
     name: ${SWARM_STACK_NAME}_storage_subnet

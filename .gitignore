@@ -149,3 +149,5 @@ docker-compose.simcore.yml
 repo.config
 .temp
 .temp/**
+
+*secret*

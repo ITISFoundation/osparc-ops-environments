@@ -1,0 +1,6 @@
+!docker-compose.yml
+
+.api_env
+.env
+.stack/
+*secret*

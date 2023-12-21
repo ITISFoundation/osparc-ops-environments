@@ -1,0 +1,120 @@
+version: '3.7'
+
+services:
+
+    adminer:
+        image: adminer:4.8.1
+        init: true
+        environment:
+            - ADMINER_DEFAULT_SERVER=db
+            - ADMINER_DESIGN=nette
+            - ADMINER_PLUGINS=json-column
+        deploy:
+            replicas: 0
+            labels:
+                - traefik.enable=true
+                - traefik.docker.network=${PUBLIC_NETWORK}
+                - traefik.http.services.adminer_payments.loadbalancer.server.port=8080
+                - traefik.http.routers.adminer_payments.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer/payments`)
+                - traefik.http.routers.adminer_payments.entrypoints=https
+                - traefik.http.routers.adminer_payments.tls=true
+                - traefik.http.middlewares.adminer_payments_stripprefixregex.stripprefixregex.regex=^/adminer
+                - traefik.http.routers.adminer_payments.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_payments_stripprefixregex
+            resources:
+                reservations:
+                    memory: 16M
+                    cpus: "0.1"
+                limits:
+                    memory: 128M
+                    cpus: "0.5"
+            placement:
+                constraints:
+                    - node.labels.ops==true
+        networks:
+            - internal
+            - public
+
+    db:
+        image: mariadb:10.11
+        environment:
+            - MYSQL_USER=${APPMOTION_GATEWAY_DB_USER}
+            - MYSQL_PASSWORD=${APPMOTION_GATEWAY_DB_PASSWORD}
+            - MYSQL_DATABASE=${APPMOTION_GATEWAY_DB_DATABASE}
+            - MYSQL_RANDOM_ROOT_PASSWORD=1
+        deploy:
+            replicas: 0
+            # https://tuneit.me/docker/deploy-mariadb-11-0-2-in-docker-swarm-cluster/
+            update_config:
+                parallelism: 2
+                delay: 10s
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+            placement:
+                constraints:
+                    - node.labels.paymentsdb==true
+            resources:
+                limits:
+                    memory: 3G
+                    cpus: '3.0'
+                reservations:
+                    memory: 256M
+                    cpus: '0.1'
+        volumes:
+            - appmotion_gateway_db_volume:/var/lib/mysql
+        networks:
+            - internal
+
+    api:
+        # PC -> Yuri: should we pass this image name via a env var?
+        image: itisfoundation/appmotion-gateway-php-apache-8.2:latest
+        environment:
+            - WEB_DOCUMENT_ROOT=/app/public
+        deploy:
+            replicas: 1
+            labels:
+                - traefik.enable=true
+                - traefik.docker.network=${PUBLIC_NETWORK}
+                - traefik.http.routers.${SWARM_STACK_NAME}_payments.rule=Host(`payments.${MACHINE_FQDN}`)
+                - traefik.http.routers.${SWARM_STACK_NAME}_payments.entrypoints=https
+                - traefik.http.routers.${SWARM_STACK_NAME}_payments.tls=true
+                - traefik.http.services.${SWARM_STACK_NAME}_payments.loadbalancer.server.port=80
+            resources:
+                limits:
+                    memory: 1G
+                    cpus: '1.0'
+                reservations:
+                    memory: 64M
+                    cpus: '0.1'
+            placement:
+                constraints:
+                    - node.labels.simcore==true
+        configs:
+          - source: api_env_config
+            target: /app/.env
+        networks:
+            - internal
+            - payments
+            - public
+
+configs:
+    # SEE https://docs.docker.com/compose/compose-file/05-services/#configs
+    api_env_config:
+        external: true
+
+volumes:
+    # SEE https://docs.docker.com/compose/compose-file/07-volumes/
+    # PC -> Yuri: this volume needs to be backuped
+    appmotion_gateway_db_volume:
+
+networks:
+    internal:
+        external: false
+    payments:
+        external: true
+        name: ${PAYMENT_NETWORK}
+    public:
+        external: true
+        name: ${PUBLIC_NETWORK}
