@@ -24,6 +24,12 @@ scrape_configs:
         type: "A"
         port: 8080
       - names:
+          - "tasks.production_api-server"
+          - "tasks.staging_api-server"
+          - "tasks.master_api-server"
+        type: "A"
+        port: 8000
+      - names:
           - "tasks.production_storage"
           - "tasks.staging_storage"
           - "tasks.master_storage"
