@@ -16,7 +16,7 @@ up-aws: .init .env ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-local ## Deploys stack on local
-up-local: .init .env ${TEMP_COMPOSE}-local
+up-local: .init .env ${TEMP_COMPOSE}-local api_env_config
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
 # Helpers -------------------------------------------------
