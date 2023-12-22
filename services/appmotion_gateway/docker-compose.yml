@@ -102,7 +102,7 @@ services:
 configs:
     # SEE https://docs.docker.com/compose/compose-file/05-services/#configs
     api_env_config:
-        external: true
+        file: ./.api_env
 
 volumes:
     # SEE https://docs.docker.com/compose/compose-file/07-volumes/

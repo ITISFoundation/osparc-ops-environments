@@ -3,8 +3,6 @@ services:
   adminer:
     image: adminer:4.8.1
     init: true
-    # ports:
-    #   - 8080
     networks:
       - monitored
       - public

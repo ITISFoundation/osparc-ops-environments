@@ -12,11 +12,11 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up-aws ## Deploys stack on aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws
+up-aws: .init .env ${TEMP_COMPOSE}-aws .api_env
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-local ## Deploys stack on local
-up-local: .init .env ${TEMP_COMPOSE}-local api_env_config
+up-local: .init .env ${TEMP_COMPOSE}-local .api_env
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
 # Helpers -------------------------------------------------
@@ -32,7 +32,3 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 
 .api_env: .env template.api_env ## resolves '.api_env' using '.env'
 	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
-
-api_env_config: .api_env  ## (re)creates docker config with '.api_env'
-	@docker config inspect $@ > /dev/null 2>&1 && docker config rm $@ || true
-	@docker config create $@ $<
