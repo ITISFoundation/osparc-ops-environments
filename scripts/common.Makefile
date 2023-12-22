@@ -246,7 +246,7 @@ clean-default: .check_clean ## Cleans all outputs
 	)
 	@$(if $(filter $(PAYMENT_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		,  \
-		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/28 $(PAYMENT_NETWORK) \
+		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/16 $(PAYMENT_NETWORK) \
 	)
 
 
