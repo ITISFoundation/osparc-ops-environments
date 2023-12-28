@@ -20,39 +20,45 @@ define jinja
 	.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
 
-
-
 .PHONY: up
 up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
+	$(MAKE) grafana-import
 
 .PHONY: up-local
 up-local: .init .env config.prometheus.simcore ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
+	$(MAKE) grafana-import
 
 .PHONY: up-letsencrypt-http
 up-letsencrypt-http: .init .env config.monitoring  config.prometheus ${TEMP_COMPOSE}-letsencrypt-http   ## Deploys or updates current stack "$(STACK_NAME)" using let's encrypt http challenge
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
+	$(MAKE) grafana-import
 
 .PHONY: up-letsencrypt-dns
 up-letsencrypt-dns: .init .env config.monitoring config.prometheus  ${TEMP_COMPOSE}-letsencrypt-dns   ## Deploys or updates current stack "$(STACK_NAME)" using let's encrypt dns challenge
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
+	$(MAKE) grafana-import
 
 .PHONY: up-dalco
 up-dalco: .init .env  config.monitoring config.prometheus.ceph.simcore ${TEMP_COMPOSE}-dalco ## Deploys monitoring stack for Dalco Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+	$(MAKE) grafana-import
 
 .PHONY: up-public
 up-public: .init .env  config.monitoring config.prometheus ${TEMP_COMPOSE}-public ## Deploys monitoring stack for Public Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
+	$(MAKE) grafana-import
 
 .PHONY: up-aws
 up-aws: .init .env config.monitoring config.prometheus.simcore ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	$(MAKE) grafana-import
 
 .PHONY: up-master
 up-master: .init .env config.monitoring  config.prometheus.ceph.simcore ${TEMP_COMPOSE}-master ## Deploys monitoring stack for Master Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+	$(MAKE) grafana-import
 
 ${TEMP_COMPOSE}: docker-compose.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
