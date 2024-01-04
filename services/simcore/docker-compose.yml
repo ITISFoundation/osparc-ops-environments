@@ -305,7 +305,7 @@ services:
           cpus: "0.1"
           memory: "256M"
         limits:
-          cpus: "0.2"
+          cpus: "1.0"
           memory: "512M"
 
   storage:
