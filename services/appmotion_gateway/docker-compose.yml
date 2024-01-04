@@ -54,7 +54,7 @@ services:
                 window: 120s
             placement:
                 constraints:
-                    - node.labels.paymentsdb==true
+                    - node.labels.appmotiondb==true
             resources:
                 limits:
                     memory: 3G
@@ -94,7 +94,7 @@ services:
 configs:
     # SEE https://docs.docker.com/compose/compose-file/05-services/#configs
     api_env_config:
-        file: ./.api_env
+        file: ./.api_env.secret
 
 volumes:
     # SEE https://docs.docker.com/compose/compose-file/07-volumes/
