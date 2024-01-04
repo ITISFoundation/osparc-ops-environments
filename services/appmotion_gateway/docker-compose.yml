@@ -14,12 +14,12 @@ services:
             labels:
                 - traefik.enable=true
                 - traefik.docker.network=${PUBLIC_NETWORK}
-                - traefik.http.services.adminer_payments.loadbalancer.server.port=8080
-                - traefik.http.routers.adminer_payments.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer/payments`)
-                - traefik.http.routers.adminer_payments.entrypoints=https
-                - traefik.http.routers.adminer_payments.tls=true
-                - traefik.http.middlewares.adminer_payments_stripprefixregex.stripprefixregex.regex=^/adminer
-                - traefik.http.routers.adminer_payments.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_payments_stripprefixregex
+                - traefik.http.services.adminer_appmotion_gateway.loadbalancer.server.port=8080
+                - traefik.http.routers.adminer_appmotion_gateway.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer/appmotion_gateway`)
+                - traefik.http.routers.adminer_appmotion_gateway.entrypoints=https
+                - traefik.http.routers.adminer_appmotion_gateway.tls=true
+                - traefik.http.middlewares.adminer_appmotion_gateway_stripprefixregex.stripprefixregex.regex=^/adminer
+                - traefik.http.routers.adminer_appmotion_gateway.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_appmotion_gateway_stripprefixregex
             resources:
                 reservations:
                     memory: 16M
@@ -74,13 +74,6 @@ services:
             - WEB_DOCUMENT_ROOT=/app/public
         deploy:
             replicas: 1
-            labels:
-                - traefik.enable=true
-                - traefik.docker.network=${PUBLIC_NETWORK}
-                - traefik.http.routers.${SWARM_STACK_NAME}_payments.rule=Host(`payments.${MACHINE_FQDN}`)
-                - traefik.http.routers.${SWARM_STACK_NAME}_payments.entrypoints=https
-                - traefik.http.routers.${SWARM_STACK_NAME}_payments.tls=true
-                - traefik.http.services.${SWARM_STACK_NAME}_payments.loadbalancer.server.port=80
             resources:
                 limits:
                     memory: 1G
@@ -96,8 +89,7 @@ services:
             target: /app/.env
         networks:
             - internal
-            - payments
-            - public
+            - appmotion
 
 configs:
     # SEE https://docs.docker.com/compose/compose-file/05-services/#configs
@@ -112,9 +104,9 @@ volumes:
 networks:
     internal:
         external: false
-    payments:
+    appmotion:
         external: true
-        name: ${PAYMENT_NETWORK}
+        name: ${APPMOTION_NETWORK}
     public:
         external: true
         name: ${PUBLIC_NETWORK}
