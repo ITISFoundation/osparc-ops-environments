@@ -68,7 +68,6 @@ services:
             - internal
 
     api:
-        # PC -> Yuri: should we pass this image name via a env var?
         image: itisfoundation/appmotion-gateway-php-apache-8.2:latest
         environment:
             - WEB_DOCUMENT_ROOT=/app/public
@@ -98,7 +97,6 @@ configs:
 
 volumes:
     # SEE https://docs.docker.com/compose/compose-file/07-volumes/
-    # PC -> Yuri: this volume needs to be backuped
     appmotion_gateway_db_volume:
 
 networks:
