@@ -3,5 +3,5 @@ typer==0.6.1
 hurry.filesize==0.9
 pandas==1.4.3
 retry==0.9.2
-pycryptodome==3.15.0
+pycryptodome==3.19.1
 pip-tools
