@@ -38,6 +38,12 @@ MONITORED_NETWORK := $(monitored_network)
 endif
 export MONITORED_NETWORK
 
+ifeq ($(appmotion_network),)
+APPMOTION_NETWORK = appmotion-network
+else
+APPMOTION_NETWORK := $(appmotion_network)
+endif
+export APPMOTION_NETWORK
 
 # Check that a valid location to a config file is set.
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
@@ -253,6 +259,10 @@ clean-default: .check_clean ## Cleans all outputs
 	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		,  \
 		, docker network create --attachable --driver=overlay --subnet=10.11.0.0/16 $(MONITORED_NETWORK) \
+	)
+	@$(if $(filter $(APPMOTION_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+		,  \
+		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/16 $(APPMOTION_NETWORK) \
 	)
 
 
