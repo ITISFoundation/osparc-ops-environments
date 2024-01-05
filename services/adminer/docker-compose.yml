@@ -3,8 +3,6 @@ services:
   adminer:
     image: adminer:4.8.1
     init: true
-    # ports:
-    #   - 8080
     networks:
       - monitored
       - public
@@ -16,12 +14,12 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
-        - traefik.http.services.adminer.loadbalancer.server.port=8080
-        - traefik.http.routers.adminer.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer`)
-        - traefik.http.routers.adminer.entrypoints=https
-        - traefik.http.routers.adminer.tls=true
-        - traefik.http.middlewares.adminer_stripprefixregex.stripprefixregex.regex=^/adminer
-        - traefik.http.routers.adminer.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_stripprefixregex
+        - traefik.http.services.adminer_simcore.loadbalancer.server.port=8080
+        - traefik.http.routers.adminer_simcore.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer/simcore`)
+        - traefik.http.routers.adminer_simcore.entrypoints=https
+        - traefik.http.routers.adminer_simcore.tls=true
+        - traefik.http.middlewares.adminer_simcore_stripprefixregex.stripprefixregex.regex=^/adminer
+        - traefik.http.routers.adminer_simcore.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_simcore_stripprefixregex
       resources:
         limits:
           memory: 128M
@@ -29,7 +27,6 @@ services:
         reservations:
           memory: 64M
           cpus: "0.5"
-
 
 networks:
   public:

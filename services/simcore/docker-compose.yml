@@ -305,7 +305,7 @@ services:
           cpus: "0.1"
           memory: "256M"
         limits:
-          cpus: "0.2"
+          cpus: "1.0"
           memory: "512M"
 
   storage:
@@ -805,6 +805,8 @@ services:
         reservations:
           memory: 128M
           cpus: '0.1'
+    networks:
+      - appmotion
 
   dynamic-scheduler:
     deploy:
@@ -830,6 +832,9 @@ networks:
   monitored:
     external: true
     name: ${OPS_MONITORED_NETWORK}
+  appmotion:
+    external: true
+    name: ${OPS_APPMOTION_NETWORK}
   storage_subnet:
     attachable: true
     name: ${SWARM_STACK_NAME}_storage_subnet

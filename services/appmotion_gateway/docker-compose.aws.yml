@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+
+    adminer:
+        deploy:
+            replicas: 1
+
+    db:
+        deploy:
+            replicas: 0
+
+    api:
+        deploy:
+            replicas: 1
