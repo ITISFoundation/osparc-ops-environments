@@ -15,6 +15,10 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 up-aws: .init .env ${TEMP_COMPOSE}-aws .api_env.secret
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
+.PHONY: up-master ## Deploys stack on master
+up-master: .init .env ${TEMP_COMPOSE}-master .api_env.secret
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+
 .PHONY: up-local ## Deploys stack on local
 up-local: .init .env ${TEMP_COMPOSE}-local .api_env.secret
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
@@ -24,6 +28,10 @@ up-local: .init .env ${TEMP_COMPOSE}-local .api_env.secret
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
+
+.PHONY: ${TEMP_COMPOSE}-master
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
