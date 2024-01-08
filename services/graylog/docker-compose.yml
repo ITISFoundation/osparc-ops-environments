@@ -16,7 +16,7 @@ services:
           memory: 1.2G
           cpus: "1"
         reservations:
-          memory: 200M
+          memory: 300M
           cpus: "0.1"
     networks:
       default:
@@ -83,7 +83,7 @@ services:
           memory: 5G
         reservations:
           cpus: "0.1"
-          memory: 2G
+          memory: 1G
 
       labels:
         - traefik.enable=true
