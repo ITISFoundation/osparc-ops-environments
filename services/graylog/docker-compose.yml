@@ -16,8 +16,8 @@ services:
           memory: 1.2G
           cpus: "1"
         reservations:
-          memory: 1.2G
-          cpus: "1"
+          memory: 200M
+          cpus: "0.1"
     networks:
       default:
         aliases:
@@ -41,11 +41,11 @@ services:
         condition: on-failure
       resources:
         limits:
-          memory: 1G
-          cpus: "1"
+          memory: 2G
+          cpus: "2"
         reservations:
           memory: 1G
-          cpus: "1"
+          cpus: "0.1"
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:5.1.4
@@ -82,8 +82,8 @@ services:
           cpus: "2.00"
           memory: 5G
         reservations:
-          cpus: "2.00"
-          memory: 2560M
+          cpus: "0.1"
+          memory: 2G
 
       labels:
         - traefik.enable=true
