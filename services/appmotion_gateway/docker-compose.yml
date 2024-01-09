@@ -73,6 +73,14 @@ services:
             - WEB_DOCUMENT_ROOT=/app/public
         deploy:
             replicas: 1
+            labels:
+                - traefik.enable=true
+                - traefik.docker.network=${PUBLIC_NETWORK}
+                - traefik.http.routers.appmotion_gateway.rule=Host(`payments.${MACHINE_FQDN}`)
+                - traefik.http.routers.appmotion_gateway.entrypoints=https
+                - traefik.http.routers.appmotion_gateway.tls=true
+                - traefik.http.services.appmotion_gateway.loadbalancer.server.port=80
+                - traefik.http.routers.appmotion_gateway.middlewares=ops_ratelimit@docker
             resources:
                 limits:
                     memory: 1G
@@ -89,6 +97,7 @@ services:
         networks:
             - internal
             - appmotion
+            - public
 
 configs:
     # SEE https://docs.docker.com/compose/compose-file/05-services/#configs
