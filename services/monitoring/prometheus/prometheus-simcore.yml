@@ -18,29 +18,17 @@ scrape_configs:
     # Handle with "tasks." when there are multiple replica according to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
     dns_sd_configs:
       - names:
-          - "tasks.production_webserver"
-          - "tasks.staging_webserver"
-          - "tasks.master_webserver"
-        type: "A"
-        port: 8080
-      - names:
           - "tasks.production_api-server"
           - "tasks.staging_api-server"
           - "tasks.master_api-server"
         type: "A"
         port: 8000
       - names:
-          - "tasks.production_storage"
-          - "tasks.staging_storage"
-          - "tasks.master_storage"
-        type: "A"
-        port: 8080
-      - names:
           - "tasks.production_director"
           - "tasks.staging_director"
           - "tasks.master_director"
         type: "A"
-        port: 8080
+        port: 8080        
       - names:
           - "tasks.production_rabbit"
           - "tasks.staging_rabbit"
@@ -48,11 +36,23 @@ scrape_configs:
         type: "A"
         port: 15692
       - names:
+          - "tasks.production_storage"
+          - "tasks.staging_storage"
+          - "tasks.master_storage"
+        type: "A"
+        port: 8080
+      - names:
           - "tasks.production_traefik"
           - "tasks.staging_traefik"
           - "tasks.master_traefik"
         type: "A"
         port: 8082
+      - names:
+          - "tasks.production_webserver"
+          - "tasks.staging_webserver"
+          - "tasks.master_webserver"
+        type: "A"
+        port: 8080
       - names:
           - "tasks.master-redis-exporter"
           - "tasks.staging-redis-exporter"
