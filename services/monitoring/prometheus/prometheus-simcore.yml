@@ -19,39 +19,9 @@ scrape_configs:
     # Handle with "tasks." when there are multiple replica according to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
     dns_sd_configs:
       - names:
-          - "tasks.production_agent"
-          - "tasks.staging_agent"
-          - "tasks.master_agent"
-        type: "A"
-        port: 8000
-      - names:
           - "tasks.production_api-server"
           - "tasks.staging_api-server"
           - "tasks.master_api-server"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_autoscaling"
-          - "tasks.staging_autoscaling"
-          - "tasks.master_autoscaling"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_catalog"
-          - "tasks.staging_catalog"
-          - "tasks.master_catalog"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_clusters-keeper"
-          - "tasks.staging_clusters-keeper"
-          - "tasks.master_clusters-keeper"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_datcore-adapter"
-          - "tasks.staging_datcore-adapter"
-          - "tasks.master_datcore-adapter"
         type: "A"
         port: 8000
       - names:
@@ -59,40 +29,11 @@ scrape_configs:
           - "tasks.staging_director"
           - "tasks.master_director"
         type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_director-v2"
-          - "tasks.staging_director-v2"
-          - "tasks.master_director-v2"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_dynamic-schdlr"
-          - "tasks.staging_dynamic-schdlr"
-          - "tasks.master_dynamic-schdlr"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_invitations"
-          - "tasks.staging_invitations"
-          - "tasks.master_invitations"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_payments"
-          - "tasks.staging_payments"
-          - "tasks.master_payments"
-        type: "A"
-        port: 8000
-      - names:
-          - "tasks.production_resource-usage-tracker"
-          - "tasks.staging_resource-usage-tracker"
-          - "tasks.master_resource-usage-tracker"
-        type: "A"
-        port: 8000
+        port: 8080        
       - names:
           - "tasks.production_rabbit"
           - "tasks.staging_rabbit"
+          - "task.master_rabbit"
         type: "A"
         port: 15692
       - names:
@@ -111,18 +52,6 @@ scrape_configs:
           - "tasks.production_webserver"
           - "tasks.staging_webserver"
           - "tasks.master_webserver"
-        type: "A"
-        port: 8080
-      - names:
-          - "tasks.production_wb-auth"
-          - "tasks.staging_wb-auth"
-          - "tasks.master_wb-auth"
-        type: "A"
-        port: 8080
-      - names:
-          - "tasks.production_wb-api-server"
-          - "tasks.staging_wb-api-server"
-          - "tasks.master_wb-api-server"
         type: "A"
         port: 8080
       - names:
