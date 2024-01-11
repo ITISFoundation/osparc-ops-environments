@@ -19,11 +19,29 @@ scrape_configs:
     # Handle with "tasks." when there are multiple replica according to https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/
     dns_sd_configs:
       - names:
+          - "tasks.production_agent"
+          - "tasks.staging_agent"
+          - "tasks.master_agent"
+        type: "A"
+        port: 8000
+      - names:
           - "tasks.production_api-server"
           - "tasks.staging_api-server"
           - "tasks.master_api-server"
         type: "A"
         port: 8000
+      - names:
+          - "tasks.production_autoscaling"
+          - "tasks.staging_autoscaling"
+          - "tasks.master_autoscaling"
+        type: "A"
+        port: 8000
+      - names:
+          - "tasks.production_clusters_keeper"
+          - "tasks.staging_clusters_keeper"
+          - "tasks.master_clusters_keeper"
+        type: "A"
+        port: 8000        
       - names:
           - "tasks.production_director"
           - "tasks.staging_director"
