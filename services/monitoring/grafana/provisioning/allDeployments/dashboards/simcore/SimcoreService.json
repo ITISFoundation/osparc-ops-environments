@@ -19,7 +19,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 8447,
+    "id": 18131,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -100,7 +100,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(rate(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"api-server\"}[5m])) by (le)",
+            "expr": "sum(rate(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\"}[5m])) by (le)",
             "format": "heatmap",
             "instant": false,
             "interval": "",
@@ -109,7 +109,7 @@
             "refId": "A"
           }
         ],
-        "title": "Request latency heatmap",
+        "title": "Request duration heatmap",
         "transformations": [],
         "type": "heatmap"
       },
@@ -204,7 +204,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=\"master-simcore_master_api-server\"}[1m])) by (name)",
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=\"master-simcore_master_$service\"}[1m])) by (name)",
             "instant": false,
             "legendFormat": "__auto",
             "range": true,
@@ -303,8 +303,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "builder",
-            "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"master-simcore_master_api-server\"}",
+            "editorMode": "code",
+            "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"master-simcore_master_$service\"}",
             "instant": false,
             "legendFormat": "{{name}}",
             "range": true,
@@ -312,6 +312,100 @@
           }
         ],
         "title": "Memory usage",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "RmZEr52nz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 31
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "RmZEr52nz"
+            },
+            "editorMode": "builder",
+            "expr": "http_requests_inprogress{service_name=\"$service\"}",
+            "instant": false,
+            "legendFormat": "{{instance}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Requests in progress",
         "type": "timeseries"
       },
       {
@@ -376,7 +470,7 @@
           "h": 12,
           "w": 24,
           "x": 0,
-          "y": 31
+          "y": 43
         },
         "id": 5,
         "links": [
@@ -404,7 +498,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_request_duration_seconds_sum{service_name=\"api-server\"}[5m]) / rate(http_request_duration_seconds_count{service_name=\"api-server\"}[5m])",
+            "expr": "rate(http_request_duration_seconds_sum{service_name=\"$service\"}[10m]) / rate(http_request_duration_seconds_count{service_name=\"$service\"}[10m])",
             "instant": false,
             "legendFormat": "{{method}} {{handler}}",
             "range": true,
@@ -476,7 +570,7 @@
           "h": 17,
           "w": 12,
           "x": 0,
-          "y": 43
+          "y": 55
         },
         "id": 6,
         "links": [
@@ -504,7 +598,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_request_size_bytes_sum{service_name=\"api-server\"} [5m]) / rate(http_request_size_bytes_count{service_name=\"api-server\"} [5m])",
+            "expr": "rate(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / rate(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -576,7 +670,7 @@
           "h": 17,
           "w": 12,
           "x": 12,
-          "y": 43
+          "y": 55
         },
         "id": 7,
         "links": [
@@ -604,7 +698,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_response_size_bytes_sum{service_name=\"api-server\"}[5m]) / rate(http_response_size_bytes_count{service_name=\"api-server\"}[5m])",
+            "expr": "rate(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / rate(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -646,10 +740,10 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 11,
+          "h": 12,
           "w": 24,
           "x": 0,
-          "y": 60
+          "y": 72
         },
         "id": 4,
         "options": {
@@ -673,7 +767,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "delta(http_requests_total{job=\"simcore\", service_name=\"api-server\"}[15m]) > 0",
+            "expr": "sum by (method, handler, status) (delta(http_requests_total{job=\"simcore\", service_name=\"$service\"}[15m]) > 0)",
             "instant": false,
             "interval": "",
             "legendFormat": "{{method}} {{handler}} (status={{status}})",
@@ -690,7 +784,82 @@
     "style": "dark",
     "tags": [],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "selected": true,
+            "text": "api-server",
+            "value": "api-server"
+          },
+          "description": "Simcore service",
+          "hide": 0,
+          "includeAll": false,
+          "label": "simcore service",
+          "multi": false,
+          "name": "service",
+          "options": [
+            {
+              "selected": false,
+              "text": "agent",
+              "value": "agent"
+            },
+            {
+              "selected": true,
+              "text": "api-server",
+              "value": "api-server"
+            },
+            {
+              "selected": false,
+              "text": "autoscaling",
+              "value": "autoscaling"
+            },
+            {
+              "selected": false,
+              "text": "catalog",
+              "value": "catalog"
+            },
+            {
+              "selected": false,
+              "text": "clusters-keeper",
+              "value": "clusters-keeper"
+            },
+            {
+              "selected": false,
+              "text": "datcore-adapter",
+              "value": "datcore-adapter"
+            },
+            {
+              "selected": false,
+              "text": "director-v2",
+              "value": "director-v2"
+            },
+            {
+              "selected": false,
+              "text": "dynamic-scheduler",
+              "value": "dynamic-scheduler"
+            },
+            {
+              "selected": false,
+              "text": "invitations",
+              "value": "invitations"
+            },
+            {
+              "selected": false,
+              "text": "payments",
+              "value": "payments"
+            },
+            {
+              "selected": false,
+              "text": "resource-usage-tracker",
+              "value": "resource-usage-tracker"
+            }
+          ],
+          "query": "agent, api-server, autoscaling, catalog, clusters-keeper, datcore-adapter, director-v2, dynamic-scheduler, invitations, payments, resource-usage-tracker",
+          "queryValue": "",
+          "skipUrlSync": false,
+          "type": "custom"
+        }
+      ]
     },
     "time": {
       "from": "now-30m",
@@ -698,8 +867,8 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "API server",
-    "uid": "fc1629b9-7750-46ee-bf0c-0348703999d2",
+    "title": "simcore-service",
+    "uid": "gc1629b9-7750-46ee-bf0c-0348703999d5",
     "version": 1,
     "weekStart": ""
   }
