@@ -234,9 +234,9 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    # -------------------------------- PAYMENT GATEWAY -------------------------------
-    log_info "starting payment-gateway..."
-    pushd "${repo_basedir}"/services/payment_gateway
+    # -------------------------------- APPMOTION GATEWAY -------------------------------
+    log_info "starting appmotion-gateway..."
+    pushd "${repo_basedir}"/services/appmotion_gateway
     call_make "." up-"$stack_target"
     popd
 
