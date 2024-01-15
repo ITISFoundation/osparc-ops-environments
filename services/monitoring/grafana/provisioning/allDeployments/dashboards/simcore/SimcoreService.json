@@ -19,7 +19,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 18634,
+    "id": 21643,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -506,7 +506,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_request_duration_seconds_sum{service_name=\"$service\"}[10m]) / rate(http_request_duration_seconds_count{service_name=\"$service\"}[10m])",
+            "expr": "increase(http_request_duration_seconds_sum{service_name=\"$service\"}[5m]) / increase(http_request_duration_seconds_count{service_name=\"$service\"}[5m])",
             "instant": false,
             "legendFormat": "{{method}} {{handler}}",
             "range": true,
@@ -606,7 +606,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / rate(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
+            "expr": "increase(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / increase(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -706,7 +706,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / rate(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
+            "expr": "increase(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / increase(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -774,11 +774,11 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "sum by (method, handler, status) (delta(http_requests_total{job=\"simcore\", service_name=\"$service\"}[15m]) > 0)",
+            "editorMode": "builder",
+            "expr": "sum by(status) (delta(http_requests_total{job=\"simcore\", service_name=\"$service\"}[15m]))",
             "instant": false,
             "interval": "",
-            "legendFormat": "{{method}} {{handler}} (status={{status}})",
+            "legendFormat": "status={{status}}",
             "range": true,
             "refId": "A"
           }
