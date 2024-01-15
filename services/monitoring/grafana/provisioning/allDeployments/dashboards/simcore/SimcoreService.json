@@ -724,7 +724,37 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "thresholds"
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
             },
             "mappings": [],
             "thresholds": {
@@ -755,17 +785,16 @@
         },
         "id": 4,
         "options": {
-          "displayMode": "gradient",
-          "minVizHeight": 10,
-          "minVizWidth": 0,
-          "orientation": "horizontal",
-          "reduceOptions": {
+          "legend": {
             "calcs": [],
-            "fields": "",
-            "values": false
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
           },
-          "showUnfilled": true,
-          "valueMode": "color"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
         },
         "pluginVersion": "10.0.3",
         "targets": [
@@ -774,8 +803,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "builder",
-            "expr": "sum by(status) (delta(http_requests_total{job=\"simcore\", service_name=\"$service\"}[15m]))",
+            "editorMode": "code",
+            "expr": "sum by(status) (increase(http_requests_total{job=\"simcore\", service_name=\"$service\"}[5m]))",
             "instant": false,
             "interval": "",
             "legendFormat": "status={{status}}",
@@ -783,8 +812,8 @@
             "refId": "A"
           }
         ],
-        "title": "Requests count (last 15min)",
-        "type": "bargauge"
+        "title": "Requests count (last 5min)",
+        "type": "timeseries"
       }
     ],
     "refresh": "",
