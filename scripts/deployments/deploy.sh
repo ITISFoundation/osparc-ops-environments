@@ -234,8 +234,13 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    # -------------------------------- MONITORING -------------------------------
+    # -------------------------------- PAYMENT GATEWAY -------------------------------
+    log_info "starting payment-gateway..."
+    pushd "${repo_basedir}"/services/payment_gateway
+    call_make "." up-"$stack_target"
+    popd
 
+    # -------------------------------- MONITORING -------------------------------
     log_info "starting monitoring..."
     # Pushd because a call with call_make trigger a strange behavior
     pushd "${repo_basedir}"/services/monitoring;

@@ -38,12 +38,12 @@ MONITORED_NETWORK := $(monitored_network)
 endif
 export MONITORED_NETWORK
 
-ifeq ($(appmotion_network),)
-APPMOTION_NETWORK = appmotion-network
+ifeq ($(payment_network),)
+PAYMENT_NETWORK = payment-network
 else
-APPMOTION_NETWORK := $(appmotion_network)
+PAYMENT_NETWORK := $(payment_network)
 endif
-export APPMOTION_NETWORK
+export PAYMENT_NETWORK
 
 # Check that a valid location to a config file is set.
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
@@ -127,6 +127,21 @@ export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
 	echo $$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE; \
 	set +o allexport; )
 
+export DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE="(Host(\`pay.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE="(Host(\`pay.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE || (Host(\`pay.$$element\`) && PathPrefix(\`/\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE; \
+	set +o allexport; )
 
 # Parse the different FQDNS in repo.config and convert them into traefik typo for APIs subdomains
 export DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
@@ -243,9 +258,9 @@ clean-default: .check_clean ## Cleans all outputs
 		,  \
 		, docker network create --attachable --driver=overlay --subnet=10.11.0.0/16 $(MONITORED_NETWORK) \
 	)
-	@$(if $(filter $(APPMOTION_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
+	@$(if $(filter $(PAYMENT_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
 		,  \
-		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/16 $(APPMOTION_NETWORK) \
+		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/16 $(PAYMENT_NETWORK) \
 	)
 
 
