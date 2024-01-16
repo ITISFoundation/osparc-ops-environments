@@ -19,7 +19,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 18131,
+    "id": 21643,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -28,7 +28,7 @@
           "type": "prometheus",
           "uid": "RmZEr52nz"
         },
-        "description": "",
+        "description": "Each temporal slice can be thought of as a histogram of request durations",
         "fieldConfig": {
           "defaults": {
             "custom": {
@@ -53,8 +53,16 @@
         "id": 1,
         "links": [
           {
-            "title": "How to read this heatmap",
-            "url": "https://towardsdatascience.com/prometheus-histograms-with-grafana-heatmaps-d556c28612c7"
+            "title": "Setup",
+            "url": "https://grafana.com/blog/2020/06/23/how-to-visualize-prometheus-histograms-in-grafana/"
+          },
+          {
+            "title": "Histograms and Heatmaps docs",
+            "url": "https://grafana.com/docs/grafana/latest/fundamentals/intro-histograms/"
+          },
+          {
+            "title": "Heatmaps",
+            "url": "https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/heatmap/"
           }
         ],
         "options": {
@@ -100,7 +108,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(rate(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\"}[5m])) by (le)",
+            "expr": "sum(increase(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\"}[5m])) by (le)",
             "format": "heatmap",
             "instant": false,
             "interval": "",
@@ -498,7 +506,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_request_duration_seconds_sum{service_name=\"$service\"}[10m]) / rate(http_request_duration_seconds_count{service_name=\"$service\"}[10m])",
+            "expr": "increase(http_request_duration_seconds_sum{service_name=\"$service\"}[5m]) / increase(http_request_duration_seconds_count{service_name=\"$service\"}[5m])",
             "instant": false,
             "legendFormat": "{{method}} {{handler}}",
             "range": true,
@@ -598,7 +606,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / rate(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
+            "expr": "increase(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / increase(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -698,7 +706,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "rate(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / rate(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
+            "expr": "increase(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / increase(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -716,7 +724,37 @@
         "fieldConfig": {
           "defaults": {
             "color": {
-              "mode": "thresholds"
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
             },
             "mappings": [],
             "thresholds": {
@@ -747,17 +785,16 @@
         },
         "id": 4,
         "options": {
-          "displayMode": "gradient",
-          "minVizHeight": 10,
-          "minVizWidth": 0,
-          "orientation": "horizontal",
-          "reduceOptions": {
+          "legend": {
             "calcs": [],
-            "fields": "",
-            "values": false
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
           },
-          "showUnfilled": true,
-          "valueMode": "color"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
         },
         "pluginVersion": "10.0.3",
         "targets": [
@@ -767,16 +804,16 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "sum by (method, handler, status) (delta(http_requests_total{job=\"simcore\", service_name=\"$service\"}[15m]) > 0)",
+            "expr": "sum by(status) (increase(http_requests_total{job=\"simcore\", service_name=\"$service\"}[5m]))",
             "instant": false,
             "interval": "",
-            "legendFormat": "{{method}} {{handler}} (status={{status}})",
+            "legendFormat": "status={{status}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Requests count (last 15min)",
-        "type": "bargauge"
+        "title": "Requests count (last 5min)",
+        "type": "timeseries"
       }
     ],
     "refresh": "",
@@ -867,9 +904,9 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "simcore-service",
+    "title": "Simcore services",
     "uid": "gc1629b9-7750-46ee-bf0c-0348703999d5",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
   }
 }
