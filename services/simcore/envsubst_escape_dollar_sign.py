@@ -10,7 +10,7 @@ escaped = open(sys.argv[2], "w+")
 for line in lines:
     if len(line) > 0 and len(line.lstrip()) > 0:
         if line.lstrip()[0] != "#":  # Ignore commented lines
-            if "$" in line:
+            if "$" in line and not line.startswith("EC2_INSTANCES_ALLOWED_TYPES"):
                 escapedLine = "".join(
                     [
                         x + "$${empty_var}"
