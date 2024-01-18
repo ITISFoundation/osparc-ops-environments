@@ -66,13 +66,13 @@ endif
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.${MACHINE_FQDN}\`)) || (Host(\`payments.${MACHINE_FQDN}\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.${MACHINE_FQDN}\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 	else \
 		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.${MACHINE_FQDN}\`)) || (Host(\`payments.${MACHINE_FQDN}\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.${MACHINE_FQDN}\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$element\`)) || (Host(\`payments.$$element\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
+			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$element\`))  || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
 		done; \
 		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL"; \
 	fi; \
@@ -93,22 +93,6 @@ export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=$(shell set -o allexport; \
 		DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS="$$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS"; \
 	fi; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
-	set +o allexport; )
-
-export DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS=$(shell set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="(Host(\`payments.${MACHINE_FQDN}\`))"; \
-	else \
-		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="(Host(\`payments.${MACHINE_FQDN}\`))"; \
-		for element in "$${hosts[@]}"; \
-		do \
-			DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="$$DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS || (Host(\`payments.$$element\`))";\
-		done; \
-		DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS="$$DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS"; \
-	fi; \
-	echo $$DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS; \
 	set +o allexport; )
 
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE=$(shell set -o allexport; \
@@ -143,6 +127,21 @@ export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
 	echo $$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE; \
 	set +o allexport; )
 
+export DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="(Host(\`pay.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="(Host(\`pay.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE || (Host(\`pay.$$element\`) && PathPrefix(\`/\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE; \
+	set +o allexport; )
 
 # Parse the different FQDNS in repo.config and convert them into traefik typo for APIs subdomains
 export DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
@@ -221,7 +220,6 @@ clean-default: .check_clean ## Cleans all outputs
 	export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS='${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'; \
-	export DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS='${DEPLOYMENT_FQDNS_CAPTURE_PAYMENTS}'; \
 	export DOLLAR='$$'; \
 	set +o allexport; \
 	envsubst < $< > .env
