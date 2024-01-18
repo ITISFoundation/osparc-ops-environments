@@ -76,7 +76,7 @@ services:
             labels:
                 - traefik.enable=true
                 - traefik.docker.network=${PUBLIC_NETWORK}
-                - traefik.http.routers.appmotion_gateway.rule=Host(`payments.${MACHINE_FQDN}`)
+                - traefik.http.routers.appmotion_gateway.rule=${DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE}
                 - traefik.http.routers.appmotion_gateway.entrypoints=https
                 - traefik.http.routers.appmotion_gateway.tls=true
                 - traefik.http.services.appmotion_gateway.loadbalancer.server.port=80
