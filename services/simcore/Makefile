@@ -55,8 +55,21 @@ ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.deploy.dalco.yml
 
 .PHONY: ${TEMP_COMPOSE}-public
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.deploy.public.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")'  > ${TEMP_COMPOSE}
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml docker-compose.deploy.letsencrypt.dns.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.master.yml")' > ${TEMP_COMPOSE}
+
+.PHONY: .env
+.env: $(REPO_CONFIG_LOCATION) # Overwriting the default from 'common.Makefile', to avoid having ato maintain a template.env file here.
+	@set -o allexport; \
+	cp -f $(REPO_CONFIG_LOCATION) .env; \
+	echo DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE=\''${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}'\' >> .env; \
+	echo DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL=\''${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}'\' >> .env; \
+	echo DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE=\''${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'\' >> .env; \
+	echo DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE=\''${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'\' >> .env; \
+	echo DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=\''${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'\' >> .env; \
+	echo DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE=\''${DEPLOYMENT_FQDNS_PAYMENT_CAPTURE_TRAEFIK_RULE}'\' >> .env; \
+	echo DOLLAR=\'$$\' >> .env; \
+	set +o allexport; \
