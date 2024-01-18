@@ -55,11 +55,11 @@ ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.deploy.dalco.yml
 
 .PHONY: ${TEMP_COMPOSE}-public
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.deploy.public.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")'  > ${TEMP_COMPOSE}
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.master.yml")'  > ${TEMP_COMPOSE}
+	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.master.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: .env
 .env: $(REPO_CONFIG_LOCATION) # Overwriting the default from 'common.Makefile', to avoid having ato maintain a template.env file here.
