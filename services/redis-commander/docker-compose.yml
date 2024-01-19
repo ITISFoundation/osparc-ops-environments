@@ -27,7 +27,7 @@ services:
           cpus: "0.5"
         reservations:
           memory: 64M
-          cpus: "0.5"
+          cpus: "0.1"
 
 networks:
   public:
