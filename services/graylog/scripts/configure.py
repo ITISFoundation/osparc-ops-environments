@@ -68,74 +68,6 @@ def getGraylogInputs(session, headers, url):
         raise Exception
 
 
-def configure_slack_notifications():
-    url = (
-        "https://monitoring."
-        + env.str("MACHINE_FQDN")
-        + "/graylog/api/events/notifications"
-    )
-    r = session.get(url, headers=hed, verify=False)
-    if (
-        len(
-            [
-                noti
-                for noti in r.json()["notifications"]
-                if noti["title"]
-                == "Graylog " + env.str("MACHINE_FQDN") + " Slack notification"
-            ]
-        )
-        == 0
-    ):
-        raw_data = (
-            '{"title":"Graylog '
-            + env.str("MACHINE_FQDN")
-            + """ Slack notification","description":"Slack notification","config": {
-            "color": "#FF0000",
-            "webhook_url": \""""
-            + env.str("GRAYLOG_SLACK_WEBHOOK_URL")
-            + """\",
-            "channel": "#"""
-            + env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
-            + """\",
-            "custom_message":"--- [Event Definition] ---------------------------\\nTitle:       ${event_definition_title}\\nType:        ${event_definition_type}\\n--- [Event] --------------------------------------\\nTimestamp:            ${event.timestamp}\\nMessage:              ${event.message}\\nSource:               ${event.source}\\nKey:                  ${event.key}\\nPriority:             ${event.priority}\\nAlert:                ${event.alert}\\nTimestamp Processing: ${event.timestamp}\\nTimerange Start:      ${event.timerange_start}\\nTimerange End:        ${event.timerange_end}\\nEvent Fields:\\n${foreach event.fields field}\\n${field.key}: ${field.value}\\n${end}\\n${if backlog}\\n--- [Backlog] ------------------------------------\\nLast messages accounting for this alert:\\n${foreach backlog message}\\n"""
-            + "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/messages"
-            + """/${message.index}/${message.id}\\n${end}${end}\\n",
-            "user_name": "Graylog",
-            "notify_channel": true,
-            "link_names": false,
-            "icon_url": \""""
-            + env.str("GRAYLOG_SLACK_WEBHOOK_ICON_URL")
-            + """\",
-            "icon_emoji": "",
-            "backlog_size": 5,
-            "type": "slack-notification-v1"}}"""
-        )
-        r = session.post(url, headers=hed, verify=False, data=raw_data.encode("utf-8"))
-        if r.status_code == 200:
-            print("Slack Notification added with success !")
-        else:
-            print(
-                "Error while adding the Slack Notification. Status code of the request : "
-                + str(r.status_code)
-                + " "
-                + r.text
-            )
-            exit(1)
-    else:
-        print("Graylog Slack Notification already present - skipping...")
-    # Keeping notification ID
-    r = session.get(url, headers=hed, verify=False)
-    slackNotificationID = [
-        noti
-        for noti in r.json()["notifications"]
-        if noti["title"] == "Graylog " + env.str("MACHINE_FQDN") + " Slack notification"
-    ][0]["id"]
-
-    return slackNotificationID
-
-
 def configure_email_notifications():
     url = (
         "https://monitoring."
@@ -331,8 +263,6 @@ def configure_alerts():
             i["notifications"] = []
             if env.str("GRAYLOG_ALERT_MAIL_ADDRESS"):
                 i["notifications"] += [{"notification_id": str(mailNotificationID)}]
-            if env.str("GRAYLOG_SLACK_WEBHOOK_URL") != "":
-                i["notifications"] += [{"notification_id": str(slackNotificationID)}]
             i["config"]["streams"] = [str(streamIDForAllMessages)]
             url = (
                 "https://monitoring."
@@ -471,10 +401,6 @@ if __name__ == "__main__":
     # Configure sending email notifications
     if env.str("GRAYLOG_ALERT_MAIL_ADDRESS") != "":
         mailNotificationID = configure_email_notifications()
-
-    # Configure sending Slack notifications
-    if env.str("GRAYLOG_SLACK_WEBHOOK_URL") != "":
-        slackNotificationID = configure_slack_notifications
 
     # Configure log retention time
     configure_log_retention()
