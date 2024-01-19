@@ -51,14 +51,10 @@ rm "$repo_basedir"/docker-compose.yml 2>/dev/null || true
 rm "$repo_basedir"/.env-devel 2>/dev/null || true
 # via https://stackoverflow.com/a/2466755
 rm -rf osparc-simcore 2>/dev/null || true
-git clone https://github.com/ITISFoundation/osparc-simcore
+git clone --depth=1 https://github.com/ITISFoundation/osparc-simcore
 pushd osparc-simcore
-# shellcheck disable=2001
-latestMatchingTag=HEAD
 
-echo Checking out "$latestMatchingTag" on osparc-simcore
-git checkout "$latestMatchingTag" services/docker-compose.yml
-git checkout "$latestMatchingTag" .env-devel
+# shellcheck disable=2001
 cp services/docker-compose.yml "$repo_basedir"
 cp .env-devel "$repo_basedir"
 popd
