@@ -27,8 +27,8 @@ services:
           memory: 200M
           cpus: "1"
         reservations:
-          memory: 200M
-          cpus: "1"
+          memory: 64M
+          cpus: "0.1"
 
 networks:
   public:
