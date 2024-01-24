@@ -337,7 +337,7 @@ services:
           memory: "256M"
         limits:
           cpus: "1"
-          memory: "1G"
+          memory: "3G"
 
   director:
     # Certificate necessary for local deploiement only
