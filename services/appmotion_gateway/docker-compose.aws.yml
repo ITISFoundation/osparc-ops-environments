@@ -12,4 +12,7 @@ services:
 
     api:
         deploy:
+            resources:
+                reservations:
+                    cpus: "0"  # nih staging has not enough cpu
             replicas: 1
