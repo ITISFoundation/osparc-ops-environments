@@ -130,9 +130,9 @@ config.monitoring: grafana/template-config.monitoring ${REPO_CONFIG_LOCATION}
 	envsubst < $< > grafana/$@
 
 .PHONY: config.prometheus.simcore
-config.prometheus.simcore: ${REPO_CONFIG_LOCATION}
+config.prometheus.simcore: ${REPO_CONFIG_LOCATION} .venv
 	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
+	source $<; \
 	set +o allexport; \
 	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' > prometheus/prometheus.yml; \
 	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
@@ -141,7 +141,7 @@ config.prometheus.simcore: ${REPO_CONFIG_LOCATION}
 .PHONY: config.prometheus.ceph.simcore
 config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
 	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
+	source $<; \
 	set +o allexport; \
 	$(call jinja, prometheus/prometheus-ceph.yml.j2, prometheus/prometheus-ceph.yml); \
 	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' | cat | \
@@ -150,11 +150,15 @@ config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus
-config.prometheus: ${REPO_CONFIG_LOCATION}
-	@cp prometheus/prometheus-base.yml prometheus/prometheus.yml
+config.prometheus: ${REPO_CONFIG_LOCATION} .venv
+	@set -o allexport; \
+	source $<; \
+	set +o allexport; \
+	envsubst < prometheus/prometheus-base.yml > prometheus/prometheus.temp.yml; \
+	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
-	$(call jinja, pgsql_query_exporter_config.yaml.j2, pgsql_query_exporter_config.yaml);
+	$(call jinja, $<, $@);
 
 smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
-	$(call jinja, smokeping_prober_config.yaml.j2, smokeping_prober_config.yaml);
+	$(call jinja, $<, $@);
