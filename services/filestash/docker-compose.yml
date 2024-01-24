@@ -24,8 +24,8 @@ services:
           memory: 120M
           cpus: "1"
         reservations:
-          memory: 120M
-          cpus: "1"
+          memory: 32M
+          cpus: "0.1"
   onlyoffice:
     image: onlyoffice/documentserver:7.4.0
     networks:
