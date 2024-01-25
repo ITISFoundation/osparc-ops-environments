@@ -133,3 +133,9 @@ scrape_configs:
           - "tasks.pgsql-query-exporter"
         type: "A"
         port: 9560
+      - names:
+          - "tasks.master-dask-scheduler"
+          - "tasks.staging-dask-scheduler"
+          - "tasks.production-dask-scheduler"
+        type: "A"
+        port: 8787
