@@ -36,8 +36,6 @@ services:
       placement:
         constraints:
           - node.labels.traefik==true
-      labels:
-        - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
     volumes:
     - /etc/traefik_certs:/etc/traefik_certs
 
