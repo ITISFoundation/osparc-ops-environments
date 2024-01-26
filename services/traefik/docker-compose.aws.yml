@@ -40,7 +40,7 @@ services:
     - /etc/traefik_certs:/etc/traefik_certs
 
   whoami:
-    dns:
+    dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
       8.8.8.8
 
 configs:

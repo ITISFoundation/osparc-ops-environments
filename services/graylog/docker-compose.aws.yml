@@ -11,7 +11,7 @@ services:
         constraints:
           - node.labels.graylog==true
   graylog:
-    dns:
+    dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
       8.8.8.8
     deploy:
       placement:
