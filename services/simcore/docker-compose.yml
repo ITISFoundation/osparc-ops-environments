@@ -644,6 +644,7 @@ services:
       - monitored
       - public
     deploy:
+      replicas: 2
       labels:
         # Prometheus
         - prometheus-job=traefik_simcore

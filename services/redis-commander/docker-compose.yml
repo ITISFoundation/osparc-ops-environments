@@ -9,7 +9,7 @@ services:
       - monitored
       - public
     environment:
-      REDIS_HOSTS: "resources:${REDIS_HOST}:${REDIS_PORT}:0,locks:${REDIS_HOST}:${REDIS_PORT}:1,validation_codes:${REDIS_HOST}:${REDIS_PORT}:2,scheduled_maintenance:${REDIS_HOST}:${REDIS_PORT}:3,user_notifications:${REDIS_HOST}:${REDIS_PORT}:4,announcements:${REDIS_HOST}:${REDIS_PORT}:5,distributed_identifiers:${REDIS_HOST}:${REDIS_PORT}:6"
+      REDIS_HOSTS: "resources:${REDIS_HOST}:${REDIS_PORT}:0,locks:${REDIS_HOST}:${REDIS_PORT}:1,validation_codes:${REDIS_HOST}:${REDIS_PORT}:2,scheduled_maintenance:${REDIS_HOST}:${REDIS_PORT}:3,user_notifications:${REDIS_HOST}:${REDIS_PORT}:4,announcements:${REDIS_HOST}:${REDIS_PORT}:5,distributed_identifiers:${REDIS_HOST}:${REDIS_PORT}:6,distributed_caches:${REDIS_HOST}:${REDIS_PORT}:7"
       URL_PREFIX: /redis
     deploy:
       labels:
