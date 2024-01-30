@@ -441,6 +441,7 @@ services:
   dask-scheduler:
     networks:
       - public
+      - monitored
     deploy:
       replicas: ${SIMCORE_DASK_SCHEDULER_REPLICAS}
       update_config:
