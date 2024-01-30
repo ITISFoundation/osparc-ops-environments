@@ -139,3 +139,10 @@ scrape_configs:
           - "tasks.production_dask-scheduler"
         type: "A"
         port: 8787
+      - names:
+          - "tasks.master_dask-sidecar"
+          - "tasks.staging_dask-sidecar"
+          - "tasks.production_dask-sidecar"
+        type: "A"
+        port: 8787
+
