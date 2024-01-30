@@ -44,5 +44,20 @@ cd "$repo_basedir"
 log_info "Creating stack.yml file..."
 scripts/deployments/startup_script.bash
 
+log_info "Ensuring dask secrets are relative to the stack file"
+# Check if the dask_tls_cert secret exists and update its file path if it does.
+if yq eval '.secrets.dask_tls_cert' stack.yml >/dev/null; then
+    yq eval --inplace '.secrets.dask_tls_cert.file = "./dask-sidecar/.dask-certificates/dask-cert.pem"' stack.yml
+else
+    log_warning "The 'dask_tls_cert' secret does not exist. Skipping this step."
+fi
+
+# Check if the dask_tls_key secret exists and update its file path if it does.
+if yq eval '.secrets.dask_tls_key' stack.yml >/dev/null; then
+    yq eval --inplace '.secrets.dask_tls_key.file = "./dask-sidecar/.dask-certificates/dask-key.pem"' stack.yml
+else
+    log_warning "The 'dask_tls_key' secret does not exist. Skipping this step."
+fi
+
 log_info "Adding prefix $PREFIX_STACK_NAME to all services..."
-./yq "with(.services; with_entries(.key |= \"${PREFIX_STACK_NAME}_\" + .))" stack.yml > "$this_script_dir"/stack_with_prefix.yml
+./yq "with(.services; with_entries(.key |= \"${PREFIX_STACK_NAME}_\" + .))" stack.yml >"$this_script_dir"/stack_with_prefix.yml
