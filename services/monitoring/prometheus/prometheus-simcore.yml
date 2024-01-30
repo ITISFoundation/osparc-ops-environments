@@ -145,3 +145,4 @@ scrape_configs:
           - "tasks.production_dask-sidecar"
         type: "A"
         port: 8787
+
