@@ -134,8 +134,8 @@ scrape_configs:
         type: "A"
         port: 9560
       - names:
-          - "tasks.master-dask-scheduler"
-          - "tasks.staging-dask-scheduler"
-          - "tasks.production-dask-scheduler"
+          - "tasks.master_dask-scheduler"
+          - "tasks.staging_dask-scheduler"
+          - "tasks.production_dask-scheduler"
         type: "A"
         port: 8787
