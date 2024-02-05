@@ -77,7 +77,7 @@ tls:
   - certFile: /etc/traefik_certs/staging.sim4life.cloud.crt
     keyFile: /etc/traefik_certs/staging.sim4life.cloud.key
 
-  # osparc-testing.click
+  # osparc-master-zmt.click
   - certFile: /etc/traefik_certs/filestash.monitoring.osparc-master-zmt.click.crt
     keyFile: /etc/traefik_certs/filestash.monitoring.osparc-master-zmt.click.key
   - certFile: /etc/traefik_certs/osparc-master-zmt.click.crt
