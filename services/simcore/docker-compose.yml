@@ -86,7 +86,6 @@ services:
       labels:
         # NOTE: apiserver does not need sslheader since there is no socket.io
         - traefik.http.routers.${SWARM_STACK_NAME}_api-server.middlewares=${SWARM_STACK_NAME}_gzip@docker
-        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.service=${SWARM_STACK_NAME}_api-server
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.rule=hostregexp(`{host:.+}`) && PathPrefix(`/dev/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.entrypoints=simcore_api
@@ -436,11 +435,12 @@ services:
           memory: "256M"
         limits:
           cpus: "1"
-          memory: "1G"
+          # memory: "16G"  # YH & SAN --> we should not limit dask sidecars | Jan 29 2024
 
   dask-scheduler:
     networks:
       - public
+      - monitored
     deploy:
       replicas: ${SIMCORE_DASK_SCHEDULER_REPLICAS}
       update_config:
@@ -469,7 +469,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.2'
+          cpus: '1'
         reservations:
           memory: 128M
           cpus: '0.1'
