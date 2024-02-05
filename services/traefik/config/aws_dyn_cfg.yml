@@ -78,16 +78,18 @@ tls:
     keyFile: /etc/traefik_certs/staging.sim4life.cloud.key
 
   # osparc-testing.click
-  - certFile: /etc/traefik_certs/osparc-testing.click.crt
-    keyFile: /etc/traefik_certs/osparc-testing.click.key
-  - certFile: /etc/traefik_certs/filestash.monitoring.osparc-testing.click.crt
-    keyFile: /etc/traefik_certs/filestash.monitoring.osparc-testing.click.key
-  - certFile: /etc/traefik_certs/testing.api.osparc-testing.click.crt
-    keyFile: /etc/traefik_certs/testing.api.osparc-testing.click.key
-  - certFile: /etc/traefik_certs/service.osparc-testing.click.crt
-    keyFile: /etc/traefik_certs/service.osparc-testing.click.key
-  - certFile: /etc/traefik_certs/service.testing.osparc-testing.click.crt
-    keyFile: /etc/traefik_certs/service.testing.osparc-testing.click.key
+  - certFile: /etc/traefik_certs/filestash.monitoring.osparc-master-zmt.click.crt
+    keyFile: /etc/traefik_certs/filestash.monitoring.osparc-master-zmt.click.key
+  - certFile: /etc/traefik_certs/osparc-master-zmt.click.crt
+    keyFile: /etc/traefik_certs/osparc-master-zmt.click.key
+  - certFile: /etc/traefik_certs/pay.osparc-master-zmt.click.crt
+    keyFile: /etc/traefik_certs/pay.osparc-master-zmt.click.key
+  - certFile: /etc/traefik_certs/service.osparc-master-zmt.click.crt
+    keyFile: /etc/traefik_certs/service.osparc-master-zmt.click.key
+  - certFile: /etc/traefik_certs/service.testing.osparc-master-zmt.click.crt
+    keyFile: /etc/traefik_certs/service.testing.osparc-master-zmt.click.key
+  - certFile: /etc/traefik_certs/testing.api.osparc-master-zmt.click.crt
+    keyFile: /etc/traefik_certs/testing.api.osparc-master-zmt.click.key
 
   # sim4life.io
   - certFile: /etc/traefik_certs/www.sim4life.io.crt
