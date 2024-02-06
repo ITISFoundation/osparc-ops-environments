@@ -799,7 +799,7 @@ services:
     networks:
       - appmotion
 
-  dynamic-scheduler:
+  dynamic-schdlr:
     deploy:
       replicas: 2
       placement:
