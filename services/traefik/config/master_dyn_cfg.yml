@@ -44,8 +44,8 @@ tls:
     keyFile: /etc/traefik_certs/service.testing.s4l-acad-master.speag.com.key
   - certFile: /etc/traefik_certs/testing.s4l-acad-master.speag.com.crt
     keyFile: /etc/traefik_certs/testing.s4l-acad-master.speag.com.key
-  - certFile: /etc/traefik_certs/payments.osparc-master.speag.com.crt
-    keyFile: /etc/traefik_certs/payments.osparc-master.speag.com.key
+  - certFile: /etc/traefik_certs/pay.osparc-master.speag.com.crt
+    keyFile: /etc/traefik_certs/pay.osparc-master.speag.com.key
   - certFile: /etc/traefik_certs/api.s4l-acad-master.speag.com.crt
     keyFile: /etc/traefik_certs/api.s4l-acad-master.speag.com.key
   - certFile: /etc/traefik_certs/service.testing.s4l-desktop-master.speag.com.crt

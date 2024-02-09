@@ -80,7 +80,7 @@ tls:
     keyFile: /etc/traefik_certs/service.testing.osparc-staging.speag.com.key
   - certFile: /etc/traefik_certs/service.testing.s4l-lite-staging.speag.com.crt
     keyFile: /etc/traefik_certs/service.testing.s4l-lite-staging.speag.com.key
-  - certFile: /etc/traefik_certs/payments.osparc-staging.speag.com.crt
-    keyFile: /etc/traefik_certs/payments.osparc-staging.speag.com.key
-  - certFile: /etc/traefik_certs/payments.osparc.speag.com.crt
-    keyFile: /etc/traefik_certs/payments.osparc.speag.com.key
+  - certFile: /etc/traefik_certs/pay.osparc-staging.speag.com.crt
+    keyFile: /etc/traefik_certs/pay.osparc-staging.speag.com.key
+  - certFile: /etc/traefik_certs/pay.osparc.speag.com.crt
+    keyFile: /etc/traefik_certs/pay.osparc.speag.com.key
