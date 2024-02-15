@@ -243,7 +243,7 @@ services:
           cpus: "0.1"
           memory: "512M"
         limits:
-          cpus: "1"
+          cpus: "4"
           memory: "2G"
     extra_hosts: []
 
