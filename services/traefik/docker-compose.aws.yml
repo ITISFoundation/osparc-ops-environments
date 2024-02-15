@@ -36,13 +36,11 @@ services:
       placement:
         constraints:
           - node.labels.traefik==true
-      labels:
-        - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
     volumes:
     - /etc/traefik_certs:/etc/traefik_certs
 
   whoami:
-    dns:
+    dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
       8.8.8.8
 
 configs:

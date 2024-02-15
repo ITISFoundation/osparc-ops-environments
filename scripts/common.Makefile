@@ -127,6 +127,21 @@ export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
 	echo $$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE; \
 	set +o allexport; )
 
+export DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="(Host(\`pay.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="(Host(\`pay.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE || (Host(\`pay.$$element\`) && PathPrefix(\`/\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE; \
+	set +o allexport; )
 
 # Parse the different FQDNS in repo.config and convert them into traefik typo for APIs subdomains
 export DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE=$(shell set -o allexport; \

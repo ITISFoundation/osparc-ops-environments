@@ -5,11 +5,19 @@ services:
     adminer:
         deploy:
             replicas: 1
-
+        dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
+          8.8.8.8
     db:
         deploy:
             replicas: 1
+        dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
+          8.8.8.8
 
     api:
         deploy:
+            resources:
+                reservations:
+                    cpus: "0"  # nih staging has not enough cpu
             replicas: 1
+        dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
+          8.8.8.8
