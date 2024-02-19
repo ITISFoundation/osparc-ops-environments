@@ -48,6 +48,12 @@ tls:
     keyFile: /etc/traefik_certs/service.testing.sim4life.cloud.key
   - certFile: /etc/traefik_certs/pay.osparc.io.crt
     keyFile: /etc/traefik_certs/pay.osparc.io.key
+  - certFile: /etc/traefik_certs/sim4life-lite.io.crt
+    keyFile: /etc/traefik_certs/sim4life-lite.io.key
+  - certFile: /etc/traefik_certs/service.testing.sim4life-lite.io.crt
+    keyFile: /etc/traefik_certs/service.testing.sim4life-lite.io.key
+  - certFile: /etc/traefik_certs/service.sim4life-lite.io.crt
+    keyFile: /etc/traefik_certs/service.sim4life-lite.io.key
 
   # osparc-staging.io
   - certFile: /etc/traefik_certs/registry.osparc-staging.io.crt
