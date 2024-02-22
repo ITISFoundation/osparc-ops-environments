@@ -95,6 +95,22 @@ export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=$(shell set -o allexport; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
 	set +o allexport; )
 
+export DEPLOYMENT_FQDNS_CAPTURE_STORAGE=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="(Host(\`storage.${MACHINE_FQDN}\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="(Host(\`storage.${MACHINE_FQDN}\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_CAPTURE_STORAGE="$$DEPLOYMENT_FQDNS_CAPTURE_STORAGE || (Host(\`storage.$$element\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="$$DEPLOYMENT_FQDNS_CAPTURE_STORAGE"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_CAPTURE_STORAGE; \
+	set +o allexport; )
+
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
@@ -220,6 +236,7 @@ clean-default: .check_clean ## Cleans all outputs
 	export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS='${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'; \
+	export DEPLOYMENT_FQDNS_CAPTURE_STORAGE='${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}'; \
 	export DOLLAR='$$'; \
 	set +o allexport; \
 	envsubst < $< > .env

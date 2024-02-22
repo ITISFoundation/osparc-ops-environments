@@ -317,6 +317,15 @@ services:
     networks:
       - monitored
     deploy:
+      labels:
+        # internal traefik
+        - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.http.routers.${SWARM_STACK_NAME}_storage.rule=(${DEPLOYMENT_FQDNS_CAPTURE_STORAGE})
+        - traefik.http.routers.${SWARM_STACK_NAME}_storage.entrypoints=http
+        - traefik.http.services.${SWARM_STACK_NAME}_storage.loadbalancer.server.port=8080
+        - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_storage_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
+        - traefik.http.routers.${SWARM_STACK_NAME}_storage.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_storage_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
       update_config:
         parallelism: 2
         order: start-first
