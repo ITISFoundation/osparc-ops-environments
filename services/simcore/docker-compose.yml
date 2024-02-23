@@ -320,6 +320,7 @@ services:
       labels:
         # internal traefik
         - traefik.enable=true
+        - traefik.docker.network=${SWARM_STACK_NAME}_default
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         - traefik.http.routers.${SWARM_STACK_NAME}_storage.rule=${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}
         - traefik.http.routers.${SWARM_STACK_NAME}_storage.entrypoints=http
