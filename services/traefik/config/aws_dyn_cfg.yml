@@ -56,93 +56,23 @@ tls:
     keyFile: /etc/traefik_certs/service.sim4life-lite.io.key
 
   # osparc-staging.io
-  - certFile: /etc/traefik_certs/registry.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/registry.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/monitoring.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/monitoring.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/www.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/www.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/filestash.monitoring.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/filestash.monitoring.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/admin.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/admin.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/service.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/service.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/service.staging.osparc.io.crt
-    keyFile: /etc/traefik_certs/service.staging.osparc.io.key
-  - certFile: /etc/traefik_certs/service.testing.staging.s4l-lite.io.crt
-    keyFile: /etc/traefik_certs/service.testing.staging.s4l-lite.io.key
-  - certFile: /etc/traefik_certs/service.testing.staging.osparc.io.crt
-    keyFile: /etc/traefik_certs/service.testing.staging.osparc.io.key
-  - certFile: /etc/traefik_certs/service.testing.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/service.testing.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/service.staging.s4l-lite.io.crt
-    keyFile: /etc/traefik_certs/service.staging.s4l-lite.io.key
-  - certFile: /etc/traefik_certs/testing.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/testing.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/testing.api.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/testing.api.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/api.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/api.osparc-staging.io.key
-  - certFile: /etc/traefik_certs/pay.osparc-staging.io.crt
-    keyFile: /etc/traefik_certs/pay.osparc-staging.io.key
   - certFile: /etc/traefik_certs/osparc-staging.io.crt
     keyFile: /etc/traefik_certs/osparc-staging.io.key
   - certFile: /etc/traefik_certs/staging.sim4life.cloud.crt
     keyFile: /etc/traefik_certs/staging.sim4life.cloud.key
+  - certFile: /etc/traefik_certs/staging.s4l-lite.io.crt
+    keyFile: /etc/traefik_certs/staging.s4l-lite.io.key
 
   # osparc-master-zmt.click
   - certFile: /etc/traefik_certs/osparc-master-zmt.click.crt
     keyFile: /etc/traefik_certs/osparc-master-zmt.click.key
 
   # sim4life.io
-  - certFile: /etc/traefik_certs/www.sim4life.io.crt
-    keyFile: /etc/traefik_certs/www.sim4life.io.key
-  - certFile: /etc/traefik_certs/monitoring.sim4life.io.crt
-    keyFile: /etc/traefik_certs/monitoring.sim4life.io.key
-  - certFile: /etc/traefik_certs/testing.sim4life.io.crt
-    keyFile: /etc/traefik_certs/testing.sim4life.io.key
-  - certFile: /etc/traefik_certs/registry.sim4life.io.crt
-    keyFile: /etc/traefik_certs/registry.sim4life.io.key
-  - certFile: /etc/traefik_certs/testing.api.sim4life.io.crt
-    keyFile: /etc/traefik_certs/testing.api.sim4life.io.key
-  - certFile: /etc/traefik_certs/admin.sim4life.io.crt
-    keyFile: /etc/traefik_certs/admin.sim4life.io.key
-  - certFile: /etc/traefik_certs/filestash.monitoring.sim4life.io.crt
-    keyFile: /etc/traefik_certs/filestash.monitoring.sim4life.io.key
-  - certFile: /etc/traefik_certs/api.sim4life.io.crt
-    keyFile: /etc/traefik_certs/api.sim4life.io.key
-  - certFile: /etc/traefik_certs/service.sim4life.io.crt
-    keyFile: /etc/traefik_certs/service.sim4life.io.key
-  - certFile: /etc/traefik_certs/service.testing.sim4life.io.crt
-    keyFile: /etc/traefik_certs/service.testing.sim4life.io.key
   - certFile: /etc/traefik_certs/sim4life.io.crt
     keyFile: /etc/traefik_certs/sim4life.io.key
-  - certFile: /etc/traefik_certs/service.sim4life.science.crt
-    keyFile: /etc/traefik_certs/service.sim4life.science.key
-  - certFile: /etc/traefik_certs/service.testing.sim4life.science.crt
-    keyFile: /etc/traefik_certs/service.testing.sim4life.science.key
-  - certFile: /etc/traefik_certs/testing.sim4life.science.crt
-    keyFile: /etc/traefik_certs/testing.sim4life.science.key
-  - certFile: /etc/traefik_certs/api.testing.sim4life.science.crt
-    keyFile: /etc/traefik_certs/api.testing.sim4life.science.key
-  - certFile: /etc/traefik_certs/api.sim4life.science.crt
-    keyFile: /etc/traefik_certs/api.sim4life.science.key
+  - certFile: /etc/traefik_certs/hpc.sim4life.io.crt
+    keyFile: /etc/traefik_certs/hpc.sim4life.io.key
   - certFile: /etc/traefik_certs/sim4life.science.crt
     keyFile: /etc/traefik_certs/sim4life.science.key
-  - certFile: /etc/traefik_certs/service.hpc.sim4life.io.crt
-    keyFile: /etc/traefik_certs/service.hpc.sim4life.io.key
-  - certFile: /etc/traefik_certs/service.testing.hpc.sim4life.io.crt
-    keyFile: /etc/traefik_certs/service.testing.hpc.sim4life.io.key
-  - certFile: /etc/traefik_certs/service.testing.hpc.sim4life.science.crt
-    keyFile: /etc/traefik_certs/service.testing.hpc.sim4life.science.key
-  - certFile: /etc/traefik_certs/service.hpc.sim4life.science.crt
-    keyFile: /etc/traefik_certs/service.hpc.sim4life.science.key
-  - certFile: /etc/traefik_certs/api.testing.hpc.sim4life.science.crt
-    keyFile: /etc/traefik_certs/api.testing.hpc.sim4life.science.key
-  - certFile: /etc/traefik_certs/testing.hpc.sim4life.science.crt
-    keyFile: /etc/traefik_certs/testing.hpc.sim4life.science.key
-  - certFile: /etc/traefik_certs/api.hpc.sim4life.science.crt
-    keyFile: /etc/traefik_certs/api.hpc.sim4life.science.key
   - certFile: /etc/traefik_certs/hpc.sim4life.science.crt
     keyFile: /etc/traefik_certs/hpc.sim4life.science.key
