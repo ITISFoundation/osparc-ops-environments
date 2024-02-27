@@ -54,7 +54,6 @@ python import.py
 
 ## Important pitfalls
 - If a new docker volume for grafana is set up, an API key with name "reporter" and permission "read" needs to be set up to get the NIH metric working.
-- Some gitlab CI tests might fail (NIH metrics) if the dashboard UID changes.
 
 
 <!-- References below -->

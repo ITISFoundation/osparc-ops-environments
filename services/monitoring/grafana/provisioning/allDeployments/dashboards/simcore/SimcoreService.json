@@ -872,8 +872,8 @@
             },
             {
               "selected": false,
-              "text": "dynamic-scheduler",
-              "value": "dynamic-scheduler"
+              "text": "dynamic-schdlr",
+              "value": "dynamic-schdlr"
             },
             {
               "selected": false,
@@ -891,7 +891,7 @@
               "value": "resource-usage-tracker"
             }
           ],
-          "query": "agent, api-server, autoscaling, catalog, clusters-keeper, datcore-adapter, director-v2, dynamic-scheduler, invitations, payments, resource-usage-tracker",
+          "query": "agent, api-server, autoscaling, catalog, clusters-keeper, datcore-adapter, director-v2, dynamic-schdlr, invitations, payments, resource-usage-tracker",
           "queryValue": "",
           "skipUrlSync": false,
           "type": "custom"
