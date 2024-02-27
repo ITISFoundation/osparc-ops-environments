@@ -285,6 +285,7 @@ services:
     networks:
       - default
       - interactive_services_subnet
+    hostname: "{{.Service.Name}}"
     deploy:
       update_config:
         parallelism: 2
