@@ -34,6 +34,9 @@ services:
       - monitored
     deploy:
       replicas: ${OPS_REGISTRY_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.io.simcore.autoscaled-node!=true
       resources:
         limits:
           memory: 1G
