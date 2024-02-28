@@ -19,8 +19,7 @@ export _yq
 #
 # start
 #
-for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE})
-do
+for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     export TARGETNAME=${service#"${SERVICES_PREFIX}"_}
     #  continue if the service == director since it doesnt have settings
     if [ "${TARGETNAME}" == "director" ]; then
@@ -54,10 +53,11 @@ do
     # Pull image from registry, just in case
     docker compose --file ${COMPOSE_FILE} pull "${service}"
     #
-    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGETFILE}" > /dev/null 2>&1; then
-        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/$TARGETFILE"
-        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/$TARGETFILE"
-        if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json > /dev/null 2>&1; then
+    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGETFILE}" >/dev/null 2>&1; then
+        service_name="${service#*_}"
+        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/$service_name"
+        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/$service_name"
+        if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json >/dev/null 2>&1; then
             echo "SUCCESS: Validation of environment variables for ${service}"
         else
             echo "ERROR: Validation of environment variables for ${service} failed"
@@ -67,7 +67,6 @@ do
     else
         echo "WARN: Settings executable not found for ${service}"
     fi
-
 
     echo "--------------------------"
 done
