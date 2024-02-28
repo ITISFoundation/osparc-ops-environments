@@ -54,9 +54,9 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     docker compose --file ${COMPOSE_FILE} pull "${service}"
     #
     if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGETFILE}" >/dev/null 2>&1; then
-        service_name="${service#*_}"
-        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/$service_name"
-        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/$service_name"
+        service_name_binary="simcore-service-${service#*_}"
+        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/$service_name_binary"
+        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/$service_name_binary"
         if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json >/dev/null 2>&1; then
             echo "SUCCESS: Validation of environment variables for ${service}"
         else
