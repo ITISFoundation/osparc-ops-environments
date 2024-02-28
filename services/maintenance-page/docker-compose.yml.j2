@@ -21,6 +21,9 @@ services:
       - public
       - monitored
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
@@ -43,6 +46,9 @@ services:
       - public
       - monitored
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
       labels:
           - traefik.enable=true
           - traefik.docker.network=${PUBLIC_NETWORK}
