@@ -150,7 +150,7 @@ services:
           memory: 4096M
           cpus: "2"
         reservations:
-          memory: 2048M
+          memory: 64M
           cpus: "0.2"
   node-exporter:
     image: prom/node-exporter:v1.6.1
@@ -298,6 +298,9 @@ services:
     networks:
       - internal
     deploy:
+      placement:
+        constraints:
+          - node.labels.grafana==true
       resources:
         limits:
           memory: 512M

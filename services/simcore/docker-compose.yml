@@ -83,6 +83,7 @@ services:
       - public
       - monitored
     deploy:
+      replicas: 2
       labels:
         # NOTE: apiserver does not need sslheader since there is no socket.io
         - traefik.http.routers.${SWARM_STACK_NAME}_api-server.middlewares=${SWARM_STACK_NAME}_gzip@docker
@@ -243,7 +244,7 @@ services:
           cpus: "0.1"
           memory: "512M"
         limits:
-          cpus: "1"
+          cpus: "4"
           memory: "2G"
     extra_hosts: []
 
@@ -285,6 +286,7 @@ services:
     networks:
       - default
       - interactive_services_subnet
+    hostname: "{{.Service.Name}}"
     deploy:
       update_config:
         parallelism: 2
@@ -317,6 +319,16 @@ services:
     networks:
       - monitored
     deploy:
+      labels:
+        # internal traefik
+        - traefik.enable=true
+        - traefik.docker.network=${SWARM_STACK_NAME}_default
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.http.routers.${SWARM_STACK_NAME}_storage.rule=${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}
+        - traefik.http.routers.${SWARM_STACK_NAME}_storage.entrypoints=http
+        - traefik.http.services.${SWARM_STACK_NAME}_storage.loadbalancer.server.port=8080
+        - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_storage_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
+        - traefik.http.routers.${SWARM_STACK_NAME}_storage.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_storage_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
       update_config:
         parallelism: 2
         order: start-first
@@ -396,7 +408,7 @@ services:
     deploy:
       update_config:
         parallelism: 2
-        order: start-first
+        order: stop-first
         failure_action: continue
         delay: 10s
       restart_policy:
@@ -829,18 +841,6 @@ networks:
   storage_subnet:
     attachable: true
     name: ${SWARM_STACK_NAME}_storage_subnet
-  interactive_services_subnet:
-    name: ${SWARM_STACK_NAME}_interactive_services_subnet
-    driver: overlay
-    attachable: true
-    internal: false
-    labels:
-      com.simcore.description: "interactive services network"
-    ipam:
-      driver: default
-      config:
-        # FIXME: move to base docker-compose.yml
-        - subnet: ${SIMCORE_INTERACTIVE_NETWORK_SUBNET}
   computational_services_subnet:
     name: ${SWARM_STACK_NAME}_computational_services_subnet
     attachable: true

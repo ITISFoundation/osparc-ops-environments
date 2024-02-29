@@ -6,7 +6,7 @@ configs:
     file: ./nginx-config/default.conf
 {% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] if j2item != "" %}
   {{ "maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}:
-    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/maintenancePageWebHTML/" + j2item.replace(" ","") + ".html" }}{% endfor %}
+    file: {{ "/".join(REPO_CONFIG_LOCATION.split("/")[:-1]) + "/assets/maintenancePageWebHTML/" + j2item.replace(" ","") + ".html" }}{% endfor %}
 services:
 {% for j2item in DEPLOYMENT_FQDNS.replace(" ","").split(",") + [MACHINE_FQDN.replace(" ","")] if j2item != "" %}
   maintenance_{{j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','')}}:
@@ -21,6 +21,9 @@ services:
       - public
       - monitored
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
@@ -43,6 +46,9 @@ services:
       - public
       - monitored
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
       labels:
           - traefik.enable=true
           - traefik.docker.network=${PUBLIC_NETWORK}

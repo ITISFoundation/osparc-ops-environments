@@ -75,12 +75,12 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml  > $@
+${TEMP_COMPOSE}-dalco: docker-compose.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml  > $@
+${TEMP_COMPOSE}-master: docker-compose.yml
+	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
 
 
 .PHONY: ${TEMP_COMPOSE}-aws
