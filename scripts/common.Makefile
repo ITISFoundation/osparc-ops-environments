@@ -54,11 +54,11 @@ $(if $(shell wc -l $(REPO_BASE_DIR)/.config.location | grep 1),,$(error The .con
 
 
 ifeq ($(_yq),)
-_yq = docker run --rm -i -v ${PWD}:/workdir mikefarah/yq:4.30.4
+_yq = docker run --rm -i -v $${PWD}:/workdir mikefarah/yq:4.30.4
 endif
 
 ifeq ($(_tree),)
-_tree = docker run --rm -i -v ${PWD}:${PWD} iankoulski/tree
+_tree = docker run --rm -i -v $${PWD}:$${PWD} iankoulski/tree
 endif
 
 
