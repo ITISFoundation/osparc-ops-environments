@@ -918,9 +918,14 @@
               "selected": false,
               "text": "production",
               "value": "production"
+            },
+            {
+              "selected": false,
+              "text": "master",
+              "value": "master"
             }
           ],
-          "query": "staging, production",
+          "query": "staging, production, master",
           "queryValue": "",
           "skipUrlSync": false,
           "type": "custom"
