@@ -94,7 +94,7 @@ services:
         - traefik.http.routers.adminpanels.middlewares=ops_whitelist_ips@docker, ops_gzip@docker
       placement:
         constraints:
-          - node.role == manager
+          - node.labels.ops==true
       resources:
         limits:
           memory: "2G"

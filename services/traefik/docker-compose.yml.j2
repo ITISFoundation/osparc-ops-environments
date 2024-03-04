@@ -137,6 +137,9 @@ services:
   whoami:
     image: "containous/whoami"
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}

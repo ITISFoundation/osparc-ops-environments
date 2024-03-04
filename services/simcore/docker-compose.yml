@@ -83,6 +83,7 @@ services:
       - public
       - monitored
     deploy:
+      replicas: 2
       labels:
         # NOTE: apiserver does not need sslheader since there is no socket.io
         - traefik.http.routers.${SWARM_STACK_NAME}_api-server.middlewares=${SWARM_STACK_NAME}_gzip@docker
@@ -285,6 +286,7 @@ services:
     networks:
       - default
       - interactive_services_subnet
+    hostname: "{{.Service.Name}}"
     deploy:
       update_config:
         parallelism: 2

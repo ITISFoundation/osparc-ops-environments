@@ -298,6 +298,9 @@ services:
     networks:
       - internal
     deploy:
+      placement:
+        constraints:
+          - node.labels.grafana==true
       resources:
         limits:
           memory: 512M

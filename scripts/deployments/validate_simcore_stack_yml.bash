@@ -19,8 +19,7 @@ export _yq
 #
 # start
 #
-for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE})
-do
+for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     export TARGETNAME=${service#"${SERVICES_PREFIX}"_}
     #  continue if the service == director since it doesnt have settings
     if [ "${TARGETNAME}" == "director" ]; then
@@ -47,17 +46,16 @@ do
     if [ "${TARGETNAME}" == "whoami" ]; then
         continue
     fi
-    export TARGETFILE="simcore-service"
-    echo TARGETFILE="${TARGETFILE}"
-    echo "Assuming targetfile in ${SETTINGS_BINARY_PATH}/${TARGETFILE}"
-    echo "Checking ${SETTINGS_BINARY_PATH}/${TARGETFILE}"
+    export TARGET_BINARY="simcore-service"
+    echo TARGET_BINARY="${TARGET_BINARY}"
+    echo "Assuming TARGET_BINARY in ${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
     # Pull image from registry, just in case
     docker compose --file ${COMPOSE_FILE} pull "${service}"
     #
-    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGETFILE}" > /dev/null 2>&1; then
-        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/$TARGETFILE"
-        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/$TARGETFILE"
-        if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json > /dev/null 2>&1; then
+    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGET_BINARY}" >/dev/null 2>&1; then
+        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
+        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
+        if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json >/dev/null 2>&1; then
             echo "SUCCESS: Validation of environment variables for ${service}"
         else
             echo "ERROR: Validation of environment variables for ${service} failed"
@@ -67,7 +65,6 @@ do
     else
         echo "WARN: Settings executable not found for ${service}"
     fi
-
 
     echo "--------------------------"
 done
