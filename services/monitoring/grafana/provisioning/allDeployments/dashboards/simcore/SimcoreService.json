@@ -19,7 +19,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 21643,
+    "id": 693,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -106,9 +106,9 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
+            "editorMode": "builder",
             "exemplar": false,
-            "expr": "sum(increase(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\"}[5m])) by (le)",
+            "expr": "sum by(le) (increase(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "format": "heatmap",
             "instant": false,
             "interval": "",
@@ -212,7 +212,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=\"master-simcore_master_$service\"}[1m])) by (name)",
+            "expr": "sum by(name) (rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=\"${deployment}-simcore_${deployment}_${service}\"}[1m]))",
             "instant": false,
             "legendFormat": "__auto",
             "range": true,
@@ -312,7 +312,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"master-simcore_master_$service\"}",
+            "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"${deployment}-simcore_${deployment}_${service}\"}",
             "instant": false,
             "legendFormat": "{{name}}",
             "range": true,
@@ -406,7 +406,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "builder",
-            "expr": "http_requests_inprogress{service_name=\"$service\"}",
+            "expr": "http_requests_inprogress{service_name=\"$service\", deployment=\"$deployment\"}",
             "instant": false,
             "legendFormat": "{{instance}}",
             "range": true,
@@ -505,8 +505,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "increase(http_request_duration_seconds_sum{service_name=\"$service\"}[5m]) / increase(http_request_duration_seconds_count{service_name=\"$service\"}[5m])",
+            "editorMode": "builder",
+            "expr": "increase(http_request_duration_seconds_sum{service_name=\"$service\", deployment=\"$deployment\"}[5m]) / increase(http_request_duration_seconds_count{service_name=\"$service\", deployment=\"$deployment\"}[5m])",
             "instant": false,
             "legendFormat": "{{method}} {{handler}}",
             "range": true,
@@ -605,8 +605,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "increase(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / increase(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
+            "editorMode": "builder",
+            "expr": "increase(http_request_size_bytes_sum{service_name=\"$service\", deployment=\"$deployment\"}[5m]) / increase(http_request_size_bytes_count{service_name=\"$service\", deployment=\"$deployment\"}[5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -705,8 +705,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "increase(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / increase(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
+            "editorMode": "builder",
+            "expr": "increase(http_response_size_bytes_sum{service_name=\"$service\", deployment=\"$deployment\"}[5m]) / increase(http_response_size_bytes_count{service_name=\"$service\", deployment=\"$deployment\"}[5m])",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
@@ -803,8 +803,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "sum by(status) (increase(http_requests_total{job=\"simcore\", service_name=\"$service\"}[5m]))",
+            "editorMode": "builder",
+            "expr": "sum by(status) (increase(http_requests_total{job=\"simcore\", service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "instant": false,
             "interval": "",
             "legendFormat": "status={{status}}",
@@ -824,9 +824,9 @@
       "list": [
         {
           "current": {
-            "selected": true,
-            "text": "api-server",
-            "value": "api-server"
+            "selected": false,
+            "text": "director-v2",
+            "value": "director-v2"
           },
           "description": "Simcore service",
           "hide": 0,
@@ -841,7 +841,7 @@
               "value": "agent"
             },
             {
-              "selected": true,
+              "selected": false,
               "text": "api-server",
               "value": "api-server"
             },
@@ -866,7 +866,7 @@
               "value": "datcore-adapter"
             },
             {
-              "selected": false,
+              "selected": true,
               "text": "director-v2",
               "value": "director-v2"
             },
@@ -895,6 +895,40 @@
           "queryValue": "",
           "skipUrlSync": false,
           "type": "custom"
+        },
+        {
+          "current": {
+            "selected": true,
+            "text": "staging",
+            "value": "staging"
+          },
+          "description": "Deployment",
+          "hide": 0,
+          "includeAll": false,
+          "label": "deployment",
+          "multi": false,
+          "name": "deployment",
+          "options": [
+            {
+              "selected": true,
+              "text": "staging",
+              "value": "staging"
+            },
+            {
+              "selected": false,
+              "text": "production",
+              "value": "production"
+            },
+            {
+              "selected": false,
+              "text": "master",
+              "value": "master"
+            }
+          ],
+          "query": "staging, production, master",
+          "queryValue": "",
+          "skipUrlSync": false,
+          "type": "custom"
         }
       ]
     },
@@ -906,7 +940,7 @@
     "timezone": "",
     "title": "Simcore services",
     "uid": "gc1629b9-7750-46ee-bf0c-0348703999d5",
-    "version": 2,
+    "version": 1,
     "weekStart": ""
   }
 }
