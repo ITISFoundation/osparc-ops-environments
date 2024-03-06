@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION="focal-20230412"
+ARG UBUNTU_VERSION="focal-20240123"
 FROM ubuntu:${UBUNTU_VERSION} as base
 ENV PYTHON_VERSION 3.10.12
 #
@@ -59,6 +59,7 @@ RUN apt-get update \
   python3-pip \
   python3.9-venv \
   python-is-python3 \
+  rsync \
   sshpass \
   unzip \
   wget \
