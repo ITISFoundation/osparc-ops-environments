@@ -408,7 +408,7 @@ services:
     deploy:
       update_config:
         parallelism: 2
-        order: start-first
+        order: stop-first
         failure_action: continue
         delay: 10s
       restart_policy:
