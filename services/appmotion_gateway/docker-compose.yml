@@ -68,7 +68,7 @@ services:
             - internal
 
     api:
-        image: itisfoundation/appmotion-gateway-php-apache-8.2:1.1rc-2024-03-05-18-36.9b755da@sha256:125e46cf574c81233e5c5e57550d5d2c135718338e6624ee04dd76eb25b357cc
+        image: itisfoundation/appmotion-gateway-php-apache-8.2:1.2rc-2024-03-07-10-51.fbba0a5@sha256:feca4939770c21bf173419c735ad5606ea88e8d34caac6f11972137a3bfa42a8
         environment:
             - WEB_DOCUMENT_ROOT=/app/public
         deploy:
