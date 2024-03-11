@@ -19,7 +19,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 21643,
+    "id": 4819,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -106,9 +106,9 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
+            "editorMode": "builder",
             "exemplar": false,
-            "expr": "sum(increase(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\"}[5m])) by (le)",
+            "expr": "sum by(le) (increase(http_request_duration_highr_seconds_bucket{job=\"simcore\", service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "format": "heatmap",
             "instant": false,
             "interval": "",
@@ -212,7 +212,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=\"master-simcore_master_$service\"}[1m])) by (name)",
+            "expr": "sum by(name) (rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=\"${deployment}-simcore_${deployment}_${service}\"}[1m]))",
             "instant": false,
             "legendFormat": "__auto",
             "range": true,
@@ -312,7 +312,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "code",
-            "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"master-simcore_master_$service\"}",
+            "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"${deployment}-simcore_${deployment}_${service}\"}",
             "instant": false,
             "legendFormat": "{{name}}",
             "range": true,
@@ -406,7 +406,7 @@
               "uid": "RmZEr52nz"
             },
             "editorMode": "builder",
-            "expr": "http_requests_inprogress{service_name=\"$service\"}",
+            "expr": "http_requests_inprogress{service_name=\"$service\", deployment=\"$deployment\"}",
             "instant": false,
             "legendFormat": "{{instance}}",
             "range": true,
@@ -505,15 +505,17 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "increase(http_request_duration_seconds_sum{service_name=\"$service\"}[5m]) / increase(http_request_duration_seconds_count{service_name=\"$service\"}[5m])",
+            "editorMode": "builder",
+            "exemplar": false,
+            "expr": "sum by(handler, method) (increase(http_request_duration_seconds_sum{service_name=\"$service\", deployment=\"$deployment\"}[5m])) / sum by(handler, method) (increase(http_request_duration_seconds_count{service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "instant": false,
+            "interval": "",
             "legendFormat": "{{method}} {{handler}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Avg request duration",
+        "title": "Avg request duration (over last 5min)",
         "type": "timeseries"
       },
       {
@@ -605,15 +607,15 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "increase(http_request_size_bytes_sum{service_name=\"$service\"} [5m]) / increase(http_request_size_bytes_count{service_name=\"$service\"} [5m])",
+            "editorMode": "builder",
+            "expr": "sum by(handler) (increase(http_request_size_bytes_sum{service_name=\"$service\", deployment=\"$deployment\"}[5m])) / sum by(handler) (increase(http_request_size_bytes_count{service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Avg request size",
+        "title": "Avg request size (last 5min)",
         "type": "timeseries"
       },
       {
@@ -705,15 +707,15 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "increase(http_response_size_bytes_sum{service_name=\"$service\"}[5m]) / increase(http_response_size_bytes_count{service_name=\"$service\"}[5m])",
+            "editorMode": "builder",
+            "expr": "sum by(handler) (increase(http_response_size_bytes_sum{service_name=\"$service\", deployment=\"$deployment\"}[5m])) / sum by(handler) (increase(http_response_size_bytes_count{service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "instant": false,
             "legendFormat": "{{handler}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Avg response size",
+        "title": "Avg response size (last 5min)",
         "type": "timeseries"
       },
       {
@@ -803,8 +805,8 @@
               "type": "prometheus",
               "uid": "RmZEr52nz"
             },
-            "editorMode": "code",
-            "expr": "sum by(status) (increase(http_requests_total{job=\"simcore\", service_name=\"$service\"}[5m]))",
+            "editorMode": "builder",
+            "expr": "sum by(status) (increase(http_requests_total{job=\"simcore\", service_name=\"$service\", deployment=\"$deployment\"}[5m]))",
             "instant": false,
             "interval": "",
             "legendFormat": "status={{status}}",
@@ -814,6 +816,141 @@
         ],
         "title": "Requests count (last 5min)",
         "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "RmZEr52nz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 30,
+          "w": 12,
+          "x": 0,
+          "y": 84
+        },
+        "id": 9,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "center",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "RmZEr52nz"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(method, handler) (http_request_duration_seconds_sum{service_name=\"$service\", deployment=\"$deployment\"}) / sum by(method, handler) (http_request_duration_seconds_count{service_name=\"$service\", deployment=\"$deployment\"})",
+            "instant": false,
+            "legendFormat": "{{method}} {{handler}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Average request duration (since t=-infinity)",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "RmZEr52nz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 30,
+          "w": 12,
+          "x": 12,
+          "y": 84
+        },
+        "id": 10,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "center",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "RmZEr52nz"
+            },
+            "editorMode": "builder",
+            "expr": "histogram_quantile(0.95, sum by(le, method, handler) (http_request_duration_seconds_bucket{service_name=\"$service\", deployment=\"$deployment\"}))",
+            "instant": false,
+            "legendFormat": "{{method}} {{handler}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "95% quantile (since t=-infinity)",
+        "type": "stat"
       }
     ],
     "refresh": "",
@@ -824,7 +961,7 @@
       "list": [
         {
           "current": {
-            "selected": true,
+            "selected": false,
             "text": "api-server",
             "value": "api-server"
           },
@@ -895,6 +1032,40 @@
           "queryValue": "",
           "skipUrlSync": false,
           "type": "custom"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "master",
+            "value": "master"
+          },
+          "description": "Deployment",
+          "hide": 0,
+          "includeAll": false,
+          "label": "deployment",
+          "multi": false,
+          "name": "deployment",
+          "options": [
+            {
+              "selected": false,
+              "text": "staging",
+              "value": "staging"
+            },
+            {
+              "selected": false,
+              "text": "production",
+              "value": "production"
+            },
+            {
+              "selected": true,
+              "text": "master",
+              "value": "master"
+            }
+          ],
+          "query": "staging, production, master",
+          "queryValue": "",
+          "skipUrlSync": false,
+          "type": "custom"
         }
       ]
     },
@@ -906,7 +1077,7 @@
     "timezone": "",
     "title": "Simcore services",
     "uid": "gc1629b9-7750-46ee-bf0c-0348703999d5",
-    "version": 2,
+    "version": 1,
     "weekStart": ""
   }
 }
