@@ -8,7 +8,7 @@ metrics:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% f
     description: Number of users in group {{_gid}}{% endfor %}
   osparc_{{_stack}}_total_number_of_users:
     type: gauge
-    description: Total nuber of registered users{% endfor %}
+    description: Total nuber of registered users
   osparc_{{_stack}}_total_number_of_payment_transactions:
     type: gauge
     description: Total number of payment transactions
