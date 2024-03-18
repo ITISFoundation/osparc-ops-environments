@@ -72,7 +72,7 @@ compose \
  config \
 | sed '/published:/s/\"//g' \
 | sed '/size:/s/\"//g' \
-| sed '1 { /name:.*/d ; }' \
+| sed '/^name: /d' \
 | sed '1 i version: \"${version}\"' \
 | sed --regexp-extended 's/cpus: ([0-9\\.]+)/cpus: \"\\1\"/'"
 
