@@ -14,10 +14,10 @@ tls:
   # osparc-staging.io
   - certFile: /etc/traefik_certs/osparc-staging.io.crt
     keyFile: /etc/traefik_certs/osparc-staging.io.key
-  - certFile: /etc/traefik_certs/staging.sim4life.cloud.crt
-    keyFile: /etc/traefik_certs/staging.sim4life.cloud.key
   - certFile: /etc/traefik_certs/staging.s4l-lite.io.crt
     keyFile: /etc/traefik_certs/staging.s4l-lite.io.key
+  - certFile: /etc/traefik_certs/sim4life-staging.cloud.crt
+    keyFile: /etc/traefik_certs/sim4life-staging.cloud.key
 
   # osparc-master-zmt.click
   - certFile: /etc/traefik_certs/osparc-master-zmt.click.crt

@@ -17,41 +17,12 @@ IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 $(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),)
 $(if $(IS_WSL2),,$(if $(IS_WSL),$(error WSL1 is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),))
 
-
-
-# Network from which services are reverse-proxied
-#  - by default it will create an overal attachable network called public_network
-ifeq ($(public_network),)
-PUBLIC_NETWORK = public-network
-else
-PUBLIC_NETWORK := $(public_network)
-endif
-export PUBLIC_NETWORK
-
-# Network that includes all services to monitor
-#  - the idea is that it shall connect osparc stack network so that e.g. cadvisor can monitor ALL the stack
-#  - by default it will create an overal attachable network called monitored_network
-ifeq ($(monitored_network),)
-MONITORED_NETWORK = monitored_network
-else
-MONITORED_NETWORK := $(monitored_network)
-endif
-export MONITORED_NETWORK
-
-ifeq ($(appmotion_network),)
-APPMOTION_NETWORK = appmotion-network
-else
-APPMOTION_NETWORK := $(appmotion_network)
-endif
-export APPMOTION_NETWORK
-
 # Check that a valid location to a config file is set.
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 export REPO_CONFIG_LOCATION := $(shell cat $(REPO_BASE_DIR)/.config.location)
 $(if $(REPO_CONFIG_LOCATION),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell cat $(REPO_CONFIG_LOCATION)),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell wc -l $(REPO_BASE_DIR)/.config.location | grep 1),,$(error The .config.location file has more than one path specified. Only one path is allowed. Aborting))
-
 
 ifeq ($(_yq),)
 _yq = docker run --rm -i -v $${PWD}:/workdir mikefarah/yq:4.30.4
@@ -266,19 +237,6 @@ clean-default: .check_clean ## Cleans all outputs
 				--label-add prometheus=true \
 			 	--label-add minio=true {}' > /dev/null; \
 	fi
-
-	@$(if $(filter $(PUBLIC_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		,  \
-		, docker network create --attachable --driver=overlay --subnet=10.10.0.0/16 $(PUBLIC_NETWORK) \
-	)
-	@$(if $(filter $(MONITORED_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		,  \
-		, docker network create --attachable --driver=overlay --subnet=10.11.0.0/16 $(MONITORED_NETWORK) \
-	)
-	@$(if $(filter $(APPMOTION_NETWORK), $(shell docker network ls --format="{{.Name}}")) \
-		,  \
-		, docker network create --attachable --driver=overlay --subnet=10.12.0.0/16 $(APPMOTION_NETWORK) \
-	)
 
 
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748

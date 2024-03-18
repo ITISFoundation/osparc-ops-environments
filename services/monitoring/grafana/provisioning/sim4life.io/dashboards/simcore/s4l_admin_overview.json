@@ -193,7 +193,7 @@
               "uid": "AAAks95hb"
             },
             "editorMode": "code",
-            "expr": "avg(osparc_master_members_in_gid_4)",
+            "expr": "avg(osparc_production_members_in_gid_4)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"

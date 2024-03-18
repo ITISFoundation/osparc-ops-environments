@@ -408,7 +408,7 @@ services:
     deploy:
       update_config:
         parallelism: 2
-        order: start-first
+        order: stop-first
         failure_action: continue
         delay: 10s
       restart_policy:
@@ -844,6 +844,8 @@ networks:
   computational_services_subnet:
     name: ${SWARM_STACK_NAME}_computational_services_subnet
     attachable: true
+  interactive_services_subnet:
+    external: true
 # self-signed only
 secrets:
   # These two are needed for local=deployments
