@@ -60,7 +60,7 @@ if docker compose version --short | grep --quiet "^2\." ; then
 # shellcheck disable=SC2002
   docker_command="\
 set -o allexport && \
-export $(cat "${env_file}" | sort) && set +o allexport && \
+. ${env_file} && set +o allexport && \
 docker stack config"
 
   for compose_file_path in "$@"
@@ -73,8 +73,6 @@ docker stack config"
   docker_command+=" \
 | sed '/published:/s/\"//g' \
 | sed '/size:/s/\"//g' \
-| sed '1 { /name:.*/d ; }' \
-| sed '1 i version: \"${version}\"' \
 | sed --regexp-extended 's/cpus: ([0-9\\.]+)/cpus: \"\\1\"/'"
 
   # Execute the command
