@@ -57,19 +57,20 @@ if docker compose version --short | grep --quiet "^2\." ; then
   if [[ -z "$version" ]]; then
     version="3.9"  # Default to 3.9 if version is not found in file
   fi
-
+# shellcheck disable=SC2002
   docker_command="\
-docker \
---log-level=ERROR \
-compose \
---env-file ${env_file}"
+set -o allexport && \
+export $(cat "${env_file}" | sort) && set +o allexport && \
+docker stack config"
 
   for compose_file_path in "$@"
   do
-    docker_command+=" --file=${compose_file_path}"
+    docker_command+=" --compose-file ${compose_file_path}"
   done
-  docker_command+="\
- config \
+
+  #docker_command+=" --skip-interpolation"
+
+  docker_command+=" \
 | sed '/published:/s/\"//g' \
 | sed '/size:/s/\"//g' \
 | sed '1 { /name:.*/d ; }' \
