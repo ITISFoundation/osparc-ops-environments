@@ -843,6 +843,8 @@ networks:
   computational_services_subnet:
     name: ${SWARM_STACK_NAME}_computational_services_subnet
     attachable: true
+  interactive_services_subnet:
+    external: true
 # self-signed only
 secrets:
   # These two are needed for local=deployments
