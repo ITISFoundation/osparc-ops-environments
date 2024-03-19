@@ -73,7 +73,8 @@ docker stack config"
   docker_command+=" \
 | sed '/published:/s/\"//g' \
 | sed '/size:/s/\"//g' \
-| sed --regexp-extended 's/cpus: ([0-9\\.]+)/cpus: \"\\1\"/'"
+| sed --regexp-extended 's/cpus: ([0-9\\.]+)/cpus: \"\\1\"/' \
+| sed 's/\$/\$\$/g'" # mitigates https://stackoverflow.com/questions/40619582/how-can-i-escape-a-dollar-sign-in-a-docker-compose-file
 
   # Execute the command
   show_info "Executing Docker command: ${docker_command}"
