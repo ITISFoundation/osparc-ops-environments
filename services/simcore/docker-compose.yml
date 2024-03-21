@@ -1,6 +1,8 @@
 version: "3.8"
 services:
   clusters-keeper:
+    networks:
+      - monitored
     deploy:
       labels: []
       replicas: 0
@@ -29,6 +31,8 @@ services:
           - node.labels.simcore==true
 
   autoscaling:
+    networks:
+      - monitored
     deploy:
       update_config:
         parallelism: 2
@@ -49,6 +53,8 @@ services:
           memory: "512M"
 
   agent:
+    networks:
+      - monitored
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -172,6 +178,8 @@ services:
           memory: "128M"
 
   invitations:
+    networks:
+      - monitored
     environment:
       - INVITATIONS_LOGLEVEL=${INVITATIONS_LOGLEVEL}
     deploy:
@@ -810,8 +818,11 @@ services:
           cpus: '0.1'
     networks:
       - appmotion
+      - monitored
 
   dynamic-schdlr:
+    networks:
+      - monitored
     deploy:
       replicas: 2
       placement:
