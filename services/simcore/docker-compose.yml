@@ -2,6 +2,7 @@ version: "3.8"
 services:
   clusters-keeper:
     deploy:
+      labels: []
       replicas: 0
       update_config:
         parallelism: 2
