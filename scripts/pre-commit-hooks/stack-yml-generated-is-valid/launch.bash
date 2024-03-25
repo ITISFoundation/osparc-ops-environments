@@ -65,7 +65,7 @@ if [[ -z $(grep '[^[:space:]]' "$repo_basedir"/stack.yml) ]] ; then
   error_exit "stack.yml is empty"
   exit 1
 fi
-"$repo_basedir"/scripts/docker-compose-config.bash -e .env "$repo_basedir"/stack.yml 2>&1 | cat
+"$repo_basedir"/scripts/docker-compose-config.bash -e "$repo_basedir"/services/.env "$repo_basedir"/stack.yml 2>&1 | cat
 rm "$repo_basedir"/stack.yml 2>/dev/null || true
 rm "$repo_basedir"/docker-compose.yml 2>/dev/null || true
 rm "$repo_basedir"/.env-devel 2>/dev/null || true
