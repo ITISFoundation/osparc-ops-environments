@@ -1,40 +1,40 @@
-version: '3.7'
+version: "3.7"
 services:
   traefik:
     command:
-      - '--api=true'
-      - '--api.dashboard=true'
-      - '--log.level=${OPS_TRAEFIK_LOGLEVEL}'
-      - '--accesslog=true'
-      - '--metrics.prometheus=true'
-      - '--metrics.prometheus.addEntryPointsLabels=true'
-      - '--metrics.prometheus.addServicesLabels=true'
-      - '--entryPoints.metrics.address=:8082'
-      - '--metrics.prometheus.entryPoint=metrics'
-      - '--entryPoints.http.address=:80'
-      - '--entryPoints.https.address=:443'
-      - '--entryPoints.smtp.address=:25'
-      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
-      - '--providers.docker.swarmMode=true'
-      - '--providers.docker.exposedByDefault=false'
-      - '--tracing=true'
-      - '--tracing.jaeger=true'
-      - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
-      - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
-      - '--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
-      - '--entryPoints.https.forwardedHeaders.insecure'
-      - '--providers.file.directory=/etc/traefik/'
-      - '--providers.file.watch=true'
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.https.address=:443"
+      - "--entryPoints.smtp.address=:25"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
+      - "--entryPoints.https.forwardedHeaders.insecure"
+      - "--providers.file.directory=/etc/traefik/"
+      - "--providers.file.watch=true"
     environment:
-      -  AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
-      -  AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
+      - AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
     deploy:
       replicas: ${OPS_TRAEFIK_REPLICAS}
       placement:
         constraints:
           - node.labels.traefik==true
     volumes:
-    - /etc/traefik_certs:/etc/traefik_certs
+      - /etc/traefik_certs:/etc/traefik_certs
     configs:
       - source: dyn_cfg.yml
         target: /etc/traefik/dynamic_conf.yml
