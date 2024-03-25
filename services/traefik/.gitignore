@@ -1,2 +1,4 @@
 docker-compose.letsencrypt.dns.yml
 docker-compose.yml
+.dyn_cfg.loc
+dyn_cfg.yml

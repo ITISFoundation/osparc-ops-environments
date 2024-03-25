@@ -25,9 +25,6 @@ services:
       - '--entryPoints.https.forwardedHeaders.insecure'
       - '--providers.file.directory=/etc/traefik/'
       - '--providers.file.watch=true'
-    configs:
-      - source: traefik_dynamic_config.yml
-        target: /etc/traefik/dynamic_conf.yml
     environment:
       -  AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
       -  AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
@@ -42,7 +39,3 @@ services:
   whoami:
     dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
       8.8.8.8
-
-configs:
-  traefik_dynamic_config.yml:
-    file: ./config/aws_dyn_cfg.yml

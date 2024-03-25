@@ -28,7 +28,7 @@ services:
       - '--providers.file.directory=/etc/traefik/'
       - '--providers.file.watch=true'
     configs:
-      - source: traefik_dynamic_config.yml
+      - source: dyn_cfg.yml
         target: /etc/traefik/dynamic_conf.yml
     deploy:
       replicas: ${OPS_TRAEFIK_REPLICAS}
@@ -39,5 +39,5 @@ services:
     - /etc/traefik_certs:/etc/traefik_certs
 
 configs:
-  traefik_dynamic_config.yml:
-    file: ./config/public_dyn_cfg.yml
+  dyn_cfg.yml:
+    file: ./dyn_cfg.yml

@@ -44,7 +44,9 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
-
+    configs:
+      - source: dyn_cfg.yml
+        target: /etc/traefik/dynamic_conf.yml
     deploy:
       # mode: global
       replicas: ${OPS_TRAEFIK_REPLICAS}
@@ -167,3 +169,7 @@ networks:
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
+
+configs:
+  dyn_cfg.yml:
+    file: ./dyn_cfg.yml

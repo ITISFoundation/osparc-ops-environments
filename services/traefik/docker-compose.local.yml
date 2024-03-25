@@ -48,7 +48,7 @@ services:
     env_file:
       - .env
     configs:
-      - source: traefik_dynamic_config.yml
+      - source: dyn_cfg.yml
         target: /etc/traefik/dynamic_conf.yml
       - source: customEntrypoint.sh
         target: /customEntrypoint.sh
@@ -59,8 +59,8 @@ services:
         target: /secrets/storageca.crt
 
 configs:
-  traefik_dynamic_config.yml:
-    file: ./config/local_dyn_cfg.yml
+  dyn_cfg.yml:
+    file: ./dyn_cfg.yml
   customEntrypoint.sh:
     file: ./config/customCAInit.sh
 

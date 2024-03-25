@@ -20,6 +20,7 @@ define jinja
 	.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
 
+
 .PHONY: up-local
 up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
@@ -50,8 +51,31 @@ up-master: .init .env ${TEMP_COMPOSE}-master ## Deploys the stack on dalco clust
 
 # Helpers -------------------------------------------------
 
+.PHONY: .dyn_cfg.loc
+.dyn_cfg.loc:
+	@if [ ! -f .dyn_cfg.loc ]; then \
+		echo "Error: .dyn_cfg.loc file does not exist." >&2; \
+		exit 1; \
+	fi
+	@LINE_COUNT=$$(wc -l < .dyn_cfg.loc); \
+	if [ $$LINE_COUNT -ne 1 ]; then \
+		echo "Error: .dyn_cfg.loc must contain exactly one line." >&2; \
+		exit 1; \
+	fi
+	$(eval DYN_CFG_LOCATION=$(shell cat .dyn_cfg.loc))
+	@if [ ! -f $(DYN_CFG_LOCATION) ]; then \
+		echo "Error: The file specified in .dyn_cfg.loc does not exist: $(DYN_CFG_LOCATION)" >&2; \
+		exit 1; \
+	else \
+		echo "Using $(DYN_CFG_LOCATION) dynamic config file."; \
+	fi
+
+dyn_cfg.yml: .dyn_cfg.loc
+	$(eval DYN_CFG_LOCATION=$(shell cat .dyn_cfg.loc))
+	cp $(DYN_CFG_LOCATION) $(shell pwd)/dyn_cfg.yml
+
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
+${TEMP_COMPOSE}-local: dyn_cfg.yml docker-compose.yml docker-compose.local.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
@@ -72,28 +96,28 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
+${TEMP_COMPOSE}-aws: dyn_cfg.yml docker-compose.yml docker-compose.aws.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
+${TEMP_COMPOSE}-dalco: dyn_cfg.yml docker-compose.yml docker-compose.dalco.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml .env
+${TEMP_COMPOSE}-public: dyn_cfg.yml docker-compose.yml docker-compose.public.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
 	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
+${TEMP_COMPOSE}-master: dyn_cfg.yml docker-compose.yml docker-compose.master.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
