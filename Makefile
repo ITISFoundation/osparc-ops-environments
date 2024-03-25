@@ -27,58 +27,18 @@ certificates/domain.key:
 
 .PHONY: up-local
 up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
-	@bash scripts/deployments/deploy.sh --stack_target=local --minio_enabled=0 --vcs_check=1
+	@bash scripts/deployments/deploy_everything.bash --stack_target=local --minio_enabled=0 --vcs_check=1
 	@$(MAKE) info-local
 
-.PHONY: up-vagrant
-up-vagrant: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore
-	@bash scripts/deployments/deploy.sh --stack_target=vagrant --minio_enabled=0
-	@$(MAKE) info-local
-
-.PHONY: up-simcore-aws
-up-simcore-aws:  ## Deploy simcores stack only, on AWS
-	./scripts/deployments/deploy.sh --stack_target=aws --start_opsstack=1
-
-.PHONY: up-simcore-dalco
-up-simcore-dalco:  ## Deploy simcores stack only, on Dalco Cluster
-	./scripts/deployments/deploy.sh --stack_target=dalco --start_opsstack=1
-
-.PHONY: up-dalco
-up-dalco: ## Deploy ops and simcore stacks on the Dalco Cluster
-	./scripts/deployments/deploy.sh --stack_target=dalco --vcs_check=1
-
-.PHONY: up-public
-up-public: ## Deploy ops and simcore stacks on the Public Cluster
-	./scripts/deployments/deploy.sh --stack_target=public --vcs_check=1
-
-.PHONY: up-aws
-up-aws: ## Deploy opt and simcore stacks on the AWS Cluster
-	./scripts/deployments/deploy.sh --stack_target=aws --vcs_check=1
-
-.PHONY: up-master
-up-master: ## Deploy opt and simcore stacks on the Master Cluster
-	./scripts/deployments/deploy.sh --stack_target=master
 
 .PHONY: up-maintenance
 up-maintenance: ## Put Osparc into maintenance mode - only team member can access it, display a maintenance page
 	@cd services/maintenance-page; \
 	make up;
 
-
 .PHONY: down-maintenance
 down-maintenance: ## Stop the maintenance mode
 	@cd services/maintenance-page; \
-	make down;
-
-.PHONY: down
-down: ## Stop all services
-	@for service in $(SERVICES); do \
-		$(MAKE_C) $$service down; \
-	done
-
-.PHONY: down-simcore
-down-simcore:  ## Stop the simcore service
-	@cd services/deployment-agent; \
 	make down;
 
 .PHONY: .install-fqdn

@@ -42,7 +42,7 @@ cp "$repo_config" "$repo_basedir"
 cd "$repo_basedir"
 
 log_info "Creating stack.yml file..."
-scripts/deployments/startup_script.bash
+scripts/deployments/compose_stack_yml.bash
 
 log_info "Ensuring dask secrets are relative to the stack file"
 # Check if the dask_tls_cert secret exists and update its file path if it does.

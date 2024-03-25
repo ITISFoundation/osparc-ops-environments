@@ -80,7 +80,6 @@ python envsubst_escape_dollar_sign.py .env.platform .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
-# The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
 
 unset EC2_INSTANCES_ALLOWED_TYPES
 "$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
