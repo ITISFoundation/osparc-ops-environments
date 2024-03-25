@@ -177,13 +177,18 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add datasources *******************")
     if overwrite:
         # Get all datasources
+        print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
         r = session.get(url + "datasources", headers=hed, verify=False)
+        if r.status_code > 300:
+            print("Received non-200 status code upon import: ", str(r.status_code))
+            print("ABORTING!")
+            print(r.json())
+            exit(1)
         for i in r.json():
-            print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
+            print("Response: ", r.status_code)
             r = session.delete(
                 url + "datasources/uid/" + str(i["uid"]), headers=hed, verify=False
             )
-            print("Response: ", r.status_code)
     listOfDatasources = []
     for file in directoriesDatasources:
         with open(file) as jsonFile:
