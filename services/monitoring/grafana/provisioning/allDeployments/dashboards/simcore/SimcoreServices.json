@@ -19,7 +19,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 4819,
+    "id": 32575,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -1075,9 +1075,9 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "Simcore services",
+    "title": "Fastapi services",
     "uid": "gc1629b9-7750-46ee-bf0c-0348703999d5",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
   }
 }
