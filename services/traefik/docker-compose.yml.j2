@@ -45,7 +45,7 @@ services:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
     configs:
-      - source: dyn_cfg.yml
+      - source: traefik_dynamic_config
         target: /etc/traefik/dynamic_conf.yml
     deploy:
       # mode: global
