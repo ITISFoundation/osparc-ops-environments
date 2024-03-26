@@ -51,7 +51,6 @@ source "$repo_basedir"/scripts/logger.bash
 #
 # This script assumes that the repo.config file is present at the top level of the ops-repo
 # This script assumes that the docker-compose.yml from the osparc-simcore repo is present at the repo_basedir.
-# This script assumes that the .env.devel from the osparc-simcore repo is present at the repo_basedir
 #
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
