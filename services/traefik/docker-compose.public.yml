@@ -1,32 +1,32 @@
-version: '3.7'
+version: "3.7"
 services:
   traefik:
     dns: 8.8.8.8 # This is critical to make the ACME challange work
     command:
-      - '--api=true'
-      - '--api.dashboard=true'
-      - '--log.level=${OPS_TRAEFIK_LOGLEVEL}'
-      - '--accesslog=false'
-      - '--metrics.prometheus=true'
-      - '--metrics.prometheus.addEntryPointsLabels=true'
-      - '--metrics.prometheus.addServicesLabels=true'
-      - '--entryPoints.metrics.address=:8082'
-      - '--entryPoints.postgres.address=:5432'
-      - '--metrics.prometheus.entryPoint=metrics'
-      - '--entryPoints.http.address=:80'
-      - '--entryPoints.https.address=:443'
-      - '--entryPoints.smtp.address=:25'
-      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
-      - '--providers.docker.swarmMode=true'
-      - '--providers.docker.exposedByDefault=false'
-      - '--tracing=true'
-      - '--tracing.jaeger=true'
-      - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
-      - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
-      - '--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
-      - '--entryPoints.https.forwardedHeaders.insecure'
-      - '--providers.file.directory=/etc/traefik/'
-      - '--providers.file.watch=true'
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
+      - "--accesslog=false"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--entryPoints.postgres.address=:5432"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.https.address=:443"
+      - "--entryPoints.smtp.address=:25"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--tracing=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
+      - "--entryPoints.https.forwardedHeaders.insecure"
+      - "--providers.file.directory=/etc/traefik/"
+      - "--providers.file.watch=true"
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
@@ -36,8 +36,8 @@ services:
         constraints:
           - node.labels.traefik==true
     volumes:
-    - /etc/traefik_certs:/etc/traefik_certs
+      - /etc/traefik_certs:/etc/traefik_certs
 
 configs:
   traefik_dynamic_config.yml:
-    file: ./config/public_dyn_cfg.yml
+    file: ./traefik_dynamic_config.yml

@@ -1,4 +1,0 @@
-tls:
-  certificates:
-  - certFile: /etc/traefik_certs/tip.itis.swiss.crt
-    keyFile: /etc/traefik_certs/tip.itis.swiss.key
