@@ -456,3 +456,40 @@
     grace_period_ms: 0
     backlog_size:
   alert: true
+- title: "${MACHINE_FQDN}: Payments service errors or warnings"
+  description: "${MACHINE_FQDN}: Payments service errors or warnings"
+  priority: 2
+  config:
+      query: log_service:/.+payments/ AND (log_level:ERROR OR log_level:WARNING)
+      query_parameters: []
+      search_within_ms: 600000
+      execute_every_ms: 600000
+      group_by: []
+      series: []
+      conditions: {}
+      type: aggregation-v1
+  field_spec:
+    source:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.source}"
+        require_values: false
+    container_name:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.container_name}"
+        require_values: false
+    full_message:
+      data_type: string
+      providers:
+      - type: template-v1
+        template: "${source.full_message}"
+  key_spec:
+    - source
+    - container_name
+  notification_settings:
+    grace_period_ms: 0
+    backlog_size: 99
+  alert: true
