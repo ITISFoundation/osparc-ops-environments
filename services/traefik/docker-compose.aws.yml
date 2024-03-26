@@ -36,12 +36,12 @@ services:
     volumes:
       - /etc/traefik_certs:/etc/traefik_certs
     configs:
-      - source: traefik_dynamic_config
+      - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
   whoami:
     dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
       8.8.8.8
 
 configs:
-  traefik_dynamic_config:
-    file: ./traefik_dynamic_config.yml
+  traefik_dynamic_config.yml:
+    file: ./config/aws_dyn_cfg.yml

@@ -1,4 +1,3 @@
 docker-compose.letsencrypt.dns.yml
 docker-compose.yml
-.dyn_cfg.loc
 traefik_dynamic_config.yml
