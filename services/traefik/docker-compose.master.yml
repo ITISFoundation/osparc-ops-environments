@@ -29,7 +29,7 @@ services:
     env_file:
       - .env
     configs:
-      - source: traefik_dynamic_config
+      - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
     deploy:
       placement:
@@ -39,5 +39,5 @@ services:
     - /etc/traefik_certs:/etc/traefik_certs
 
 configs:
-  traefik_dynamic_config:
+  traefik_dynamic_config.yml:
     file: ./traefik_dynamic_config.yml
