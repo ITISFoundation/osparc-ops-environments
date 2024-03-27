@@ -20,6 +20,7 @@ define jinja
 	.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
 
+
 .PHONY: up-local
 up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
@@ -49,6 +50,17 @@ up-master: .init .env ${TEMP_COMPOSE}-master ## Deploys the stack on dalco clust
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
 # Helpers -------------------------------------------------
+
+traefik_dynamic_config.yml: .config.dir
+	$(eval CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.config.dir))
+	$(eval TRAEFIK_DYN_CFG=$(CONFIG_DIR)/traefik_dynamic_config.yml)
+	@if [ ! -f $(TRAEFIK_DYN_CFG) ]; then \
+		echo "Error: file does not exist $(TRAEFIK_DYN_CFG)" >&2; \
+		exit 1; \
+	fi
+
+	@cp $(TRAEFIK_DYN_CFG) $(REPO_BASE_DIR)/services/traefik/traefik_dynamic_config.yml
+
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
@@ -106,7 +118,7 @@ docker-compose.letsencrypt.dns.yml: .venv .env
 	rm docker-compose.letsencrypt.dns.yml.unlinted >/dev/null 2>&1;
 
 .PHONY: docker-compose.yml
-docker-compose.yml: .venv .env
+docker-compose.yml: traefik_dynamic_config.yml .venv .env
 	@$(call jinja, docker-compose.yml.j2, docker-compose.yml.unlinted) && \
 	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;

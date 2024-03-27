@@ -51,7 +51,7 @@ up-public: .init .env  config.monitoring config.prometheus ${TEMP_COMPOSE}-publi
 	$(MAKE) grafana-import
 
 .PHONY: up-aws
-up-aws: .init .env config.monitoring config.prometheus.simcore ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
+up-aws: .init .env config.monitoring config.prometheus.simcore.aws ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) grafana-import
 
@@ -135,6 +135,15 @@ config.prometheus.simcore: ${REPO_CONFIG_LOCATION} .venv
 	source $<; \
 	set +o allexport; \
 	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' > prometheus/prometheus.yml; \
+	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
+	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
+
+.PHONY: config.prometheus.simcore.aws
+config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} .venv
+	@set -o allexport; \
+	source $<; \
+	set +o allexport; \
+	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' | $(_yq) '. *+ load("prometheus/prometheus-aws.yml")' > prometheus/prometheus.yml; \
 	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 

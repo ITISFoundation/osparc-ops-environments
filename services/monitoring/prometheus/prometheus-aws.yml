@@ -1,0 +1,38 @@
+scrape_configs:
+  - job_name: 'federate-computational-clusters-ec2'
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      # we match all metrics for now
+      'match[]':
+        - '{job=~"^.+$"}'
+    ec2_sd_configs:
+      - region: ${CLUSTERS_KEEPER_EC2_REGION_NAME}
+        access_key: ${CLUSTERS_KEEPER_EC2_ACCESS_KEY_ID}
+        secret_key: ${CLUSTERS_KEEPER_EC2_SECRET_ACCESS_KEY}
+        # profile: "<aws_profile>" # optional, if using instance role or profile
+        port: 9090
+        # You can filter by tags, instance IDs, or other attributes to only discover the specific Prometheus instances
+        filters:
+          - name: "tag:autoscaling"
+            values: ["computational"]
+          - name: "tag:role"
+            values: ["manager"]
+
+    relabel_configs:
+      - source_labels: [__meta_ec2_public_dns_name] # or use __meta_ec2_instance_id, __meta_ec2_private_ip depending on your network setup
+        target_label: __address__
+        replacement: "${1}:9090" # Assumes Prometheus is running on port 9090
+
+      # Apply additional relabeling here as needed, for example:
+      # Map the EC2 instance ID to a label
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance_id
+
+      # Add a label for user_id based on the tag
+      - source_labels: [__meta_ec2_tag_user_id]
+        target_label: user_id
+
+      # Add a label for wallet_id based on the tag
+      - source_labels: [__meta_ec2_tag_wallet_id]
+        target_label: wallet_id
