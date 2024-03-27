@@ -4,7 +4,6 @@ services:
     networks:
       - monitored
     deploy:
-      labels: []
       replicas: 0
       update_config:
         parallelism: 2

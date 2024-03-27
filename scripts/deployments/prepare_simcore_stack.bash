@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+# This script assumed a clone of the osparc-simcore repo to be present in `"$repo_basedir"/../osparc-simcore`
 #
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -o errexit
@@ -42,7 +43,7 @@ cp "$repo_config" "$repo_basedir"
 cd "$repo_basedir"
 
 log_info "Creating stack.yml file..."
-scripts/deployments/startup_script.bash
+scripts/deployments/compose_stack_yml.bash
 
 log_info "Ensuring dask secrets are relative to the stack file"
 # Check if the dask_tls_cert secret exists and update its file path if it does.
