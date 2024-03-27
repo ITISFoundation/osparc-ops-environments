@@ -56,13 +56,13 @@ def main(
         print(response["CORSRules"])
         #
         print("#####")
+        return None
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchCORSConfiguration":
             return []
-        else:
-            # AllAccessDisabled error == bucket not found
-            print(e)
-            return None
+
+        print(e)
+        return None
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+# pylint: skip-file
 import glob
 import json
 import os

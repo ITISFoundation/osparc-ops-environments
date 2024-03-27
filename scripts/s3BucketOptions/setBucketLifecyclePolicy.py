@@ -59,13 +59,14 @@ def main(
         print(response["Rules"])
         #
         print("#####")
+        return None
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchLifecycleConfiguration":
             return []
-        else:
-            # AllAccessDisabled error == bucket not found
-            print(e)
-            return None
+
+        # AllAccessDisabled error == bucket not found
+        print(e)
+        return None
 
 
 if __name__ == "__main__":
