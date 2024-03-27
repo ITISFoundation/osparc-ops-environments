@@ -87,6 +87,7 @@ repos:
         entry: 'scripts/pre-commit-hooks/runPylint/launch.bash'
         always_run: true
         language: script
+        files: '^(.*\.py)$'
       - id: validate-template-dotenv
         name: Validate template.env
         description: Validate template.env
