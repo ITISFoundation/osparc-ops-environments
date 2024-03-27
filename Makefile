@@ -73,11 +73,11 @@ down-maintenance: ## Stop the maintenance mode
 
 
 .PHONY: venv
-# WARNING: this is not windows friendly
 venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 .venv:
 	@python3 -m venv .venv
 	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install typer
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 # Misc: info & clean

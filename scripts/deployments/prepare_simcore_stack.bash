@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+# This script assumed a clone of the osparc-simcore repo to be present in `"$repo_basedir"/../osparc-simcore`
 #
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -o errexit
