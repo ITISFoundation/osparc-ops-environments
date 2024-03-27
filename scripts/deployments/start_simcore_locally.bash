@@ -117,9 +117,6 @@ else
 fi
 # FI
 
-############
-cp .env-devel "$repo_basedir"
-############
 popd
 ############
 #
