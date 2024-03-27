@@ -50,7 +50,7 @@ jobs:
         run: python --version
 
       - name: Install dependencies
-        run: pip install pylint
+        run: pip install pylint==3.0.3
 
       - name: Run pylint
         run: pylint --rcfile .pylintrc .
