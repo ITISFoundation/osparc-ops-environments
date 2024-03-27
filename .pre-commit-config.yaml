@@ -50,6 +50,11 @@ repos:
       - id: isort
         args: ["--profile", "black"]
         name: sort imports
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        name: black format code
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -74,31 +79,6 @@ repos:
     hooks:
       - id: shellcheck
         name: Shell scripts conform to shellcheck
-  # NOTE: Keep order as pyupgrade (will update code) then pycln (remove unused imports), then isort (sort them) and black (final formatting)
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.34.0
-    hooks:
-      - id: pyupgrade
-        args:
-          - "--py310-plus"
-        name: upgrade code
-  - repo: https://github.com/hadialqattan/pycln
-    rev: v2.1.4
-    hooks:
-      - id: pycln
-        args: [--all, --expand-stars]
-        name: prune imports
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-        name: sort imports
-  - repo: https://github.com/psf/black
-    rev: 22.3.0
-    hooks:
-      - id: black
-        name: black format code
   - repo: local
     hooks:
       - id: run-pylint
