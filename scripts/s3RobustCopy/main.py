@@ -1,3 +1,4 @@
+# pylint: skip-file
 import atexit
 import os
 import os.path
