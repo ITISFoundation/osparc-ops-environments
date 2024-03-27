@@ -88,6 +88,7 @@ repos:
         always_run: true
         language: script
         files: '^(.*\.py)$'
+        require_serial: true
       - id: validate-template-dotenv
         name: Validate template.env
         description: Validate template.env
