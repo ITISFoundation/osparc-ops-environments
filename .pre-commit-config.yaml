@@ -101,6 +101,12 @@ repos:
         name: black format code
   - repo: local
     hooks:
+      - id: run-pylint
+        name: Run pylint
+        description: Run pylint
+        entry: 'scripts/pre-commit-hooks/runPylint/launch.bash'
+        always_run: true
+        language: script
       - id: validate-template-dotenv
         name: Validate template.env
         description: Validate template.env
