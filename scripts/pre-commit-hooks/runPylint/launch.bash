@@ -4,6 +4,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+set -x
+
 repo_basedir=$(git rev-parse --show-toplevel)
 script_dir=$(dirname "$0")
 
