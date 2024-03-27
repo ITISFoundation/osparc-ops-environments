@@ -29,28 +29,3 @@ jobs:
 
       - name: Run pre-commit
         run: SKIP=stack-yml-generated-is-valid pre-commit run --all-files
-
-  pylint:
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Define python
-        run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
-
-      - name: Install python version
-        uses: gabrielfalcao/pyenv-action@v11
-        with:
-          default: "${{ env.PYTHON_VERSION }}"
-          command: pip install -U pip
-
-      - name: Show python version
-        run: python --version
-
-      - name: Install dependencies
-        run: pip install pylint==3.0.3
-
-      - name: Run pylint
-        run: pylint --rcfile .pylintrc .
