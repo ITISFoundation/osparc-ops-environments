@@ -7,11 +7,11 @@ with open(sys.argv[1], "r+") as original:
     lines = original.readlines()
 
 linesWithoutCaptures = []
-validationRegex = "^(.*)=([\"'])?((\\$\\{[^:]*\\})|(null))([\"'])?$"
+VALIDATION_REGEX = "^(.*)=([\"'])?((\\$\\{[^:]*\\})|(null))([\"'])?$"
 for line in lines:
     if len(line) > 0 and len(line.lstrip()) > 0:
         if line.lstrip()[0] != "#":  # Ignore commented lines
-            matchObj = re.search(validationRegex, line)
+            matchObj = re.search(VALIDATION_REGEX, line)
             if not matchObj:
                 linesWithoutCaptures.append(line)
 if len(linesWithoutCaptures) == 0:
@@ -21,7 +21,7 @@ else:
         "ALL LINES IN",
         sys.argv[1],
         "MUST CONTAIN PURE ASSIGNMENTS OR NULL (match the regex",
-        validationRegex,
+        VALIDATION_REGEX,
         ").",
     )
     print("Tip: Move all concatenations etc. to repo.config")

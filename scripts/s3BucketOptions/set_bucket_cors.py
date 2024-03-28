@@ -18,7 +18,7 @@ def main(
     destinationendpointurl: str,
 ):
     #
-    corsConfigPermissive = [
+    cors_config_permissive = [
         {
             "AllowedHeaders": ["*"],
             "AllowedMethods": ["GET", "PUT", "HEAD", "DELETE"],
@@ -27,7 +27,7 @@ def main(
         }
     ]
     # Define the configuration rules
-    cors_configuration = {"CORSRules": corsConfigPermissive}
+    cors_configuration = {"CORSRules": cors_config_permissive}
     # GET the CORS configuration
     s3 = boto3.client(
         "s3",

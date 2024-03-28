@@ -19,7 +19,7 @@ def main(
     noncurrentversionexpirationdays: int,
 ):
     #
-    bucketLifecycleConfig = {
+    bucket_lifecycle_config = {
         "ID": "DeleteOldVersionsAfter" + str(noncurrentversionexpirationdays) + "Days",
         "Status": "Enabled",
         "Prefix": "",
@@ -51,7 +51,7 @@ def main(
             return None
     s3.put_bucket_lifecycle(
         Bucket=destinationbucketname,
-        LifecycleConfiguration={"Rules": [bucketLifecycleConfig]},
+        LifecycleConfiguration={"Rules": [bucket_lifecycle_config]},
     )
     try:
         response = response = s3.get_bucket_lifecycle(Bucket=destinationbucketname)
