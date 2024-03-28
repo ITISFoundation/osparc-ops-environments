@@ -11,9 +11,9 @@ def generate_password(length=12):
 
 
 if len(sys.argv) < 2:
-    pwd_len = 30
+    PWD_LEN = 30
 else:
-    pwd_len = int(sys.argv[1])
+    PWD_LEN = int(sys.argv[1])
 
-new_password = generate_password(pwd_len)
-print(new_password)
+NEW_PWD = generate_password(PWD_LEN)
+print(NEW_PWD)

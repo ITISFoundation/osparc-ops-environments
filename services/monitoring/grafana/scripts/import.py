@@ -1,3 +1,4 @@
+# pylint: skip-file
 import glob
 import json
 import os
@@ -177,7 +178,7 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add datasources *******************")
     if overwrite:
         # Get all datasources
-        print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
+        # print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
         r = session.get(url + "datasources", headers=hed, verify=False)
         if r.status_code > 300:
             print("Received non-200 status code upon import: ", str(r.status_code))
