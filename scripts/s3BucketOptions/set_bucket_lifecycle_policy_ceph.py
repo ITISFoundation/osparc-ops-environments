@@ -20,7 +20,7 @@ def main(
     noncurrentversiontransitiondays: int,
 ):
     #
-    bucketLifecycleConfig = [
+    bucket_lifecycle_config = [
         {
             "ID": "DeleteOldVersionsAfter"
             + str(noncurrentversionexpirationdays)
@@ -67,7 +67,7 @@ def main(
             return None
     s3.put_bucket_lifecycle(
         Bucket=destinationbucketname,
-        LifecycleConfiguration={"Rules": bucketLifecycleConfig},
+        LifecycleConfiguration={"Rules": bucket_lifecycle_config},
     )
     try:
         response = response = s3.get_bucket_lifecycle(Bucket=destinationbucketname)
@@ -75,13 +75,13 @@ def main(
         print(response["Rules"])
         #
         print("#####")
+        return None
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchLifecycleConfiguration":
             return []
-        else:
-            # AllAccessDisabled error == bucket not found
-            print(e)
-            return None
+
+        print(e)
+        return None
 
 
 if __name__ == "__main__":

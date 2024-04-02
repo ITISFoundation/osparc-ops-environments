@@ -131,8 +131,10 @@ docs/_build
 /services/monitoring/smokeping_prober_config.yaml
 
 
-# Simcore: Contains location of repo.config file on the machine
+# Simcore: Contains location of repo.config file on the machine and of the whole config directory
 .config.location
+.config.dir
+.shared_config.dir
 
 # Simcore: Files from osparc-simcore
 yq

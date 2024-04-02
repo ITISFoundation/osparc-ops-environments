@@ -40,4 +40,4 @@ services:
 
 configs:
   traefik_dynamic_config.yml:
-    file: ./config/master_dyn_cfg.yml
+    file: ./traefik_dynamic_config.yml

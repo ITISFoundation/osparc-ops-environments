@@ -37,6 +37,9 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     if [ "${TARGETNAME}" == "redis" ]; then
         continue
     fi
+    if [ "${TARGETNAME}" == "static-webserver" ]; then
+        continue
+    fi
     if [ "${TARGETNAME}" == "traefik" ]; then
         continue
     fi
@@ -50,7 +53,7 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     echo TARGET_BINARY="${TARGET_BINARY}"
     echo "Assuming TARGET_BINARY in ${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
     # Pull image from registry, just in case
-    docker compose --file ${COMPOSE_FILE} pull "${service}"
+    docker compose --file ${COMPOSE_FILE} pull --policy always "${service}"
     #
     export TARGET_EXECUTABLE="${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
     if docker compose --file ${COMPOSE_FILE} run --entrypoint "${TARGET_EXECUTABLE}" --rm "${service}" settings --as-json >/dev/null 2>&1; then

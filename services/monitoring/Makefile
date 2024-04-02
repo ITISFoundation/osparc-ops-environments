@@ -51,7 +51,7 @@ up-public: .init .env  config.monitoring config.prometheus ${TEMP_COMPOSE}-publi
 	$(MAKE) grafana-import
 
 .PHONY: up-aws
-up-aws: .init .env config.monitoring config.prometheus.simcore ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
+up-aws: .init .env config.monitoring config.prometheus.simcore.aws ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) grafana-import
 
@@ -108,7 +108,7 @@ grafana-export: ## Export grafana dashboards and datasources
 	python3 export.py;
 
 .PHONY: grafana-import
-grafana-import: ## Import grafana dashboards and datasources
+grafana-import: grafana/assets # Import grafana dashboards and datasources
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\
@@ -138,6 +138,15 @@ config.prometheus.simcore: ${REPO_CONFIG_LOCATION} .venv
 	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
+.PHONY: config.prometheus.simcore.aws
+config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} .venv
+	@set -o allexport; \
+	source $<; \
+	set +o allexport; \
+	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' | $(_yq) '. *+ load("prometheus/prometheus-aws.yml")' > prometheus/prometheus.yml; \
+	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
+	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
+
 .PHONY: config.prometheus.ceph.simcore
 config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
 	@set -o allexport; \
@@ -162,3 +171,25 @@ pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CON
 
 smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
 	$(call jinja, $<, $@);
+
+.PHONY: grafana/assets
+grafana/assets: .config.dir .shared_config.dir
+	$(eval CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.config.dir))
+	$(eval SHARED_CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.shared_config.dir))
+
+	$(eval GRAFANA_ASSETS_DIR=$(CONFIG_DIR)/assets/grafana)
+	@if [ ! -d $(GRAFANA_ASSETS_DIR) ]; then \
+		echo "Error: folder does not exist $(GRAFANA_ASSETS_DIR)" >&2; \
+		exit 1; \
+	fi
+
+	$(eval GRAFANA_COMMON_ASSETS_DIR=$(SHARED_CONFIG_DIR)/assets/grafana)
+	@if [ ! -d $(GRAFANA_COMMON_ASSETS_DIR) ]; then \
+		echo "Error: folder does not exist $(GRAFANA_COMMON_ASSETS_DIR)" >&2; \
+		exit 1; \
+	fi
+
+	@rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true
+	@mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets
+	@cp -r $(GRAFANA_ASSETS_DIR)/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets
+	@cp -r $(GRAFANA_COMMON_ASSETS_DIR) $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared
