@@ -55,18 +55,12 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     # Pull image from registry, just in case
     docker compose --file ${COMPOSE_FILE} pull --policy always "${service}"
     #
-    if docker compose --file ${COMPOSE_FILE} run --rm "${service}" test -f "${SETTINGS_BINARY_PATH}"/"${TARGET_BINARY}" >/dev/null 2>&1; then
-        echo "FOUND_EXECUTABLE=${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
-        export FOUND_EXECUTABLE="${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
-        if docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json >/dev/null 2>&1; then
-            echo "SUCCESS: Validation of environment variables for ${service}"
-        else
-            echo "ERROR: Validation of environment variables for ${service} failed"
-            docker compose --file ${COMPOSE_FILE} run --entrypoint "${FOUND_EXECUTABLE}" --rm "${service}" settings --as-json
-            exit_code=1
-        fi
+    export TARGET_EXECUTABLE="${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
+    if docker compose --file ${COMPOSE_FILE} run --entrypoint "${TARGET_EXECUTABLE}" --rm "${service}" settings --as-json >/dev/null 2>&1; then
+        echo "SUCCESS: Validation of environment variables for ${service}"
     else
-        echo "ERROR: Settings executable not found for ${service}"
+        echo "ERROR: Validation of environment variables for ${service} failed"
+        docker compose --file ${COMPOSE_FILE} run --entrypoint "${TARGET_EXECUTABLE}" --rm "${service}" settings --as-json
         exit_code=1
     fi
 
