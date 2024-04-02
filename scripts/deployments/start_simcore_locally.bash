@@ -101,7 +101,7 @@ else
 
     $_yq "del(.services.traefik)" "$osparcsimcoredeveldir"/services/docker-compose.local.yml > "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml
     #
-    "$repo_basedir"/scripts/docker-compose-config.bash \
+    "$repo_basedir"/scripts/docker-stack-config.bash \
             -e "$repo_basedir"/services/simcore/.env \
             "$osparcsimcoredeveldir"/services/docker-compose.yml \
             "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml \

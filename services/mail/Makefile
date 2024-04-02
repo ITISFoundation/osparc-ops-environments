@@ -33,15 +33,15 @@ up-local: .env configure ${TEMP_COMPOSE}-local
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.aws.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash $< docker-compose.aws.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash $< docker-compose.local.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash $< docker-compose.local.yml > $@
 
 
 .PHONY : configure
