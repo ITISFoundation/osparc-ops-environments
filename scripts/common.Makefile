@@ -257,6 +257,25 @@ clean-default: .check_clean ## Cleans all outputs
 		exit 1; \
 	fi
 
+.PHONY: .shared_config.dir
+.shared_config.dir:
+	$(eval SHARED_CONFIG_DIR_LOCATION=$(REPO_BASE_DIR)/.shared_config.dir)
+
+	@if [ ! -f  $(SHARED_CONFIG_DIR_LOCATION) ]; then \
+		echo "Error: file does not exist $(SHARED_CONFIG_DIR_LOCATION)" >&2; \
+		exit 1; \
+	fi
+	@LINE_COUNT=$$(wc -l < $(SHARED_CONFIG_DIR_LOCATION)); \
+	if [ $$LINE_COUNT -ne 1 ]; then \
+		echo "Error: $(SHARED_CONFIG_DIR_LOCATION) must contain exactly one '\n'" >&2; \
+		exit 1; \
+	fi
+	$(eval CONFIG_DIR=$(shell cat $(SHARED_CONFIG_DIR_LOCATION)))
+	@if [ ! -d $(CONFIG_DIR) ]; then \
+		echo "Error: directory does not exist: $(CONFIG_DIR)" >&2; \
+		exit 1; \
+	fi
+
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default
 	@ true
