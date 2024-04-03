@@ -166,12 +166,8 @@ def main(foldername: str = "", overwrite: bool = True):
     hed = {"Content-Type": "application/json"}
 
     if foldername == "":
-        directoriesDatasources = glob.glob(
-            "./../provisioning/" + env.str("MACHINE_FQDN") + "/datasources/*"
-        )
-        directoriesDatasources += glob.glob(
-            "./../provisioning/allDeployments" + "/datasources/*"
-        )
+        directoriesDatasources = glob.glob("./../assets/datasources/*")
+        directoriesDatasources += glob.glob("./../assets/shared" + "/datasources/*")
     else:
         directoriesDatasources = glob.glob(foldername + "/datasources/*")
     #
@@ -231,12 +227,10 @@ def main(foldername: str = "", overwrite: bool = True):
     # Second, we import the folders structure
     directoriesData = []
     if foldername == "":
-        directoriesDashboards = glob.glob(
-            "./../provisioning/" + env.str("MACHINE_FQDN") + "/dashboards/*"
-        )
+        directoriesDashboards = glob.glob("./../assets/dashboards/*")
         directoriesDashboards = [
             *directoriesDashboards,
-            *list(glob.glob("./../provisioning/allDeployments" + "/dashboards/*")),
+            *list(glob.glob("./../assets/shared" + "/dashboards/*")),
         ]
     else:
         directoriesDashboards = glob.glob(foldername + "/dashboards/*")
@@ -290,9 +284,7 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add dashboards *******************")
     #
     #
-    configFilePath = Path(
-        "./../provisioning/" + env.str("MACHINE_FQDN") + "/datasources2dashboards.yaml"
-    )
+    configFilePath = Path("./../assets/datasources2dashboards.yaml")
 
     # Finally we import the dashboards
     for directory in directoriesDashboards:
@@ -448,10 +440,8 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add alerts *******************")
     # Finally we import the dashboards
     if foldername == "":
-        directoriesAlerts = glob.glob(
-            "./../provisioning/" + env.str("MACHINE_FQDN") + "/alerts/*"
-        )
-        directoriesAlerts += glob.glob("./../provisioning/allDeployments" + "/alerts/*")
+        directoriesAlerts = glob.glob("./../assets/alerts/*")
+        directoriesAlerts += glob.glob("./../assets/shared" + "/alerts/*")
     else:
         directoriesAlerts = glob.glob(foldername + "/alerts/*")
     for file in directoriesAlerts:
