@@ -117,7 +117,7 @@ repos:
         exclude: ^(services/maintenance-page/Makefile)$
         always_run: true
         language: script
-        files: '^(.*\/Makefile.*)|(.*\.deploy_everything.bash)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
+        files: '^(.*\/Makefile.*)|(.*\.deploy_everything_locally.bash)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
       - id: stack-yml-generated-is-valid
         name: stack-yml-generated-is-valid
         description: stack-yml-generated-is-valid
