@@ -50,6 +50,11 @@ repos:
       - id: isort
         args: ["--profile", "black"]
         name: sort imports
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        name: black format code
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -74,13 +79,16 @@ repos:
     hooks:
       - id: shellcheck
         name: Shell scripts conform to shellcheck
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
-    hooks:
-      - id: black
-        name: black format code
   - repo: local
     hooks:
+      - id: run-pylint
+        name: Run pylint
+        description: Run pylint
+        entry: 'scripts/pre-commit-hooks/runPylint/launch.bash'
+        always_run: true
+        language: script
+        files: '^(.*\.py)$'
+        require_serial: true
       - id: validate-template-dotenv
         name: Validate template.env
         description: Validate template.env

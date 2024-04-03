@@ -2,6 +2,7 @@ import csv
 import json
 import logging
 import os
+import sys
 from collections import defaultdict
 
 import tqdm
@@ -34,10 +35,10 @@ if __name__ == "__main__":
     service_ids = [
         x for x in docker.service.ls("--format", "{{.ID}}").split("\n") if x != ""
     ]
-    logger.debug(f"service_ids: {service_ids}")
+    logger.debug("service_ids: %s", service_ids)
     if service_ids == [""]:
         logger.warning("No docker services found. Exiting.")
-        exit(0)
+        sys.exit(0)
     node_max_resources = defaultdict(lambda: {"cpu": 0, "memory_gib": 0})
 
     docker_node_names = [
@@ -66,7 +67,7 @@ if __name__ == "__main__":
                 node_max_resources[node_name][kind] = int(value)
 
     logger.info(
-        f"Found the following node specs\n{json.dumps(node_max_resources, indent=2)}"
+        "Found the following node specs\n %s", json.dumps(node_max_resources, indent=2)
     )
 
     node_used_resources_limits = defaultdict(lambda: {"cpu": 0, "memory_gib": 0})
@@ -84,7 +85,7 @@ if __name__ == "__main__":
             name + "__Reservations" for name in resource_names
         ]
         csv_header = csv_header_static + csv_header_dynamic
-        logger.debug(f"csv_header {csv_header}")
+        logger.debug("csv_header %s", csv_header)
         writer.writerow(csv_header)
         for service_id in tqdm.tqdm(service_ids):
             service_name = [
@@ -94,7 +95,7 @@ if __name__ == "__main__":
                 ).split("\n")
                 if x != ""
             ][0]
-            logger.debug(f"service_name {service_name}")
+            logger.debug("service_name %s", service_name)
             service_resources = [
                 x
                 for x in docker.service.inspect(
@@ -102,7 +103,7 @@ if __name__ == "__main__":
                 ).split("\n")
                 if x != ""
             ][0]
-            logger.debug(f"service_resources {service_resources}")
+            logger.debug("service_resources %s", service_resources)
             current_state = [
                 x
                 for x in docker.service.ps(
@@ -110,10 +111,11 @@ if __name__ == "__main__":
                 ).split("\n")
                 if x != ""
             ]
-            logger.debug(f"current_state {current_state}")
+            logger.debug("current_state %s", current_state)
             if not current_state or "Running" not in current_state[0]:
                 logger.warning(
-                    f"Service {service_name} has current-state != `running`. Ignoring it."
+                    "Service %s has current-state != `running`. Ignoring it.",
+                    service_name,
                 )
                 continue
             node_ids = [
@@ -133,11 +135,15 @@ if __name__ == "__main__":
 
             if "Limits" not in resources_dict and "Reservations" in resources_dict:
                 logger.warning(
-                    f"Reservations set but not limits. Please audit this docker service: {service_id} / {service_name}"
+                    "Reservations set but not limits. Please audit this docker service: %s, %s",
+                    service_id,
+                    service_name,
                 )
             if "Limits" not in resources_dict and "Reservations" not in resources_dict:
                 logger.warning(
-                    f"No limits set. Please audit this docker service: {service_id} / {service_name}"
+                    "No limits set. Please audit this docker service: %s, %s",
+                    service_id,
+                    service_name,
                 )
             if "Limits" in resources_dict:
                 if "Reservations" in resources_dict:
@@ -145,13 +151,17 @@ if __name__ == "__main__":
                         "Reservations"
                     ].get("NanoCPUs", 0):
                         logger.warning(
-                            f"CPU Limits != Reservations. Please audit this docker service: {service_id} / {service_name}"
+                            "CPU Limits != Reservations. Please audit this docker service %s, %s",
+                            service_id,
+                            service_name,
                         )
                     if resources_dict["Limits"].get("MemoryBytes", 0) != resources_dict[
                         "Reservations"
                     ].get("MemoryBytes", 0):
                         logger.warning(
-                            f"Memory Limits != Reservations. Please audit this docker service: {service_id} / {service_name}"
+                            "Memory Limits != Reservations. Please audit this docker service: %s, %s",
+                            service_id,
+                            service_name,
                         )
                 else:
                     resources_dict["Reservations"] = {"NanoCPUs": 0, "MemoryBytes": 0}
@@ -168,13 +178,13 @@ if __name__ == "__main__":
                             kind = resource["DiscreteResourceSpec"]["Kind"]
                             resources_dict[key][kind] = value
                             logger.debug(
-                                f"GenericResources - kind {kind} value {value}"
+                                "GenericResources - kind %s, value %s", kind, value
                             )
                         resources_dict[key].pop("GenericResources", None)
                     resources_dict[key].pop("NanoCPUs", None)
                     resources_dict[key].pop("MemoryBytes", None)
                     for node in node_ids:
-                        logger.debug(f"node {node}")
+                        logger.debug("node %s", node)
                         static_data_csv = [node, service_name]
                         dynamic_data_csv = []
                         for i in range(len(csv_header_dynamic)):
@@ -215,7 +225,7 @@ if __name__ == "__main__":
                                     resource_name, 0
                                 )
                         data_csv = static_data_csv + dynamic_data_csv
-                        logger.debug(f"data_csv {data_csv}")
+                        logger.debug("data_csv %s", data_csv)
                         writer.writerow(data_csv)
 
     results_dict = {"Limits": {}, "Reservations": {}}

@@ -19,8 +19,6 @@ json_schema_path = Path("osparc-simcore/api/specs/common/schemas/node-meta-v0.0.
 
 
 servicesList = {
-    "sleeper": "2.1.1",
-    "sleeper": "2.1.3",
     "sleeper": "2.1.4",
     "jupyter-base-notebook": "2.14.0",
     "jupyter-r-notebook": "2.14.0",
@@ -39,7 +37,9 @@ cmd_string = (
 logging.info("Running cmd command for docker login...")
 os.system(cmd_string)
 
-node_schema = json.load(json_schema_path.open())
+with json_schema_path.open() as file:
+    node_schema = json.load(file)
+
 for key in servicesList.keys():
     logging.info("Pulling and pushing service: %s", key)
     _pull_push_service(

@@ -18,6 +18,9 @@ scrape_configs:
             values: ["computational"]
           - name: "tag:role"
             values: ["manager"]
+    basic_auth:
+      username: ${PRIMARY_EC2_INSTANCES_PROMETHEUS_USERNAME}
+      password: ${SERVICES_PASSWORD}
 
     relabel_configs:
       - source_labels: [__meta_ec2_public_dns_name] # or use __meta_ec2_instance_id, __meta_ec2_private_ip depending on your network setup

@@ -5,7 +5,6 @@ Notes:
 """
 
 import os
-from distutils.util import strtobool
 from pathlib import Path
 from string import Template
 
@@ -14,6 +13,25 @@ from dotenv import load_dotenv
 SCRIPT_DIR = Path(__file__).resolve().parent
 TEMPLATE_PATH = SCRIPT_DIR / "filestash_config.json.template"
 CONFIG_JSON = Path(__file__).resolve().parent / "filestash_config.json"
+
+
+def strtobool(val):
+    """
+    Convert a string representation of truth to True or False.
+
+    True values are 'y', 'yes', 't', 'true', 'on', and '1';
+    False values are 'n', 'no', 'f', 'false', 'off', and '0'.
+    Raises ValueError if 'val' is anything else.
+    """
+    val = val.lower()
+
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return True
+
+    if val in ("n", "no", "f", "false", "off", "0"):
+        return False
+
+    raise ValueError(f"invalid truth value {val}")
 
 
 def patch_env_vars() -> None:

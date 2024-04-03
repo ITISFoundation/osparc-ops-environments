@@ -18,7 +18,7 @@ def main(
     destinationendpointurl: str,
 ):
     #
-    corsConfigPermissive = [
+    cors_config_permissive = [
         {
             "AllowedHeaders": ["*"],
             "AllowedMethods": ["GET", "PUT", "HEAD", "DELETE"],
@@ -27,7 +27,7 @@ def main(
         }
     ]
     # Define the configuration rules
-    cors_configuration = {"CORSRules": corsConfigPermissive}
+    cors_configuration = {"CORSRules": cors_config_permissive}
     # GET the CORS configuration
     s3 = boto3.client(
         "s3",
@@ -56,13 +56,13 @@ def main(
         print(response["CORSRules"])
         #
         print("#####")
+        return None
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchCORSConfiguration":
             return []
-        else:
-            # AllAccessDisabled error == bucket not found
-            print(e)
-            return None
+
+        print(e)
+        return None
 
 
 if __name__ == "__main__":
