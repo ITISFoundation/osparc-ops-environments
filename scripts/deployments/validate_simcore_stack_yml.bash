@@ -17,6 +17,32 @@ chmod +x yq
 _yq=$(realpath ./yq)
 export _yq
 #
+# Check if the Docker Compose file has a top-level secrets section
+if $_yq e ".secrets" ${COMPOSE_FILE} > /dev/null; then
+    # Generate a random private key file
+    echo "Generating a random private key file on the host"
+    docker run -it --rm -v /tmp:/tmp itisfoundation/ci-provisioned-ubuntu:latest openssl genpkey -algorithm RSA -out /tmp/random_private_key.pem
+    # Iterate over the secrets
+    for secret in $($_yq e ".secrets | keys | .[]" ${COMPOSE_FILE}); do
+        # Get the file path
+        if $_yq e ".secrets.${secret} | has(\"file\")" ${COMPOSE_FILE} > /dev/null; then
+            file_path=$($_yq e ".secrets.${secret}.file" ${COMPOSE_FILE})
+
+            # Check if it's a .pem file and replace the path
+            if [[ $file_path == *.pem ]] || [[ $file_path == *.crt ]];  then
+                $_yq e -i ".secrets.${secret}.file = \"/tmp/random_private_key.pem\"" ${COMPOSE_FILE}
+                echo "Replaced secret \"$secret\" at $file_path with a random private key."
+            else
+                echo "Error: Found a secret \"$secret\" that is not a .pem file: $file_path"
+                exit 1
+            fi
+        fi
+    done
+else
+    echo "Error: No top-level secrets section found in the Docker Compose file"
+    exit 1
+fi
+#
 # start
 #
 for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
@@ -50,7 +76,6 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
         continue
     fi
     export TARGET_BINARY="simcore-service"
-    echo TARGET_BINARY="${TARGET_BINARY}"
     echo "Assuming TARGET_BINARY in ${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
     # Pull image from registry, just in case
     docker compose --file ${COMPOSE_FILE} pull --policy always "${service}"
