@@ -431,7 +431,9 @@ services:
         limits:
           cpus: "1"
           memory: "1G"
-
+      placement:
+        constraints:
+          - node.labels.ops != true
   dask-sidecar:
     networks:
       - monitored
