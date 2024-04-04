@@ -1,3 +1,4 @@
+# pylint: skip-file
 import glob
 import json
 import os
@@ -165,25 +166,26 @@ def main(foldername: str = "", overwrite: bool = True):
     hed = {"Content-Type": "application/json"}
 
     if foldername == "":
-        directoriesDatasources = glob.glob(
-            "./../provisioning/" + env.str("MACHINE_FQDN") + "/datasources/*"
-        )
-        directoriesDatasources += glob.glob(
-            "./../provisioning/allDeployments" + "/datasources/*"
-        )
+        directoriesDatasources = glob.glob("./../assets/datasources/*")
+        directoriesDatasources += glob.glob("./../assets/shared" + "/datasources/*")
     else:
         directoriesDatasources = glob.glob(foldername + "/datasources/*")
     #
     print("**************** Add datasources *******************")
     if overwrite:
         # Get all datasources
+        # print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
         r = session.get(url + "datasources", headers=hed, verify=False)
+        if r.status_code > 300:
+            print("Received non-200 status code upon import: ", str(r.status_code))
+            print("ABORTING!")
+            print(r.json())
+            exit(1)
         for i in r.json():
-            print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
+            print("Response: ", r.status_code)
             r = session.delete(
                 url + "datasources/uid/" + str(i["uid"]), headers=hed, verify=False
             )
-            print("Response: ", r.status_code)
     listOfDatasources = []
     for file in directoriesDatasources:
         with open(file) as jsonFile:
@@ -225,12 +227,10 @@ def main(foldername: str = "", overwrite: bool = True):
     # Second, we import the folders structure
     directoriesData = []
     if foldername == "":
-        directoriesDashboards = glob.glob(
-            "./../provisioning/" + env.str("MACHINE_FQDN") + "/dashboards/*"
-        )
+        directoriesDashboards = glob.glob("./../assets/dashboards/*")
         directoriesDashboards = [
             *directoriesDashboards,
-            *list(glob.glob("./../provisioning/allDeployments" + "/dashboards/*")),
+            *list(glob.glob("./../assets/shared" + "/dashboards/*")),
         ]
     else:
         directoriesDashboards = glob.glob(foldername + "/dashboards/*")
@@ -284,9 +284,7 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add dashboards *******************")
     #
     #
-    configFilePath = Path(
-        "./../provisioning/" + env.str("MACHINE_FQDN") + "/datasources2dashboards.yaml"
-    )
+    configFilePath = Path("./../assets/datasources2dashboards.yaml")
 
     # Finally we import the dashboards
     for directory in directoriesDashboards:
@@ -442,10 +440,8 @@ def main(foldername: str = "", overwrite: bool = True):
     print("**************** Add alerts *******************")
     # Finally we import the dashboards
     if foldername == "":
-        directoriesAlerts = glob.glob(
-            "./../provisioning/" + env.str("MACHINE_FQDN") + "/alerts/*"
-        )
-        directoriesAlerts += glob.glob("./../provisioning/allDeployments" + "/alerts/*")
+        directoriesAlerts = glob.glob("./../assets/alerts/*")
+        directoriesAlerts += glob.glob("./../assets/shared" + "/alerts/*")
     else:
         directoriesAlerts = glob.glob(foldername + "/alerts/*")
     for file in directoriesAlerts:

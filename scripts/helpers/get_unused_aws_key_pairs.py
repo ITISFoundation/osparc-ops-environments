@@ -2,6 +2,7 @@ import sys
 from pprint import pprint
 
 import boto3
+from botocore.exceptions import BotoCoreError
 
 # Create a session with the specified profile or use the default profile
 profile_name = sys.argv[1] if len(sys.argv) > 1 else None
@@ -33,7 +34,7 @@ for region in ec2.meta.client.describe_regions()["Regions"]:
         for key_pair in key_pairs:
             if key_pair.name not in used_keys:
                 unused_keys[key_pair.name] = region_name
-    except Exception as e:
+    except BotoCoreError as e:
         print(f"No access to region {region_name}: {e}")
 
 # Print the results
