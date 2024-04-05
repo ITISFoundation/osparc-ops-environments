@@ -21,7 +21,7 @@ export _yq
 if $_yq e ".secrets" ${COMPOSE_FILE} > /dev/null; then
     # Generate a random private key file
     echo "Generating a random private key file on the host"
-    docker run -it --rm -v /tmp:/tmp itisfoundation/ci-provisioned-ubuntu:latest openssl genpkey -algorithm RSA -out /tmp/random_private_key.pem
+    docker run --rm -v /tmp:/tmp itisfoundation/ci-provisioned-ubuntu:latest openssl genpkey -algorithm RSA -out /tmp/random_private_key.pem
     # Iterate over the secrets
     for secret in $($_yq e ".secrets | keys | .[]" ${COMPOSE_FILE}); do
         # Get the file path
