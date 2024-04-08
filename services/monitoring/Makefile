@@ -108,7 +108,7 @@ grafana-export: ## Export grafana dashboards and datasources
 	python3 export.py;
 
 .PHONY: grafana-import
-grafana-import: grafana/assets # Import grafana dashboards and datasources
+grafana-import: grafana/assets ## Import grafana dashboards and datasources
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\
