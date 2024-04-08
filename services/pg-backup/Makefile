@@ -31,7 +31,7 @@ up-public: up
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: .venv .env
 	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env docker-compose.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env docker-compose.yml > $@
 	rm docker-compose.yml >/dev/null 2>&1;
 
 .venv:
