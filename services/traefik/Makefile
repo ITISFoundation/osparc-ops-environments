@@ -51,15 +51,14 @@ up-master: .init .env ${TEMP_COMPOSE}-master ## Deploys the stack on dalco clust
 
 # Helpers -------------------------------------------------
 
-traefik_dynamic_config.yml: .config.dir
-	$(eval CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.config.dir))
-	$(eval TRAEFIK_DYN_CFG=$(CONFIG_DIR)/traefik_dynamic_config.yml)
+traefik_dynamic_config.yml:
+	$(eval CONFIG_DIR=$(shell dirname ${REPO_CONFIG_LOCATION}))
+	$(eval TRAEFIK_DYN_CFG=$(CONFIG_DIR)/$@)
 	@if [ ! -f $(TRAEFIK_DYN_CFG) ]; then \
 		echo "Error: file does not exist $(TRAEFIK_DYN_CFG)" >&2; \
 		exit 1; \
 	fi
-
-	@cp $(TRAEFIK_DYN_CFG) $(REPO_BASE_DIR)/services/traefik/traefik_dynamic_config.yml
+	@cp $(TRAEFIK_DYN_CFG) $@
 
 
 .PHONY: ${TEMP_COMPOSE}-local
