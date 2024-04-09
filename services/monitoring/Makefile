@@ -173,23 +173,16 @@ smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCA
 	$(call jinja, $<, $@);
 
 .PHONY: grafana/assets
-grafana/assets: .config.dir .shared_config.dir
-	$(eval CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.config.dir))
-	$(eval SHARED_CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.shared_config.dir))
-
-	$(eval GRAFANA_ASSETS_DIR=$(CONFIG_DIR)/assets/grafana)
-	@if [ ! -d $(GRAFANA_ASSETS_DIR) ]; then \
-		echo "Error: folder does not exist $(GRAFANA_ASSETS_DIR)" >&2; \
+grafana/assets: ${REPO_CONFIG_LOCATION}
+	@if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana" ]; then \
+		echo "Error: folder does not exist $$GRAFANA_ASSETS_DIR" >&2; \
 		exit 1; \
-	fi
-
-	$(eval GRAFANA_COMMON_ASSETS_DIR=$(SHARED_CONFIG_DIR)/assets/grafana)
-	@if [ ! -d $(GRAFANA_COMMON_ASSETS_DIR) ]; then \
-		echo "Error: folder does not exist $(GRAFANA_COMMON_ASSETS_DIR)" >&2; \
+	fi; \
+	if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana" ]; then \
+		echo "Error: folder does not exist $$GRAFANA_COMMON_ASSETS_DIR" >&2; \
 		exit 1; \
-	fi
-
-	@rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true
-	@mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets
-	@cp -r $(GRAFANA_ASSETS_DIR)/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets
-	@cp -r $(GRAFANA_COMMON_ASSETS_DIR) $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared
+	fi; \
+	rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true; \
+	mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared; \
