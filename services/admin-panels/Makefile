@@ -30,7 +30,7 @@ endef
 .PHONY: docker-compose.yml
 docker-compose.yml: docker-compose.yml.j2 .venv .data.json
 	$(call jinja, $<, .data.json, tmp.yml)
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash tmp.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
 	@rm tmp.yml
 
 .PHONY: up
@@ -67,29 +67,29 @@ up-public: up-dalco
 
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $<  docker-compose.letsencrypt.http.yml  > $@
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $<  docker-compose.letsencrypt.http.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
+${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+${TEMP_COMPOSE}-dalco: docker-compose.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+${TEMP_COMPOSE}-master: docker-compose.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $<  > $@
+${TEMP_COMPOSE}: docker-compose.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $<  > $@
 
 
 .PHONY: jupyter_server_config.py

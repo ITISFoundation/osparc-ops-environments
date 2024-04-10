@@ -13,6 +13,7 @@ scrape_configs:
       'match[]': # The match[] parameter is used to select the metrics to retrieve. Logical OR is used between match[] parameters.
         - '{__name__=~"s4l_.*"}' # Regex to select all metrics that start with 's4l_'
         - '{__name__=~"osparc_.*"}' # Regex to select all metrics that start with 'osparc_'
+        - '{__name__=~"simcore_.*"}' # Regex to select all metrics that start with 'simcore_'
 
     static_configs:
       - targets: ['prometheuscatchall:9090'] # The targets section is where you specify the host and port of the Prometheus instances to scrape.

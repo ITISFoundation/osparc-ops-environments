@@ -101,7 +101,7 @@ else
 
     $_yq "del(.services.traefik)" "$osparcsimcoredeveldir"/services/docker-compose.local.yml > "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml
     #
-    "$repo_basedir"/scripts/docker-compose-config.bash \
+    "$repo_basedir"/scripts/docker-stack-config.bash \
             -e "$repo_basedir"/services/simcore/.env \
             "$osparcsimcoredeveldir"/services/docker-compose.yml \
             "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml \
@@ -117,9 +117,6 @@ else
 fi
 # FI
 
-############
-cp .env-devel "$repo_basedir"
-############
 popd
 ############
 #
@@ -129,7 +126,7 @@ cd "$repo_basedir"
 rm -fr "$repo_basedir"/.temp
 #
 log_info "Creating stack.yml file..."
-scripts/deployments/startup_script.bash
+scripts/deployments/compose_stack_yml.bash
 log_info "Adding prefix $PREFIX_STACK_NAME to all services..."
 ./yq "with(.services; with_entries(.key |= \"${PREFIX_STACK_NAME}_\" + .))" stack.yml > stack_with_prefix.yml
 log_info "Deleting the $SIMCORE_STACK_NAME docker stack if present"

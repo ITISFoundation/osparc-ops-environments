@@ -51,7 +51,6 @@ source "$repo_basedir"/scripts/logger.bash
 #
 # This script assumes that the repo.config file is present at the top level of the ops-repo
 # This script assumes that the docker-compose.yml from the osparc-simcore repo is present at the repo_basedir.
-# This script assumes that the .env.devel from the osparc-simcore repo is present at the repo_basedir
 #
 # Loads configurations variables
 # See https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
@@ -80,10 +79,9 @@ python envsubst_escape_dollar_sign.py .env.platform .env.nosub
 envsubst < .env.nosub > .env
 cp .env ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
-# The command includes a Hacky "sed" workaround introduced by DK2022 addressing https://github.com/docker/compose/issues/7771
 
 unset EC2_INSTANCES_ALLOWED_TYPES
-"$repo_basedir"/scripts/docker-compose-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
+"$repo_basedir"/scripts/docker-stack-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
 #
 #
 ### Cleanup

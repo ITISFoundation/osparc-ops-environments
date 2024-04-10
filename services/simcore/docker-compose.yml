@@ -4,7 +4,6 @@ services:
     networks:
       - monitored
     deploy:
-      labels: []
       replicas: 0
       update_config:
         parallelism: 2
@@ -857,11 +856,4 @@ networks:
     attachable: true
   interactive_services_subnet:
     name: ${SWARM_STACK_NAME}_interactive_services_subnet
-    external: true
-# self-signed only
-secrets:
-  # These two are needed for local=deployments
-  rootca.crt:
-    external: true
-  storageca.crt:
     external: true

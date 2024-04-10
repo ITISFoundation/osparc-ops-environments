@@ -61,28 +61,28 @@ up-master: .init .env config.monitoring  config.prometheus.ceph.simcore ${TEMP_C
 	$(MAKE) grafana-import
 
 ${TEMP_COMPOSE}: docker-compose.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
 
 ${TEMP_COMPOSE}-aws:  docker-compose.yml docker-compose.aws.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
 	$(call jinja,$<,$@)
@@ -108,7 +108,7 @@ grafana-export: ## Export grafana dashboards and datasources
 	python3 export.py;
 
 .PHONY: grafana-import
-grafana-import: grafana/assets # Import grafana dashboards and datasources
+grafana-import: grafana/assets ## Import grafana dashboards and datasources
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\
@@ -173,23 +173,16 @@ smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCA
 	$(call jinja, $<, $@);
 
 .PHONY: grafana/assets
-grafana/assets: .config.dir .shared_config.dir
-	$(eval CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.config.dir))
-	$(eval SHARED_CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.shared_config.dir))
-
-	$(eval GRAFANA_ASSETS_DIR=$(CONFIG_DIR)/assets/grafana)
-	@if [ ! -d $(GRAFANA_ASSETS_DIR) ]; then \
-		echo "Error: folder does not exist $(GRAFANA_ASSETS_DIR)" >&2; \
+grafana/assets: ${REPO_CONFIG_LOCATION}
+	@if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana" ]; then \
+		echo "Error: folder does not exist $$GRAFANA_ASSETS_DIR" >&2; \
 		exit 1; \
-	fi
-
-	$(eval GRAFANA_COMMON_ASSETS_DIR=$(SHARED_CONFIG_DIR)/assets/grafana)
-	@if [ ! -d $(GRAFANA_COMMON_ASSETS_DIR) ]; then \
-		echo "Error: folder does not exist $(GRAFANA_COMMON_ASSETS_DIR)" >&2; \
+	fi; \
+	if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana" ]; then \
+		echo "Error: folder does not exist $$GRAFANA_COMMON_ASSETS_DIR" >&2; \
 		exit 1; \
-	fi
-
-	@rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true
-	@mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets
-	@cp -r $(GRAFANA_ASSETS_DIR)/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets
-	@cp -r $(GRAFANA_COMMON_ASSETS_DIR) $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared
+	fi; \
+	rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true; \
+	mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared; \
