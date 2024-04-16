@@ -34,18 +34,8 @@ def strtobool(val):
     raise ValueError(f"invalid truth value {val}")
 
 
-def patch_env_vars() -> None:
-    endpoint = os.environ["S3_ENDPOINT"]
-    if not endpoint.startswith("http"):
-        protocol = "https" if strtobool(os.environ["S3_SECURE"].lower()) else "http"
-        endpoint = f"{protocol}://{endpoint}"
-
-    os.environ["S3_ENDPOINT"] = endpoint
-
-
 def main() -> None:
     load_dotenv()
-    patch_env_vars()
 
     assert TEMPLATE_PATH.exists()
 
