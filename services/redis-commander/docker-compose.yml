@@ -38,6 +38,7 @@ services:
           memory: 64M
           cpus: "0.1"
 
+
 networks:
   public:
     external: true
