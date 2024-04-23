@@ -50,4 +50,4 @@ docker-compose.yml: .venv .env
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@

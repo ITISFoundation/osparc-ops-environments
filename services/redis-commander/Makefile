@@ -45,28 +45,28 @@ up-aws: .init .env ${TEMP_COMPOSE}-aws
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml  > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml  > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml  > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml  > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml  > $@

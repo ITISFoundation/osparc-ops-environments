@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import warnings
+from pathlib import Path
 
 import requests
 import typer
@@ -26,8 +27,9 @@ def main(foldername: str = ""):
     # We delete the previous files
     if foldername == "":
         directory = "./../provisioning/exported/" + env.str("MACHINE_FQDN")
-        if os.path.exists("./../provisioning/exported") == False:
-            os.mkdir("./../provisioning/exported")
+
+        export_dir = Path.cwd() / ".." / "provisioning/exported"
+        export_dir.mkdir(parents=True, exist_ok=True)
     else:
         directory = foldername
     if os.path.exists(directory):

@@ -55,14 +55,14 @@ endef
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yaml.j2	.venv .env
 	$(call jinja, $<, tmp.yaml)
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env tmp.yaml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env tmp.yaml > $@
 	@rm tmp.yaml
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yaml.j2 docker-compose.letsencrypt.http.yaml.j2 .venv .env
 	$(call jinja, $<, tmp.yaml)
 	$(call jinja, docker-compose.letsencrypt.http.yaml.j2, tmp-letsencrypt.http.yaml)
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env tmp.yaml tmp-letsencrypt.http.yaml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env tmp.yaml tmp-letsencrypt.http.yaml > $@
 	@rm tmp.yaml tmp-letsencrypt.http.yaml
 
 
@@ -70,7 +70,7 @@ ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yaml.j2 docker-compose.letsencr
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yaml.j2 docker-compose.letsencrypt.dns.yaml.j2 .venv .env
 	$(call jinja, $<, tmp.yaml)
 	$(call jinja, docker-compose.letsencrypt.dns.yaml.j2, tmp-letsencrypt.dns.yaml)
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env tmp.yaml tmp-letsencrypt.dns.yaml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env tmp.yaml tmp-letsencrypt.dns.yaml > $@
 	@rm tmp.yaml tmp-letsencrypt.dns.yaml
 
 .create-secrets:

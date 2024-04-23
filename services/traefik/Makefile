@@ -51,15 +51,14 @@ up-master: .init .env ${TEMP_COMPOSE}-master ## Deploys the stack on dalco clust
 
 # Helpers -------------------------------------------------
 
-traefik_dynamic_config.yml: .config.dir
-	$(eval CONFIG_DIR=$(shell cat $(REPO_BASE_DIR)/.config.dir))
-	$(eval TRAEFIK_DYN_CFG=$(CONFIG_DIR)/traefik_dynamic_config.yml)
+traefik_dynamic_config.yml:
+	$(eval CONFIG_DIR=$(shell dirname ${REPO_CONFIG_LOCATION}))
+	$(eval TRAEFIK_DYN_CFG=$(CONFIG_DIR)/$@)
 	@if [ ! -f $(TRAEFIK_DYN_CFG) ]; then \
 		echo "Error: file does not exist $(TRAEFIK_DYN_CFG)" >&2; \
 		exit 1; \
 	fi
-
-	@cp $(TRAEFIK_DYN_CFG) $(REPO_BASE_DIR)/services/traefik/traefik_dynamic_config.yml
+	@cp $(TRAEFIK_DYN_CFG) $@
 
 
 .PHONY: ${TEMP_COMPOSE}-local
@@ -67,49 +66,49 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.local.yml  > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
 ${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.public.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: docker-compose.letsencrypt.dns.yml
 docker-compose.letsencrypt.dns.yml: .venv .env

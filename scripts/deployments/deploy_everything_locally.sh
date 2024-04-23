@@ -27,7 +27,7 @@ pushd () {
     command pushd "$@" > /dev/null
 }
 
-
+# shellcheck disable=SC2034
 declare psed # fixes issue with not finding psed
 
 # shellcheck disable=1090,1091
@@ -53,6 +53,8 @@ stack_target=local
 usage="$(basename "$0") [-h] [--key=value]
 
 Deploys all the osparc-ops stacks and the simcore stack.
+NOTE: This script was used in the past to deploy to server / production systems, now it is only used for local dev deployments.
+NOTE: Server deployments now use CD pipelines via gitlab.
 
 where keys are:
     -h, --help  show this help text
@@ -110,23 +112,6 @@ set -o allexport
 source "${repo_config}"
 set +o allexport
 
-
-# Generate WEBSERVER_SESSION_SECRET_KEY if the key is empty in repo_config
-if [[ -z "${WEBSERVER_SESSION_SECRET_KEY}" ]]; then
-    log_warning "INFO: Webserver session key is missing, creating one now."
-    python3 -m pip install cryptography > /dev/null 2>&1
-    WEBSERVER_SESSION_SECRET_KEY=$(python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key())" | sed -e '1s/^.//' ) # drops first char, i.e. 'b'
-    $psed --in-place "s/WEBSERVER_SESSION_SECRET_KEY=.*/WEBSERVER_SESSION_SECRET_KEY=${WEBSERVER_SESSION_SECRET_KEY}/" "${repo_config}"
-    set -o allexport
-    # shellcheck disable=SC1090,SC1091
-    source "${repo_config}"
-    set +o allexport
-fi
-
-min_pw_length=8
-if [ ${#SERVICES_PASSWORD} -lt $min_pw_length ]; then
-    error_exit "Password length should be at least $min_pw_length characters"
-fi
 log_info "Deploying osparc for $1 cluster on ${MACHINE_FQDN}, using credentials $SERVICES_USER:$SERVICES_PASSWORD"
 
 
@@ -201,7 +186,7 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up-"$stack_target"
     popd
 
-    # We onl start minio for the local deployment
+    # only start minio for the local deployment
     #
     if [ "$minio_enabled" -eq 0 ]; then
         # -------------------------------- Minio -------------------------------
@@ -266,41 +251,5 @@ if [ "$start_opsstack" -eq 0 ]; then
 fi
 if [ "$start_simcore" -eq 0 ]; then
     log_info "starting simcore..."
-    "${repo_basedir}"/scripts/deployments/start_without_deployment_agent.bash
-fi
-# shellcheck disable=2235
-
-
-if [ "$stack_target" = "dalco" ] || [ "$stack_target" = "master" ] || [ "$stack_target" = "public" ]; then
-
-    # How many deploys do we have ?
-    deploys_count=$(docker service ls --format "{{.Name}}" | grep -c "deployment-agent")
-
-    # -------------------------------- BACKUP PG -------------------------------
-    # PG-backup has to wait for postgres container to be started and ready before starting, or it will fail.
-    # Wait for all potsgres container to start
-    log_info "Before starting PG-backup, we ensure that all postgres are started and ready to accept connections."
-    until [[ $(docker service ls --format "{{.Name}}" | grep -c "simcore_.*_postgres") -eq $deploys_count ]]; do
-        log_info "All postgres didn't start yet. Waiting for 5 seconds..."
-        sleep 5
-    done
-
-    postgres_services_names=$(docker service ls --format "{{.Name}}" | grep "simcore_.*_postgres")
-    log_info "Postgres service(s) started"
-
-    # Wait for the "database system is ready to accept connections" message to appear in the logs
-    for postgres_services_name in $postgres_services_names; do
-        until docker service logs "$postgres_services_name" 2>&1 | grep -q "database system is ready to accept connections"; do
-            log_info "Postgres not initialized yet for container $postgres_services_name. Waiting for 5 seconds..."
-            sleep 5
-        done
-        log_info "Postgres container $postgres_services_name is ready to accept connections"
-    done
-
-    log_info "All postgres are ready to accept connections. We can start pg-backup"
-    log_info "starting PG-backup..."
-    service_dir="${repo_basedir}"/services/pg-backup
-    pushd "${service_dir}"
-    call_make "." up-"$stack_target"
-    popd
+    "${repo_basedir}"/scripts/deployments/start_simcore_locally.bash
 fi

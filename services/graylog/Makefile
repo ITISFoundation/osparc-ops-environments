@@ -51,33 +51,33 @@ up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local c
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml ## Deploys stack
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-http ## Deploys stack using let's encrypt http challenge
 ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-letsencrypt-dns ## Deploys stack using let's encrypt dns challenge
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.dalco.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master .env ## Deploys stack on master deployment
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.master.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local ## Deploys stack on local deployment
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.local.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws ## Deploys stack on aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
-	@${REPO_BASE_DIR}/scripts/docker-compose-config.bash -e .env $< docker-compose.aws.yml > $@
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
 .PHONY: .env
 .env: template.env $(REPO_CONFIG_LOCATION)

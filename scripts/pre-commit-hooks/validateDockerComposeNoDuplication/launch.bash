@@ -20,5 +20,5 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt >/dev/null 2>&1
 for i in "$@"; do
   # assert file not empty via https://www.cyberciti.biz/faq/linux-unix-script-check-if-file-empty-or-not/
-  [ -s ../../../"$i" ] && bash -c "! ../../../scripts/docker-compose-config.bash -e .env ../../../$i 2>&1 | cat | grep \"must be unique\""
+  [ -s ../../../"$i" ] && bash -c "! ../../../scripts/docker-stack-config.bash -e .env ../../../$i 2>&1 | cat | grep \"must be unique\""
 done
