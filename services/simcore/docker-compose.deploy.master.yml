@@ -74,3 +74,5 @@ services:
   storage:
     deploy:
       replicas: 3
+    environment:
+      - STORAGE_PROFILING_MIDDLEWARE_ENABLED=1
