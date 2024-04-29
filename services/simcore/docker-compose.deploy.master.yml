@@ -66,3 +66,11 @@ services:
   payments:  # test prior to a big bang release Sept 2023. Can be deleted after (YH, 09 2023)
     deploy:
       replicas: 1
+
+  webserver:
+    deploy:
+      replicas: 6
+
+  storage:
+    deploy:
+      replicas: 3
