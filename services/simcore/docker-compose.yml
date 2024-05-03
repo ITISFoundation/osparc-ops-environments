@@ -255,6 +255,31 @@ services:
           memory: "2G"
     extra_hosts: []
 
+  web-api:
+    deploy:
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "512M"
+        limits:
+          cpus: "4"
+          memory: "2G"
+    extra_hosts: []
+
   wb-db-event-listener:
     hostname: "{{.Service.Name}}"
     environment:
