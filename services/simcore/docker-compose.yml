@@ -255,7 +255,7 @@ services:
           memory: "2G"
     extra_hosts: []
 
-  web-api:
+  wb-api-server:
     deploy:
       update_config:
         parallelism: 2
