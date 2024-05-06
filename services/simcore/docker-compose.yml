@@ -268,6 +268,7 @@ services:
         <<: *webserver_resources
     extra_hosts: []
 
+
   wb-db-event-listener:
     hostname: "{{.Service.Name}}"
     environment:
