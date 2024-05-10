@@ -69,7 +69,11 @@ services:
 
   webserver:
     deploy:
-      replicas: 6
+      replicas: 3
+
+  wb-api-server:
+    deploy:
+      replicas: 3
 
   storage:
     deploy:
