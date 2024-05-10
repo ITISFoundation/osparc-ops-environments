@@ -257,7 +257,7 @@ services:
 
   wb-api-server:
     networks:
-      - monitored  
+      - monitored
     deploy:
       update_config:
         <<: *webserver_update_config
