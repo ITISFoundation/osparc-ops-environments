@@ -256,6 +256,8 @@ services:
     extra_hosts: []
 
   wb-api-server:
+    networks:
+      - monitored  
     deploy:
       update_config:
         <<: *webserver_update_config
