@@ -232,12 +232,12 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=2
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
-      update_config:
+      update_config: &webserver_update_config
         parallelism: 2
         order: start-first
         failure_action: continue
         delay: 10s
-      restart_policy:
+      restart_policy: &webserver_restart_policy
         condition: any
         delay: 5s
         max_attempts: 3
@@ -246,7 +246,7 @@ services:
       placement:
         constraints:
           - node.labels.simcore==true
-      resources:
+      resources: &webserver_resources
         reservations:
           cpus: "0.1"
           memory: "512M"
@@ -254,6 +254,22 @@ services:
           cpus: "4"
           memory: "2G"
     extra_hosts: []
+
+  wb-api-server:
+    networks:
+      - monitored
+    deploy:
+      update_config:
+        <<: *webserver_update_config
+      restart_policy:
+        <<: *webserver_restart_policy
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        <<: *webserver_resources
+    extra_hosts: []
+
 
   wb-db-event-listener:
     hostname: "{{.Service.Name}}"
