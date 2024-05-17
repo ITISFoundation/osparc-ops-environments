@@ -7,9 +7,6 @@ volumes:
   prometheus_data_federation: {}
 
 networks:
-  internal:
-    driver: overlay
-    attachable: true
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
@@ -43,7 +40,6 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     networks:
-      - internal
       - monitored
     command: --logtostderr --docker_only --allow_dynamic_housekeeping=true
     deploy:
@@ -81,7 +77,6 @@ services:
       - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
       #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
     networks:
-      - internal
       - monitored
       - public
     extra_hosts: []
@@ -128,7 +123,6 @@ services:
       - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
       #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
     networks:
-      - internal
       - monitored
       - public
     extra_hosts: []
@@ -176,7 +170,6 @@ services:
       - /bin/sh
       - /docker-entrypoint.sh
     networks:
-      - internal
       - monitored
     deploy:
       labels:
@@ -194,7 +187,6 @@ services:
   nvidia-exporter:
     image: mindprince/nvidia_gpu_prometheus_exporter:0.1
     networks:
-      - internal
       - monitored
     deploy:
       labels:
@@ -220,7 +212,7 @@ services:
       - "--config.file=/etc/alertmanager/config.yml"
       - "--storage.path=/alertmanager"
     networks:
-      - internal
+      - monitored
     configs:
       - source: alertmanager_config
         target: /etc/alertmanager/config.yml
@@ -242,7 +234,6 @@ services:
      - /var/run/docker.sock:/var/run/docker.sock:ro
     user: root # only user root can use the docker socket
     networks:
-      - internal
       - monitored
     deploy:
       labels:
@@ -265,7 +256,6 @@ services:
       - ./grafana/config.monitoring
     user: "104"
     networks:
-      - internal
       - monitored # needed to access postgres
       - public
     deploy:
@@ -290,29 +280,9 @@ services:
           memory: 128M
           cpus: "0.1"
 
-  grafana-image-renderer:
-    image: grafana/grafana-image-renderer:3.7.1
-    configs:
-      - source: grafana_image_renderer_config
-        target: /usr/src/app/config.json
-    networks:
-      - internal
-    deploy:
-      placement:
-        constraints:
-          - node.labels.grafana==true
-      resources:
-        limits:
-          memory: 512M
-          cpus: "2.0"
-        reservations:
-          memory: 64M
-          cpus: "0.1"
-
   smokeping-prober-exporter:
     image: quay.io/superq/smokeping-prober:v0.7.1
     networks:
-      - internal
       - monitored
     volumes: []
     cap_add:
@@ -342,7 +312,6 @@ services:
     image: nvidia/dcgm-exporter:3.1.8-3.1.5-ubuntu20.04
     hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
-      - internal
       - monitored
     deploy:
       mode: global
@@ -368,7 +337,6 @@ services:
       - source: pgsql_query_exporter_config
         target: /config.yaml
     networks:
-      - internal
       - monitored
       - public
     extra_hosts: []
@@ -389,7 +357,6 @@ services:
   {{_stack}}-postgres-exporter:
     image: bitnami/postgres-exporter:0.15.0
     networks:
-      - internal
       - monitored
     environment:
       - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
@@ -410,7 +377,6 @@ services:
   {{_stack}}-redis-exporter:
     image: oliver006/redis_exporter:v1.58.0-alpine
     networks:
-      - internal
       - monitored
     environment:
       REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
