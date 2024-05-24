@@ -114,6 +114,12 @@ scrape_configs:
         type: "A"
         port: 8080
       - names:
+          - "tasks.production_wb-api-server"
+          - "tasks.staging_wb-api-server"
+          - "tasks.master_wb-api-server"
+        type: "A"
+        port: 8080
+      - names:
           - "tasks.master-redis-exporter"
           - "tasks.staging-redis-exporter"
           - "tasks.production-redis-exporter"
