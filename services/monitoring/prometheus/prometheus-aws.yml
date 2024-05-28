@@ -23,7 +23,7 @@ scrape_configs:
       password: ${SERVICES_PASSWORD}
 
     relabel_configs:
-      - source_labels: [__meta_ec2_public_dns_name] # or use __meta_ec2_instance_id, __meta_ec2_private_ip depending on your network setup
+      - source_labels: [__meta_ec2_private_dns_name] # or use __meta_ec2_instance_id, __meta_ec2_private_ip depending on your network setup
         target_label: __address__
         replacement: "${1}:9090" # Assumes Prometheus is running on port 9090
 
