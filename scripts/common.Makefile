@@ -39,7 +39,7 @@ export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL:=$(shell set -o allexport;
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
 		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$MACHINE_FQDN\`))|| (Host(\`storage.$$MACHINE_FQDN\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 	else \
-		IFS=',' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
 		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$MACHINE_FQDN\`))|| (Host(\`storage.$$MACHINE_FQDN\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
