@@ -10,7 +10,11 @@ import typer
 from environs import Env
 
 repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
-assert repo_config_location is not None
+try:
+    assert repo_config_location is not None
+except Exception:
+    print("ERROR: Env-Var REPO_CONFIG_LOCATION not set.")
+    exit(1)
 if "\n" in repo_config_location:
     repo_config_location = repo_config_location.split("\n")[0]
 
