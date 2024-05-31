@@ -1,0 +1,61 @@
+---
+- name: Setup Environment
+  hosts: all
+  vars:
+
+  tasks:
+    - name: Ensure rsync is installed
+      apt:
+        name: rsync
+        state: present
+
+    - name: Generate a random string
+      set_fact:
+        random_string: "{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=16') }}"
+
+    - name: Set temporary directory path
+      set_fact:
+        temp_dir: "/tmp/z43_{{ random_string }}"
+
+    - name: Create "{{ temp_dir }}" on remote machine
+      file:
+        path: "{{ temp_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Copy charts folder to "{{ temp_dir }}"
+      synchronize:
+        src: "/home/hrytsuk/fork-projects/osparc-ops/charts"
+        dest: "{{ temp_dir }}"
+        mode: push
+        archive: yes
+        delete: yes
+        use_ssh_args: yes
+
+    - name: Set recursive permissions on "{{ temp_dir }}"
+      file:
+        path: "{{ temp_dir }}"
+        recurse: yes
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Install helm if not exists
+      become: true
+      unarchive:
+        src: https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
+        dest: /usr/local/bin
+        extra_opts: "--strip-components=1"
+        owner: root
+        group: root
+        mode: 0755
+        remote_src: true
+      args:
+        creates: /usr/local/bin/helm
+
+
+    # - name: clean tmp folder
+    #   file:
+    #     path: "{{ temp_dir }}"
+    #     state: absent

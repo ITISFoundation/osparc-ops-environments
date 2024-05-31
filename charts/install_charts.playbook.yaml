@@ -1,0 +1,24 @@
+---
+- name: Install Helm Charts
+  hosts: all
+  tasks:
+    - name: Add Traefik Helm repository
+      kubernetes.core.helm_repository:
+        name: traefik
+        repo_url: https://helm.traefik.io/traefik
+
+
+    - name: Install Traefik using custom values
+      kubernetes.core.helm:
+        name: traefik
+        chart_ref: traefik/traefik
+        chart_version: 'v28.2.0'
+        release_namespace: default
+        values_files:
+          - '{{ temp_dir }}/charts/traefik/override_values.yaml'
+
+    - name: Install adminer chart from local directory
+      kubernetes.core.helm:
+        name: adminer
+        release_namespace: default
+        chart_ref: '{{ temp_dir }}/charts/adminer'
