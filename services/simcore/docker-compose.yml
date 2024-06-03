@@ -533,9 +533,6 @@ services:
           cpus: '0.1'
 
   efs-guardian:
-    networks:
-      - monitored
-      - public
     hostname: "{{.Service.Name}}"
     deploy:
       replicas: ${SIMCORE_EFS_GUARDIAN_REPLICAS}
