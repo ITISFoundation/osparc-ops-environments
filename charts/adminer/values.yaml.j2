@@ -49,7 +49,6 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: default-traefik-basic-auth@kubernetescrd
     cert-manager.io/cluster-issuer: "letsencrypt-production"
   tls:
     - hosts:
