@@ -58,7 +58,6 @@ extraObjects:
     name: traefik-dashboard
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.middlewares: default-traefik-basic-auth@kubernetescrd  # namespace + middleware name
   spec:
     tls:
     - hosts:
