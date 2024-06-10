@@ -10,7 +10,7 @@ repos:
         args: ["--maxkb=499"] # ensures docker config compatability for all files
       - id: check-merge-conflict
       - id: check-yaml
-        exclude: ^(.*.go.yml)|(.*.template.y*ml)$
+        exclude: ^(.*.go.yml)|(.*.template.y*ml)$|^charts/
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-json

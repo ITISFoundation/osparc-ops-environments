@@ -1,0 +1,77 @@
+ingressRoute:
+  dashboard:
+    enabled: false
+
+logs:
+  general:
+    level: DEBUG
+  access:
+    enabled: true
+
+service:
+  type: NodePort
+
+ports:
+  web:
+    nodePort: 32080
+  websecure:
+    nodePort: 32443
+
+additionalArguments:
+  - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+  - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+  - "--api.insecure=true"
+
+extraObjects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: traefik-api
+  spec:
+    type: ClusterIP
+    selector:
+      app.kubernetes.io/name: traefik
+      app.kubernetes.io/instance: traefik-default
+    ports:
+    - port: 8080
+      name: traefik
+      targetPort: 9000
+      protocol: TCP
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: traefik-authorized-users
+    namespace: default
+  data:
+    users: |2
+      ${TRAEFIK_K8S_AUTHORIZED_USER}
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: traefik-basic-auth
+  spec:
+    basicAuth:
+      secret: traefik-authorized-users  # https://doc.traefik.io/traefik/middlewares/http/basicauth/#users
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: traefik-dashboard
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: default-traefik-basic-auth@kubernetescrd  # namespace + middleware name
+  spec:
+    tls:
+    - hosts:
+        - k8s.monitoring.${MACHINE_FQDN}
+      secretName: monitoring-tls
+    rules:
+    - host: k8s.monitoring.${MACHINE_FQDN}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: traefik-api
+              port:
+                name: traefik
