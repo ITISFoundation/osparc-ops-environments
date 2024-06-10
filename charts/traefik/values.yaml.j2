@@ -68,7 +68,17 @@ extraObjects:
     - host: k8s.monitoring.${MACHINE_FQDN}
       http:
         paths:
-        - path: /
+        - path: /dashboard
+          pathType: Prefix
+          backend:
+            service:
+              name: traefik-api
+              port:
+                name: traefik
+    - host: k8s.monitoring.${MACHINE_FQDN}
+      http:
+        paths:
+        - path: /api
           pathType: Prefix
           backend:
             service:
