@@ -63,6 +63,10 @@ services:
     deploy:
       replicas: 1
 
+  wb-api-server:
+    deploy:
+      replicas: 3
+
 volumes:
    efs_volume:
        driver_opts:
