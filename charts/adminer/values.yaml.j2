@@ -49,7 +49,7 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    cert-manager.io/cluster-issuer: "cert-issuer"
   tls:
     - hosts:
         - k8s.monitoring.${MACHINE_FQDN}

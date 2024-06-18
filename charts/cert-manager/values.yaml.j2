@@ -17,7 +17,7 @@ extraObjects:
   apiVersion: cert-manager.io/v1
   kind: ClusterIssuer
   metadata:
-    name: letsencrypt-production
+    name: cert-issuer
     namespace: {{ .Release.Namespace }}
     annotations:
       # ClusterIssuer depends on cert-manager CRDs. We need to wait for them to be installed before creating the ClusterIssuer
