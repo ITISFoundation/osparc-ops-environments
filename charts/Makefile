@@ -47,8 +47,8 @@ helmfile.yaml:
 
 .PHONY: configure-local-hosts
 configure-local-hosts:
-	@echo "Addings osparc.local hosts to /etc/hosts ..."
-	@grep -q '127.0.0.1 k8s.monitoring.osparc.local' /etc/hosts || echo '127.0.0.1 k8s.monitoring.osparc.local' | sudo tee -a /etc/hosts
+	@echo "Addings $(MACHINE_FQDN) hosts to /etc/hosts ..."
+	@grep -q '127.0.0.1 k8s.monitoring.$(MACHINE_FQDN)' /etc/hosts || echo '127.0.0.1 k8s.monitoring.$(MACHINE_FQDN)' | sudo tee -a /etc/hosts
 
 .PHONY: apply-local
 apply-local: values.local.yaml values.yaml .helmfile-apply configure-local-hosts
