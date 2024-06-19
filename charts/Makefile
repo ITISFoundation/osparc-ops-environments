@@ -14,8 +14,7 @@ CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
 .PHONY: values.yaml
 values.yaml:
-	@echo "configuring **/$@"
-	@echo charts=$(CHART_DIRS)
+	@echo "configuring $@ for charts..."
 	@for dir in $(CHART_DIRS); do \
 		if [ -f $$dir/values.yaml.j2 ]; then \
 			$(MAKE) -s -C $$dir values.yaml; \
@@ -24,7 +23,7 @@ values.yaml:
 
 .PHONY: values.local.yaml
 values.local.yaml:
-	@echo "configuring **/$@"
+	@echo "configuring $@ for charts..."
 	@for dir in $(CHART_DIRS); do \
 		if [ -f $$dir/values.local.yaml.j2 ]; then \
 			$(MAKE) -s -C $$dir values.local.yaml; \
@@ -48,16 +47,15 @@ helmfile.yaml:
 
 .PHONY: configure-local-hosts
 configure-local-hosts:
-	@echo ""
 	@echo "Addings osparc.local hosts to /etc/hosts ..."
 	@grep -q '127.0.0.1 k8s.monitoring.osparc.local' /etc/hosts || echo '127.0.0.1 k8s.monitoring.osparc.local' | sudo tee -a /etc/hosts
 
 .PHONY: apply-local
 apply-local: values.local.yaml values.yaml .helmfile-apply configure-local-hosts
-	@echo ""
 	@echo "Cluster has been deployed locally: http://$(MACHINE_FQDN)"
 	@echo "    For secure connections self-signed certificates are used."
-	@echo "    Install their root-ca certificate in your system for smooth experience"
+	@echo "    Install their root-ca certificate in your system for smooth experience."
+	@echo "    For insecure connections make sure to disable automatic https redirects in your browser."
 
 .PHONY: diff-local
 diff-local: values.local.yaml values.yaml .helmfile-diff

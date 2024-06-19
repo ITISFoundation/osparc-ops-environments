@@ -151,6 +151,3 @@ repo.config
 .temp/**
 
 *secret*
-
-# Kubernetes
-helmfile.yaml
