@@ -16,7 +16,7 @@ CHART_DIRS := $(wildcard */)
 values.yaml:
 	@echo "configuring **/$@"
 	@for dir in $(CHART_DIRS); do \
-		if [ -f $$dir/values.yaml.j2 ]; then \
+		if [ -f ./charts/$$dir/values.yaml.j2 ]; then \
 			$(MAKE) -s -C $$dir values.yaml; \
 		fi; \
 	done
@@ -25,7 +25,7 @@ values.yaml:
 values.local.yaml:
 	@echo "configuring **/$@"
 	@for dir in $(CHART_DIRS); do \
-		if [ -f $$dir/values.local.yaml.j2 ]; then \
+		if [ -f ./charts/$$dir/values.local.yaml.j2 ]; then \
 			$(MAKE) -s -C $$dir -s values.local.yaml; \
 		fi; \
 	done
