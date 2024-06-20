@@ -1,7 +1,3 @@
-crds:
-  enabled: true
-  keep: true
-
 extraObjects:
 - |
   apiVersion: v1
@@ -11,8 +7,8 @@ extraObjects:
     namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
   type: Opaque
   data:
-    access-key-id: ${DNS_CHALLENGE_AWS_ACCESS_KEY_ID_BASE64}  # Base64 encoded Access Key ID
-    secret-access-key: ${DNS_CHALLENGE_AWS_SECRET_ACCESS_KEY_BASE64}  # Base64 encoded Secret Access Key
+    access-key-id: {{ requiredEnv "DNS_CHALLENGE_AWS_ACCESS_KEY_ID_BASE64" }}  # Base64 encoded Access Key ID
+    secret-access-key: {{ requiredEnv "DNS_CHALLENGE_AWS_SECRET_ACCESS_KEY_BASE64" }}  # Base64 encoded Secret Access Key
 - |
   apiVersion: cert-manager.io/v1
   kind: ClusterIssuer
@@ -25,14 +21,14 @@ extraObjects:
       "helm.sh/hook-weight": "1"
   spec:
     acme:
-      email: ${OSPARC_DEVOPS_MAIL_ADRESS}
-      server: ${DNS_CHALLENGE_ACME_SERVER}
+      email: {{ requiredEnv "OSPARC_DEVOPS_MAIL_ADRESS" }}
+      server: {{ requiredEnv "DNS_CHALLENGE_ACME_SERVER" }}
       privateKeySecretRef:
         name: cert-manager-acme-private-key
       solvers:
         - dns01:
             route53:
-              region: "${DNS_CHALLENGE_AWS_REGION}"
+              region: {{ requiredEnv "DNS_CHALLENGE_AWS_REGION" }}
               accessKeyIDSecretRef:
                 name: route53-credentials
                 key: access-key-id

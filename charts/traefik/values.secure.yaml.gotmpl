@@ -1,4 +1,6 @@
 additionalArguments:
+  - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+  - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
   - "--api.insecure=true"
 
 extraObjects:
@@ -23,7 +25,7 @@ extraObjects:
     namespace: default
   data:
     users: |2
-      ${TRAEFIK_K8S_AUTHORIZED_USER}
+      {{ requiredEnv "TRAEFIK_K8S_AUTHORIZED_USER" }}
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
@@ -36,15 +38,15 @@ extraObjects:
   metadata:
     name: traefik-dashboard
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure  # allow http(s) for local deployment
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: default-traefik-basic-auth@kubernetescrd  # namespace + middleware name
   spec:
     tls:
     - hosts:
-        - k8s.monitoring.${MACHINE_FQDN}
+        - k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
       secretName: monitoring-tls
     rules:
-    - host: k8s.monitoring.${MACHINE_FQDN}
+    - host: k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
       http:
         paths:
         - path: /dashboard
@@ -54,7 +56,7 @@ extraObjects:
               name: traefik-api
               port:
                 name: traefik
-    - host: k8s.monitoring.${MACHINE_FQDN}
+    - host: k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
       http:
         paths:
         - path: /api
