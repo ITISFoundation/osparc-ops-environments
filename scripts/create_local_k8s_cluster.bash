@@ -18,7 +18,7 @@ if ! command -v kubectl &> /dev/null; then
     exit 1
 fi
 
-if kind get clusters | grep -q "^$KIND_CLUSTER_NAME"; then
+if kind get clusters | grep -q "^$KIND_CLUSTER_NAME$"; then
         echo "A cluster is already up."
         exit 0
 fi
