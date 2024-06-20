@@ -20,8 +20,8 @@ helmfile-lint: .check-helmfile-installed helmfile.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	helmfile lint
 
-.PHONY: .helmfile-apply-local-post-install
-.helmfile-apply-local-post-install:
+.PHONY: .helmfile-local-post-install
+.helmfile-local-post-install:
 	@$(MAKE) -s configure-local-hosts
 	@echo "";
 	@echo "Cluster has been deployed locally: http://$(MACHINE_FQDN)";
@@ -35,7 +35,7 @@ helmfile-apply: .check-helmfile-installed helmfile.yaml
 	helmfile -f $(REPO_BASE_DIR)/charts/helmfile.yaml apply
 
 	@if [ "$(MACHINE_FQDN)" = "osparc.local" ]; then \
-		$(MAKE) -s .helmfile-apply-local-post-install; \
+		$(MAKE) -s .helmfile-local-post-install; \
 	fi
 
 .PHONY: configure-local-hosts
