@@ -205,6 +205,7 @@ services:
           memory: "256M"
 
   webserver:
+    hostname: "wb-{{.Node.Hostname}}-{{.Task.Slot}}"
     networks:
       - public
       - monitored
@@ -256,6 +257,7 @@ services:
     extra_hosts: []
 
   wb-api-server:
+    hostname: "wb-api-{{.Node.Hostname}}-{{.Task.Slot}}"
     networks:
       - monitored
     deploy:
@@ -272,7 +274,7 @@ services:
 
 
   wb-db-event-listener:
-    hostname: "{{.Service.Name}}"
+    hostname: "wb-dbel-{{.Node.Hostname}}-{{.Task.Slot}}"
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
     networks:
@@ -309,7 +311,7 @@ services:
     networks:
       - default
       - interactive_services_subnet
-    hostname: "{{.Service.Name}}"
+    hostname: "wb-gc-{{.Node.Hostname}}-{{.Task.Slot}}"
     deploy:
       update_config:
         parallelism: 2
