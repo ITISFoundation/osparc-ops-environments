@@ -49,21 +49,19 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    cert-manager.io/cluster-issuer: "cert-issuer"
   tls:
     - hosts:
-        - k8s.monitoring.${MACHINE_FQDN}
+        - k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
       secretName: monitoring-tls
   hosts:
-    - host: k8s.monitoring.${MACHINE_FQDN}
+    - host: k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
       paths:
         - path: /adminer/simcore
           pathType: Exact
           backend:
             service:
               name: adminer
-              port:
-                number: 8080
 
 resources:
   limits:
