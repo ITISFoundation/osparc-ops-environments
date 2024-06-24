@@ -274,7 +274,7 @@ services:
 
 
   wb-db-event-listener:
-    hostname: "wb-dbel-{{.Node.Hostname}}-{{.Task.Slot}}"
+    hostname: "wb-db-el-{{.Node.Hostname}}-{{.Task.Slot}}"
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
     networks:
