@@ -1,0 +1,18 @@
+ingressRoute:
+  dashboard:
+    enabled: false
+
+logs:
+  general:
+    level: DEBUG
+  access:
+    enabled: true
+
+service:
+  type: NodePort
+
+ports:
+  web:
+    nodePort: 32080
+  websecure:
+    nodePort: 32443

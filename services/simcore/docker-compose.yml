@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   clusters-keeper:
     networks:
@@ -530,6 +529,31 @@ services:
           cpus: '0.2'
         reservations:
           memory: 128M
+          cpus: '0.1'
+
+  efs-guardian:
+    hostname: "{{.Service.Name}}"
+    deploy:
+      replicas: ${SIMCORE_EFS_GUARDIAN_REPLICAS}
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
           cpus: '0.1'
 
   migration:

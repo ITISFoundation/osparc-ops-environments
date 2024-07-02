@@ -1,0 +1,66 @@
+additionalArguments:
+  - "--api.insecure=true"
+
+extraObjects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: traefik-api
+  spec:
+    type: ClusterIP
+    selector:
+      app.kubernetes.io/name: traefik
+      app.kubernetes.io/instance: traefik-default
+    ports:
+    - port: 8080
+      name: traefik
+      targetPort: 9000
+      protocol: TCP
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: traefik-authorized-users
+    namespace: default
+  data:
+    users: |2
+      {{ requiredEnv "TRAEFIK_K8S_AUTHORIZED_USER" }}
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: traefik-basic-auth
+  spec:
+    basicAuth:
+      secret: traefik-authorized-users  # https://doc.traefik.io/traefik/middlewares/http/basicauth/#users
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: traefik-dashboard
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure  # allow http(s) for local deployment
+      traefik.ingress.kubernetes.io/router.middlewares: default-traefik-basic-auth@kubernetescrd  # namespace + middleware name
+  spec:
+    tls:
+    - hosts:
+        - k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
+      secretName: monitoring-tls
+    rules:
+    - host: k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
+      http:
+        paths:
+        - path: /dashboard
+          pathType: Prefix
+          backend:
+            service:
+              name: traefik-api
+              port:
+                name: traefik
+    - host: k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
+      http:
+        paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service:
+              name: traefik-api
+              port:
+                name: traefik
