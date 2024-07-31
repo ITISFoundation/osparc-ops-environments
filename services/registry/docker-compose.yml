@@ -112,6 +112,9 @@ services:
         - prometheus-job=registry-pull-through-cache
         - prometheus-port=5001
 networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
