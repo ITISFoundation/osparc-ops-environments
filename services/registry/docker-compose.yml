@@ -89,7 +89,9 @@ services:
       REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
       REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
     ports:
-      - "5000:5000"
+    - mode: host
+      target: 5000
+      published: 5000
     networks:
       - monitored
     deploy:
