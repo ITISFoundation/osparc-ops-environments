@@ -89,11 +89,13 @@ services:
       REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
       REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
     ports:
-      - "5000:5000"
+    - mode: host
+      target: 5000
+      published: 5000
     networks:
       - monitored
     deploy:
-      replicas: ${OPS_REGISTRY_PULL_THROUGH_CACHE_REPLICAS}
+      mode: global
       placement:
         constraints:
           - node.labels.ops==true
