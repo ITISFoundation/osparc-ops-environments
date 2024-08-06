@@ -95,7 +95,7 @@ services:
     networks:
       - monitored
     deploy:
-      replicas: ${OPS_REGISTRY_PULL_THROUGH_CACHE_REPLICAS}
+      mode: global
       placement:
         constraints:
           - node.labels.ops==true
