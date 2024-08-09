@@ -31,9 +31,15 @@ services:
 
   wb-garbage-collector:
     hostname: "{{.Service.Name}}"
+
   payments:
     deploy:
       replicas: 0
+
   clusters-keeper:
     deploy:
       replicas: 0
+
+  storage:
+    deploy:
+      replicas: 2
