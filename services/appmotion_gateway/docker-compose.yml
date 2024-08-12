@@ -19,7 +19,7 @@ services:
                 - traefik.http.routers.adminer_appmotion_gateway.entrypoints=https
                 - traefik.http.routers.adminer_appmotion_gateway.tls=true
                 - traefik.http.middlewares.adminer_appmotion_gateway_stripprefixregex.stripprefixregex.regex=^/adminer
-                - traefik.http.routers.adminer_appmotion_gateway.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_appmotion_gateway_stripprefixregex
+                - traefik.http.routers.adminer_appmotion_gateway.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, adminer_appmotion_gateway_stripprefixregex
             resources:
                 reservations:
                     memory: 16M
@@ -80,7 +80,7 @@ services:
                 - traefik.http.routers.appmotion_gateway.entrypoints=https
                 - traefik.http.routers.appmotion_gateway.tls=true
                 - traefik.http.services.appmotion_gateway.loadbalancer.server.port=80
-                - traefik.http.routers.appmotion_gateway.middlewares=ops_ratelimit@docker
+                - traefik.http.routers.appmotion_gateway.middlewares=ops_ratelimit@swarm
             resources:
                 limits:
                     memory: 1G
