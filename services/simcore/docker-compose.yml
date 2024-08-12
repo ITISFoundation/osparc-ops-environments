@@ -145,6 +145,7 @@ services:
 
   static-webserver:
     deploy:
+      replicas: 2
       labels:
         # Handle freshping service and route it to the faster static webserver.
         - traefik.http.middlewares.${SWARM_STACK_NAME}_static_webserver_prefix.addprefix.prefix=/osparc

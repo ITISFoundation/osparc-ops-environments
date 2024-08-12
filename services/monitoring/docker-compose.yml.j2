@@ -381,6 +381,7 @@ services:
     environment:
       REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
       REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     deploy:
       labels:
       - prometheus-job={{_stack}}-redis-exporter

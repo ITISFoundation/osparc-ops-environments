@@ -66,7 +66,51 @@ services:
         mode: 0644
       - source: registry_config.yml
         target: /etc/docker/registry/config.yml
-
+  registry-pull-through-cache:
+    hostname: "registry-ptc-{{.Node.Hostname}}-{{.Task.Slot}}"
+    image: registry:2.8.2
+    environment:
+      REGISTRY_HTTP_SECRET: ${REGISTRY_PULL_THROUGH_CACHE_HTTP_SECRET}
+      # S3
+      REGISTRY_STORAGE: s3
+      REGISTRY_STORAGE_S3_ACCESSKEY: ${REGISTRY_S3_ACCESS_KEY}
+      REGISTRY_STORAGE_S3_SECRETKEY: ${REGISTRY_S3_SECRET_KEY}
+      REGISTRY_STORAGE_S3_REGIONENDPOINT: "${REGISTRY_S3_ENDPOINT}"
+      REGISTRY_STORAGE_S3_SECURE: "true"
+      REGISTRY_STORAGE_S3_BUCKET: ${REGISTRY_PULL_THROUGH_CACHE_S3_BUCKET}
+      REGISTRY_STORAGE_S3_REGION: ${REGISTRY_AWS_REGION}
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      # Pull through cache
+      REGISTRY_PROXY_REMOTEURL: "https://registry-1.docker.io"
+      REGISTRY_PROXY_USERNAME: ${DOCKER_HUB_LOGIN}
+      REGISTRY_PROXY_PASSWORD: ${DOCKER_HUB_PASSWORD}
+      # Metrics
+      REGISTRY_HTTP_DEBUG_ADDR: ":5001"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED: "true"
+      REGISTRY_HTTP_DEBUG_PROMETHEUS_PATH: "/metrics"
+    ports:
+    - mode: host
+      target: 5000
+      published: 5000
+    networks:
+      - monitored
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.ops==true
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${MONITORED_NETWORK}
+        - prometheus-job=registry-pull-through-cache
+        - prometheus-port=5001
 networks:
   public:
     external: true
