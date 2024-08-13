@@ -3,12 +3,11 @@ extraObjects:
   apiVersion: v1
   kind: Secret
   metadata:
-    name: route53-credentials
+    name: rfc2136-credentials
     namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
   type: Opaque
   data:
-    access-key-id: {{ requiredEnv "DNS_CHALLENGE_AWS_ACCESS_KEY_ID" | b64enc }}
-    secret-access-key: {{ requiredEnv "DNS_CHALLENGE_AWS_SECRET_ACCESS_KEY" | b64enc }}
+    tsig-secret-key: {{ requiredEnv "RFC2136_TSIG_SECRET" | b64enc }}  # Base64 encoded Secret Access Key
 - |
   apiVersion: cert-manager.io/v1
   kind: ClusterIssuer
@@ -27,11 +26,10 @@ extraObjects:
         name: cert-manager-acme-private-key
       solvers:
         - dns01:
-            route53:
-              region: {{ requiredEnv "DNS_CHALLENGE_AWS_REGION" }}
-              accessKeyIDSecretRef:
-                name: route53-credentials
-                key: access-key-id
-              secretAccessKeySecretRef:
-                name: route53-credentials
-                key: secret-access-key
+            rfc2136:
+                nameserver:  {{ requiredEnv "RFC2136_NAMESERVER" }}
+                tsigKeyName: {{ requiredEnv "RFC2136_TSIG_KEY" }}
+                tsigAlgorithm: {{ requiredEnv "RFC2136_TSIG_ALGORITHM_CERT_MANAGER" }}
+                tsigSecretSecretRef:
+                    name: rfc2136-credentials
+                    key: tsig-secret-key

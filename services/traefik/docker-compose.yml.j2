@@ -19,7 +19,6 @@ services:
       - '--entryPoints.postgres2.address=:5433'
       - "--entryPoints.https.address=:443"
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.swarmMode=true"
       - "--providers.swarm.exposedByDefault=false"
       # so that internal services are not picked up
       - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
@@ -28,7 +27,6 @@ services:
       - "--tracing.addinternals"
       - "--tracing.otlp=true"
       - "--tracing.otlp.http=true"
-      # - "--tracing.otlp.http.endpoint=0.0.0.0:4318/v1/traces"
     ports:
       - target: 80
         published: 80
