@@ -1,0 +1,50 @@
+extraObjects:
+- |
+  apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    name: selfsigned-issuer
+    namespace: {{ .Release.Namespace }}
+    annotations:
+      # It depends on cert-manager CRDs. We need to wait for CRDs to be installed
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
+  spec:
+    selfSigned: {}
+- |
+  apiVersion: cert-manager.io/v1
+  kind: Certificate
+  metadata:
+    name: local-ca
+    namespace: {{ .Release.Namespace }}
+    annotations:
+      # It depends on cert-manager CRDs. We need to wait for CRDs to be installed
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
+  spec:
+    isCA: true
+    commonName: local-ca
+    subject:
+      organizations:
+        - Z43
+    secretName: local-ca-secret
+    privateKey:
+      algorithm: ECDSA
+      size: 256
+    issuerRef:
+      name: selfsigned-issuer
+      kind: ClusterIssuer
+      group: cert-manager.io
+- |
+  apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    name: cert-issuer
+    namespace: {{ .Release.Namespace }}
+    annotations:
+      # It depends on cert-manager CRDs. We need to wait for CRDs to be installed
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
+  spec:
+    ca:
+      secretName: local-ca-secret

@@ -1,0 +1,37 @@
+extraObjects:
+- |
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: route53-credentials
+    namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
+  type: Opaque
+  data:
+    access-key-id: {{ requiredEnv "DNS_CHALLENGE_AWS_ACCESS_KEY_ID" | b64enc }}
+    secret-access-key: {{ requiredEnv "DNS_CHALLENGE_AWS_SECRET_ACCESS_KEY" | b64enc }}
+- |
+  apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    name: cert-issuer
+    namespace: {{ .Release.Namespace }}
+    annotations:
+      # ClusterIssuer depends on cert-manager CRDs. We need to wait for them to be installed before creating the ClusterIssuer
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
+  spec:
+    acme:
+      email: {{ requiredEnv "OSPARC_DEVOPS_MAIL_ADRESS" }}
+      server: {{ requiredEnv "DNS_CHALLENGE_ACME_SERVER" }}
+      privateKeySecretRef:
+        name: cert-manager-acme-private-key
+      solvers:
+        - dns01:
+            route53:
+              region: {{ requiredEnv "DNS_CHALLENGE_AWS_REGION" }}
+              accessKeyIDSecretRef:
+                name: route53-credentials
+                key: access-key-id
+              secretAccessKeySecretRef:
+                name: route53-credentials
+                key: secret-access-key
