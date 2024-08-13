@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   registry:
-    image: registry:2.8.2
+    image: registry:2.8.3
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       REGISTRY_HTTP_HOST: "https://${REGISTRY_DOMAIN}"
@@ -68,7 +68,7 @@ services:
         target: /etc/docker/registry/config.yml
   registry-pull-through-cache:
     hostname: "registry-ptc-{{.Node.Hostname}}-{{.Task.Slot}}"
-    image: registry:2.8.2
+    image: registry:2.8.3
     environment:
       REGISTRY_HTTP_SECRET: ${REGISTRY_PULL_THROUGH_CACHE_HTTP_SECRET}
       # S3
