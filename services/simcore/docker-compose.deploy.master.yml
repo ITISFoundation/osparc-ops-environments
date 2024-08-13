@@ -39,7 +39,7 @@ services:
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.network=${SWARM_STACK_NAME}_default"
       # https://github.com/traefik/traefik/issues/7886
-      - "--providers.swarm.swarmModeRefreshSeconds=1"
+      - "--providers.swarm.refreshSeconds=1"
       - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
       - "--tracing=true"
