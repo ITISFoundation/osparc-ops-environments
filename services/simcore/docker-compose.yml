@@ -149,7 +149,7 @@ services:
       labels:
         # Handle freshping service and route it to the faster static webserver.
         - traefik.http.middlewares.${SWARM_STACK_NAME}_static_webserver_prefix.addprefix.prefix=/osparc
-        - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.rule=HeadersRegexp(`User-Agent`, `.*(FreshpingBot).*`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.rule=HeaderRegexp(`User-Agent`, `.*(FreshpingBot).*`)
         - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.service=${SWARM_STACK_NAME}_static_webserver_freshping
         - traefik.http.services.${SWARM_STACK_NAME}_static_webserver_freshping.loadbalancer.server.port=8000
         - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.entrypoints=http
