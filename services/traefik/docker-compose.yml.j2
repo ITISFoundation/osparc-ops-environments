@@ -15,6 +15,9 @@ services:
       - "--entryPoints.metrics.address=:8082"
       - "--metrics.prometheus.entryPoint=metrics"
       - "--entryPoints.http.address=:80"
+      - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - '--entryPoints.postgres.address=:5432'
       - '--entryPoints.postgres2.address=:5433'
       - "--entryPoints.https.address=:443"

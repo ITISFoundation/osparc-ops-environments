@@ -107,8 +107,6 @@ services:
           memory: 128M
           cpus: '0.1'
       labels:
-        - traefik.enable=true
-        - traefik.docker.network=${MONITORED_NETWORK}
         - prometheus-job=registry-pull-through-cache
         - prometheus-port=5001
 networks:
