@@ -5,7 +5,7 @@ services:
       - '--api=true'
       - '--api.dashboard=true'
       - '--log.level=${OPS_TRAEFIK_LOGLEVEL}'
-      - '--accesslog=false'
+      #   - '--accesslog=true'
       - '--metrics.prometheus=true'
       - '--metrics.prometheus.addEntryPointsLabels=true'
       - '--metrics.prometheus.addServicesLabels=true'
@@ -15,14 +15,14 @@ services:
       - '--entryPoints.https.address=:443'
       - '--entryPoints.master_postgres.address=:5432'
       - '--entryPoints.smtp.address=:25'
-      - '--providers.swarm.endpoint=unix:///var/run/docker.sock'
-      - '--providers.swarm.exposedByDefault=false'
-      - "--core.defaultRuleSyntax=v2"
-      - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
-      - '--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
+      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
+      - '--providers.docker.swarmMode=true'
+      - '--providers.docker.exposedByDefault=false'
+      - '--tracing=true'
+      - '--tracing.jaeger=true'
+      - '--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling'
+      - '--tracing.jaeger.localAgentHostPort=jaeger:6831'
+      - '--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
       - '--entryPoints.https.forwardedHeaders.insecure'
       - '--providers.file.directory=/etc/traefik/'
       - '--providers.file.watch=true'
