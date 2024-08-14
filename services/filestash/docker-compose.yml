@@ -18,7 +18,7 @@ services:
         - traefik.http.routers.filestash.rule=Host(`${FILESTASH_DOMAIN}`)
         - traefik.http.routers.filestash.entrypoints=https
         - traefik.http.routers.filestash.tls=true
-        - traefik.http.routers.filestash.middlewares=ops_whitelist_ips@docker
+        - traefik.http.routers.filestash.middlewares=ops_whitelist_ips@swarm
       resources:
         limits:
           memory: 120M
