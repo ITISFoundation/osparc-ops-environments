@@ -33,7 +33,6 @@ services:
       - "--tracing.addinternals"
       - "--tracing.otlp=true"
       - "--tracing.otlp.http=true"
-      # - "--tracing.otlp.http.endpoint=0.0.0.0:4318/v1/traces"
     ports:
       - target: 80
         published: 80

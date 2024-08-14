@@ -6,7 +6,7 @@ extraObjects:
     name: selfsigned-issuer
     namespace: {{ .Release.Namespace }}
     annotations:
-      # ClusterIssuer depends on cert-manager CRDs. We need to wait for them to be installed before creating the ClusterIssuer
+      # It depends on cert-manager CRDs. We need to wait for CRDs to be installed
       "helm.sh/hook": post-install,post-upgrade
       "helm.sh/hook-weight": "1"
   spec:
@@ -17,6 +17,10 @@ extraObjects:
   metadata:
     name: local-ca
     namespace: {{ .Release.Namespace }}
+    annotations:
+      # It depends on cert-manager CRDs. We need to wait for CRDs to be installed
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
   spec:
     isCA: true
     commonName: local-ca
@@ -37,6 +41,10 @@ extraObjects:
   metadata:
     name: cert-issuer
     namespace: {{ .Release.Namespace }}
+    annotations:
+      # It depends on cert-manager CRDs. We need to wait for CRDs to be installed
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
   spec:
     ca:
       secretName: local-ca-secret
