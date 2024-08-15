@@ -94,17 +94,16 @@ services:
       - "--entryPoints.simcore_api.forwardedHeaders.insecure"
       - "--entryPoints.traefik_monitor.address=:8080"
       - "--entryPoints.traefik_monitor.forwardedHeaders.insecure"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.network=${SWARM_STACK_NAME}_default"
-      - "--providers.docker.swarmMode=true"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+      - "--providers.swarm.network=${SWARM_STACK_NAME}_default"
       # https://github.com/traefik/traefik/issues/7886
-      - "--providers.docker.swarmModeRefreshSeconds=1"
-      - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--providers.swarm.refreshSeconds=1"
+      - "--providers.swarm.exposedByDefault=false"
+      - "--providers.swarm.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
       - "--tracing=true"
-      - "--tracing.jaeger=true"
-      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
-      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--tracing.addinternals"
+      - "--tracing.otlp=true"
+      - "--tracing.otlp.http=true"
     deploy:
       labels:
         # oSparc postgres
