@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   traefik:
-    image: "traefik:v3.1.2@sha256:ec1a82940b8e00eaeef33fb4113aa1d1573b2ebb6440e10c023743fe96f08475"
+    image: traefik:v2.10.4
     init: true
     command:
       - "--api=true"
@@ -17,22 +17,20 @@ services:
       - "--entryPoints.http.address=:80"
       - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - '--entryPoints.postgres.address=:5432'
       - '--entryPoints.postgres2.address=:5433'
       - "--entryPoints.https.address=:443"
-      - "--entryPoints.https.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.exposedByDefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
       # so that internal services are not picked up
-      - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
-      - "--core.defaultRuleSyntax=v2"
+      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
       - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+
     ports:
       - target: 80
         published: 80
@@ -119,8 +117,8 @@ services:
           (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
         - traefik.http.routers.api.entrypoints=https
         - traefik.http.routers.api.tls=true
-        - traefik.http.routers.api.middlewares=ops_whitelist_ips@swarm,
-          ops_auth@swarm, ops_gzip@swarm
+        - traefik.http.routers.api.middlewares=ops_whitelist_ips@docker,
+          ops_auth@docker, ops_gzip@docker
         - traefik.http.services.api.loadbalancer.server.port=8080
         # prometheus labels
         - prometheus-job=traefik_ops
@@ -152,8 +150,8 @@ services:
           PathPrefix(`/whoami`)
         - traefik.http.routers.whoami.entrypoints=https
         - traefik.http.routers.whoami.tls=true
-        - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@swarm,
-          ops_auth@swarm, ops_gzip@swarm
+        - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@docker,
+          ops_auth@docker, ops_gzip@docker
       resources:
         limits:
           memory: 50M
