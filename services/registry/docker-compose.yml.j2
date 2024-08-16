@@ -66,8 +66,11 @@ services:
         mode: 0644
       - source: registry_config.yml
         target: /etc/docker/registry/config.yml
+{%- if REGISTRY_PULL_THROUGH_CACHE_ENABLED == "true" %}
   registry-pull-through-cache:
+    {%- raw %}
     hostname: "registry-ptc-{{.Node.Hostname}}-{{.Task.Slot}}"
+    {%- endraw %}
     image: registry:2.8.2
     environment:
       REGISTRY_HTTP_SECRET: ${REGISTRY_PULL_THROUGH_CACHE_HTTP_SECRET}
@@ -109,6 +112,7 @@ services:
       labels:
         - prometheus-job=registry-pull-through-cache
         - prometheus-port=5001
+{%- endif %}
 
 networks:
   public:

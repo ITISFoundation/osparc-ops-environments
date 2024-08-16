@@ -32,13 +32,3 @@ up-public: up
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .venv .env
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
-
-.venv:
-	# creating virtual environment with tooling (jinja, etc)
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
-
-define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2)
-endef
