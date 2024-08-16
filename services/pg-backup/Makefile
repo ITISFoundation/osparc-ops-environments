@@ -9,10 +9,11 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+include $(REPO_CONFIG_LOCATION)
 
 .PHONY: up ## Deploys pg-backup stack
 up: .init .env ${TEMP_COMPOSE}  ## Deploys pg-backup stack
-	docker stack deploy --with-registry-auth --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+	docker stack deploy --with-registry-auth --compose-file ${TEMP_COMPOSE} ${PREFIX_STACK_NAME}-${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys pg-backup stack for Dalco Cluster
 up-dalco: up
@@ -29,10 +30,8 @@ up-public: up
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: .venv .env
-	@$(call jinja, docker-compose.yml.j2, docker-compose.yml)
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env docker-compose.yml > $@
-	rm docker-compose.yml >/dev/null 2>&1;
+${TEMP_COMPOSE}: docker-compose.yml .venv .env
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .venv:
 	# creating virtual environment with tooling (jinja, etc)

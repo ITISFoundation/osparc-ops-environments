@@ -4,16 +4,12 @@
 
 # Include common functionality
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
-# TARGETS --------------------------------------------------
+
 include ${REPO_BASE_DIR}/scripts/common.Makefile
-
-.DEFAULT_GOAL := help
-
 include $(REPO_CONFIG_LOCATION)
 
-
-
-# CERTIFICATES ----------------------------------------------------
+# TARGETS --------------------------------------------------
+.DEFAULT_GOAL := help
 
 .PHONY: create-certificates
 create-certificates: rootca.crt domain.crt domain.key ## create self-signed certificates and ca authority
