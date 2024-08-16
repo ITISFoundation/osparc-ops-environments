@@ -1,19 +1,19 @@
 .DEFAULT_GOAL := help
 
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 include $(REPO_CONFIG_LOCATION)
 
+# Internal VARIABLES ------------------------------------------------
+# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
+STACK_NAME = ${PREFIX_STACK_NAME}-$(notdir $(shell pwd))
+TEMP_COMPOSE=.stack.$(notdir $(shell pwd)).yaml
+
 .PHONY: up ## Deploys pg-backup stack
 up: .init .env ${TEMP_COMPOSE}  ## Deploys pg-backup stack
-	docker stack deploy --with-registry-auth --compose-file ${TEMP_COMPOSE} ${PREFIX_STACK_NAME}-${STACK_NAME}
+	docker stack deploy --with-registry-auth --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys pg-backup stack for Dalco Cluster
 up-dalco: up
