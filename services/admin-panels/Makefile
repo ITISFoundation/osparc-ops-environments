@@ -11,17 +11,6 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-# Helpers -------------------------------------------------
-.venv:
-	# creating virtual environment with tooling (jinja, etc)
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
-
-define jinja
-	@.venv/bin/j2 --format=json $(1) $(2) -o $(3)
-endef
-
 .PHONY: .data.json
 .data.json:
 	@$(_tree) -J ${PWD}/data | jq ".[0]" > .data.json
