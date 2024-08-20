@@ -10,17 +10,6 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-# Helpers -------------------------------------------------
-.venv:
-	# creating virtual environment with tooling (jinja, etc)
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
-
-define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2)
-endef
-
 .PHONY: up ## Deploys maintenance page stack
 up: .init .env ${TEMP_COMPOSE}
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
