@@ -11,6 +11,11 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+# Helpers --------------------------------------------------
+define custom-jinja
+	@.venv/bin/j2 --format=json $(1) $(2) -o $(3)
+endef
+
 .PHONY: .data.json
 .data.json:
 	@$(_tree) -J ${PWD}/data | jq ".[0]" > .data.json
@@ -18,7 +23,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: docker-compose.yml
 docker-compose.yml: docker-compose.yml.j2 .venv .data.json
-	$(call jinja, $<, .data.json, tmp.yml)
+	$(call custom-jinja, $<, .data.json, tmp.yml)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
 	@rm tmp.yml
 
