@@ -1,6 +1,6 @@
 services:
   pg_backup:
-    image: eeshugerman/postgres-backup-s3:16
+    image: eeshugerman/postgres-backup-s3:14
     environment:
       SCHEDULE: '@midnight'
       BACKUP_KEEP_DAYS: 30
