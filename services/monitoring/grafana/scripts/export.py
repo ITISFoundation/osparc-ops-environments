@@ -1,7 +1,8 @@
-# pylint: skip-file
+# pylint: disable=pointless-string-statement,too-many-statements
 import json
 import os
 import shutil
+import sys
 import warnings
 from pathlib import Path
 
@@ -10,11 +11,9 @@ import typer
 from environs import Env
 
 repo_config_location = os.getenv("REPO_CONFIG_LOCATION")
-try:
-    assert repo_config_location is not None
-except Exception:
+if not repo_config_location:
     print("ERROR: Env-Var REPO_CONFIG_LOCATION not set.")
-    exit(1)
+    sys.exit(1)
 if "\n" in repo_config_location:
     repo_config_location = repo_config_location.split("\n")[0]
 
@@ -51,91 +50,91 @@ def main(foldername: str = ""):
 
     r = session.get(url + "datasources", headers=hed, verify=False)
     for datasource in r.json():
-        rDatasource = session.get(
+        r_datasource = session.get(
             url + "datasources/" + str(datasource["id"]), headers=hed, verify=False
         )
         with open(
             directory + "/datasources/" + str(datasource["id"]) + ".json", "w"
         ) as outfile:
             # If the datasource is Prometheus, we remove the login/password credentials
-            jsonData = rDatasource.json()
-            if jsonData["type"] == "prometheus":
-                jsonData["basicAuthUser"] = ""
-                jsonData["basicAuthPassword"] = ""
-            json.dump(jsonData, outfile, sort_keys=True, indent=2)
-            print("Export datasource " + jsonData["name"])
+            json_data = r_datasource.json()
+            if json_data["type"] == "prometheus":
+                json_data["basicAuthUser"] = ""
+                json_data["basicAuthPassword"] = ""
+            json.dump(json_data, outfile, sort_keys=True, indent=2)
+            print("Export datasource " + json_data["name"])
 
     # We export the dashboards
     print("**************** Export dashboards *******************")
     os.mkdir(directory + "/dashboards")
     r = session.get(url + "search?query=%", headers=hed, verify=False)
     for dashboard in r.json():
-        rDashboard = session.get(
+        r_dashboard = session.get(
             url + "dashboards/uid/" + str(dashboard["uid"]), headers=hed, verify=False
         )
-        if rDashboard.json()["meta"]["isFolder"] is not True:
+        if r_dashboard.json()["meta"]["isFolder"] is not True:
             if (
                 os.path.exists(
                     directory
                     + "/dashboards/"
-                    + rDashboard.json()["meta"]["folderTitle"]
+                    + r_dashboard.json()["meta"]["folderTitle"]
                 )
                 == False
             ):
                 os.mkdir(
                     directory
                     + "/dashboards/"
-                    + rDashboard.json()["meta"]["folderTitle"]
+                    + r_dashboard.json()["meta"]["folderTitle"]
                 )
 
             with open(
                 directory
                 + "/dashboards/"
-                + rDashboard.json()["meta"]["folderTitle"]
+                + r_dashboard.json()["meta"]["folderTitle"]
                 + "/"
-                + str(rDashboard.json()["dashboard"]["title"])
+                + str(r_dashboard.json()["dashboard"]["title"])
                 + ".json",
                 "w",
             ) as outfile:
-                print("Export Dashboard " + rDashboard.json()["dashboard"]["title"])
-                exportedDashboard = rDashboard.json()
-                exportedDashboard["meta"].pop("updated", None)
-                exportedDashboard["meta"].pop("created", None)
-                exportedDashboard["meta"].pop("folderId", None)
-                exportedDashboard["meta"].pop("folderUid", None)
-                exportedDashboard["meta"].pop("folderUrl", None)
-                exportedDashboard["meta"].pop("version", None)
-                exportedDashboard.pop("id", None)
-                exportedDashboard["dashboard"].pop("id", None)
-                exportedDashboard.pop("iteration", None)
-                json.dump(exportedDashboard, outfile, sort_keys=True, indent=2)
+                print("Export Dashboard " + r_dashboard.json()["dashboard"]["title"])
+                exported_dashboard = r_dashboard.json()
+                exported_dashboard["meta"].pop("updated", None)
+                exported_dashboard["meta"].pop("created", None)
+                exported_dashboard["meta"].pop("folderId", None)
+                exported_dashboard["meta"].pop("folderUid", None)
+                exported_dashboard["meta"].pop("folderUrl", None)
+                exported_dashboard["meta"].pop("version", None)
+                exported_dashboard.pop("id", None)
+                exported_dashboard["dashboard"].pop("id", None)
+                exported_dashboard.pop("iteration", None)
+                json.dump(exported_dashboard, outfile, sort_keys=True, indent=2)
 
     # Export Alerts
     print("**************** Export alerts  *******************")
-    if os.path.exists(directory + "/alerts/") == False:
+    if not os.path.exists(directory + "/alerts/"):
         os.mkdir(directory + "/alerts/")
     r = session.get(url + "ruler/grafana/api/v1/rules", headers=hed, verify=False)
     for alert in r.json()["ops"]:
         with open(directory + "/alerts/" + alert["name"] + ".json", "w") as outfile:
             print("Export Alert " + alert["name"])
             # Remove UID if present
-            for ruleIter in range(len(alert["rules"])):
-                alert["rules"][ruleIter]["grafana_alert"].pop("uid", None)
+            for rule_iter in range(len(alert["rules"])):
+                alert["rules"][rule_iter]["grafana_alert"].pop("uid", None)
                 # Remove orgId
-                alert["rules"][ruleIter]["grafana_alert"].pop("orgId", None)
+                alert["rules"][rule_iter]["grafana_alert"].pop("orgId", None)
                 # Remove id
-                alert["rules"][ruleIter]["grafana_alert"].pop("id", None)
+                alert["rules"][rule_iter]["grafana_alert"].pop("id", None)
                 # Remove id
-                alert["rules"][ruleIter]["grafana_alert"].pop("namespace_id", None)
+                alert["rules"][rule_iter]["grafana_alert"].pop("namespace_id", None)
                 # Remove id
-                alert["rules"][ruleIter]["grafana_alert"].pop("namespace_uid", None)
+                alert["rules"][rule_iter]["grafana_alert"].pop("namespace_uid", None)
                 if (
                     str(env.str("MACHINE_FQDN") + " - ")
-                    in alert["rules"][ruleIter]["grafana_alert"]["title"]
+                    in alert["rules"][rule_iter]["grafana_alert"]["title"]
                 ):
-                    alert["rules"][ruleIter]["grafana_alert"]["title"] = alert["rules"][
-                        ruleIter
-                    ]["grafana_alert"]["title"].replace(
+                    alert["rules"][rule_iter]["grafana_alert"]["title"] = alert[
+                        "rules"
+                    ][rule_iter]["grafana_alert"]["title"].replace(
                         str(env.str("MACHINE_FQDN") + " - "), ""
                     )
             json.dump(alert, outfile, sort_keys=True, indent=2)
