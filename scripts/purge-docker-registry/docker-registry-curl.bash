@@ -16,6 +16,7 @@ IFS=$'\n\t'
 console() {
     :
     return
+    # shellcheck disable=SC2317
     echo "${@}"
 }
 
