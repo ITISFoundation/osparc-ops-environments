@@ -1,14 +1,15 @@
-# pylint: skip-file
+# pylint: disable=invalid-name,consider-using-in,consider-using-with,expression-not-assigned
 import atexit
 import os
 import os.path
+import sys
 import time
 import warnings
 from pathlib import Path
 
 ####
-### Copies all files from one S3 bucket to another, or downloads them locally
-### Aimed at robustness, should handle network problems and corrupt files
+# Copies all files from one S3 bucket to another, or downloads them locally
+# Aimed at robustness, should handle network problems and corrupt files
 #
 #
 # Details:
@@ -32,31 +33,28 @@ warnings.filterwarnings(
 
 
 ############
-############ Common functionality
-def isObjectPresentOnBucket(botobucket, filepath, allObjectsBucket=None):
-    if allObjectsBucket == None:
+# Common functionality
+def is_object_present_on_bucket(botobucket, filepath, all_object_bucket=None):
+    if all_object_bucket is None:
         objs = list(botobucket.objects.filter(Prefix=filepath))
     else:
-        objs = list(allObjectsBucket.filter(Prefix=filepath))
-    if len(objs) == 1:
-        return True
-    else:
-        return False
+        objs = list(all_object_bucket.filter(Prefix=filepath))
+    return bool(len(objs) == 1)
 
 
 #
 # Uses given eTag (=hash) to check if files are identical
 # This might only work for files smaller than some Gb due to chunking
-def isObjectInBucketIdentical(
-    botoresourceSource,
-    bucketnameSource,
-    botoresourceTarget,
-    bucketnameTarget,
-    filepathBucket,
+def is_object_in_bucket_identical(
+    boto_resource_source,
+    bucket_name_source,
+    boto_resource_target,
+    bucketname_target,
+    filepath_bucket,
 ):
-    sourceobj = botoresourceSource.Object(bucketnameSource, filepathBucket)
+    sourceobj = boto_resource_source.Object(bucket_name_source, filepath_bucket)
     sourceobj.load()
-    targetobj = botoresourceTarget.Object(bucketnameTarget, filepathBucket)
+    targetobj = boto_resource_target.Object(bucketname_target, filepath_bucket)
     targetobj.load()
     return sourceobj.e_tag != targetobj.e_tag
 
@@ -83,10 +81,10 @@ def generateCypherKeyFromPassword(password, salt):
 def copyOrDownloadFile(
     downloadfolderlocal,
     key,
-    listOfSkipped,
-    listOfSuccess,
-    listOfFailed,
-    listOfFailedWithExceptions,
+    listOfSkipped_,
+    listOfSuccess_,
+    listOfFailed_,
+    listOfFailedWithExceptions_,
     sourcebucketname,
     src_s3,
     destinationbucketname="",
@@ -98,8 +96,8 @@ def copyOrDownloadFile(
     encrypt=False,
     decrypt=False,
     cypherKey=None,
-):
-    if dest_s3 == None:
+):  # pylint: disable=too-many-arguments,too-many-branches,too-many-statements
+    if dest_s3 is None:
         useDestination_ = False
     else:
         useDestination_ = True
@@ -122,15 +120,15 @@ def copyOrDownloadFile(
             my_file = Path(downloadFilename)
             if not useDestination_:
                 print("ERROR. Filename too long. THIS FILE WOULD BE OVERWRITTEN!")
-                exit(1)
+                sys.exit(1)
         else:
             raise
-    if not my_file.is_file():
+    if not my_file.is_file():  # pylint: disable=too-many-nested-blocks
         try:
             # If we copy to remote bucket
             if downloadfolderlocal == "." and useDestination_:
-                if allObjectsDestinationBucket != None:
-                    if isObjectPresentOnBucket(
+                if allObjectsDestinationBucket is not None:
+                    if is_object_present_on_bucket(
                         dest_bucket, key, allObjectsDestinationBucket
                     ):
                         if no_overwrite:
@@ -138,7 +136,7 @@ def copyOrDownloadFile(
                             return 0
                         targetObj = src_s3.Object(sourcebucketname, key)
                         targetObj.load()  # Assert object's metadata can be loaded
-                        if isObjectInBucketIdentical(
+                        if is_object_in_bucket_identical(
                             dest_s3,
                             destinationbucketname,
                             src_s3,
@@ -149,7 +147,7 @@ def copyOrDownloadFile(
                             listOfSkipped.add(key)
                             return 0
             src_bucket.download_file(key, downloadFilename)
-            if cypherKey != None:
+            if cypherKey is not None:
                 assert not (encrypt and decrypt)
                 if encrypt:
                     file_in = open(downloadFilename, "rb").read()
@@ -157,7 +155,9 @@ def copyOrDownloadFile(
                     ciphertext, tag = cipher.encrypt_and_digest(file_in)
                     #
                     file_out = open(downloadFilename, "wb")
-                    [file_out.write(x) for x in (cipher.nonce, tag, ciphertext)]
+                    [
+                        file_out.write(x) for x in (cipher.nonce, tag, ciphertext)
+                    ]  # pylint: disable=expression-not-assigned
                     file_out.close()
                 elif decrypt:
                     file_in = open(downloadFilename, "rb")
@@ -177,33 +177,33 @@ def copyOrDownloadFile(
                 )
                 # Delete local file
                 os.system("rm " + downloadFilename)
-            listOfSuccess.add(key)
+            listOfSuccess_.add(key)
             return 0
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             # print(e)
-            listOfFailed.add(key)
-            listOfFailedWithExceptions.append([key, e])
+            listOfFailed_.add(key)
+            listOfFailedWithExceptions_.append([key, e])
             print("Failed for ", str(key))
             return 1
     else:
         # print("Skipping ",str(key))
-        listOfSkipped.add(key)
+        listOfSkipped_.add(key)
         return 0
 
 
 #######################################################
 
 
-####### Variable init
+# Variable init
 listOfSuccess = set()
 listOfFailed = set()
-listOfFailedWithExceptions = list()
+listOfFailedWithExceptions = []
 listOfSkipped = set()
 listTotalInSourceBucket = set()
 #######################################################
 
 
-######## Main
+# Main
 def main(
     sourcebucketname: str,
     sourcebucketaccess: str,
@@ -224,7 +224,7 @@ def main(
     encryption: bool = typer.Option(False, "--encryption"),
     decryption: bool = typer.Option(False, "--decryption"),
     password: str = "",
-):
+):  # pylint: disable=too-many-arguments,too-many-branches,too-many-statements
     if nooverwrites:
         print("CONFIG: WILL NOT OVERWRITE ANY FILES.")
     if (encryption or decryption) and password != "":
@@ -283,7 +283,8 @@ def main(
         atexit.register(saveFiles)
 
     # Configure source bucket
-    # via https://docs.min.io/docs/how-to-use-aws-sdk-for-python-with-minio-server.html
+    # via
+    # https://docs.min.io/docs/how-to-use-aws-sdk-for-python-with-minio-server.html
     from botocore.client import Config
 
     src_s3 = boto3.resource(
@@ -309,7 +310,7 @@ def main(
         )
         try:
             dest_s3.create_bucket(Bucket=destinationbucketname)
-        except boto3.client("s3").exceptions.BucketAlreadyOwnedByYou as error:
+        except boto3.client("s3").exceptions.BucketAlreadyOwnedByYou:
             pass
         time.sleep(0.25)
         dest_bucket = dest_s3.Bucket(destinationbucketname)
@@ -324,10 +325,10 @@ def main(
                 print("Target Backup Directory is not empty!")
                 answer = input("Do you want to overwrite? [y/N]")
                 if answer != "y" and answer != "Y":
-                    exit()
+                    sys.exit(0)
         else:
             print("ERROR: Given backup directory doesn't exist")
-            exit()
+            sys.exit(1)
     #
     elif destinationendpointurl != "":
         print(
@@ -335,7 +336,7 @@ def main(
         )
     else:
         print("No local download folder or destination bucket specified. Aborting.")
-        exit(1)
+        sys.exit(1)
 
     print("Starting...")
     startTime = time.time()
@@ -463,7 +464,8 @@ def main(
                             decrypt=decryption,
                         )
     #
-    # If provided, read oSparc postgrs export csv files to resolve user%project associated with a corrupt file
+    # If provided, read oSparc postgrs export csv files to resolve
+    # user%project associated with a corrupt file
     if filemetadatacsv != "" and projectscsv != "":
         print("Trying to match corrupted files with their DB owner and projects.")
         filemetadata = pd.read_csv(filemetadatacsv)
@@ -483,9 +485,9 @@ def main(
         targetObj.load()
         print("Filesize: ", str(size(targetObj.content_length)))
         print("Last modified: ", str(targetObj.last_modified))
-        if (
-            filemetadatacsv != "" and projectscsv != ""
-        ):  # If we have the oSparc Postgres files, we can provide more details about the files which we couldnt download
+        # If we have the oSparc Postgres files, we can provide more details
+        # about the files which we couldnt download
+        if filemetadatacsv != "" and projectscsv != "":
             selection = filemetadata.loc[filemetadata["file_uuid"].isin([str(item[0])])]
             currentItem = selection.iloc[0]
             userID = currentItem.user_id
