@@ -298,9 +298,6 @@ def main(foldername: str = "", overwrite: bool = True):
                     configFilePath,
                     jsonObject["dashboard"]["title"],
                     jsonObject,
-                    session,
-                    url,
-                    hed,
                 )
                 dashboard = {"Dashboard": jsonObject["dashboard"]}
                 # DEBUGPRINT
@@ -452,9 +449,6 @@ def main(foldername: str = "", overwrite: bool = True):
                     configFilePath,
                     jsonObject["name"],
                     rule,
-                    session,
-                    url,
-                    hed,
                 )
                 # Propagate subsituted UIDs to other fields
                 for i in rule["grafana_alert"]["data"]:
