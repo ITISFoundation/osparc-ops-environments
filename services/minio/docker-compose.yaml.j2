@@ -46,7 +46,7 @@ services:
         - traefik.http.routers.minio.rule=Host(`${STORAGE_DOMAIN}`)
         - traefik.http.routers.minio.entrypoints=https
         - traefik.http.routers.minio.tls=true
-        - traefik.http.routers.minio.middlewares=ops_gzip@swarm
+        - traefik.http.routers.minio.middlewares=ops_gzip@docker
     command: >
       server
       {%- for i in range(num_minios|int) %}
