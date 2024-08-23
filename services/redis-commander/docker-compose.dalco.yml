@@ -12,14 +12,14 @@ services:
         production_announcements:production_redis:${REDIS_PORT}:5:${REDIS_PASSWORD},
         production_distributed_identifiers:production_redis:${REDIS_PORT}:6:${REDIS_PASSWORD},
         production_deferred_tasks:production_redis:${REDIS_PORT}:7:${REDIS_PASSWORD},
-        staging_resources:staging_redis:${REDIS_PORT}:0:${REDIS_PASSWORD},
-        staging_locks:staging_redis:${REDIS_PORT}:1:${REDIS_PASSWORD},
-        staging_validation_codes:staging_redis:${REDIS_PORT}:2:${REDIS_PASSWORD},
-        staging_scheduled_maintenance:staging_redis:${REDIS_PORT}:3:${REDIS_PASSWORD},
-        staging_user_notifications:staging_redis:${REDIS_PORT}:4:${REDIS_PASSWORD},
-        staging_announcements:staging_redis:${REDIS_PORT}:5:${REDIS_PASSWORD},
-        staging_distributed_identifiers:staging_redis:${REDIS_PORT}:6:${REDIS_PASSWORD},
-        staging_deferred_tasks:staging_redis:${REDIS_PORT}:7:${REDIS_PASSWORD}
+        staging_resources:staging_redis:${REDIS_PORT}:0:${REDIS_STAGING_PASSWORD},
+        staging_locks:staging_redis:${REDIS_PORT}:1:${REDIS_STAGING_PASSWORD},
+        staging_validation_codes:staging_redis:${REDIS_PORT}:2:${REDIS_STAGING_PASSWORD},
+        staging_scheduled_maintenance:staging_redis:${REDIS_PORT}:3:${REDIS_STAGING_PASSWORD},
+        staging_user_notifications:staging_redis:${REDIS_PORT}:4:${REDIS_STAGING_PASSWORD},
+        staging_announcements:staging_redis:${REDIS_PORT}:5:${REDIS_STAGING_PASSWORD},
+        staging_distributed_identifiers:staging_redis:${REDIS_PORT}:6:${REDIS_STAGING_PASSWORD},
+        staging_deferred_tasks:staging_redis:${REDIS_PORT}:7:${REDIS_STAGING_PASSWORD}
       - URL_PREFIX=/redis
     deploy:
       placement:
