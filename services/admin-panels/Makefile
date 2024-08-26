@@ -11,14 +11,8 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-# Helpers -------------------------------------------------
-.venv:
-	# creating virtual environment with tooling (jinja, etc)
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
-
-define jinja
+# Helpers --------------------------------------------------
+define custom-jinja
 	@.venv/bin/j2 --format=json $(1) $(2) -o $(3)
 endef
 
@@ -29,7 +23,7 @@ endef
 
 .PHONY: docker-compose.yml
 docker-compose.yml: docker-compose.yml.j2 .venv .data.json
-	$(call jinja, $<, .data.json, tmp.yml)
+	$(call custom-jinja, $<, .data.json, tmp.yml)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
 	@rm tmp.yml
 

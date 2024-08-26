@@ -1,7 +1,8 @@
-# pylint: skip-file
+# pylint: disable=invalid-name,pointless-string-statement,too-many-statements,too-many-branches
 import glob
 import json
 import os
+import sys
 import time
 import warnings
 from pathlib import Path
@@ -26,13 +27,13 @@ env.read_env(repo_config_location, recurse=False)
 
 
 def dictionary_traversal_datasource_uid_replacement(
-    input, datasourceType, replacementID
+    _input, datasourceType, replacementID
 ):
     """
     Traverses Dictionary, potentially with lists of dicts, recursively.
     If a "datasource" dict tis found, the uid value is replaced.
     """
-    for key, value in input.items():
+    for key, value in _input.items():
         # If we found the target dict "datasource"
         if (
             key == "datasource"
@@ -65,17 +66,13 @@ def subsituteDatasources(
     configFilePath,
     dashboardTitle,
     jsonObject,
-    session,
-    url,
-    hed,
 ):
     if configFilePath.is_file():
-        cfile = open(str(configFilePath))
-        configYaml = yaml.load(cfile, Loader=yaml.FullLoader)
-        cfile.close()
+        with open(str(configFilePath)) as cfile:
+            configYaml = yaml.load(cfile, Loader=yaml.FullLoader)
     else:
         print("ERROR: Config file missing at: " + str(configFilePath))
-        exit(1)
+        sys.exit(1)
     ######
     ######
     listOfDatasources = []
@@ -180,7 +177,7 @@ def main(foldername: str = "", overwrite: bool = True):
             print("Received non-200 status code upon import: ", str(r.status_code))
             print("ABORTING!")
             print(r.json())
-            exit(1)
+            sys.exit(1)
         for i in r.json():
             print("Response: ", r.status_code)
             r = session.delete(
@@ -194,15 +191,9 @@ def main(foldername: str = "", overwrite: bool = True):
 
         # We add the credentials for the PGSQL Databases with the secureJsonData field
         # DK Mar2023 : THIS IS CURRENTLY NOT USED
-        if jsonObjectDatasource["type"] == "postgres":
+        if jsonObjectDatasource["type"].lower() == "postgres":
             print("postgres datasource is currently not supported (deprecated)")
-            exit(1)
-            jsonObjectDatasource["secureJsonData"] = {
-                "password": env.str("POSTGRES_GRAFANA_PASSWORD")
-            }
-            jsonObjectDatasource["user"] = env.str("POSTGRES_GRAFANA_USER")
-            jsonObjectDatasource["url"] = env.str("POSTGRES_HOST")
-            # We keep a list of PG datasources and their UIDs
+            sys.exit(1)
         elif jsonObjectDatasource["type"] == "Prometheus":
             jsonObjectDatasource["basicAuthUser"] = env.str("SERVICES_USER")
             jsonObjectDatasource["basicAuthPassword"] = env.str("SERVICES_PASSWORD")
@@ -239,7 +230,7 @@ def main(foldername: str = "", overwrite: bool = True):
             print(
                 "Error: Looking for folders but got json file. Is your folder structure organized properly?\nABORTING"
             )
-            exit(1)
+            sys.exit(1)
         for file in glob.glob(directory + "/*"):
             with open(file) as jsonFile:
                 jsonObject = json.load(
@@ -260,7 +251,7 @@ def main(foldername: str = "", overwrite: bool = True):
             if deleteResponse.status_code != 202:
                 print("Received non-202 status code upon delete: ", str(r.status_code))
                 print("ABORTING!")
-                exit(1)
+                sys.exit(1)
 
     # We add them in grafana
     print("**************** Add folders *******************")
@@ -301,14 +292,12 @@ def main(foldername: str = "", overwrite: bool = True):
                 assert folderID
                 print("Add dashboard " + jsonObject["dashboard"]["title"])
                 # Subsitute datasource UID
+                # pylint: disable=too-many-function-args
                 subsituteDatasources(
                     directoriesDatasources,
                     configFilePath,
                     jsonObject["dashboard"]["title"],
                     jsonObject,
-                    session,
-                    url,
-                    hed,
                 )
                 dashboard = {"Dashboard": jsonObject["dashboard"]}
                 # DEBUGPRINT
@@ -328,7 +317,7 @@ def main(foldername: str = "", overwrite: bool = True):
                     )
                     # print(r.json())
                     print("JSON file failed uploading.")
-                    exit()
+                    sys.exit()
 
     # IMPORT ALERTS
     # 1. Provision Alerting User
@@ -435,7 +424,7 @@ def main(foldername: str = "", overwrite: bool = True):
         )
         print("Response Error:")
         print(r.json())
-        exit(1)
+        sys.exit(1)
     # 2. Import alerts
     print("**************** Add alerts *******************")
     # Finally we import the dashboards
@@ -447,21 +436,19 @@ def main(foldername: str = "", overwrite: bool = True):
     for file in directoriesAlerts:
         with open(file) as jsonFile:
             jsonObject = json.load(jsonFile)
-            #
+            # pylint: disable=too-many-nested-blocks
             for rule in jsonObject["rules"]:
                 # Add deployment name to alert name
                 rule["grafana_alert"]["title"] = (
                     env.str("MACHINE_FQDN") + " - " + rule["grafana_alert"]["title"]
                 )
                 # Subsitute UIDs of datasources
+                # pylint: disable=too-many-function-args
                 subsituteDatasources(
                     directoriesDatasources,
                     configFilePath,
                     jsonObject["name"],
                     rule,
-                    session,
-                    url,
-                    hed,
                 )
                 # Propagate subsituted UIDs to other fields
                 for i in rule["grafana_alert"]["data"]:
@@ -495,7 +482,7 @@ def main(foldername: str = "", overwrite: bool = True):
                 print(r.json())
                 # print(r.json())
                 print("JSON file failed uploading.")
-                exit()
+                sys.exit()
 
 
 if __name__ == "__main__":

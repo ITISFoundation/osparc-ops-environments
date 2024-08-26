@@ -238,6 +238,17 @@ clean-default: .check_clean ## Cleans all outputs
 			 	--label-add minio=true {}' > /dev/null; \
 	fi
 
+# Helpers -------------------------------------------------
+.venv:
+	# creating virtual environment with tooling (jinja, etc)
+	@python3 -m venv .venv
+	@.venv/bin/pip3 install --upgrade pip wheel setuptools
+	@.venv/bin/pip3 install jinja2 j2cli[yaml]
+
+define jinja
+	.venv/bin/j2 --format=env $(1) .env -o $(2)
+endef
+
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default
 	@ true

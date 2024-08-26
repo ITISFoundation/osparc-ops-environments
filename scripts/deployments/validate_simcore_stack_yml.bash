@@ -75,6 +75,10 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     if [ "${TARGETNAME}" == "whoami" ]; then
         continue
     fi
+    #  Continue if the service is efs-guardian, as it cannot start because mounting the AWS Distributed Elastic File System to the runner would be required.
+    if [ "${TARGETNAME}" == "efs-guardian" ]; then
+        continue
+    fi
     export TARGET_BINARY="simcore-service"
     echo "Assuming TARGET_BINARY in ${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
     # Pull image from registry, just in case

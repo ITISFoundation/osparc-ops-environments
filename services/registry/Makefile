@@ -53,6 +53,9 @@ up-local: up
 
 # Helpers -------------------------------------------------
 
+docker-compose.yml:  docker-compose.yml.j2 .venv .env
+	@$(call jinja, $<, $@)
+
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.self-signed.yml .env
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.self-signed.yml > $@
