@@ -248,8 +248,11 @@ def main(foldername: str = "", overwrite: bool = True):
             deleteResponse = session.delete(
                 url + "ruler/grafana/api/v1/rules/ops/" + alert["name"]
             )
-            if deleteResponse.status_code != 202:
-                print("Received non-202 status code upon delete: ", str(r.status_code))
+            if deleteResponse.status_code != 202 or deleteResponse.status_code != 200:
+                print(
+                    "Received status code not 200 or 202 upon delete: ",
+                    str(r.status_code),
+                )
                 print("ABORTING!")
                 sys.exit(1)
 
