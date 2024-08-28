@@ -439,27 +439,36 @@ def main(foldername: str = "", overwrite: bool = True):
     else:
         directoriesAlerts = glob.glob(foldername + "/alerts/*")
     #
-    # print("***************** Add folders ******************")
+    print("***************** Add folders ******************")
     # jsondata = {"title": "alerts"}
-    # r = session.get(
-    #    url + "folders",
-    #    headers=hed,
-    #    verify=False,
-    # )
+    r = session.get(
+        url + "folders",
+        headers=hed,
+        verify=False,
+    )
     # r = session.post(
     #    url + "folders",
     #    json=jsondata,
     #    headers=hed,
     #    verify=False,
     # )
-    # if r.status_code != 200:
-    #    print(
-    #        "Received non-200 status code upon alerts folder creation: ",
-    #        str(r.status_code),
-    #    )
-    #    print(r.json())
-    #    sys.exit(1)
-    # alerts_folder_uid = r.json()["uid"]
+    ops_uid = (
+        r.json()[
+            next((i for i, item in enumerate(r.json()) if item["title"] == "ops"), None)
+        ]["uid"]
+        if next((i for i, item in enumerate(r.json()) if item["title"] == "ops"), None)
+        else None
+    )
+    if not ops_uid:
+        print("Could not find required grafana folder named `ops`. Aborting.")
+        sys.exit(1)
+    print(f"Info: Adding alerts always to folder `ops`, determined with uid {ops_uid}.")
+    if r.status_code != 200:
+        print(
+            "Received non-200 status code upon alerts folder creation: ",
+            str(r.status_code),
+        )
+        sys.exit(1)
     #
     for file in directoriesAlerts:
         with open(file) as jsonFile:
@@ -497,18 +506,14 @@ def main(foldername: str = "", overwrite: bool = True):
             print("Add alerts " + jsonObject["name"])
 
             r = session.post(
-                url + "ruler/grafana/api/v1/rules/ops",
+                url + f"ruler/grafana/api/v1/rules/{ops_uid}",
                 json=jsonObject,
                 headers=hed,
                 verify=False,
             )
-            # with open(directory + "/debug.json", 'w') as outfile:
-            #    json.dump(jsonObject, outfile, sort_keys=True, indent=2)
-
             if r.status_code != 202:
                 print("Received non-202 status code upon import: ", str(r.status_code))
                 print(r.json())
-                # print(r.json())
                 print("JSON file failed uploading.")
                 sys.exit()
 
