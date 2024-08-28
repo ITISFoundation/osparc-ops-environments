@@ -96,7 +96,7 @@ services:
         - traefik.http.routers.graylog.tls=true
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, graylog_replace_regex
+        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
 
 volumes:
   mongo_data:

@@ -19,7 +19,7 @@ services:
         - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
         - traefik.http.routers.jaeger.tls=true
-        - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
+        - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@swarm, ops_auth@swarm, ops_gzip@swarm
         - prometheus-job=jaeger
         - prometheus-port=14269
       resources:
