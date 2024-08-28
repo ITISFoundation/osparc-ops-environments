@@ -440,18 +440,11 @@ def main(foldername: str = "", overwrite: bool = True):
         directoriesAlerts = glob.glob(foldername + "/alerts/*")
     #
     print("***************** Add folders ******************")
-    # jsondata = {"title": "alerts"}
     r = session.get(
         url + "folders",
         headers=hed,
         verify=False,
     )
-    # r = session.post(
-    #    url + "folders",
-    #    json=jsondata,
-    #    headers=hed,
-    #    verify=False,
-    # )
     ops_uid = (
         r.json()[
             next((i for i, item in enumerate(r.json()) if item["title"] == "ops"), None)
