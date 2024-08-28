@@ -174,7 +174,7 @@ def main(foldername: str = "", overwrite: bool = True):
         # print("Deleting datasource " + str(i["uid"]) + " - " + str(i["name"]))
         r = session.get(url + "datasources", headers=hed, verify=False)
         if r.status_code > 300:
-            print("Received non-200 status code upon import: ", str(r.status_code))
+            print("Recieved non-200 status code upon import: ", str(r.status_code))
             print("ABORTING!")
             print(r.json())
             sys.exit(1)
@@ -241,17 +241,19 @@ def main(foldername: str = "", overwrite: bool = True):
     directoriesData = list(set(directoriesData))
 
     print("Deleting alerts")
-    r = session.get(url + "prometheus/grafana/api/v1/rules", headers=hed, verify=False)
+    r = session.get(url + "v1/provisioning/alert-rules", headers=hed, verify=False)
     # Status code is 404 if no alerts are present. Handling it:
     if r.status_code != 404:
-        for alert in r.json()["data"]["groups"]:
+        for alert in r.json():
             deleteResponse = session.delete(
-                url + "ruler/grafana/api/v1/rules/ops/" + alert["name"]
+                url + f"v1/provisioning/alert-rules/{alert['uid']}",
+                headers=hed,
+                verify=False,
             )
-            if deleteResponse.status_code != 202 and deleteResponse.status_code != 200:
+            if deleteResponse.status_code < 200 or deleteResponse.status_code > 204:
                 print(
-                    "Received status code not 200 or 202 upon delete: ",
-                    str(r.status_code),
+                    "Received status code not 200-204 upon delete: ",
+                    str(deleteResponse.status_code),
                 )
                 print("ABORTING!")
                 sys.exit(1)
@@ -436,6 +438,29 @@ def main(foldername: str = "", overwrite: bool = True):
         directoriesAlerts += glob.glob("./../assets/shared" + "/alerts/*")
     else:
         directoriesAlerts = glob.glob(foldername + "/alerts/*")
+    #
+    # print("***************** Add folders ******************")
+    # jsondata = {"title": "alerts"}
+    # r = session.get(
+    #    url + "folders",
+    #    headers=hed,
+    #    verify=False,
+    # )
+    # r = session.post(
+    #    url + "folders",
+    #    json=jsondata,
+    #    headers=hed,
+    #    verify=False,
+    # )
+    # if r.status_code != 200:
+    #    print(
+    #        "Received non-200 status code upon alerts folder creation: ",
+    #        str(r.status_code),
+    #    )
+    #    print(r.json())
+    #    sys.exit(1)
+    # alerts_folder_uid = r.json()["uid"]
+    #
     for file in directoriesAlerts:
         with open(file) as jsonFile:
             jsonObject = json.load(jsonFile)
