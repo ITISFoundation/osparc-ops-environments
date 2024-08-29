@@ -33,7 +33,7 @@ configs:
     file: ./smokeping_prober_config.yaml
 services:
   cadvisor-exporter:
-    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -56,7 +56,7 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.47.2
+    image: prom/prometheus:v2.54.0
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -90,7 +90,7 @@ services:
         - traefik.http.routers.prometheuscatchall.entrypoints=https
         - traefik.http.routers.prometheuscatchall.tls=true
         - traefik.http.middlewares.prometheuscatchall_stripprefixregex.stripprefixregex.regex=^/prometheus
-        - traefik.http.routers.prometheuscatchall.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheuscatchall_stripprefixregex
+        - traefik.http.routers.prometheuscatchall.middlewares=ops_whitelist_ips@swarm, ops_auth@swarm, ops_gzip@swarm, prometheuscatchall_stripprefixregex
         - prometheus-job=prometheuscatchall
         - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
@@ -102,7 +102,7 @@ services:
           cpus: "0.2"
   prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.47.2
+    image: prom/prometheus:v2.54.0
     volumes:
       - prometheus_data_federation:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -136,7 +136,7 @@ services:
         - traefik.http.routers.prometheusfederation.entrypoints=https
         - traefik.http.routers.prometheusfederation.tls=true
         - traefik.http.middlewares.prometheusfederation_stripprefixregex.stripprefixregex.regex=^/prometheusfederation
-        - traefik.http.routers.prometheusfederation.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker, prometheusfederation_stripprefixregex
+        - traefik.http.routers.prometheusfederation.middlewares=ops_whitelist_ips@swarm, ops_auth@swarm, ops_gzip@swarm, prometheusfederation_stripprefixregex
         - prometheus-job=prometheusfederation
         - prometheus-port=${MONITORING_PROMETHEUS_PORT}
       resources:
@@ -147,7 +147,7 @@ services:
           memory: 64M
           cpus: "0.2"
   node-exporter:
-    image: prom/node-exporter:v1.6.1
+    image: prom/node-exporter:v1.8.2
     volumes:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
@@ -205,7 +205,7 @@ services:
           cpus: "0.1"
 
   alertmanager:
-    image: prom/alertmanager:v0.25.0
+    image: prom/alertmanager:v0.27.0
     volumes:
       - alertmanager_data:/alertmanager
     command:
@@ -249,7 +249,7 @@ services:
           cpus: "0.1"
 
   grafana:
-    image: grafana/grafana-oss:10.0.3
+    image: grafana/grafana-oss:11.1.3
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -271,7 +271,7 @@ services:
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.grafana.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, grafana_replace_regex
+        - traefik.http.routers.grafana.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, grafana_replace_regex
       resources:
         limits:
           memory: 256M
@@ -281,7 +281,7 @@ services:
           cpus: "0.1"
 
   smokeping-prober-exporter:
-    image: quay.io/superq/smokeping-prober:v0.7.1
+    image: quay.io/superq/smokeping-prober:v0.8.1
     networks:
       - monitored
     volumes: []
@@ -309,7 +309,7 @@ services:
   dcgm-exporter:
     cap_add:
       - SYS_ADMIN
-    image: nvidia/dcgm-exporter:3.1.8-3.1.5-ubuntu20.04
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.7-3.5.0-ubuntu22.04
     hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
       - monitored
@@ -330,12 +330,12 @@ services:
       - prometheus-port=9400
 
   pgsql-query-exporter:
-    image: adonato/query-exporter:2.8.3
+    image: adonato/query-exporter:2.10.0
     volumes: []
-    dns: 8.8.8.8
+    dns: 9.9.9.9
     configs:
       - source: pgsql_query_exporter_config
-        target: /config.yaml
+        target: /config/config.yaml
     networks:
       - monitored
       - public
@@ -375,7 +375,7 @@ services:
           memory: 32M
           cpus: "0.1"
   {{_stack}}-redis-exporter:
-    image: oliver006/redis_exporter:v1.58.0-alpine
+    image: oliver006/redis_exporter:v1.62.0-alpine
     networks:
       - monitored
     environment:

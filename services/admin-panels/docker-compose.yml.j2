@@ -91,7 +91,7 @@ services:
         - traefik.http.routers.adminpanels.entrypoints=https
         - traefik.http.routers.adminpanels.priority=1
         - traefik.http.routers.adminpanels.tls=true
-        - traefik.http.routers.adminpanels.middlewares=ops_whitelist_ips@docker, ops_gzip@docker
+        - traefik.http.routers.adminpanels.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm
       placement:
         constraints:
           - node.labels.ops==true

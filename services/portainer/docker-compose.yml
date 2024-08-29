@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   agent:
-    image: portainer/agent:2.18.4 # Needs to match portainer-ce version
+    image: portainer/agent:2.20.3 # Needs to match portainer-ce version
     init: true
     environment:
       # REQUIRED: Should be equal to the service name prefixed by "tasks." when
@@ -26,7 +26,7 @@ services:
           memory: 50M
 
   portainer:
-    image: portainer/portainer-ce:2.18.4
+    image: portainer/portainer-ce:2.20.3
     init: true
     command: >
       -H tcp://tasks.agent:9001 --tlsskipverify
@@ -61,7 +61,7 @@ services:
         - traefik.http.routers.portainer.tls=true
         - traefik.http.middlewares.portainer_replace_regex.replacepathregex.regex=^/portainer/?(.*)$$
         - traefik.http.middlewares.portainer_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.portainer.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, portainer_replace_regex
+        - traefik.http.routers.portainer.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, portainer_replace_regex
 
 networks:
   agent_network:
