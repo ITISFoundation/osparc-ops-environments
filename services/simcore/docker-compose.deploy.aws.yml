@@ -65,6 +65,19 @@ services:
     deploy:
       replicas: 3
 
+  redis:
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.tcp.services.${SWARM_STACK_NAME}_redis.loadBalancer.server.port=6379
+        - traefik.tcp.routers.redis.service=${SWARM_STACK_NAME}_redis
+        - traefik.tcp.routers.redis.entrypoints=redis
+        - traefik.tcp.routers.redis.tls=false
+        - traefik.tcp.routers.redis.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)
+    networks:
+      - public
+
 volumes:
    efs_volume:
        driver_opts:

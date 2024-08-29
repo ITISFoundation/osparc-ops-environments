@@ -12,8 +12,11 @@ CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 			echo "'helmfile' is not installed. Install it to continue ...";\
 	fi
 
-helmfile.yaml:
-	cp $(CONFIG_DIR)/helmfile.yaml $(REPO_BASE_DIR)/charts/helmfile.yaml
+helmfile.yaml: simcore-charts/helmfile.yaml
+	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml
+
+simcore-charts/helmfile.yaml:
+	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
 
 .PHONY: helmfile-lint
 helmfile-lint: .check-helmfile-installed helmfile.yaml
