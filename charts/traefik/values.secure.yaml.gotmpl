@@ -1,7 +1,8 @@
-additionalArguments:
-  - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-  - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-  - "--api.insecure=true"
+ports:
+  web:
+    redirectTo:
+       port: websecure
+       permanent: true
 
 extraObjects:
 
@@ -40,9 +41,9 @@ extraObjects:
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
-    name: internal-ipwhitelist
+    name: internal-ipallowlist
   spec:
-    ipWhiteList:
+    ipAllowList:
       sourceRange:
         - 10.0.0.0/8
         - 172.16.0.0/12

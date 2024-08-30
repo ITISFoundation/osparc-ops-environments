@@ -48,7 +48,6 @@ ingress:
   className: ""
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: webinternal
-    traefik.ingress.kubernetes.io/router.middlewares: internal-ipwhitelist@kubernetescrd
   hosts:
     - host: resource-usage-tracker.{{ requiredEnv  "K8S_PRIVATE_FQDN" }}
       paths:
@@ -100,52 +99,52 @@ affinity: {}
 
 env:
   - name: LOG_FORMAT_LOCAL_DEV_ENABLED
-    value: {{ requiredEnv "LOG_FORMAT_LOCAL_DEV_ENABLED"}}
+    value: {{ requiredEnv "LOG_FORMAT_LOCAL_DEV_ENABLED" }}
   - name: POSTGRES_DB
-    value: {{ requiredEnv "POSTGRES_DB"}}
+    value: {{ requiredEnv "POSTGRES_DB" }}
   - name: POSTGRES_ENDPOINT
-    value: {{ requiredEnv "POSTGRES_ENDPOINT"}}
+    value: {{ requiredEnv "POSTGRES_ENDPOINT" }}
   - name: POSTGRES_HOST
-    value: {{ requiredEnv "POSTGRES_HOST"}}
+    value: {{ requiredEnv "POSTGRES_HOST" }}
   - name: POSTGRES_PASSWORD
-    value: {{ requiredEnv "POSTGRES_PASSWORD"}}
+    value: {{ requiredEnv "POSTGRES_PASSWORD" }}
     sensitive: true
   - name: POSTGRES_PORT
-    value: {{ requiredEnv "POSTGRES_PORT"}}
+    value: {{ requiredEnv "POSTGRES_PORT" }}
   - name: POSTGRES_USER
-    value: {{ requiredEnv "POSTGRES_USER"}}
+    value: {{ requiredEnv "POSTGRES_USER" }}
   - name: PROMETHEUS_URL
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_URL"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_URL" }}
   - name: PROMETHEUS_USERNAME
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_USERNAME"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_USERNAME" }}
   - name: PROMETHEUS_PASSWORD
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}
     sensitive: true
   - name: RABBIT_HOST
-    value: {{ requiredEnv "RABBIT_HOST"}}
+    value: {{ requiredEnv "RABBIT_HOST" }}
   - name: RABBIT_PASSWORD
-    value: {{ requiredEnv "RABBIT_PASSWORD"}}
+    value: {{ requiredEnv "RABBIT_PASSWORD" }}
     sensitive: true
   - name: RABBIT_PORT
-    value: {{ requiredEnv "RABBIT_PORT"}}
+    value: {{ requiredEnv "RABBIT_PORT" }}
   - name: RABBIT_SECURE
-    value: {{ requiredEnv "RABBIT_SECURE"}}
+    value: {{ requiredEnv "RABBIT_SECURE" }}
   - name: RABBIT_USER
-    value: {{ requiredEnv "RABBIT_USER"}}
+    value: {{ requiredEnv "RABBIT_USER" }}
   - name: REDIS_HOST
-    value: {{ requiredEnv "REDIS_EXTERNAL_HOST"}}
+    value: {{ requiredEnv "REDIS_EXTERNAL_HOST" }}
   - name: REDIS_PORT
-    value: {{ requiredEnv "REDIS_PORT"}}
+    value: {{ requiredEnv "REDIS_PORT" }}
   - name: REDIS_PASSWORD
-    value: {{ requiredEnv "REDIS_PASSWORD"}}
+    value: {{ requiredEnv "REDIS_PASSWORD" }}
     sensitive: true
   - name: RESOURCE_USAGE_TRACKER_LOGLEVEL
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_LOGLEVEL"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_LOGLEVEL" }}
   - name: RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_CHECK_ENABLED
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_CHECK_ENABLED"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_CHECK_ENABLED" }}
   - name: RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_INTERVAL_SEC
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_INTERVAL_SEC"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_INTERVAL_SEC" }}
   - name: RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_COUNTER_FAIL
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_COUNTER_FAIL"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_COUNTER_FAIL" }}
   - name: RESOURCE_USAGE_TRACKER_S3
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_S3"}}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_S3" | quote }}  # without quote `null` won't work
