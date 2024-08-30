@@ -48,7 +48,7 @@ services:
       labels:
         # redirect http to https
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
-        - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.http_to_https.rule=HostRegexp(`(?P<host>.+)`)
         - traefik.http.routers.http_to_https.entrypoints=http
         - traefik.http.routers.http_to_https.middlewares=http_to_https
     env_file:
