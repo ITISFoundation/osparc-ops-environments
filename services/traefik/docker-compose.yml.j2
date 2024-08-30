@@ -85,14 +85,14 @@ services:
         ###########################
         # redirect http to https
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
-        - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.http_to_https.rule=HostRegexp(`(?P<host>.+)`)
         - traefik.http.routers.http_to_https.entrypoints=http
         - traefik.http.routers.http_to_https.middlewares=http_to_https
         ###########################
         # via https://community.traefik.io/t/v2-2-8-global-redirect-www-to-non-www-with-http-to-https/7428
         # see also: https://community.traefik.io/t/get-a-valid-ssl-certificate-for-www-domains-via-traefik-and-lets-encrypt/2023
         # Global redirection: https (www.) to https
-        - traefik.http.routers.wwwsecure-catchall.rule=HostRegexp(`{host:(www\.).+}`)
+        - traefik.http.routers.wwwsecure-catchall.rule=HostRegexp(`(?P<host>(www\.).+)`)
         - traefik.http.routers.wwwsecure-catchall.entrypoints=https
         - traefik.http.routers.wwwsecure-catchall.tls=true
         - traefik.http.routers.wwwsecure-catchall.middlewares=wwwtohttps
