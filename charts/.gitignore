@@ -2,5 +2,3 @@ values.yaml
 values.*.yaml
 k8s_hosts.ini
 helmfile.y?ml
-
-common-helpers-*.tgz
