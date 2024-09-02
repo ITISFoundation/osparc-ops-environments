@@ -227,7 +227,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver.middlewares=${SWARM_STACK_NAME}_gzip@swarm, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.service=${SWARM_STACK_NAME}_webserver
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME}_gzip@swarm, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
-        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=hostregexp(`{host:.+}`) && PathPrefix(`/dev/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=PathPrefix(`/dev/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=2
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
@@ -785,7 +785,7 @@ services:
         # basic authentication
         - traefik.http.middlewares.${SWARM_STACK_NAME}_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         # OPS IP Whitelist
-        - traefik.http.middlewares.${SWARM_STACK_NAME}_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
+        - traefik.http.middlewares.${SWARM_STACK_NAME}_whitelist_ips.ipallowlist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
       update_config:
         parallelism: 2
         order: start-first
@@ -820,7 +820,7 @@ services:
         # whoami
         - traefik.enable=true
         - traefik.http.services.${SWARM_STACK_NAME}_whoami.loadbalancer.server.port=80
-        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=hostregexp(`{host:.+}`) && PathPrefix(`/whoami`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=PathPrefix(`/whoami`)
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@swarm,${SWARM_STACK_NAME}_gzip@swarm

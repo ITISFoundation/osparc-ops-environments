@@ -19,7 +19,7 @@ services:
         - traefik.http.routers.adminer_simcore.entrypoints=https
         - traefik.http.routers.adminer_simcore.tls=true
         - traefik.http.middlewares.adminer_simcore_stripprefixregex.stripprefixregex.regex=^/adminer
-        - traefik.http.routers.adminer_simcore.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, adminer_simcore_stripprefixregex
+        - traefik.http.routers.adminer_simcore.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, adminer_simcore_stripprefixregex
       resources:
         limits:
           memory: 128M
