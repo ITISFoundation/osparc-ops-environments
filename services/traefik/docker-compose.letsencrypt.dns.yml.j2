@@ -5,7 +5,7 @@ services:
       labels:
         - traefik.http.routers.wwwsecure-catchall.tls.certresolver=myresolver
         - traefik.http.routers.api.tls.certresolver=myresolver
-        - traefik.http.middlewares.ops_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
+        - traefik.http.middlewares.ops_whitelist_ips.ipallowlist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
         # What follows is a tested workaround to ensure letsencrypt certificates for products' domains are generated
 {% for j2item in DEPLOYMENT_FQDNS.split(",") + [MACHINE_FQDN] + CERTIFICATE_GENERATION_FQDNS.split(",") %}
 {% if j2item and j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') != ""  %}
