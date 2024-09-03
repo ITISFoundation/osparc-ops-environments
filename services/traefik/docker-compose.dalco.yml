@@ -27,7 +27,6 @@ services:
       - "--entryPoints.staging_postgres.address=:5433"
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
-      - "--core.defaultRuleSyntax=v2"
       - "--tracing=true"
       - "--tracing.addinternals"
       - "--tracing.otlp=true"
