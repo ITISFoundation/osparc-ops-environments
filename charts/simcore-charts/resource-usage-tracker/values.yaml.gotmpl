@@ -134,7 +134,7 @@ env:
   - name: REDIS_HOST
     value: {{ requiredEnv "REDIS_EXTERNAL_HOST" }}
   - name: REDIS_PORT
-    value: {{ requiredEnv "REDIS_PORT" }}
+    value: {{ requiredEnv "REDIS_EXTERNAL_PORT" }}
   - name: REDIS_PASSWORD
     value: {{ requiredEnv "REDIS_PASSWORD" }}
     sensitive: true
