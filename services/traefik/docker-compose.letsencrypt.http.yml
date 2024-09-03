@@ -19,7 +19,6 @@ services:
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
-      - "--core.defaultRuleSyntax=v2"
       - "--tracing=true"
       - "--tracing.addinternals"
       - "--tracing.otlp=true"
