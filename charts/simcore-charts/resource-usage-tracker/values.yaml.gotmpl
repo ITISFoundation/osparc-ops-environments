@@ -148,3 +148,4 @@ env:
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_MISSED_HEARTBEAT_COUNTER_FAIL" }}
   - name: RESOURCE_USAGE_TRACKER_S3
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_S3" | quote }}  # without quote `null` won't work
+    sensitive: true
