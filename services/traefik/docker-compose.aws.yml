@@ -25,6 +25,7 @@ services:
       - "--entryPoints.smtp.address=:25"
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
+      - "--core.defaultRuleSyntax=v2"
       - "--tracing=true"
       - "--tracing.addinternals"
       - "--tracing.otlp=true"

@@ -31,6 +31,7 @@ services:
       - "--providers.swarm.exposedByDefault=false"
       # so that internal services are not picked up
       - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--core.defaultRuleSyntax=v2"
       - "--tracing=true"
       - "--tracing.addinternals"
       - "--tracing.otlp=true"
