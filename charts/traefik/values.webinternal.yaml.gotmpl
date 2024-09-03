@@ -1,0 +1,12 @@
+ports:
+  webinternal:
+    nodePort: 32081
+    port: 8001
+    expose:
+      default: true
+    exposedPort: 81
+    protocol: TCP
+    http3:
+      enabled: false
+    middlewares:
+      - default-internal-ipallowlist@kubernetescrd

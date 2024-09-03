@@ -34,6 +34,11 @@ services:
       - "--entryPoints.https.forwardedHeaders.insecure"
       - "--providers.file.directory=/etc/traefik/"
       - "--providers.file.watch=true"
+      - '--entryPoints.redis.address=:6379'
+    ports:
+      - target: 6379
+        published: 31379
+        mode: host
     environment:
       - AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
       - AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
