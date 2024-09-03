@@ -51,3 +51,24 @@ metadata:
   {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+
+Usage:
+{{- include "common-helpers.containerEnvSecret" . | nindent 0 }}
+
+*/}}
+
+{{- define "common-helpers.containerEnvSecret" -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "common-helpers.containerEnvSecretName" . }}
+type: Opaque
+data:
+{{- range .Values.env }}
+  {{- if .sensitive }}
+  {{ .name }}: {{ .value | b64enc }}
+  {{- end }}
+{{- end }}
+{{- end -}}
