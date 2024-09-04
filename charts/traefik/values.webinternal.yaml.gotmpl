@@ -1,6 +1,6 @@
 ports:
   webinternal:
-    nodePort: 32081
+    nodePort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT" }}
     port: 8001
     expose:
       default: true
