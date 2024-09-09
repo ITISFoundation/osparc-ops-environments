@@ -86,7 +86,7 @@ update.grafana.pwd: .env ## Change grafana pwd
 
 
 .PHONY: grafana-export
-grafana-export: ## Export grafana dashboards and datasources
+grafana-export: ## Export the remote grafana dashboards and datasources TO YOUR LOCAL MACHINE
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\
@@ -97,7 +97,7 @@ grafana-export: ## Export grafana dashboards and datasources
 	python3 export.py;
 
 .PHONY: grafana-import
-grafana-import: grafana/assets ## Import grafana dashboards and datasources
+grafana-import: grafana/assets ## Imports AND OVERWRITES the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\
