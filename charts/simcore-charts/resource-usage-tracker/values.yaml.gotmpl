@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: '{{  .Values | get "DOCKER_REGISTRY" "itisfoundation" }}/resource-usage-tracker'
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: {{ requiredEnv "DOCKER_IMAGE_TAG" }}
 
