@@ -7,8 +7,8 @@ extraObjects:
     namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
   type: Opaque
   data:
-    access-key-id: {{ requiredEnv "DNS_CHALLENGE_AWS_ACCESS_KEY_ID_BASE64" }}  # Base64 encoded Access Key ID
-    secret-access-key: {{ requiredEnv "DNS_CHALLENGE_AWS_SECRET_ACCESS_KEY_BASE64" }}  # Base64 encoded Secret Access Key
+    access-key-id: {{ requiredEnv "DNS_CHALLENGE_AWS_ACCESS_KEY_ID" | b64enc }}
+    secret-access-key: {{ requiredEnv "DNS_CHALLENGE_AWS_SECRET_ACCESS_KEY" | b64enc }}
 - |
   apiVersion: cert-manager.io/v1
   kind: ClusterIssuer

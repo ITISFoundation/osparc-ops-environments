@@ -6,4 +6,4 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.adminer==true
+          - node.labels.ops==true

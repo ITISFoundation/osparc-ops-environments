@@ -1,7 +1,8 @@
-# pylint: skip-file
+# pylint: disable=logging-fstring-interpolation
 import json
 import logging
 import os
+import sys
 import warnings
 from time import sleep
 
@@ -10,6 +11,8 @@ import yaml
 from environs import Env, EnvError
 from tenacity import retry, stop_after_attempt, wait_random
 from yaml.loader import SafeLoader
+
+RETRY_SLEEP_DURATION_SEC = 15
 
 logging.basicConfig(level="INFO")
 logger = logging.getLogger()
@@ -33,49 +36,48 @@ def log_attempt_number(retry_state):
     wait=wait_random(min=1, max=10),
     after=log_attempt_number,
 )
-def checkGraylogOnline():
-    url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/users"
-    hed = {"Content-Type": "application/json", "Accept": "application/json"}
-    session = requests.Session()
-    session.auth = (
+def check_graylog_online():
+    _url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/users"
+    _urlhed = {"Content-Type": "application/json", "Accept": "application/json"}
+    _session = requests.Session()
+    _session.auth = (
         "admin",
         env.str("SERVICES_PASSWORD"),
     )
-    r = session.get(url, headers=hed, verify=False)
-    if r.status_code != 401 and str(r.status_code) != "200":
-        print(r.status_code)
-        sleep(15)
-        raise Exception
-    else:
-        return True
+    _r = _session.get(_url, headers=_urlhed, verify=False)
+    if _r.status_code != 401 and str(_r.status_code) != "200":
+        print(_r.status_code)
+        sleep(RETRY_SLEEP_DURATION_SEC)
+        raise RuntimeError("Could not connect to graylog.")
+    return True
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_random(min=1, max=10))
-def getGraylogInputs(session, headers, url):
+def get_graylog_inputs(_session, _headers, _url):
     # We check if graylog has inputs, if not we add a new one
-    r = session.get(url, headers=headers, verify=False)
+    _r = _session.get(_url, headers=_headers, verify=False)
     # DEBUG
-    if r.status_code == 200:
+    if _r.status_code == 200:
         print("Successfully send GET /api/system/inputs")
         print("Graylog is online :)")
-        return r
-    else:
-        print(
-            "Error while sending GET /api/system/inputs. Status code of the request : "
-            + str(r.status_code)
-            + " "
-            + r.text
-        )
-        raise Exception
+        return _r
+    error_message = (
+        "Error while sending GET /api/system/inputs. Status code of the request : "
+        + str(_r.status_code)
+        + " "
+        + _r.text
+    )
+    print(error_message)
+    raise RuntimeError(error_message)
 
 
-def configure_email_notifications():
-    url = (
+def configure_email_notifications(_session, _headers):
+    _url = (
         "https://monitoring."
         + env.str("MACHINE_FQDN")
         + "/graylog/api/events/notifications"
     )
-    r = session.get(url, headers=hed, verify=False)
+    _r = _session.get(_url, headers=_headers, verify=False)
     if (
         len(
             [
@@ -94,97 +96,97 @@ def configure_email_notifications():
             + env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
             + '"],"type":"email-notification-v1"}}'
         )
-        r = session.post(url, headers=hed, data=raw_data, verify=False)
-        if r.status_code == 200:
+        _r = _session.post(_url, headers=_headers, data=raw_data, verify=False)
+        if _r.status_code == 200:
             print("Mail Notification added with success !")
         else:
             print(
                 "Error while adding the Mail Notification. Status code of the request : "
-                + str(r.status_code)
+                + str(_r.status_code)
                 + " "
-                + r.text
+                + _r.text
             )
-            exit(1)
+            sys.exit(1)
     else:
         print("Graylog Mail Notification already present - skipping...")
     # Keeping notification ID
-    r = session.get(url, headers=hed, verify=False)
-    mailNotificationID = [
+    _r = _session.get(_url, headers=_headers, verify=False)
+    _mail_notification_id = [
         noti
-        for noti in r.json()["notifications"]
+        for noti in _r.json()["notifications"]
         if noti["title"] == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
     ][0]["id"]
 
-    return mailNotificationID
+    return _mail_notification_id
 
 
-def configure_log_retention():
+def configure_log_retention(_session, _headers):
     try:
-        url = (
+        _url = (
             "https://monitoring."
             + env.str("MACHINE_FQDN")
             + "/graylog/api/system/indices/index_sets"
         )
-        r = session.get(url, headers=hed, verify=False)
-        indexOfInterest = [
+        _r = _session.get(_url, headers=_headers, verify=False)
+        index_of_interest = [
             index
-            for index in r.json()["index_sets"]
+            for index in _r.json()["index_sets"]
             if index["title"] == "Default index set"
         ][0]
-        indexOfInterest[
+        index_of_interest[
             "rotation_strategy_class"
         ] = "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategy"
         # Rotate logs every day
-        indexOfInterest["rotation_strategy"] = {
+        index_of_interest["rotation_strategy"] = {
             "rotation_period": "P1D",
             "type": "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategyConfig",
         }
-        indexOfInterest["retention_strategy"] = {
+        index_of_interest["retention_strategy"] = {
             "max_number_of_indices": str(env.str("GRAYLOG_RETENTION_TIME_DAYS")),
             "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
         }
-        url = (
+        _url = (
             "https://monitoring."
             + env.str("MACHINE_FQDN")
             + "/graylog/api/system/indices/index_sets"
         )
-        raw_data = json.dumps(indexOfInterest)
-        r = session.put(
-            url + "/" + str(indexOfInterest["id"]),
-            headers=hed,
+        raw_data = json.dumps(index_of_interest)
+        _r = _session.put(
+            _url + "/" + str(index_of_interest["id"]),
+            headers=_headers,
             data=raw_data,
             verify=False,
         )
-        if r.status_code == 200:
+        if _r.status_code == 200:
             print("Log retention time successfully updated !")
         else:
             print(
                 "Error updating log retention time! Status code of the request : "
-                + str(r.status_code)
+                + str(_r.status_code)
                 + " "
                 + r.text
             )
-    except EnvError as e:
+    except EnvError:
         print(
             "Setting retention time: GRAYLOG_RETENTION_TIME_DAYS not set or failed, default retention is used..."
         )
 
     try:
-        url = (
+        _url = (
             "https://monitoring."
             + env.str("MACHINE_FQDN")
             + "/graylog/api/system/cluster/nodes"
         )
-        r = session.get(url, headers=hed, verify=False).json()
-        assert len(r["nodes"]) == 1
-        node_uuid = r["nodes"][0]["node_id"]
+        _r = _session.get(_url, headers=_headers, verify=False).json()
+        assert len(_r["nodes"]) == 1
+        node_uuid = _r["nodes"][0]["node_id"]
         #
-        url = (
+        _url = (
             "https://monitoring."
             + env.str("MACHINE_FQDN")
             + "/graylog/api/system/inputs"
         )
-        r2 = session.get(url, headers=hed, verify=False).json()
+        r2 = _session.get(_url, headers=_headers, verify=False).json()
         if len([i for i in r2["inputs"] if i["title"] == "Syslog"]) == 0:
             raw_data = (
                 '{"title":"Syslog","type":"org.graylog2.inputs.syslog.udp.SyslogUDPInput","configuration":{"bind_address":"0.0.0.0","port":'
@@ -193,12 +195,12 @@ def configure_log_retention():
                 + node_uuid
                 + '"}'
             )
-            input_id = session.post(
-                url, headers=hed, data=raw_data, verify=False
+            input_id = _session.post(
+                _url, headers=_headers, data=raw_data, verify=False
             ).json()["id"]
             #
             sleep(0.3)
-            url = (
+            _url = (
                 "https://monitoring."
                 + env.str("MACHINE_FQDN")
                 + "/graylog/api/system/inputs/"
@@ -206,51 +208,55 @@ def configure_log_retention():
                 + "/extractors"
             )
             raw_data = '{"title":"Fill container_name","cut_or_copy":"copy","source_field":"application_name","target_field":"container_name","extractor_type":"regex_replace","extractor_config":{"regex":"(^.)","replacement":"Syslog: $1"},"converters":{},"condition_type":"none","condition_value":""}'
-            r3 = session.post(url, headers=hed, data=raw_data, verify=False)
-            print("Graylog Syslog Capture setup successful")
+            _session.post(_url, headers=_headers, data=raw_data, verify=False)
+            print("Graylog Syslog Capture setup successful.")
         else:
             print("Graylog Syslog Capture already present, skipping...")
-    except EnvError as e:
+    except EnvError:
         print("Error setting up graylog syslog capturing.")
 
 
-def configure_alerts():
+def configure_alerts(_mail_notification_id, _session, _headers):
     print("Configuring Graylog Alerts...")
     with open("alerts.yaml") as f:
         data = yaml.load(f, Loader=SafeLoader)
-        url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/streams"
-        r = session.get(url, headers=hed, verify=False)
-        if r.status_code == 200:
-            streamsList = r.json()["streams"]
-            streamAllEvents = [
+        _url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/streams"
+        _r = _session.get(_url, headers=_headers, verify=False)
+        if _r.status_code == 200:
+            streams_list = _r.json()["streams"]
+            stream_all_events = [
                 i
-                for i in streamsList
+                for i in streams_list
                 if "Stream containing all messages" in i["description"]
                 or "default stream" == i["title"].lower()
             ]
-            streamIDForAllMessages = streamAllEvents[0]["id"]
+            stream_id_for_all_messages = stream_all_events[0]["id"]
         else:
             print(
                 "Could not determine ID of stream containing all events. Is graylog misconfigured? Exiting with error!"
             )
-            exit(1)
-        url = (
+            sys.exit(1)
+        _url = (
             "https://monitoring."
             + env.str("MACHINE_FQDN")
             + "/graylog/api/events/definitions"
         )
-        r = session.get(url, headers=hed, params={"per_page": 2500}, verify=False)
-        if r.status_code == 200:
-            alreadyPresentAlerts = r.json()["event_definitions"]
-            for presentAlert in filter(
+        _r = _session.get(
+            _url, headers=_headers, params={"per_page": 2500}, verify=False
+        )
+        if _r.status_code == 200:
+            already_present_alerts = _r.json()["event_definitions"]
+            for present_alert in filter(
                 lambda e: e["title"] != "System notification events",
-                alreadyPresentAlerts,
+                already_present_alerts,
             ):
-                resp = session.delete(
-                    url + "/" + str(presentAlert["id"]), headers=hed, verify=False
+                resp = _session.delete(
+                    _url + "/" + str(present_alert["id"]),
+                    headers=_headers,
+                    verify=False,
                 )
                 if resp.ok:
-                    print("Alert successfully deleted: " + str(presentAlert["title"]))
+                    print("Alert successfully deleted: " + str(present_alert["title"]))
                 else:
                     print(
                         "Could not delete alert. Failure: "
@@ -259,30 +265,30 @@ def configure_alerts():
                     )
                     print(resp.status_code)
                     print(resp.json())
-                    exit(1)
+                    sys.exit(1)
         for i in data:
             i["notifications"] = []
             if env.str("GRAYLOG_ALERT_MAIL_ADDRESS"):
-                i["notifications"] += [{"notification_id": str(mailNotificationID)}]
-            i["config"]["streams"] = [str(streamIDForAllMessages)]
-            url = (
+                i["notifications"] += [{"notification_id": str(_mail_notification_id)}]
+            i["config"]["streams"] = [str(stream_id_for_all_messages)]
+            _url = (
                 "https://monitoring."
                 + env.str("MACHINE_FQDN")
                 + "/graylog/api/events/definitions?schedule=true"
             )
-            resp = session.post(url, headers=hed, json=i, verify=False)
+            resp = _session.post(_url, headers=_headers, json=i, verify=False)
             if resp.status_code == 200:
                 print("Alert successfully added: " + str(i["title"]))
             else:
                 print("Could not add alert. Failure:", resp.status_code)
                 print(resp.json())
-                exit(1)
+                sys.exit(1)
 
 
-def configure_content_packs(session, headers, base_url):
+def configure_content_packs(_session, _headers, base_url):
     def get_installation(content_pack):
         logger.debug(f"Getting installations for content pack {content_pack['id']}")
-        resp = session.get(
+        resp = _session.get(
             base_url + "/system/content_packs/" + content_pack["id"] + "/installations"
         )
 
@@ -301,13 +307,13 @@ def configure_content_packs(session, headers, base_url):
     def delete_installation(content_pack, installation):
         logger.debug(f"Deleting installation {installation['_id']}")
 
-        resp = session.delete(
+        resp = _session.delete(
             base_url
             + "/system/content_packs/"
             + content_pack["id"]
             + "/installations/"
             + installation["_id"],
-            headers=headers,
+            headers=_headers,
         )
 
         if not resp.ok:
@@ -319,8 +325,8 @@ def configure_content_packs(session, headers, base_url):
         logger.debug(
             f"Uploading content pack {content_pack['id']} revision {content_pack['rev']}"
         )
-        resp = session.post(
-            base_url + "/system/content_packs", json=content_pack, headers=headers
+        resp = _session.post(
+            base_url + "/system/content_packs", json=content_pack, headers=_headers
         )
 
         if resp.ok:
@@ -339,11 +345,11 @@ def configure_content_packs(session, headers, base_url):
             f"Installing content pack {content_pack['id']} revision {content_pack['rev']}"
         )
 
-        resp = session.post(
+        resp = _session.post(
             base_url
             + f"/system/content_packs/{content_pack['id']}/{content_pack['rev']}/installations",
             json={"comment": "Installed by configure.py script"},
-            headers=headers,
+            headers=_headers,
         )
 
         if not resp.ok:
@@ -378,12 +384,12 @@ if __name__ == "__main__":
         "Waiting for graylog to run for provisioning. This can take up to some minutes, please be patient..."
     )
     try:
-        checkGraylogOnline()
-    except Exception as e:
+        check_graylog_online()
+    except RuntimeError as e:
         print(e)
         print("Exception or: Graylog is still not online.")
         print("Graylog script will now stop.")
-        exit(1)
+        sys.exit(1)
 
     session = requests.Session()
     session.verify = False
@@ -397,17 +403,16 @@ if __name__ == "__main__":
         "X-Requested-By": "cli",
     }
     url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/system/inputs"
-    r = getGraylogInputs(session, hed, url)
+    r = get_graylog_inputs(session, hed, url)
+
+    configure_log_retention(session, hed)
 
     # Configure sending email notifications
     if env.str("GRAYLOG_ALERT_MAIL_ADDRESS") != "":
-        mailNotificationID = configure_email_notifications()
-
+        mail_notification_id = configure_email_notifications(session, hed)
+        # Configure Alerts
+        configure_alerts(mail_notification_id, session, hed)
     # Configure log retention time
-    configure_log_retention()
-
-    # Configure Alerts
-    configure_alerts()
 
     # content pack will create GELF UDP Input
     # NOTE: When you introduce changes, revision number increase is mandatory

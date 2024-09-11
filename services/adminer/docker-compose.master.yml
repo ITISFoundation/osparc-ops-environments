@@ -4,7 +4,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.adminer==true
+          - node.labels.ops==true
       resources:
         reservations:
           cpus: '0.0'  # not enough resources on master | YH Dec 2023

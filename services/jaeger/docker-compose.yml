@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   jaeger:
-    image: jaegertracing/all-in-one:1.47
+    image: jaegertracing/all-in-one:1.60.0
     command: >
       --query.base-path=/jaeger
     init: true
@@ -19,7 +19,7 @@ services:
         - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
         - traefik.http.routers.jaeger.tls=true
-        - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@docker, ops_auth@docker, ops_gzip@docker
+        - traefik.http.routers.jaeger.middlewares=ops_whitelist_ips@swarm, ops_auth@swarm, ops_gzip@swarm
         - prometheus-job=jaeger
         - prometheus-port=14269
       resources:

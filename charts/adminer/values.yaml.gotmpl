@@ -50,12 +50,13 @@ ingress:
   className: ""
   annotations:
     cert-manager.io/cluster-issuer: "cert-issuer"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
   tls:
     - hosts:
-        - k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
       secretName: monitoring-tls
   hosts:
-    - host: k8s.monitoring.{{ requiredEnv "MACHINE_FQDN" }}
+    - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
       paths:
         - path: /adminer/simcore
           pathType: Exact

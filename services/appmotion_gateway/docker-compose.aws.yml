@@ -9,7 +9,7 @@ services:
           8.8.8.8
     db:
         deploy:
-            replicas: 1
+            replicas: 0
         dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
           8.8.8.8
 

@@ -43,17 +43,15 @@ services:
       - "--entryPoints.simcore_api.forwardedHeaders.insecure"
       - "--entryPoints.traefik_monitor.address=:8080"
       - "--entryPoints.traefik_monitor.forwardedHeaders.insecure"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.network=${SWARM_STACK_NAME}_default"
-      - "--providers.docker.swarmMode=true"
-      # https://github.com/traefik/traefik/issues/7886
-      - "--providers.docker.swarmModeRefreshSeconds=1"
-      - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+      - "--providers.swarm.network=${SWARM_STACK_NAME}_default"      # https://github.com/traefik/traefik/issues/7886
+      - "--providers.swarm.refreshSeconds=1"
+      - "--providers.swarm.exposedByDefault=false"
+      - "--providers.swarm.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
       - "--tracing=true"
-      - "--tracing.jaeger=true"
-      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
-      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--tracing.addinternals"
+      - "--tracing.otlp=true"
+      - "--tracing.otlp.http=true"
     deploy:
       resources:
         limits:
@@ -66,6 +64,19 @@ services:
   wb-api-server:
     deploy:
       replicas: 3
+
+  redis:
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.tcp.services.${SWARM_STACK_NAME}_redis.loadBalancer.server.port=6379
+        - traefik.tcp.routers.redis.service=${SWARM_STACK_NAME}_redis
+        - traefik.tcp.routers.redis.entrypoints=redis
+        - traefik.tcp.routers.redis.tls=false
+        - traefik.tcp.routers.redis.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)
+    networks:
+      - public
 
 volumes:
    efs_volume:

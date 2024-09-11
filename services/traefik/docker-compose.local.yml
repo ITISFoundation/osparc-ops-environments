@@ -18,16 +18,22 @@ services:
       - "--metrics.prometheus.entryPoint=metrics"
       - "--entryPoints.smtp.address=:25"
       - "--entryPoints.http.address=:80"
+      - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.https.address=:443"
+      - "--entryPoints.https.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+      - "--entryPoints.https.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.master_postgres.address=:5432"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.swarmMode=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+      - "--providers.swarm.exposedByDefault=false"
+      - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
+      - "--core.defaultRuleSyntax=v2"
       - "--tracing=true"
-      - "--tracing.jaeger=true"
-      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
-      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--tracing.addinternals"
+      - "--tracing.otlp=true"
+      - "--tracing.otlp.http=true"
       - "--providers.file.directory=/etc/traefik/"
       - "--providers.file.watch=true"
     networks:
@@ -42,7 +48,7 @@ services:
       labels:
         # redirect http to https
         - traefik.http.middlewares.http_to_https.redirectScheme.scheme=https
-        - traefik.http.routers.http_to_https.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.http_to_https.rule=HostRegexp(`(?P<host>.+)`)
         - traefik.http.routers.http_to_https.entrypoints=http
         - traefik.http.routers.http_to_https.middlewares=http_to_https
     env_file:

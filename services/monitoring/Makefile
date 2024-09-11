@@ -9,17 +9,6 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-# Helpers -------------------------------------------------
-.venv:
-	# creating virtual environment with tooling (jinja, etc)
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
-
-define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2)
-endef
-
 .PHONY: up
 up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
@@ -97,7 +86,7 @@ update.grafana.pwd: .env ## Change grafana pwd
 
 
 .PHONY: grafana-export
-grafana-export: ## Export grafana dashboards and datasources
+grafana-export: ## Export the remote grafana dashboards and datasources TO YOUR LOCAL MACHINE
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\
@@ -108,7 +97,7 @@ grafana-export: ## Export grafana dashboards and datasources
 	python3 export.py;
 
 .PHONY: grafana-import
-grafana-import: grafana/assets ## Import grafana dashboards and datasources
+grafana-import: grafana/assets ## Imports AND OVERWRITES the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
 	@cd grafana/scripts;\
 	if [ ! -d ".venv" ]; \
 	then\

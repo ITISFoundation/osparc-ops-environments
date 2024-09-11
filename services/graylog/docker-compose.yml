@@ -48,7 +48,7 @@ services:
           cpus: "0.1"
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:5.1.4
+    image: graylog/graylog:6.0.5
     init: true
     # user: "1000:1001"
     configs:
@@ -67,6 +67,7 @@ services:
       # Username: admin
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
       - GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200,
     networks:
       - public
       - default
@@ -95,7 +96,7 @@ services:
         - traefik.http.routers.graylog.tls=true
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@docker, ops_gzip@docker, graylog_replace_regex
+        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
 
 volumes:
   mongo_data:
