@@ -1,0 +1,20 @@
+{
+  "connections": [
+    {%- for label in REDIS_DATABASES.split(',') %}
+    {
+      "label": "{{ label }}",
+      "host": "{{ REDIS_HOST }}",
+      "port": "{{ REDIS_PORT }}",
+      "username": "{{ REDIS_USER }}",
+      "password": "{{ REDIS_PASSWORD }}",
+      "dbIndex": {{ loop.index0 }},
+      {%- set TRUE_VALUES = ['1', 'true', 'yes'] %}
+      {%- if REDIS_SECURE.lower() in TRUE_VALUES %}
+      "tls": true
+      {%- else %}
+      "tls": false
+      {%- endif %}
+    }{%- if not loop.last %},{% endif %}
+    {%- endfor %}
+  ]
+}

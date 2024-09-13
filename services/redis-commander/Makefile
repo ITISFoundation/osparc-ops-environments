@@ -42,6 +42,8 @@ up-local: up
 up-aws: .init .env ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
+.PHONY: docker-compose.yml
+docker-compose.yml: config.json
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
@@ -70,3 +72,6 @@ ${TEMP_COMPOSE}-master: docker-compose.yml .env
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml  > $@
+
+config.json: config.json.j2 .env .venv
+	@$(call jinja, $<, $@)
