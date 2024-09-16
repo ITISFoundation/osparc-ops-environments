@@ -42,7 +42,6 @@ up-local: up
 up-aws: .init .env ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-.PHONY: docker-compose.yml
 docker-compose.yml: config.json
 
 .PHONY: ${TEMP_COMPOSE}
