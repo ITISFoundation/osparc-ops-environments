@@ -137,10 +137,10 @@ services:
           - node.labels.simcore==true
       resources:
         reservations:
-          cpus: "0.1"
+          cpus: "0.3"
           memory: "128M"
         limits:
-          cpus: "0.5"
+          cpus: "1.0"
           memory: "512M"
 
   static-webserver:
@@ -785,7 +785,7 @@ services:
         # basic authentication
         - traefik.http.middlewares.${SWARM_STACK_NAME}_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         # OPS IP Whitelist
-        - traefik.http.middlewares.${SWARM_STACK_NAME}_whitelist_ips.ipwhitelist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
+        - traefik.http.middlewares.${SWARM_STACK_NAME}_whitelist_ips.ipallowlist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
       update_config:
         parallelism: 2
         order: start-first

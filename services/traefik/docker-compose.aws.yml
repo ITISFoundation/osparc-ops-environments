@@ -12,6 +12,9 @@ services:
       - "--entryPoints.metrics.address=:8082"
       - "--metrics.prometheus.entryPoint=metrics"
       - "--entryPoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entrypoint.to=https"
+      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
       - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
@@ -31,6 +34,11 @@ services:
       - "--entryPoints.https.forwardedHeaders.insecure"
       - "--providers.file.directory=/etc/traefik/"
       - "--providers.file.watch=true"
+      - '--entryPoints.redis.address=:6379'
+    ports:
+      - target: 6379
+        published: 31379
+        mode: host
     environment:
       - AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
       - AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
