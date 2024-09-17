@@ -1,4 +1,7 @@
 version: "3.7"
+configs:
+  opentelemetry-collector-config:
+    file: ./opentelemetry-collector-config.yaml
 services:
   jaeger:
     image: jaegertracing/all-in-one:1.60.0
@@ -30,8 +33,9 @@ services:
           cpus: "0.1"
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.105.0
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel/config.yaml
+    configs:
+      - source: opentelemetry-collector-config
+        target: /etc/otel/config.yaml
     hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
     command:
       - "--config=/etc/otel/config.yaml"
