@@ -3,7 +3,7 @@
   "label": "{{ label }}",
   "host": "{{ host }}",
   "port": "{{ port }}",
-  {%- if username %}
+  {%- if username.lower() not in ["", "null", "none"] %}
   "username": "{{ username }}",
   {%- endif %}
   "password": "{{ password }}",
