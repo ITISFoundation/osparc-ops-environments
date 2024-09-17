@@ -1,7 +1,0 @@
-version: '3.7'
-services:
-  redis-commander:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.rediscommander==true
