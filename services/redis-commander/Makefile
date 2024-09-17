@@ -28,7 +28,7 @@ up-dalco: up
 up-master: up
 
 .PHONY: up-public ## Deploys redis-commander stack for public access Cluster
-up-public: .init up
+up-public: up
 
 .PHONY: up-local ## Deploys redis-commander stack for local deployment
 up-local: up
