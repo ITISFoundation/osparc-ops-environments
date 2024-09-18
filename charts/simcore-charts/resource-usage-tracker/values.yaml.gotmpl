@@ -118,7 +118,7 @@ env:
   - name: PROMETHEUS_USERNAME
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_USERNAME" }}
   - name: PROMETHEUS_PASSWORD
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}.
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}
     sensitive: true
   - name: RABBIT_HOST
     value: {{ requiredEnv "RABBIT_HOST" }}
