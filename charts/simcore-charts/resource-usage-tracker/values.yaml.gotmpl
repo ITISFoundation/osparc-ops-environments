@@ -118,7 +118,7 @@ env:
   - name: PROMETHEUS_USERNAME
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_USERNAME" }}
   - name: PROMETHEUS_PASSWORD
-    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}
+    value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}.
     sensitive: true
   - name: RABBIT_HOST
     value: {{ requiredEnv "RABBIT_HOST" }}
@@ -131,10 +131,14 @@ env:
     value: {{ requiredEnv "RABBIT_SECURE" }}
   - name: RABBIT_USER
     value: {{ requiredEnv "RABBIT_USER" }}
+  - name: REDIS_USER
+    value: {{ requiredEnv "REDIS_USER" }}
   - name: REDIS_HOST
-    value: {{ requiredEnv "REDIS_EXTERNAL_HOST" }}
+    value: {{ requiredEnv "REDIS_HOST" }}
   - name: REDIS_PORT
-    value: {{ requiredEnv "REDIS_EXTERNAL_PORT" }}
+    value: {{ requiredEnv "REDIS_PORT" }}
+  - name: REDIS_SECURE
+    value: {{ requiredEnv "REDIS_SECURE" }}
   - name: REDIS_PASSWORD
     value: {{ requiredEnv "REDIS_PASSWORD" }}
     sensitive: true
