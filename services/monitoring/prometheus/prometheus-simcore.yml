@@ -1,7 +1,7 @@
 scrape_configs:
   # SIMCORE -------------------------------------------------------------------
   - job_name: "simcore"
-    scrape_interval: 73s
+    scrape_interval: 15s
     relabel_configs:
       - source_labels: [__meta_dns_name]
         separator: ;
