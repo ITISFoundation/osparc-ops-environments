@@ -2,11 +2,14 @@ services:
   agent:
     volumes:
       - /docker/volumes/:/docker/volumes/
+
+
   dask-sidecar:
     deploy:
       placement:
         constraints:
           - node.role == worker
+
   efs-guardian:
     volumes:
       - efs_volume:/data/efs
@@ -19,6 +22,7 @@ services:
       replicas: 3
   static-webserver:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
+
   postgres:
     deploy:
       replicas: 0
