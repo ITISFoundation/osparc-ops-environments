@@ -9,9 +9,7 @@ services:
       placement:
         constraints:
           - node.labels.postgres==true
-  datcore-adapter:
-    deploy:
-      replicas: 0
+
   resource-usage-tracker:
     deploy:
       replicas: 3

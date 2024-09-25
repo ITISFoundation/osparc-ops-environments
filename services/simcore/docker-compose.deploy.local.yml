@@ -67,9 +67,6 @@ services:
   rabbit:
     deploy:
       replicas: 1
-  datcore-adapter:
-    deploy:
-      replicas: 0
   redis:
     deploy:
       replicas: 1

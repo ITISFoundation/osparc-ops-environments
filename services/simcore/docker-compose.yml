@@ -511,6 +511,7 @@ services:
 
   datcore-adapter:
     deploy:
+      replicas: ${SIMCORE_DATCORE_ADAPTER_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
