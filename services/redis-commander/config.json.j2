@@ -3,7 +3,7 @@
   "label": "{{ label }}",
   "host": "{{ host }}",
   "port": "{{ port }}",
-  {%- if username %}
+  {%- if username.lower() not in ["", "null", "none"] %}
   "username": "{{ username }}",
   {%- endif %}
   "password": "{{ password }}",
@@ -16,7 +16,7 @@
     {#- special if for DALCO. Remove once dalco is not special case anymore #}
     {%- if REDIS_STAGING_DATABASES %}
       {%- for label in REDIS_STAGING_DATABASES.strip(',').split(',') %}
-        {{ redis_connection(label, REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_STAGING_PASSWORD, loop.index0, REDIS_SECURE) | indent(4) }},
+        {{ redis_connection(label, REDIS_STAGING_HOST, REDIS_STAGING_PORT, REDIS_STAGING_USER, REDIS_STAGING_PASSWORD, loop.index0, REDIS_STAGING_SECURE) | indent(4) }},
       {%- endfor %}
     {%- endif %}
     {%- if REDIS_DATABASES %}

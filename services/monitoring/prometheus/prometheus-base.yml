@@ -1,8 +1,8 @@
 #  global config
 #  DOLLAR SIGNS NEED TO BE EXCAPED (see https://stackoverflow.com/a/61259844/10198629)
 global:
-  scrape_interval: 20s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 20s # By default, scrape targets every 15 seconds.
+  scrape_interval: 15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
   # scrape_timeout global default would be (10s).
 
   # Attach these labels to any time series or alerts when communicating with

@@ -14,6 +14,9 @@ services:
     environment:
       MEMORY_MAX_TRACES: 10000
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
@@ -39,15 +42,19 @@ services:
     hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
     command:
       - "--config=/etc/otel/config.yaml"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.ops==true
     ports:
       - "4318:4318"  # OTLP HTTP receiver
     networks:
       - public
       - monitored
     environment:
-      TRACING_OTEL_COLLECTOR_BATCH_SIZE: ${TRACING_OTEL_COLLECTOR_BATCH_SIZE}
-      TRACING_OTEL_COLLECTOR_SAMPLING_PERCENTAGE: ${TRACING_OTEL_COLLECTOR_SAMPLING_PERCENTAGE}
-      TRACING_OTEL_COLLECTOR_EXPORTER_ENDPOINT: ${TRACING_OTEL_COLLECTOR_EXPORTER_ENDPOINT}
+      TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
+      TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE: ${TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE}
+      TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}
 networks:
   public:
     external: true
