@@ -23,14 +23,6 @@ source: https://kind.sigs.k8s.io/docs/user/quick-start
 
 Follow the instructions here: https://helm.sh/docs/intro/install/
 
-Install the helm-diff plugin: `helm plugin install https://github.com/databus23/helm-diff`
-
-`via https://doc.traefik.io/traefik/user-guides/crd-acme/#ingressroute-definition`
-Install traefik-v3 CRDs: `kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.1/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml`
-
-`via https://doc.traefik.io/traefik/user-guides/crd-acme/#ingressroute-definition`
-Install traefik-v3 RBAC: `kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.1/docs/content/reference/dynamic-configuration/kubernetes-crd-rbac.yml`
-
 #### helmfile
 
 If you have a different OS / architecture, pick a different link from [release artifacts](https://github.com/helmfile/helmfile/releases)
