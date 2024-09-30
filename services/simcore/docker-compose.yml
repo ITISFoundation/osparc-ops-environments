@@ -277,6 +277,7 @@ services:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
     networks:
       - default
+      - monitored
     deploy:
       # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
       # NOTE: this MUSTN'T change, or weird things might happen
@@ -309,6 +310,7 @@ services:
     networks:
       - default
       - interactive_services_subnet
+      - monitored
     hostname: "{{.Service.Name}}"
     deploy:
       update_config:
@@ -510,6 +512,8 @@ services:
           cpus: '0.1'
 
   datcore-adapter:
+    networks:
+      - monitored
     deploy:
       update_config:
         parallelism: 2
