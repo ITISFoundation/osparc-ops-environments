@@ -27,9 +27,9 @@ helmfile-lint: .check-helmfile-installed helmfile.yaml ## Lints the helmfile
 .helmfile-local-post-install: ## Post install steps for local helmfile deployment
 	@$(MAKE) -s configure-local-hosts
 	@echo "";
-	@echo "Cluster has been deployed locally: http://$(MACHINE_FQDN)";
+	@echo "Cluster has been deployed locally: https://$(MACHINE_FQDN)";
 	@echo "    For secure connections self-signed certificates are used.";
-	@echo "
+	@echo "";
 
 .PHONY: helmfile-apply
 helmfile-apply: .check-helmfile-installed helmfile.yaml ## Applies the helmfile configuration
@@ -64,3 +64,6 @@ helmfile-diff: .check-helmfile-installed helmfile.yaml ## Shows the differences 
 helmfile-delete: .check-helmfile-installed helmfile.yaml ## Deletes the helmfile configuration
 	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	helmfile -f $(REPO_BASE_DIR)/charts/helmfile.yaml delete
+
+.PHONY: up
+up: helmfile-apply ## Start the stack
