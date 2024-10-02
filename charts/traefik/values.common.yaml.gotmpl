@@ -1,6 +1,9 @@
 additionalArguments:
   - "--api.insecure=true"
 
+deployment:
+  kind: DaemonSet
+
 ingressRoute:
   dashboard:
     enabled: false
@@ -19,3 +22,15 @@ ports:
     nodePort: 32080
   websecure:
     nodePort: 32443
+
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "" # in some cases may require tolerations
+
+affinity:  # https://github.com/traefik/traefik-helm-chart/blob/v28.2.0/traefik/values.yaml#L838
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: '{{`{{ template "traefik.name" . }}`}}'
+            app.kubernetes.io/instance: '{{ .Release.Name }}'
+        topologyKey: kubernetes.io/hostname
