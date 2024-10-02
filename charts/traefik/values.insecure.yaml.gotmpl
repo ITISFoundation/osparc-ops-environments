@@ -3,11 +3,12 @@ extraObjects:
   kind: Service
   metadata:
     name: traefik-api
+    namespace: traefik
   spec:
     type: ClusterIP
     selector:
       app.kubernetes.io/name: traefik
-      app.kubernetes.io/instance: traefik-default
+      app.kubernetes.io/instance: traefik-traefik
     ports:
     - port: 8080
       name: traefik
@@ -34,13 +35,14 @@ extraObjects:
     name: traefik-dashboard
     namespace: traefik
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure  # allow http(s) for local deployment
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure  # allow http(s) for local deployment
       traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd  # namespace + middleware name
+      cert-manager.io/cluster-issuer: "cert-issuer"
   spec:
     tls:
-    - hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      secretName: monitoring-tls
+      - hosts:
+          - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        secretName: monitoring-tls
     rules:
     - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
       http:

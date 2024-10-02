@@ -67,3 +67,7 @@ helmfile-delete: .check-helmfile-installed helmfile.yaml ## Deletes the helmfile
 
 .PHONY: up
 up: helmfile-apply ## Start the stack
+
+.PHONY: leave
+leave: ## Leaves kind cluster
+	kind delete clusters kind
