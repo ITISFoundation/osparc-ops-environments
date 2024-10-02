@@ -31,6 +31,7 @@ affinity:  # https://github.com/traefik/traefik-helm-chart/blob/v28.2.0/traefik/
     requiredDuringSchedulingIgnoredDuringExecution:
       - labelSelector:
           matchLabels:
+            # https://stackoverflow.com/a/51326166/12124525
             app.kubernetes.io/name: '{{`{{ template "traefik.name" . }}`}}'
             app.kubernetes.io/instance: '{{ .Release.Name }}'
         topologyKey: kubernetes.io/hostname
