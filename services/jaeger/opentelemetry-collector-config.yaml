@@ -17,7 +17,7 @@ service:
       exporters: [otlphttp,debug]
   telemetry:
     logs:
-      level: "debug"
+      level: ${TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL}
 processors:
   batch:
     timeout: 5s
