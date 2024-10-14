@@ -10,11 +10,12 @@ extraObjects:
   kind: Service
   metadata:
     name: traefik-api
+    namespace: traefik
   spec:
     type: ClusterIP
     selector:
       app.kubernetes.io/name: traefik
-      app.kubernetes.io/instance: traefik-default
+      app.kubernetes.io/instance: traefik-traefik
     ports:
     - port: 8080
       name: traefik
@@ -57,6 +58,7 @@ extraObjects:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd  # namespace + middleware name
+      cert-manager.io/cluster-issuer: "cert-issuer"
   spec:
     tls:
     - hosts:
