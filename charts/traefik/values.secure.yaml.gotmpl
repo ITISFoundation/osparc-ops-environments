@@ -54,7 +54,7 @@ extraObjects:
   kind: Ingress
   metadata:
     name: traefik-dashboard
-    namesoace: traefik
+    namespace: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd  # namespace + middleware name
