@@ -49,7 +49,7 @@ ingress:
   enabled: true
   className: ""
   annotations:
-    namespace: adminer
+    namespace: {{ .Release.Namespace }}
     cert-manager.io/cluster-issuer: "cert-issuer"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
   tls:
