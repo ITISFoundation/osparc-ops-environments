@@ -35,7 +35,7 @@ extraObjects:
     name: traefik-dashboard
     namespace: {{.Release.Namespace}}
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure  # allow http(s) for local deployment
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure  # allow http(s) for local deployment
       traefik.ingress.kubernetes.io/router.middlewares: {{.Release.Namespace}}-traefik-basic-auth@kubernetescrd  # namespace + middleware name
       cert-manager.io/cluster-issuer: "cert-issuer"
   spec:
