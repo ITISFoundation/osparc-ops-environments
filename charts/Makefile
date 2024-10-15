@@ -41,7 +41,7 @@ helmfile-apply: .check-helmfile-installed helmfile.yaml ## Applies the helmfile 
 	fi
 
 .PHONY: helmfile-sync
-helmfile-sync: .check-helmfile-installed helmfile.yaml ## Syncs the helmfile configuration
+helmfile-sync: .check-helmfile-installed helmfile.yaml ## Syncs the helmfile configuration (use `helmfile-apply` to deploy the app)
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	helmfile -f $(REPO_BASE_DIR)/charts/helmfile.yaml sync
 
