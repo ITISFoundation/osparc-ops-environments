@@ -9,10 +9,16 @@ from time import sleep
 import requests
 import yaml
 from environs import Env, EnvError
-from tenacity import retry, stop_after_attempt, wait_random
+from requests.exceptions import HTTPError
+from tenacity import (
+    before_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_fixed,
+    wait_random,
+)
 from yaml.loader import SafeLoader
-
-RETRY_SLEEP_DURATION_SEC = 15
 
 logging.basicConfig(level="INFO")
 logger = logging.getLogger()
@@ -25,31 +31,44 @@ warnings.filterwarnings(
 env = Env()
 env.read_env("./../.env", recurse=False)
 
+SUPPORTED_GRAYLOG_MAJOR_VERSION = 6
 
-def log_attempt_number(retry_state):
-    """return the result of the last call attempt"""
-    print(f"Retrying: {retry_state.attempt_number}...")
+GRAYLOG_BASE_DOMAIN = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog"
+GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC = env.int("GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC")
+REQUESTS_AUTH = (env.str("SERVICES_USER"), env.str("SERVICES_PASSWORD"))
+
+GRAYLOG_LOG_MAX_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MAX_DAYS_IN_STORAGE")
+GRAYLOG_LOG_MIN_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
 
 
 @retry(
-    stop=stop_after_attempt(10),
-    wait=wait_random(min=1, max=10),
-    after=log_attempt_number,
+    stop=stop_after_attempt(GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC / 5),
+    wait=wait_fixed(5),
+    retry=retry_if_exception_type(HTTPError),
+    before=before_log(logger, logging.INFO),
 )
-def check_graylog_online():
-    _url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/users"
-    _urlhed = {"Content-Type": "application/json", "Accept": "application/json"}
-    _session = requests.Session()
-    _session.auth = (
-        "admin",
-        env.str("SERVICES_PASSWORD"),
-    )
-    _r = _session.get(_url, headers=_urlhed, verify=False)
-    if _r.status_code != 401 and str(_r.status_code) != "200":
-        print(_r.status_code)
-        sleep(RETRY_SLEEP_DURATION_SEC)
-        raise RuntimeError("Could not connect to graylog.")
-    return True
+def wait_graylog_is_online():
+    _r = requests.get(GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH)
+
+    if _r.status_code == 401:
+        raise TypeError(f"Graylog unauthorized HTTP response: {_r}")
+
+    _r.raise_for_status()
+    logger.info("Graylog is online")
+
+
+def validate_graylog_version_is_supported():
+    _r = requests.get(GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH)
+    _r.raise_for_status()
+
+    graylog_version = _r.json()["version"]
+    major_version = int(graylog_version.split(".")[0])
+
+    if major_version != SUPPORTED_GRAYLOG_MAJOR_VERSION:
+        raise TypeError(
+            f"Graylog major version {major_version} is not supported by this script. "
+            f"Supported version is {SUPPORTED_GRAYLOG_MAJOR_VERSION}"
+        )
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_random(min=1, max=10))
@@ -59,7 +78,6 @@ def get_graylog_inputs(_session, _headers, _url):
     # DEBUG
     if _r.status_code == 200:
         print("Successfully send GET /api/system/inputs")
-        print("Graylog is online :)")
         return _r
     error_message = (
         "Error while sending GET /api/system/inputs. Status code of the request : "
@@ -121,54 +139,46 @@ def configure_email_notifications(_session, _headers):
 
 
 def configure_log_retention(_session, _headers):
-    try:
-        _url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/system/indices/index_sets"
-        )
-        _r = _session.get(_url, headers=_headers, verify=False)
-        index_of_interest = [
-            index
-            for index in _r.json()["index_sets"]
-            if index["title"] == "Default index set"
-        ][0]
-        index_of_interest[
-            "rotation_strategy_class"
-        ] = "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategy"
-        # Rotate logs every day
-        index_of_interest["rotation_strategy"] = {
-            "rotation_period": "P1D",
-            "type": "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategyConfig",
-        }
-        index_of_interest["retention_strategy"] = {
-            "max_number_of_indices": str(env.str("GRAYLOG_RETENTION_TIME_DAYS")),
-            "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
-        }
-        _url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/system/indices/index_sets"
-        )
-        raw_data = json.dumps(index_of_interest)
-        _r = _session.put(
-            _url + "/" + str(index_of_interest["id"]),
-            headers=_headers,
-            data=raw_data,
-            verify=False,
-        )
-        if _r.status_code == 200:
-            print("Log retention time successfully updated !")
-        else:
-            print(
-                "Error updating log retention time! Status code of the request : "
-                + str(_r.status_code)
-                + " "
-                + r.text
-            )
-    except EnvError:
+    _url = (
+        "https://monitoring."
+        + env.str("MACHINE_FQDN")
+        + "/graylog/api/system/indices/index_sets"
+    )
+    _r = _session.get(_url, headers=_headers, verify=False)
+    index_of_interest = [
+        index
+        for index in _r.json()["index_sets"]
+        if index["title"] == "Default index set"
+    ][0]
+
+    # https://graylog.org/post/understanding-data-tiering-in-60-seconds/
+    # https://community.graylog.org/t/graylog-6-0-data-tiering-for-rotation-and-retention/33302
+    index_of_interest["use_legacy_rotation"] = False
+    index_of_interest["data_tiering"] = {
+        "type": "hot_only",
+        "index_lifetime_min": f"P{GRAYLOG_LOG_MIN_DAYS_IN_STORAGE}D",
+        "index_lifetime_max": f"P{GRAYLOG_LOG_MAX_DAYS_IN_STORAGE}D",
+    }
+    _url = (
+        "https://monitoring."
+        + env.str("MACHINE_FQDN")
+        + "/graylog/api/system/indices/index_sets"
+    )
+    raw_data = json.dumps(index_of_interest)
+    _r = _session.put(
+        _url + "/" + str(index_of_interest["id"]),
+        headers=_headers,
+        data=raw_data,
+        verify=False,
+    )
+    if _r.status_code == 200:
+        print("Log retention time successfully updated !")
+    else:
         print(
-            "Setting retention time: GRAYLOG_RETENTION_TIME_DAYS not set or failed, default retention is used..."
+            "Error updating log retention time! Status code of the request : "
+            + str(_r.status_code)
+            + " "
+            + r.text
         )
 
     try:
@@ -380,21 +390,13 @@ def configure_content_packs(_session, _headers, base_url):
 
 
 if __name__ == "__main__":
-    print(
-        "Waiting for graylog to run for provisioning. This can take up to some minutes, please be patient..."
-    )
-    try:
-        check_graylog_online()
-    except RuntimeError as e:
-        print(e)
-        print("Exception or: Graylog is still not online.")
-        print("Graylog script will now stop.")
-        sys.exit(1)
+    wait_graylog_is_online()
+    validate_graylog_version_is_supported()
 
     session = requests.Session()
     session.verify = False
     session.auth = (
-        "admin",
+        env.str("SERVICES_USER"),
         env.str("SERVICES_PASSWORD"),
     )  # Graylog username is always "admin"
     hed = {
