@@ -30,3 +30,8 @@ fi
 
 # create a k8s cluster
 kind create cluster --config "$KIND_CONFIG_FILE" --name "$KIND_CLUSTER_NAME"
+# HARDCODE: Addition of placement labels
+# !This assumes only one node in the cluster!
+# FIXME!
+kubectl label nodes kind-control-plane simcore=true
+kubectl label nodes kind-control-plane ops=true
