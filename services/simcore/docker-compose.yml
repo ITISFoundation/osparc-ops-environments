@@ -540,7 +540,6 @@ services:
   efs-guardian:
     hostname: "{{.Service.Name}}"
     networks:
-      - public
       - monitored
     deploy:
       replicas: ${SIMCORE_EFS_GUARDIAN_REPLICAS}
