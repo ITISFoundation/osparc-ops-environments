@@ -12,7 +12,7 @@ services:
       - public
       - monitored
     environment:
-      MEMORY_MAX_TRACES: 10000
+      MEMORY_MAX_TRACES: 5000
     deploy:
       placement:
         constraints:
@@ -29,7 +29,7 @@ services:
         - prometheus-port=14269
       resources:
         limits:
-          memory: 200M
+          memory: 512M
           cpus: "1"
         reservations:
           memory: 64M
