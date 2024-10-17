@@ -9,4 +9,4 @@ ports:
     http3:
       enabled: false
     middlewares:
-      - default-internal-ipallowlist@kubernetescrd
+      - {{.Release.Namespace}}-internal-ipallowlist@kubernetescrd
