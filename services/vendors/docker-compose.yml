@@ -1,0 +1,35 @@
+
+# NOTE: this stack is only for development and testing of vendor services.
+# the actualy code is deployed inside the ops repository.
+
+services:
+
+  manual:
+    image: containous/whoami
+    init: true
+    hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
+    deploy:
+      replicas: ${VENDOR_MANUAL_REPLICAS}
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # auth: https://doc.traefik.io/traefik/middlewares/http/forwardauth
+        - traefik.http.middlewares.vendor_manual_auth.forwardauth.address=http://${WEBSERVER_HOST}:${WEBSERVER_PORT}/v0/auth:check
+        - traefik.http.middlewares.vendor_manual_auth.forwardauth.trustForwardHeader=true
+        - traefik.http.middlewares.vendor_manual_auth.forwardauth.authResponseHeaders=Set-Cookie,osparc-sc2
+        # routing
+        - traefik.http.services.vendor_manual.loadbalancer.server.port=80
+        - traefik.http.routers.vendor_manual.entrypoints=https
+        - traefik.http.routers.vendor_manual.rule=Host(`${VENDOR_MANUAL_DOMAIN}`)
+        - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, vendor_manual_auth
+    networks:
+      - simcore_default
+      - public
+
+networks:
+  simcore_default:
+    name: ${SIMCORE_NETWORK}
+    external: true
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
