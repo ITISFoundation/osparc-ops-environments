@@ -17,6 +17,7 @@ services:
         # routing
         - traefik.http.services.vendor_manual.loadbalancer.server.port=80
         - traefik.http.routers.vendor_manual.entrypoints=https
+        - traefik.http.routers.vendor_manual.tls=true
         - traefik.http.routers.vendor_manual.rule=Host(`${VENDOR_MANUAL_DOMAIN}`)
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, vendor_manual_auth
     networks:
