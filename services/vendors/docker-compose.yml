@@ -1,11 +1,8 @@
-
-# NOTE: this stack is only for development and testing of vendor services.
-# the actualy code is deployed inside the ops repository.
+version: "3.7"
 
 services:
-
   manual:
-    image: containous/whoami
+    image: ${VENDOR_MANUAL_IMAGE}
     init: true
     hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
     deploy:
@@ -23,13 +20,9 @@ services:
         - traefik.http.routers.vendor_manual.rule=Host(`${VENDOR_MANUAL_DOMAIN}`)
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, vendor_manual_auth
     networks:
-      - simcore_default
       - public
 
 networks:
-  simcore_default:
-    name: ${SIMCORE_NETWORK}
-    external: true
   public:
     external: true
     name: ${PUBLIC_NETWORK}
