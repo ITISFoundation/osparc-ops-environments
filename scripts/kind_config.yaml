@@ -10,3 +10,6 @@ nodes:
         hostPort: 443
       - containerPort: 32443
         hostPort: 8443  ## handle traefik [interal] http --> https redirect
+    labels:
+      ops: "true"
+      simcore: "true"
