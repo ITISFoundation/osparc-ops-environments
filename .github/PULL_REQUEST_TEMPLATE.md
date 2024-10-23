@@ -18,6 +18,6 @@
 - [ ] Service has placement constraints or is global
 - [ ] Service is restartable
   - [ ] The restart is zero-downtime
-- [ ] Service can migrate to another Node without manual intervention
+- [ ] Service is not bound to one specific node (e.g. via files or volumes)
 - [ ] Relevant OPS E2E Test for this stack were added
 -->

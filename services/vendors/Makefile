@@ -9,23 +9,23 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up ## Deploys registry stack
+.PHONY: up ## Deploys stack
 up: ${TEMP_COMPOSE} .init .env
 	docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
 
-.PHONY: up-dalco ## Deploys registry stack for Dalco Cluster
+.PHONY: up-dalco ## Deploys stack for Dalco Cluster
 up-dalco: up
 
 .PHONY: up-aws
 up-aws: up
 
-.PHONY: up-master ## Deploys registry on master cluster
+.PHONY: up-master ## Deploys stack on master cluster
 up-master: up
 
-.PHONY: up-public ## Deploys registry on public cluster
+.PHONY: up-public ## Deploys stack on public cluster
 up-public: up
 
-.PHONY: up-local ## Deploys registry on local deployment
+.PHONY: up-local ## Deploys stack on local deployment
 up-local: up
 
 # Helpers -------------------------------------------------
