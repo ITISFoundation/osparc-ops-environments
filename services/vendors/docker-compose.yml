@@ -7,6 +7,16 @@ services:
     hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
     deploy:
       replicas: ${VENDOR_MANUAL_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
