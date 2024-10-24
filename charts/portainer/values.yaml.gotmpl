@@ -18,6 +18,12 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: portainer-sa-clusteradmin
+persistence:
+  enabled: true
+  size: "10Gi"
+  annotations: {}
+  storageClass: "csi-s3"
+  existingClaim:
 
 podAnnotations: {}
 podLabels: {}
