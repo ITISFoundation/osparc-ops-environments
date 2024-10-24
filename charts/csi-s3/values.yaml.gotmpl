@@ -1,0 +1,7 @@
+secret:
+  accessKey: {{ requiredEnv "S3_ACCESS_KEY" }}
+  secretKey: {{ requiredEnv "S3_SECRET_KEY" }}
+  region: {{ requiredEnv "S3_REGION" }}
+  endpoint: {{ requiredEnv "S3_ENDPOINT" }}
+storageClass:
+  singleBucket:  {{ requiredEnv "S3_K8S_CSI_BUCKET_NAME" }}

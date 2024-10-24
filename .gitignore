@@ -149,3 +149,6 @@ docker-compose.simcore.yml
 repo.config
 .temp
 .temp/**
+
+# By convention: `.secret` files are gitignored
+**/*.secret
