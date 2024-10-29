@@ -28,4 +28,4 @@ jobs:
           pre-commit install
 
       - name: Run pre-commit
-        run: SKIP=stack-yml-generated-is-valid pre-commit run --all-files
+        run: pre-commit run --all-files
