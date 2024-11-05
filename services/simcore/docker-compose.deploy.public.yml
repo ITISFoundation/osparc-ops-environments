@@ -10,9 +10,6 @@ services:
         constraints:
           - node.labels.postgres==true
 
-  resource-usage-tracker:
-    deploy:
-      replicas: 3
   static-webserver:
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
   traefik:

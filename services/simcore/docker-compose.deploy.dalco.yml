@@ -17,9 +17,7 @@ services:
       placement:
         constraints:
           - node.role == worker
-  resource-usage-tracker:
-    deploy:
-      replicas: 3
+
   traefik:
     command:
       - "--api=true"
