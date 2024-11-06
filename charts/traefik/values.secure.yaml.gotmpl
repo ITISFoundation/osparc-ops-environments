@@ -35,10 +35,19 @@ extraObjects:
   kind: Middleware
   metadata:
     name: traefik-basic-auth
+    namespace: {{.Release.Namespace}}
   spec:
     basicAuth:
       secret: traefik-authorized-users  # https://doc.traefik.io/traefik/middlewares/http/basicauth/#users
-
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: portainer-strip-prefix
+    namespace: {{.Release.Namespace}}
+  spec:
+    stripPrefix:
+      prefixes:
+      - /portainer
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
