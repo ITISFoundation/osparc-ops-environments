@@ -51,6 +51,7 @@ services:
     networks:
       - public
       - monitored
+      - interactive_services_subnet
     environment:
       TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
       TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE: ${TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE}
@@ -62,4 +63,7 @@ networks:
     name: ${PUBLIC_NETWORK}
   monitored:
     name: ${MONITORED_NETWORK}
+    external: true
+  interactive_services_subnet:
+    name: ${SWARM_STACK_NAME}_interactive_services_subnet
     external: true
