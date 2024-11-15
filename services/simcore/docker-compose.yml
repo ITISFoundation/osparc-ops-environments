@@ -649,7 +649,7 @@ services:
       # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
       # NOTE: this MUSTN'T change, or weird things might happen
       # this will stay until all legacy dynamic services are gone.
-      replicas: ${RESOURCE_USAGE_TRACKER_REPLICA}
+      replicas: ${RESOURCE_USAGE_TRACKER_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
