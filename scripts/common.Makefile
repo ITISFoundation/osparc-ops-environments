@@ -245,9 +245,18 @@ clean-default: .check_clean ## Cleans all outputs
 	@.venv/bin/pip3 install --upgrade pip wheel setuptools
 	@.venv/bin/pip3 install jinja2 j2cli[yaml]
 
+
+# if j2cli_customization.py exists, include it
+# https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
+ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
+define jinja
+	.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+endef
+else
 define jinja
 	.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
+endif
 
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default

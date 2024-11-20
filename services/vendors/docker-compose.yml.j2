@@ -4,7 +4,9 @@ services:
   manual:
     image: ${VENDOR_MANUAL_IMAGE}
     init: true
+{%- raw %}
     hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
+{%- endraw %}
     deploy:
       replicas: ${VENDOR_MANUAL_REPLICAS}
       placement:
@@ -28,7 +30,7 @@ services:
         - traefik.http.services.vendor_manual.loadbalancer.server.port=${VENDOR_MANUAL_PORT}
         - traefik.http.routers.vendor_manual.entrypoints=https
         - traefik.http.routers.vendor_manual.tls=true
-        - traefik.http.routers.vendor_manual.rule=Host(`${VENDOR_MANUAL_DOMAIN}`)
+        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_manual_traefik_rule(VENDOR_MANUAL_DOMAINS) }}
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, authenticated_platform_user@swarm
     networks:
       - public
