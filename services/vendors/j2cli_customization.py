@@ -1,11 +1,11 @@
-def _vendors_manual_traefik_rule(domains):
-    return " || ".join(
-        f"Host(`{domain.strip()}`)" for domain in domains.strip().strip(",").split(",")
-    )
+def _generate_vendors_manual_traefik_rule(domains: str, subdomain_prefix: str) -> str:
+    domain_list = domains.strip().strip(",").split(",")
+    domains = [f"{subdomain_prefix}.{domain}" for domain in domain_list]
+    return " || ".join(domains)
 
 
 def j2_environment(env):
     env.globals.update(
-        generate_vendors_manual_traefik_rule=_vendors_manual_traefik_rule
+        generate_vendors_manual_traefik_rule=_generate_vendors_manual_traefik_rule
     )
     return env

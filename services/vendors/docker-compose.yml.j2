@@ -30,7 +30,7 @@ services:
         - traefik.http.services.vendor_manual.loadbalancer.server.port=${VENDOR_MANUAL_PORT}
         - traefik.http.routers.vendor_manual.entrypoints=https
         - traefik.http.routers.vendor_manual.tls=true
-        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_manual_traefik_rule(VENDOR_MANUAL_DOMAINS) }}
+        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_manual_traefik_rule(VENDOR_MANUAL_PRODUCTS, VENDOR_MANUAL_SUBDOMAIN_PREFIX) }}
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, authenticated_platform_user@swarm
     networks:
       - public
