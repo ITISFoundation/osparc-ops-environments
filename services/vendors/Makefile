@@ -30,6 +30,12 @@ up-local: up
 
 # Helpers -------------------------------------------------
 
+.PHONY: docker-compose.yml
+docker-compose.yml: .venv .env
+	@$(call jinja, docker-compose.yml.j2, docker-compose.yml.unlinted) && \
+	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
+	rm docker-compose.yml.unlinted >/dev/null 2>&1;
+
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@

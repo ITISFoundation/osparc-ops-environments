@@ -13,7 +13,7 @@ service:
     traces:
       receivers: [otlp]
       exporters: [otlphttp]
-      processors: [batch,probabilistic_sampler]
+      processors: [batch,probabilistic_sampler,filter/drop_healthcheck]
   telemetry:
     logs:
       level: ${TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL}
@@ -23,3 +23,11 @@ processors:
     send_batch_size: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
   probabilistic_sampler:
     sampling_percentage: ${TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE}
+  filter/drop_healthcheck:
+    error_mode: ignore
+    traces:
+      span:
+        - attributes["http.route"] == "healthcheck_readiness_probe"
+        - attributes["http.route"] == "healthcheck_liveness_probe"
+        - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
+        - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
