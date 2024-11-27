@@ -48,7 +48,9 @@ GRAYLOG_LOG_MIN_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
     before=before_log(logger, logging.INFO),
 )
 def wait_graylog_is_online():
-    _r = requests.get(GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH)
+    _r = requests.get(
+        GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH, verify=False
+    )
 
     if _r.status_code == 401:
         raise TypeError(f"Graylog unauthorized HTTP response: {_r}")
@@ -58,7 +60,9 @@ def wait_graylog_is_online():
 
 
 def validate_graylog_version_is_supported():
-    _r = requests.get(GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH)
+    _r = requests.get(
+        GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH, verify=False
+    )
     _r.raise_for_status()
 
     graylog_version = _r.json()["version"]
