@@ -7,14 +7,12 @@ VERSION := $(shell uname -a)
 
 # Checks for handling various operating systems
 ifeq ($(filter Windows_NT,$(OS)),)
-IS_WSL  := $(if $(findstring microsoft,$(shell uname -a | tr '[:upper:]' '[:lower:]')),WSL,)
 IS_WSL2 := $(if $(findstring -microsoft-,$(shell uname -a)),WSL2,)
 IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 
-$(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),)
 $(if $(IS_WSL2),,$(if $(IS_WSL),$(error WSL1 is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),))
 
 # Check that a valid location to a config file is set.
@@ -243,20 +241,21 @@ clean-default: .check_clean ## Cleans all outputs
 	# creating virtual environment with tooling (jinja, etc)
 	@python3 -m venv .venv
 	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
+	@.venv/bin/pip3 install jinja2 j2cli[yaml] typer
+	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 
 # https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
 
 endif
