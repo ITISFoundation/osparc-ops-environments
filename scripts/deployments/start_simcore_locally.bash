@@ -131,8 +131,12 @@ scripts/deployments/compose_stack_yml.bash
 log_info "Adding prefix $PREFIX_STACK_NAME to all services..."
 ./yq "with(.services; with_entries(.key |= \"${PREFIX_STACK_NAME}_\" + .))" stack.yml > stack_with_prefix.yml
 log_info "Deleting the $SIMCORE_STACK_NAME docker stack if present"
-docker stack rm "$SIMCORE_STACK_NAME" || true
-sleep 3 # Wait for stack to be deleted, the networks often take a while, not waiting might lead to docker network creation issues
+# Wait for stack to be deleted, the networks often take a while, not waiting might lead to docker network creation issues
+# shellcheck disable=2015
+docker stack rm "$SIMCORE_STACK_NAME" && sleep 3 || true
+log_info "Copying dask-certificates into place"
+mkdir -p "$repo_basedir"/services/simcore/dask-sidecar/.dask-certificates
+cp -r "$(dirname "${repo_config}")"/assets/dask-certificates/*.pem "$repo_basedir"/services/simcore/dask-sidecar/.dask-certificates
 log_info "Deploying: Running docker stack deploy for stack $SIMCORE_STACK_NAME..."
 
 # Retry logic via https://unix.stackexchange.com/a/82610
@@ -142,4 +146,5 @@ for i in {1..5}; do docker stack deploy -c stack_with_prefix.yml "$SIMCORE_STACK
 
 ############
 # CLEANUP
+# shellcheck disable=1073
 rm -r "${repo_basedir:?}"/"${tempdirname:?}" 2>/dev/null || true
