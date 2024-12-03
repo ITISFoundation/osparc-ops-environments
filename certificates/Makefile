@@ -66,16 +66,10 @@ install-root-certificate: rootca.crt ## installs a certificate in the host syste
 		echo "Is the DOCKER service ready? press when ready" && read -n 1; \
 	    fi;\
 		echo "======================================";,\
-		$(if $(IS_OSX),                                             \
-			sudo security add-trusted-cert -d -k /Library/Keychains/System.keychain $<; \
-			echo "Please restart the DOCKER service now..." && read -n 1; \
-			echo "Is the DOCKER service ready? press when ready" && read -n 1; \
-		,                                                           \
-		sudo cp $< /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates -f;                            \
-		echo "# restarting docker daemon";                      \
+		sudo cp $< /etc/ca-certificates/trust-source/anchors/osparc.crt; \
+		sudo trust extract-compat &&                            \
+		echo "# restarting docker daemon" &&                      \
 		sudo systemctl restart docker                           \
-		) \
 	)
 
 
