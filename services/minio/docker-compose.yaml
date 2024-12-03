@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   minio:
-    image: minio/minio:RELEASE.2023-06-19T19-52-50Z
+    image: minio/minio:RELEASE.2024-10-29T16-01-48Z
     init: true
     hostname: minio
     volumes:
@@ -15,7 +15,6 @@ services:
     environment:
       - MINIO_ACCESS_KEY_FILE=minio_access_key
       - MINIO_SECRET_KEY_FILE=minio_secret_key
-      - MINIO_PROMETHEUS_AUTH_TYPE=public
     deploy:
       restart_policy:
         delay: 10s
@@ -25,14 +24,20 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # direct access without path (necessary for minio client it does not like /path)
-        - traefik.http.services.minio.loadbalancer.server.port=9000
-        - traefik.http.services.minio.loadbalancer.healthcheck.path=/minio/health/ready
-        - traefik.http.routers.minio.rule=Host(`${STORAGE_DOMAIN}`)
-        - traefik.http.routers.minio.entrypoints=https
-        - traefik.http.routers.minio.tls=true
-        - traefik.http.routers.minio.middlewares=ops_gzip@swarm
+        - traefik.http.services.minio9000.loadbalancer.server.port=9000
+        - traefik.http.services.minio9000.loadbalancer.healthcheck.path=/minio/health/ready
+        - traefik.http.routers.minio9000.rule=Host(`${STORAGE_DOMAIN}`)
+        - traefik.http.routers.minio9000.entrypoints=https
+        - traefik.http.routers.minio9000.tls=true
+        - traefik.http.routers.minio9000.service=minio9000
+        #
+        - traefik.http.services.minio9001.loadbalancer.server.port=9001
+        - traefik.http.routers.minio9001.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/minio`)
+        - traefik.http.routers.minio9001.entrypoints=https
+        - traefik.http.routers.minio9001.tls=true
+        - traefik.http.routers.minio9001.service=minio9001
     command: >
-      server /data
+      server /data --console-address ":9001"
     secrets:
       - minio_secret_key
       - minio_access_key
