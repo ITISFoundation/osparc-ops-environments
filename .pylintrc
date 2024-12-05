@@ -58,7 +58,7 @@ ignore-paths=^.*\\generated_models\\.*$|^.*/generated_models/.*$
 # Files or directories matching the regex patterns are skipped. The regex
 # matches against base names, not paths. The default value ignores Emacs file
 # locks
-ignore-patterns=venv,.venv
+ignore-patterns=venv,.venv,jupyter_server_config.py
 
 # List of module names for which member attributes should not be checked
 # (useful for modules/projects where namespaces are manipulated during runtime

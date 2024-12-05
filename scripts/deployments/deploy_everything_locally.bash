@@ -235,6 +235,9 @@ if [ "$start_opsstack" -eq 0 ]; then
     # -------------------------------- ADMIN-PANELS -------------------------------
 
     log_info "starting admin-panels..."
+    # Check if the stack 'admin-panels' exists and delete it if it does
+    # shellcheck disable=2015
+    docker stack ls | grep -q admin-panels && docker stack rm admin-panels >/dev/null 2>&1 || true
     # Pushd because a call with call_make trigger a strange behavior
     pushd "${repo_basedir}"/services/admin-panels;
     call_make "." up-"$stack_target";

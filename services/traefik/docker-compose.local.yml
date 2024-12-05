@@ -52,6 +52,7 @@ services:
         aliases: # This enables the registry to resolve "registry.osparc.local" etc. to minio, via traefik. Necessary to give the registry access to the S3 bucket.
           - "${STORAGE_DOMAIN}"
           - "${REGISTRY_DOMAIN}"
+          - "${MONITORING_DOMAIN}"
     deploy:
       placement:
         constraints: []
