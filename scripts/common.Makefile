@@ -7,14 +7,12 @@ VERSION := $(shell uname -a)
 
 # Checks for handling various operating systems
 ifeq ($(filter Windows_NT,$(OS)),)
-IS_WSL  := $(if $(findstring microsoft,$(shell uname -a | tr '[:upper:]' '[:lower:]')),WSL,)
 IS_WSL2 := $(if $(findstring -microsoft-,$(shell uname -a)),WSL2,)
 IS_OSX  := $(filter Darwin,$(shell uname -a))
 IS_LINUX:= $(if $(or $(IS_WSL),$(IS_OSX)),,$(filter Linux,$(shell uname -a)))
 endif
 IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 
-$(if $(IS_WIN),$(error Windows is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),)
 $(if $(IS_WSL2),,$(if $(IS_WSL),$(error WSL1 is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),))
 
 # Check that a valid location to a config file is set.
@@ -37,13 +35,13 @@ endif
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL:=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$MACHINE_FQDN\`))|| (Host(\`storage.$$MACHINE_FQDN\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$MACHINE_FQDN\`))||  (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 	else \
 		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$MACHINE_FQDN\`))|| (Host(\`storage.$$MACHINE_FQDN\`)) || (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="(Host(\`$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$MACHINE_FQDN\`))|| (HostRegexp(\`services.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$MACHINE_FQDN\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$MACHINE_FQDN\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$element\`)) || (Host(\`storage.$$element\`))  || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
+			DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL || (Host(\`$$element\`) && PathPrefix(\`/\`)) || (Host(\`invitations.$$element\`)) || (HostRegexp(\`services.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.$$element\`) && PathPrefix(\`/\`)) || (HostRegexp(\`services.testing.$$element\`,\`{subhost:[a-zA-Z0-9-]+}.services.testing.$$element\`) && PathPrefix(\`/\`))";\
 		done; \
 		DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL="$$DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL"; \
 	fi; \
@@ -66,21 +64,6 @@ export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS:=$(shell set -o allexport; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
 	set +o allexport; )
 
-export DEPLOYMENT_FQDNS_CAPTURE_STORAGE:=$(shell set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
-		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="(Host(\`storage.$$MACHINE_FQDN\`))"; \
-	else \
-		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
-		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="(Host(\`storage.$$MACHINE_FQDN\`))"; \
-		for element in "$${hosts[@]}"; \
-		do \
-			DEPLOYMENT_FQDNS_CAPTURE_STORAGE="$$DEPLOYMENT_FQDNS_CAPTURE_STORAGE || (Host(\`storage.$$element\`))";\
-		done; \
-		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="$$DEPLOYMENT_FQDNS_CAPTURE_STORAGE"; \
-	fi; \
-	echo $$DEPLOYMENT_FQDNS_CAPTURE_STORAGE; \
-	set +o allexport; )
 
 export DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_MAINTENANCE_PAGE:=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
@@ -207,7 +190,6 @@ clean-default: .check_clean ## Cleans all outputs
 	export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS='${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'; \
-	export DEPLOYMENT_FQDNS_CAPTURE_STORAGE='${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}'; \
 	export DOLLAR='$$'; \
 	set +o allexport; \
 	envsubst < $< > .env
@@ -243,20 +225,21 @@ clean-default: .check_clean ## Cleans all outputs
 	# creating virtual environment with tooling (jinja, etc)
 	@python3 -m venv .venv
 	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml]
+	@.venv/bin/pip3 install jinja2 j2cli[yaml] typer
+	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 
 # https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
 
 endif

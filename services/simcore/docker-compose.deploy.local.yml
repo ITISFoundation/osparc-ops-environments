@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   autoscaling:
     deploy:
@@ -138,3 +137,8 @@ services:
   clusters-keeper:
     deploy:
       replicas: 0
+secrets:
+  rootca.crt:
+    external: true
+  storageca.crt:
+    external: true

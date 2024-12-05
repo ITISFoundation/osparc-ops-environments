@@ -26,7 +26,7 @@ certificates/domain.key:
 	# Done: Creating docker secrets
 
 .PHONY: up-local
-up-local: .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
+up-local: .init .venv .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
 	@bash scripts/deployments/deploy_everything_locally.bash --stack_target=local --minio_enabled=0 --vcs_check=1
 	@$(MAKE) info-local
 
@@ -70,15 +70,6 @@ down-maintenance: ## Stop the maintenance mode
 		|| true; \
 	fi \
 	,)
-
-
-.PHONY: venv
-venv: .venv ## Creates a python virtual environment with dev tools (pip, pylint, ...)
-.venv:
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install typer
-	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 # Misc: info & clean
 .PHONY: info info-vars info-local
