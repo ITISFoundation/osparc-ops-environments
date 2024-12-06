@@ -233,13 +233,13 @@ clean-default: .check_clean ## Cleans all outputs
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	.venv/bin/j2 --format=env $(1) .env -o $(2)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2)
 endef
 
 endif
