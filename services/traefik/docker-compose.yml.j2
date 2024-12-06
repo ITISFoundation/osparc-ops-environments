@@ -103,9 +103,6 @@ services:
         - traefik.http.routers.www-catchall.tls=true
         - traefik.http.routers.www-catchall.middlewares=strip-www
 
-        # Explicit www domain certificate
-        - traefik.http.routers.www-catchall.tls.domains[0].main=www.${MACHINE_FQDN} # Shouldnt this be all domains?>>
-
         ###########################
         # basic authentication
         # Note: all dollar signs in the hash need to be doubled for escaping.
