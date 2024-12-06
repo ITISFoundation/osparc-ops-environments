@@ -142,8 +142,8 @@ services:
         - traefik.http.middlewares.authenticated_platform_user.forwardauth.authResponseHeaders=Set-Cookie,osparc-sc2
         #
         # middleware: http(s)://(www.) to  https://
-        - traefik.http.middlewares.strip-www.redirectregex.regex=^(.*)www\.(.+)
-        - traefik.http.middlewares.strip-www.redirectregex.replacement=$${1}$${2}
+        - traefik.http.middlewares.strip-www.redirectregex.regex=^(https?)://www\.(.+)
+        - traefik.http.middlewares.strip-www.redirectregex.replacement=$${1}://$${2}
         - traefik.http.middlewares.strip-www.redirectregex.permanent=true
 
     networks:
