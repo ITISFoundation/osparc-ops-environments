@@ -71,8 +71,6 @@ down-maintenance: ## Stop the maintenance mode
 	fi \
 	,)
 
-.PHONY: venv
-venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 
 # Misc: info & clean
 .PHONY: info info-vars info-local
