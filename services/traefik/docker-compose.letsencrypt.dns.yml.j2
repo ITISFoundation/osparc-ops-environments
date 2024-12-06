@@ -3,7 +3,7 @@ services:
   traefik:
     deploy:
       labels:
-        - traefik.http.routers.wwwsecure-catchall.tls.certresolver=myresolver
+        - traefik.http.routers.www-catchall.tls.certresolver=myresolver
         - traefik.http.routers.api.tls.certresolver=myresolver
         - traefik.http.middlewares.ops_whitelist_ips.ipallowlist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
         # What follows is a tested workaround to ensure letsencrypt certificates for products' domains are generated
