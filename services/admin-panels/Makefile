@@ -13,7 +13,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 # Helpers --------------------------------------------------
 define custom-jinja
-	@.venv/bin/j2 --format=json $(1) $(2) -o $(3)
+	@${REPO_BASE_DIR}/.venv/bin/j2 --format=json $(1) $(2) -o $(3)
 endef
 
 .PHONY: .data.json
