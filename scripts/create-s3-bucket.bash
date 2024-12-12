@@ -11,5 +11,5 @@ IFS=$'\n\t'
 docker run \
 -v /etc/ssl/certs:/etc/ssl/certs:ro \
 --network host \
---env MC_HOST_local="https://${S3_ACCESS_KEY}:${S3_SECRET_KEY}@${S3_ENDPOINT}" \
-minio/mc:RELEASE.2023-06-19T19-31-19Z mb --ignore-existing local/"$1"
+--env MC_HOST_local="https://${S3_ACCESS_KEY}:${S3_SECRET_KEY}@${STORAGE_DOMAIN}" \
+minio/mc:RELEASE.2023-06-19T19-31-19Z mb --insecure --ignore-existing local/"$1"

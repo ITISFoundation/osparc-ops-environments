@@ -24,7 +24,7 @@ endef
 .PHONY: up-local
 up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys registry stack
 	@$(create-s3-bucket)
-	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
 .PHONY: up-letsencrypt-http  ## Deploys registry stack using let's encrypt http challenge
 up-letsencrypt-http: .init .env ${TEMP_COMPOSE}-letsencrypt-http
@@ -48,8 +48,6 @@ up-master: up-dalco
 .PHONY: up-public ## Deploys registry on public cluster
 up-public: up-dalco
 
-.PHONY: up-local ## Deploys registry on local deployment
-up-local: up
 
 # Helpers -------------------------------------------------
 

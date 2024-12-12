@@ -7,8 +7,15 @@ services:
     command:
       - "--api=true"
       - "--api.dashboard=true"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+      - "--accesslog.fields.defaultmode=keep"
+      - "--accesslog.fields.names.ClientUsername=keep"
+      - "--accesslog.fields.headers.defaultmode=keep"
+      - "--accesslog.fields.headers.names.User-Agent=keep"
+      - "--accesslog.fields.headers.names.Authorization=drop"
+      - "--accesslog.fields.headers.names.Content-Type=keep"
       - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
-      - "--accesslog=false"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addEntryPointsLabels=true"
       - "--metrics.prometheus.addServicesLabels=true"
@@ -18,9 +25,9 @@ services:
       - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - --entrypoints.http.http.redirections.entrypoint.to=https
-      - --entrypoints.http.http.redirections.entrypoint.scheme=https
-      - --entrypoints.http.http.redirections.entrypoint.permanent=true
+      - "--entrypoints.http.http.redirections.entrypoint.to=https"
+      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
       - '--entryPoints.postgres.address=:5432'
       - '--entryPoints.postgres2.address=:5433'
       - "--entryPoints.https.address=:443"
@@ -90,16 +97,12 @@ services:
         # via https://community.traefik.io/t/v2-2-8-global-redirect-www-to-non-www-with-http-to-https/7428
         # see also: https://community.traefik.io/t/get-a-valid-ssl-certificate-for-www-domains-via-traefik-and-lets-encrypt/2023
         # Global redirection: https (www.) to https
-        - traefik.http.routers.wwwsecure-catchall.rule=HostRegexp(`(?P<host>(www\.).+)`)
-        - traefik.http.routers.wwwsecure-catchall.entrypoints=https
-        - traefik.http.routers.wwwsecure-catchall.tls=true
-        - traefik.http.routers.wwwsecure-catchall.middlewares=wwwtohttps
-        # middleware: http(s)://(www.) to  https://
-        - traefik.http.middlewares.wwwtohttps.redirectregex.regex=^https?://(?:www\.)?(.+)
-        - traefik.http.middlewares.wwwtohttps.redirectregex.replacement=https://$${1}
-        - traefik.http.middlewares.wwwtohttps.redirectregex.permanent=true
-        # Explicit www domain certificate
-        - traefik.http.routers.wwwsecure-catchall.tls.domains[0].main=www.${MACHINE_FQDN}
+        - traefik.http.routers.www-catchall.rule=Host(`www.osparc.local`)
+        - traefik.http.routers.www-catchall.priority=100000
+        - traefik.http.routers.www-catchall.entrypoints=https,http
+        - traefik.http.routers.www-catchall.tls=true
+        - traefik.http.routers.www-catchall.middlewares=strip-www
+
         ###########################
         # basic authentication
         # Note: all dollar signs in the hash need to be doubled for escaping.
@@ -137,6 +140,12 @@ services:
         - traefik.http.middlewares.authenticated_platform_user.forwardauth.address=http://${WEBSERVER_HOST}:${WEBSERVER_PORT}/v0/auth:check
         - traefik.http.middlewares.authenticated_platform_user.forwardauth.trustForwardHeader=true
         - traefik.http.middlewares.authenticated_platform_user.forwardauth.authResponseHeaders=Set-Cookie,osparc-sc2
+        #
+        # middleware: http(s)://(www.) to  https://
+        - traefik.http.middlewares.strip-www.redirectregex.regex=^(https?)://www\.(.+)
+        - traefik.http.middlewares.strip-www.redirectregex.replacement=$${1}://$${2}
+        - traefik.http.middlewares.strip-www.redirectregex.permanent=true
+
     networks:
       public: null
       monitored: null
@@ -145,7 +154,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.ops==true
+          - node.labels.traefik==true
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
