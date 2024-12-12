@@ -97,7 +97,7 @@ services:
         # via https://community.traefik.io/t/v2-2-8-global-redirect-www-to-non-www-with-http-to-https/7428
         # see also: https://community.traefik.io/t/get-a-valid-ssl-certificate-for-www-domains-via-traefik-and-lets-encrypt/2023
         # Global redirection: https (www.) to https
-        - traefik.http.routers.www-catchall.rule=Host(`www.osparc.local`)
+        - traefik.http.routers.www-catchall.rule={{ DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE.strip("\"") }}
         - traefik.http.routers.www-catchall.priority=100000
         - traefik.http.routers.www-catchall.entrypoints=https,http
         - traefik.http.routers.www-catchall.tls=true
