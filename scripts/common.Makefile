@@ -97,6 +97,22 @@ export DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE:=$(shell set -o allexport; 
 	echo $$DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE; \
 	set +o allexport; )
 
+export DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE:=$(shell set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
+		DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE="(Host(\`www.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+	else \
+		IFS=', ' read -r -a hosts <<< "$${DEPLOYMENT_FQDNS}"; \
+		DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE="(Host(\`www.$$MACHINE_FQDN\`) && PathPrefix(\`/\`))"; \
+		for element in "$${hosts[@]}"; \
+		do \
+			DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE || (Host(\`www.$$element\`) && PathPrefix(\`/\`))";\
+		done; \
+		DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE"; \
+	fi; \
+	echo $$DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE; \
+	set +o allexport; )
+
 export DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE:=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
@@ -221,13 +237,17 @@ clean-default: .check_clean ## Cleans all outputs
 	fi
 
 # Helpers -------------------------------------------------
-.venv:
+# Replace the existing .venv target with the following
+$(REPO_BASE_DIR)/.venv/bin/activate:
 	# creating virtual environment with tooling (jinja, etc)
-	@python3 -m venv .venv
-	@.venv/bin/pip3 install --upgrade pip wheel setuptools
-	@.venv/bin/pip3 install jinja2 j2cli[yaml] typer
-	@echo "To activate the venv, execute 'source .venv/bin/activate'"
-
+	python3 -m venv $(REPO_BASE_DIR)/.venv
+	$(REPO_BASE_DIR)/.venv/bin/pip3 install --upgrade pip wheel setuptools
+	$(REPO_BASE_DIR)/.venv/bin/pip3 install jinja2 j2cli[yaml] typer
+	@echo "To activate the venv, execute 'source $(REPO_BASE_DIR)/.venv/bin/activate'"
+PHONY: .venv
+.venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
+.PHONY: venv
+venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 
 # https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)

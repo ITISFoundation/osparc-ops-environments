@@ -92,13 +92,9 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 
 
 .PHONY: configure
-configure: .env ## Test is Graylog is online and configure Graylog inputs
+configure: .env .venv ## Test is Graylog is online and configure Graylog inputs
 	@cd scripts;\
-	if [ ! -d ".venv" ]; \
-	then\
-		python3 -m venv .venv;\
-	fi;\
-	source .venv/bin/activate;\
+	source ${REPO_BASE_DIR}/.venv/bin/activate;\
 	pip install -r requirements.txt > /dev/null 2>&1;\
 	set -o allexport; \
 	source ../$<;\
