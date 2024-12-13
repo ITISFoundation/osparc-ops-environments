@@ -254,5 +254,8 @@ if [ "$start_opsstack" -eq 0 ]; then
 fi
 if [ "$start_simcore" -eq 0 ]; then
     log_info "starting simcore..."
-    "${repo_basedir}"/scripts/deployments/start_simcore_locally.bash
+    service_dir="${repo_basedir}"/services/simcore
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 fi
