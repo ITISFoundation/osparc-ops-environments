@@ -129,7 +129,7 @@ docs/_build
 /services/monitoring/pgsql_query_exporter_config.yaml
 /services/monitoring/docker-compose.yml
 /services/monitoring/smokeping_prober_config.yaml
-
+services/monitoring/tempo_config.yaml
 
 # Simcore: Contains location of repo.config file on the machine and of the whole config directory
 .config.location
