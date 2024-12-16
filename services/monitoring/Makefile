@@ -84,6 +84,23 @@ update.grafana.pwd: .env ## Change grafana pwd
 	grafanacontainerid=$$(docker ps | grep grafana | awk '{print $$1;}');\
 	docker exec -ti $$grafanacontainerid grafana-cli admin reset-admin-password $$TRAEFIK_PASSWORD
 
+.PHONY: ensure-grafana-online
+ensure-grafana-online:
+	@set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	set +o allexport; \
+	url=$${TF_VAR_grafana_url}; \
+	echo "Waiting for grafana at $$url to become reachable."; \
+	while true; do \
+	    status_code=$$(curl -k -o /dev/null -s -w "%{http_code}" $$url); \
+	    if [ "$$status_code" -ge 200 ] && [ "$$status_code" -lt 400 ]; then \
+	        echo "Grafana is online"; \
+	        break; \
+	    else \
+	        echo "Grafana still unreachable, waiting 5s for grafana to become reachable..."; \
+	        sleep 5; \
+	    fi; \
+done;
 
 .PHONY: grafana-export
 grafana-export: .venv## Export the remote grafana dashboards and datasources TO YOUR LOCAL MACHINE
@@ -93,11 +110,16 @@ grafana-export: .venv## Export the remote grafana dashboards and datasources TO 
 	python3 export.py;
 
 .PHONY: grafana-import
-grafana-import: grafana/assets .venv ## Imports AND OVERWRITES the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
-	@cd grafana/scripts;\
-	source ${REPO_BASE_DIR}/.venv/bin/activate;\
-	pip install -r requirements.txt > /dev/null 2>&1;\
-	python3 import.py
+grafana-import: grafana/assets ensure-grafana-online ## Imports AND OVERWRITES the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
+	@set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	set +o allexport; \
+	pushd ${REPO_BASE_DIR}/services/monitoring/grafana/terraform && \
+	terraform init && \
+	terraform destroy -auto-approve && \
+	terraform apply -auto-approve; \
+	popd > /dev/null
+
 
 .PHONY: config.grafana.dashboards
 config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters
