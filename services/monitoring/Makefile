@@ -74,7 +74,7 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml con
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
-	$(call jinja,$<,$@)
+	$(call jinja,$<,.env,$@)
 
 .PHONY: update.grafana.pwd
 update.grafana.pwd: .env ## Change grafana pwd
@@ -123,7 +123,7 @@ grafana-import: grafana/assets ensure-grafana-online ## Imports AND OVERWRITES t
 
 .PHONY: config.grafana.dashboards
 config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters
-	$(call jinja, $<, grafana/provisioning/dashboards/simcore/Metrics-dashboard.json)
+	$(call jinja, $<, .env, grafana/provisioning/dashboards/simcore/Metrics-dashboard.json)
 
 .PHONY: config.monitoring
 config.monitoring: grafana/template-config.monitoring ${REPO_CONFIG_LOCATION}
@@ -155,7 +155,7 @@ config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
-	$(call jinja, prometheus/prometheus-ceph.yml.j2, prometheus/prometheus-ceph.yml); \
+	$(call jinja, prometheus/prometheus-ceph.yml.j2, .env, prometheus/prometheus-ceph.yml); \
 	cat prometheus/prometheus-base.yml | $(_yq) '. *+ load("prometheus/prometheus-simcore.yml")' | cat | \
 	$(_yq) '. *+ load("prometheus/prometheus-ceph.yml")' > prometheus/prometheus.yml; \
 	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
@@ -170,10 +170,10 @@ config.prometheus: ${REPO_CONFIG_LOCATION} .venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
-	$(call jinja, $<, $@);
+	$(call jinja, $<, .env, $@);
 
 smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
-	$(call jinja, $<, $@);
+	$(call jinja, $<, .env, $@);
 
 .PHONY: grafana/assets
 grafana/assets: ${REPO_CONFIG_LOCATION}
