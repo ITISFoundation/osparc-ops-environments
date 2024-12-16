@@ -6,7 +6,7 @@ terraform {
   }
   {% else %}
   backend "s3" {
-    key            = "{{ TF_STATE_S3_KEY}}"
+    key            = "{{ TF_STATE_S3_GRAFANAKEY}}"
     dynamodb_table = "{{ TF_STATE_S3_DYNAMODB_LOCK_TABLE }}"
     encrypt        = true
     bucket         = "{{ TF_STATE_S3_BUCKET_NAME }}"
