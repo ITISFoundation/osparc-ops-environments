@@ -1,8 +1,18 @@
 terraform {
   required_version = "~> 1.5.1"
-  backend "local" {
+  {% if TF_STATE_BACKEND_TYPE != "s3" %}
+  backend "{{TF_STATE_BACKEND_TYPE}}" {
     path = "terraform.tfstate" # Specify the path for the state file, can be a different path if needed
   }
+  {% else %}
+  backend "s3" {
+    key            = "{{ TF_STATE_S3_KEY}}"
+    dynamodb_table = "{{ TF_STATE_S3_DYNAMODB_LOCK_TABLE }}"
+    encrypt        = true
+    bucket         = "{{ TF_STATE_S3_BUCKET_NAME }}"
+    region         = "{{ TF_STATE_S3_REGION }}"
+  }
+  {% endif %}
   required_providers {
     grafana = {
       source  = "grafana/grafana"
