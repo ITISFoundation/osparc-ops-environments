@@ -1,20 +1,20 @@
-variable "grafana_url" {
+variable "GRAFANA_URL" {
   description = "grafana_url"
   sensitive   = false
 }
-variable "grafana_auth" {
+variable "GRAFANA_AUTH" {
   description = "Username:Password"
   sensitive   = true
 }
-variable "prometheus_federation_url" {
+variable "PROMETHEUS_FEDERATION_URL" {
   description = "Prometheus Federation URL"
   sensitive   = false
 }
-variable "prometheus_catchall_url" {
+variable "PROMETHEUS_CATCHALL_URL" {
   description = "Prometheus Catchall URL"
   sensitive   = false
 }
-variable "tempo_url" {
+variable "TEMPO_URL" {
   description = "Tempo URL"
   sensitive   = false
 }
