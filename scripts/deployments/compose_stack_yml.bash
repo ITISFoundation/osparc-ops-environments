@@ -80,7 +80,6 @@ envsubst < .env.nosub > .env
 cp .env ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
 
-unset EC2_INSTANCES_ALLOWED_TYPES
 "$repo_basedir"/scripts/docker-stack-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
 #
 #
