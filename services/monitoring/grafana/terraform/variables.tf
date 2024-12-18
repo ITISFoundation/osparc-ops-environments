@@ -14,7 +14,3 @@ variable "PROMETHEUS_CATCHALL_URL" {
   description = "Prometheus Catchall URL"
   sensitive   = false
 }
-variable "TEMPO_URL" {
-  description = "Tempo URL"
-  sensitive   = false
-}

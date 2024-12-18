@@ -15,11 +15,3 @@ resource "grafana_data_source" "prometheuscatchall" {
   is_default         = false
   uid                = "RmZEr52nz"
 }
-
-resource "grafana_data_source" "tempo" {
-  type               = "tempo"
-  name               = "tempo"
-  url                = var.TEMPO_URL
-  basic_auth_enabled = false
-  is_default         = false
-}
