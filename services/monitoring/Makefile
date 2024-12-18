@@ -84,16 +84,8 @@ update.grafana.pwd: .env ## Change grafana pwd
 	grafanacontainerid=$$(docker ps | grep grafana | awk '{print $$1;}');\
 	docker exec -ti $$grafanacontainerid grafana-cli admin reset-admin-password $$TRAEFIK_PASSWORD
 
-
-.PHONY: grafana-export
-grafana-export: .venv## Export the remote grafana dashboards and datasources TO YOUR LOCAL MACHINE
-	@cd grafana/scripts;\
-	source ${REPO_BASE_DIR}/.venv/bin/activate;\
-	pip install -r requirements.txt > /dev/null 2>&1;\
-	python3 export.py;
-
 .PHONY: grafana-import
-grafana-import: grafana/assets ## Imports AND OVERWRITES the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
+grafana-import: grafana/assets ## Imports the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
 	@pushd ${REPO_BASE_DIR}/services/monitoring/grafana && \
 	$(MAKE) terraform-plan && \
 	$(MAKE) terraform-apply; \
