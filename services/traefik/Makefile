@@ -101,13 +101,13 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
 
 .PHONY: docker-compose.letsencrypt.dns.yml
 docker-compose.letsencrypt.dns.yml: .venv .env
-	@$(call jinja, docker-compose.letsencrypt.dns.yml.j2, docker-compose.letsencrypt.dns.yml.unlinted) && \
+	@$(call jinja, docker-compose.letsencrypt.dns.yml.j2, .env, docker-compose.letsencrypt.dns.yml.unlinted) && \
 	$(_yq) docker-compose.letsencrypt.dns.yml.unlinted > docker-compose.letsencrypt.dns.yml; \
 	rm docker-compose.letsencrypt.dns.yml.unlinted >/dev/null 2>&1;
 
 .PHONY: docker-compose.yml
 docker-compose.yml: traefik_dynamic_config.yml .venv .env
-	@$(call jinja, docker-compose.yml.j2, docker-compose.yml.unlinted) && \
+	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
 	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;
 
