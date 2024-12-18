@@ -22,6 +22,13 @@ $(if $(REPO_CONFIG_LOCATION),,$(error The location of the repo.config file given
 $(if $(shell cat $(REPO_CONFIG_LOCATION)),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell wc -l $(REPO_BASE_DIR)/.config.location | grep 1),,$(error The .config.location file has more than one path specified. Only one path is allowed. Aborting))
 
+# Extract DEPLOYMENT_FQDN using Make functions
+DEPLOYMENT_FQDN := $(notdir $(patsubst %/,%, $(dir $(REPO_CONFIG_LOCATION))))
+# Construct CI_ENV_FILE using Make functions
+CI_ENV_FILE := $(realpath $(dir $(REPO_CONFIG_LOCATION))/../../.gitlab/pipelines/1_configurations/$(DEPLOYMENT_FQDN)/ci.env)
+$(if $(CI_ENV_FILE),,$(error The location of the repo.config file given in .config.location is invalid. Cannot find the ci.env file. Aborting))
+$(if $(shell cat $(CI_ENV_FILE)),,$(error The location of the repo.config file given in .config.location is invalid. Cannot find the ci.env file. Aborting))
+
 ifeq ($(_yq),)
 _yq = docker run --rm -i -v $${PWD}:/workdir mikefarah/yq:4.30.4
 endif
@@ -253,13 +260,13 @@ venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environmen
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) --customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3)
 endef
 
 endif
