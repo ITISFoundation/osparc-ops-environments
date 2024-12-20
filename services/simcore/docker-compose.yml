@@ -887,6 +887,8 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.server.port=8000
+        - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.sticky.cookie=true
+        - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.sticky.cookie.name=sticky_session
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/dynamic-scheduler`)
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.entrypoints=https
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.tls=true
