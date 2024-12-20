@@ -892,9 +892,7 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/dynamic-scheduler`)
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.entrypoints=https
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.tls=true
-        - traefik.http.middlewares.${PREFIX_STACK_NAME}_dynamic_scheduler_replace_regex.replacepathregex.regex=^/dynamic-scheduler/(.*)$$
-        - traefik.http.middlewares.${PREFIX_STACK_NAME}_dynamic_scheduler_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.middlewares=${PREFIX_STACK_NAME}_dynamic_scheduler_replace_regex@swarm, ops_gzip@swarm, ops_auth@swarm
+        - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.middlewares=ops_gzip@swarm, ops_auth@swarm
 
 volumes:
   rabbit_data:
