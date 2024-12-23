@@ -52,6 +52,6 @@ ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.d
 
 config.json: config.json.j2 .env .venv
 	# generate $@
-	@$(call jinja, $<, $@)
+	@$(call jinja, $<, .env, $@)
 	# validate and format $@
 	@cat $@ | jq > /dev/null
