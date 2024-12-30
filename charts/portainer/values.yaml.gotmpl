@@ -19,12 +19,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: portainer-sa-clusteradmin
 
-persistence:
-  enabled: true
-  size: "1Gi"  # minima size for gp3 is 1Gi
-  annotations: {}
-  storageClass: "ebs-sc"
-  existingClaim:
+persistence: {}
 
 podAnnotations: {}
 podLabels: {}
