@@ -11,6 +11,10 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+.PHONY: up-local
+up-local:
+	@${REPO_BASE_DIR}/scripts/deployments/start_simcore_locally.bash
+
 .PHONY: compose-local
 compose-local: .env ${TEMP_COMPOSE}-local ## Create docker-compose.deploy for local deployment
 
