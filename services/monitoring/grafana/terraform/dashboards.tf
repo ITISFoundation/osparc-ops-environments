@@ -1,6 +1,6 @@
 // Import subfolders using an external script
 data "external" "subfolders" {
-  program = ["bash", "${path.module}/../../../../scripts/tf_helper_list_subfolders.sh", "${path.module}/../assets/shared/dashboards"]
+  program = ["bash", "${path.module}/tf_helper_list_subfolders.sh", "${path.module}/../assets/shared/dashboards"]
 }
 
 // Local mappings of folder names to their paths
@@ -19,7 +19,7 @@ resource "grafana_folder" "subfolders" {
 data "external" "dashboard_files" {
   for_each = local.folder_map
 
-  program = ["bash", "${path.module}/../../../../scripts/tf_helper_list_json_files_in_folder.sh", "${path.module}/../assets/shared/dashboards/${each.key}"]
+  program = ["bash", "${path.module}/tf_helper_list_json_files_in_folder.sh", "${path.module}/../assets/shared/dashboards/${each.key}"]
 }
 
 // Create Grafana dashboards from JSON files
