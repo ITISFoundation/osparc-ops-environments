@@ -46,13 +46,20 @@ ensure-grafana-online:
 	set +o allexport; \
 	url=$${TF_VAR_GRAFANA_URL}; \
 	echo "Waiting for grafana at $$url to become reachable..."; \
-	while true; do \
-	    status_code=$$(curl -k -o /dev/null -s -w "%{http_code}" $$url); \
-	    if [ "$$status_code" -ge 200 ] && [ "$$status_code" -lt 400 ]; then \
-	        echo "Grafana is online"; \
-	        break; \
-	    else \
-	        echo "Grafana still unreachable, waiting 5s for grafana to become reachable..."; \
-	        sleep 5; \
-	    fi; \
-done;
+	attempts=0; \
+	max_attempts=10; \
+	while [ $$attempts -lt $$max_attempts ]; do \
+		status_code=$$(curl -k -o /dev/null -s -w "%{http_code}" $$url); \
+		if [ "$$status_code" -ge 200 ] && [ "$$status_code" -lt 400 ]; then \
+			echo "Grafana is online"; \
+			break; \
+		else \
+			echo "Grafana still unreachable, waiting 5s for grafana to become reachable... (Attempt $$((attempts+1)))"; \
+			sleep 5; \
+			attempts=$$((attempts + 1)); \
+		fi; \
+	done; \
+	if [ $$attempts -eq $$max_attempts ]; then \
+		echo "Max attempts reached, Grafana is still unreachable."; \
+		exit 1; \
+	fi;
