@@ -7,20 +7,20 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Internal VARIABLES ------------------------------------------------
 TF_STATE_FILE := terraform/.terraform/terraform.tfstate
 
-terraform/main.tf: terraform/main.tf.j2 .venv $(CI_ENV_FILE)
+terraform/main.tf: terraform/main.tf.j2 .venv $(REPO_CONFIG_LOCATION)
 	# generate $@
-	@$(call jinja, $<, $(CI_ENV_FILE), $@)
+	@$(call jinja, $<, $(REPO_CONFIG_LOCATION), $@)
 	# validate and format $@
 
 terraform-init: $(TF_STATE_FILE)  ## init terraform
 
-$(TF_STATE_FILE): $(CI_ENV_FILE) terraform/main.tf
+$(TF_STATE_FILE): $(REPO_CONFIG_LOCATION) terraform/main.tf
 	# terraform init
 	@set -a; source $<; set +a; \
-	if [ "$${TF_STATE_BACKEND_TYPE}" = "local" ]; then \
+	if [ "$${GRAFANA_TERRAFORM_STATE_BACKEND_TYPE}" = "local" ]; then \
 	  terraform -chdir=./terraform init; \
 	else \
-	  terraform -chdir=./terraform init -backend-config="access_key=$${TF_BACKEND_ACCESS_KEY}" -backend-config="secret_key=$${TF_BACKEND_SECRET_KEY}"; \
+	  terraform -chdir=./terraform init -backend-config="access_key=$${GRAFANA_TERRAFORM_STATE_BACKEND_AWS_ACCESS_KEY_ID}" -backend-config="secret_key=$${GRAFANA_TERRAFORM_STATE_BACKEND_AWS_SECRET_ACCESS_KEY}"; \
 	fi
 
 terraform/plan.cache:
@@ -28,16 +28,16 @@ terraform/plan.cache:
 	@exit 1
 
 .PHONY: terraform-plan
-terraform-plan: $(CI_ENV_FILE) $(TF_STATE_FILE) ensure-grafana-online ## terraform plan
+terraform-plan: $(REPO_CONFIG_LOCATION) $(TF_STATE_FILE) ensure-grafana-online ## terraform plan
 	# terraform plan
-	@set -a; source $<; source $${REPO_CONFIG_LOCATION}; set +a; \
-    TF_VAR_aws_region=$${TF_AWS_REGION} TF_VAR_aws_access_key=$${TF_AWS_ACCESS_KEY_ID} TF_VAR_aws_secret_key=$${TF_AWS_SECRET_ACCESS_KEY} terraform -chdir=./terraform plan -out=plan.cache
+	@set -a; source $<; set +a; \
+    terraform -chdir=./terraform plan -out=plan.cache
 
 .PHONY: terraform-apply
-terraform-apply: $(CI_ENV_FILE) terraform/plan.cache $(TF_STATE_FILE) ensure-grafana-online ## terraform apply
+terraform-apply: $(REPO_CONFIG_LOCATION) terraform/plan.cache $(TF_STATE_FILE) ensure-grafana-online ## terraform apply
 	# terraform apply
 	@set -a; source $<; set +a; \
-	TF_VAR_aws_region=$${TF_AWS_REGION} TF_VAR_aws_access_key=$${TF_AWS_ACCESS_KEY_ID} TF_VAR_aws_secret_key=$${TF_AWS_SECRET_ACCESS_KEY} terraform -chdir=./terraform apply plan.cache
+	terraform -chdir=./terraform apply plan.cache
 
 .PHONY: ensure-grafana-online
 ensure-grafana-online:
