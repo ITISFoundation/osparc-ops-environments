@@ -17,7 +17,6 @@ def _generate_domain_capture_all_rule(domain: str) -> str:
 
 def j2_environment(env):
     env.globals.update(
-        generate_domain_capture_all_rule=_generate_domain_capture_all_rule,
-        zip=zip,
+        generate_domain_capture_all_rule=_generate_domain_capture_all_rule
     )
     return env

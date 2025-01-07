@@ -152,20 +152,27 @@ services:
         ###
 {% set redirect_from_domains_list = TRAEFIK_DOMAINS_REDIRECT_FROM.split(',') %}
 {% set redirect_to_domains_list = TRAEFIK_DOMAINS_REDIRECT_TO.split(',') %}
+{% set redirect_is_permanent_list = TRAEFIK_DOMAINS_REDIRECT_IS_PERMANENT.split(',') %}
 
-{% for from_domain, to_domain in zip(redirect_from_domains_list, redirect_to_domains_list) %}
+{% for ix in range(redirect_from_domains_list | length) %}
+
+{% set from_domain = redirect_from_domains_list[ix] %}
 {% set from_domain_no_dots = from_domain.replace(".", "-") %}
+{% set to_domain = redirect_to_domains_list[ix] %}
+{% set redirect_is_permanent = redirect_is_permanent_list[ix] %}
+
         # Regex below is redirecting any subdomains and path to new domain.
         #     Use https://regex101.com/r/58sIgx/2 for regex explanation and experimentation.
         #     Below we include dollar escaping and j2 expressions. It is not clean / pure regex
         #     You can fetch baked and clean regex from traefik dashboards.
         - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.regex=^https?://((?:[a-zA-Z0-9-]+\.)*)*{{ from_domain }}(.*)$$
         - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.replacement=https://$${1}{{ to_domain }}$${2}
-        - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.permanent=false
+        - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.permanent={{ redirect_is_permanent }}
         - traefik.http.routers.{{ from_domain_no_dots }}.rule={{ generate_domain_capture_all_rule(from_domain) }}
         - traefik.http.routers.{{ from_domain_no_dots }}.middlewares=redirect-{{ from_domain_no_dots }}
         - traefik.http.routers.{{ from_domain_no_dots }}.entrypoints=https
         - traefik.http.routers.{{ from_domain_no_dots }}.tls=true
+
 {% endfor %}
 
     networks:
