@@ -150,9 +150,9 @@ services:
         ###
         # Domain redirects
         ###
-{% set redirect_from_domains_list = TRAEFIK_DOMAINS_REDIRECT_FROM.split(',') %}
-{% set redirect_to_domains_list = TRAEFIK_DOMAINS_REDIRECT_TO.split(',') %}
-{% set redirect_is_permanent_list = TRAEFIK_DOMAINS_REDIRECT_IS_PERMANENT.split(',') %}
+{% set redirect_from_domains_list = TRAEFIK_DOMAINS_REDIRECT_FROM.strip().split(',') if TRAEFIK_DOMAINS_REDIRECT_FROM.strip() else [] %}
+{% set redirect_to_domains_list = TRAEFIK_DOMAINS_REDIRECT_TO.strip().split(',') if TRAEFIK_DOMAINS_REDIRECT_TO.strip() else [] %}
+{% set redirect_is_permanent_list = TRAEFIK_DOMAINS_REDIRECT_IS_PERMANENT.strip().split(',') if TRAEFIK_DOMAINS_REDIRECT_IS_PERMANENT.strip() else [] %}
 
 {% for ix in range(redirect_from_domains_list | length) %}
 
