@@ -22,9 +22,6 @@ $(if $(REPO_CONFIG_LOCATION),,$(error The location of the repo.config file given
 $(if $(shell cat $(REPO_CONFIG_LOCATION)),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell wc -l $(REPO_BASE_DIR)/.config.location | grep 1),,$(error The .config.location file has more than one path specified. Only one path is allowed. Aborting))
 
-# Extract DEPLOYMENT_FQDN using Make functions
-DEPLOYMENT_FQDN := $(notdir $(patsubst %/,%, $(dir $(REPO_CONFIG_LOCATION))))
-# Use SELECTED_ENV_FILE in your targets as needed
 ifeq ($(_yq),)
 _yq = docker run --rm -i -v $${PWD}:/workdir mikefarah/yq:4.30.4
 endif
