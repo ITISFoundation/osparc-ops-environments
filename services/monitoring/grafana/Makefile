@@ -20,7 +20,7 @@ $(TF_STATE_FILE): $(REPO_CONFIG_LOCATION) terraform/main.tf
 	if [ "$${GRAFANA_TERRAFORM_STATE_BACKEND_TYPE}" = "local" ]; then \
 	  terraform -chdir=./terraform init; \
 	else \
-	  terraform -chdir=./terraform init -backend-config="access_key=$${GRAFANA_TERRAFORM_STATE_BACKEND_AWS_ACCESS_KEY_ID}" -backend-config="secret_key=$${GRAFANA_TERRAFORM_STATE_BACKEND_AWS_SECRET_ACCESS_KEY}"; \
+	  terraform -chdir=./terraform init -backend-config="access_key=$${TF_GRAFANA_STATE_BACKEND_AWS_ACCESS_KEY_ID}" -backend-config="secret_key=$${TF_GRAFANA_STATE_BACKEND_AWS_SECRET_ACCESS_KEY}"; \
 	fi
 
 terraform/plan.cache:

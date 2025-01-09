@@ -10,8 +10,8 @@ terraform {
     key            = "{{ GRAFANA_TERRAFORM_STATE_BACKEND_S3_KEY }}"
     use_lockfile = true
     encrypt        = false
-    bucket         = "{{ TF_STATE_S3_BUCKET_NAME }}"
-    region         = "{{ TF_STATE_S3_REGION }}"
+    bucket         = "{{ TF_GRAFANA_STATE_BACKEND_S3_BUCKET_NAME }}"
+    region         = "{{ TF_GRAFANA_STATE_BACKEND_AWS_REGION }}"
     {% if GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT %}
     endpoints = {
       s3 = "{{ GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT }}"
