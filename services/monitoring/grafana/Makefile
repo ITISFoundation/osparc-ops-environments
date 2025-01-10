@@ -30,7 +30,7 @@ terraform/plan.cache:
 terraform-plan: $(REPO_CONFIG_LOCATION) $(TF_STATE_FILE) ensure-grafana-online ## terraform plan
 	# terraform plan
 	@set -a; source $<; set +a; \
-    terraform -chdir=./terraform plan -out=plan.cache
+	terraform -chdir=./terraform plan -out=plan.cache
 
 .PHONY: terraform-apply
 terraform-apply: $(REPO_CONFIG_LOCATION) terraform/plan.cache $(TF_STATE_FILE) ensure-grafana-online ## terraform apply
