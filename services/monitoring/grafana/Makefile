@@ -10,7 +10,6 @@ TF_STATE_FILE := terraform/.terraform/terraform.tfstate
 terraform/main.tf: terraform/main.tf.j2 .venv $(REPO_CONFIG_LOCATION)
 	# generate $@
 	@$(call jinja, $<, $(REPO_CONFIG_LOCATION), $@)
-	# validate and format $@
 
 terraform-init: $(TF_STATE_FILE)  ## init terraform
 
