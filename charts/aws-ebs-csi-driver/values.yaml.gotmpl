@@ -1,0 +1,21 @@
+# Relies on ec2 instance profile attached to K8s EC2.
+# It lets ebs csi driver to manage EBS volumes
+
+image:
+    tag: "v1.38.1"
+
+storageClasses:
+  - name: "ebs-sc"
+    parameters:
+        type: "gp3"
+    allowVolumeExpansion: true
+    reclaimPolicy: Retain  # EBS Volume will not be deleted when PV is deleted
+
+controller:
+    extraVolumeTags:
+        Deployment: {{ requiredEnv "MACHINE_FQDN" }}
+    volumeModificationFeature:
+        enabled: true
+    resources:
+        limits:
+            cpu: 1  # no cpu limits by default

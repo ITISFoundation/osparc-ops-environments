@@ -253,13 +253,13 @@ venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environmen
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) --customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3)
 endef
 
 endif

@@ -52,7 +52,7 @@ up-public: up-dalco
 # Helpers -------------------------------------------------
 
 docker-compose.yml:  docker-compose.yml.j2 .venv .env
-	@$(call jinja, $<, $@)
+	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.self-signed.yml .env
