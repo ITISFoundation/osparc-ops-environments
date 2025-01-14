@@ -4,7 +4,7 @@
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(CURDIR))
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
-REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
+REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../..)
 
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
@@ -76,21 +76,12 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml con
 docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
 	$(call jinja,$<,.env,$@)
 
-.PHONY: update.grafana.pwd
-update.grafana.pwd: .env ## Change grafana pwd
-	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	set +o allexport; \
-	grafanacontainerid=$$(docker ps | grep grafana | awk '{print $$1;}');\
-	docker exec -ti $$grafanacontainerid grafana-cli admin reset-admin-password $$TRAEFIK_PASSWORD
-
 .PHONY: grafana-import
 grafana-import: grafana/assets ## Imports the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
 	@pushd ${REPO_BASE_DIR}/services/monitoring/grafana && \
 	$(MAKE) terraform-plan && \
 	$(MAKE) terraform-apply; \
 	popd > /dev/null
-
 
 .PHONY: config.grafana.dashboards
 config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters

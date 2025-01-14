@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
+REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../../..)
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 
