@@ -11,6 +11,7 @@ def _generate_domain_capture_all_rule(domain: str) -> str:
         f"Host(`api.{domain}`)",
         f"Host(`api.testing.{domain}`)",
         f"Host(`testing.{domain}`)",
+        f"Host(`manual.{domain}`)",
     ]
     return " || ".join(rules)
 
