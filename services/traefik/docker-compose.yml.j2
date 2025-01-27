@@ -204,6 +204,72 @@ services:
     networks:
       - public
 
+  fallback-service-web:
+    image: nginx:1.25.1
+    configs:
+      - source: web_html
+        target: /usr/share/nginx/html/503.html
+      - source: web_nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    networks:
+      - public
+      - monitored
+    deploy:
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      update_config:
+        order: start-first
+      labels:
+          - traefik.enable=true
+          - traefik.docker.network=${PUBLIC_NETWORK}
+          - traefik.http.routers.fallback_html.priority=3
+          - traefik.http.routers.fallback_html.tls=true
+          - traefik.http.routers.fallback_html.rule=Host(`fallback.osparc.local`)
+          - traefik.http.services.fallback_html.loadbalancer.server.port=80
+          - traefik.http.routers.fallback_html.entrypoints=https
+
+  fallback-service-api:
+    image: nginx:1.25.1
+    configs:
+      - source: api_json
+        target: /usr/share/nginx/api/503.json
+      - source: api_nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    networks:
+      - public
+      - monitored
+    deploy:
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      update_config:
+        order: start-first
+      labels:
+          - traefik.enable=true
+          - traefik.docker.network=${PUBLIC_NETWORK}
+          - traefik.http.routers.fallback_api.priority=3
+          - traefik.http.routers.fallback_api.tls=true
+          - traefik.http.routers.fallback_api.rule=Host(`fallback-api.osparc.local`)
+          - traefik.http.services.fallback_api.loadbalancer.server.port=80
+          - traefik.http.routers.fallback_api.entrypoints=https
+
+{%- raw %}
+configs:
+  web_html:
+    file: ./config/web/503.html
+    name: web_html_${DOCKER_IMAGE_TAG?error}  # exit with error if not defined
+  api_json:
+    file: ./config/api/503.json
+    name: api_json_${DOCKER_IMAGE_TAG?error}
+  web_nginx_config:
+    file: ./config/web/default.conf
+    name: web_nginx_config_${DOCKER_IMAGE_TAG?error}
+  api_nginx_config:
+    file: ./config/api/default.conf
+    name: api_nginx_config_${DOCKER_IMAGE_TAG?error}
+{% endraw %}
+
 networks:
   public:
     external: true
