@@ -207,9 +207,39 @@ clean-default: .check_clean ## Cleans all outputs
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS='${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'; \
 	export DOLLAR='$$'; \
+	$(if $(STACK_NAME),export STACK_NAME='$(STACK_NAME)';) \
 	set +o allexport; \
 	envsubst < $< > .env
 
+ifdef STACK_NAME
+
+.PHONY: prune-docker-stack-configs-default
+prune-docker-stack-configs-default: ## Clean all unused stack configs
+	@# Since the introduction of rolling docker config updates
+	@# the old versions are kept. This target removes them
+	@# https://github.com/docker/cli/issues/203
+	@#
+	@# This should be run before stack update in order to
+	@# keep previous config version for potential rollback
+	@#
+	@# This will not clean "external" configs. To achieve this extend
+	@# this target in related Makefiles.
+	@#
+	@# Long live Kubernetes ConfigMaps!
+
+	@for id in $$(docker config ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" --format '{{.ID}}'); do \
+	    docker config rm "$$id" >/dev/null 2>&1 || true; \
+	done
+
+.PHONY: prune-docker-stack-secrets-default
+prune-docker-stack-secrets-default: ## Clean all unused stack secrets
+	@# Same as for configs
+
+	@for id in $$(docker secret ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" --format '{{.ID}}'); do \
+	    docker secret rm "$$id" >/dev/null 2>&1 || true; \
+	done
+
+endif
 
 # Helpers -------------------------------------------------
 .PHONY: .init
@@ -253,13 +283,16 @@ venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environmen
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) \
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
+	--customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) \
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
 endef
 
 endif
