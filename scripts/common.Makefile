@@ -215,8 +215,8 @@ ifdef STACK_NAME
 
 .PHONY: prune-docker-stack-configs-default
 prune-docker-stack-configs-default: ## Clean all unused stack configs
-	@# Since the introduction of rolling docker config updates
-	@# the old versions are kept. This target removes them
+	@# Since the introduction of rolling docker config updates old
+	@# [docker config] versions are kept. This target removes them
 	@# https://github.com/docker/cli/issues/203
 	@#
 	@# This should be run before stack update in order to
