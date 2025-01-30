@@ -53,7 +53,9 @@ services:
   agent:
     networks:
       - monitored
+{%- raw %}
     hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
+{%- endraw %}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -270,9 +272,10 @@ services:
         <<: *webserver_resources
     extra_hosts: []
 
-
   wb-db-event-listener:
+{%- raw %}
     hostname: "{{.Service.Name}}"
+{%- endraw %}
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
     networks:
@@ -311,7 +314,9 @@ services:
       - default
       - interactive_services_subnet
       - monitored
+{%- raw %}
     hostname: "{{.Service.Name}}"
+{%- endraw %}
     deploy:
       update_config:
         parallelism: 2
@@ -538,7 +543,9 @@ services:
           cpus: '0.1'
 
   efs-guardian:
+{%- raw %}
     hostname: "{{.Service.Name}}"
+{% endraw %}
     networks:
       - monitored
     deploy:
@@ -644,7 +651,9 @@ services:
     networks:
       - monitored
       - public
+{%- raw %}
     hostname: "{{.Service.Name}}"
+{% endraw %}
     deploy:
       # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
       # NOTE: this MUSTN'T change, or weird things might happen
@@ -768,6 +777,7 @@ services:
         reservations:
           memory: 128M
           cpus: '0.1'
+
   traefik_api:
     # NOTE: this is a trick to allow to access the internal traefik REST API
     # A comment
@@ -813,6 +823,7 @@ services:
         reservations:
           memory: 8M
           cpus: '0.1'
+
   whoami:
     image: "containous/whoami:v1.5.0"
     networks:
@@ -851,6 +862,7 @@ services:
         reservations:
           memory: 8M
           cpus: '0.1'
+
   payments:
     deploy:
       placement:
@@ -894,9 +906,72 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.tls=true
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.middlewares=ops_gzip@swarm, ops_auth@swarm
 
+  fallback-service-web:
+    image: nginx:1.25.1
+    configs:
+      - source: {{ SWARM_STACK_NAME }}_web_html
+        target: /usr/share/nginx/html/503.html
+      - source: {{ SWARM_STACK_NAME }}_web_nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    networks:
+      - public
+      - monitored
+    deploy:
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      update_config:
+        order: start-first
+      labels:
+          - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+          - traefik.enable=true
+          - traefik.http.routers.fallback_html.priority=1
+          - traefik.http.routers.fallback_html.rule=(Path(`/`) || Path(`/v0`) || Path(`/socket.io/`) || Path(`/static-frontend-data.json`) || PathRegexp(`^/study/(?P<study_uuid>\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)`) || Path(`/view`) || Path(`/#/view`) || Path(`/#/error`) || PathPrefix(`/v0/`))
+          - traefik.http.services.fallback_html.loadbalancer.server.port=80
+          - traefik.http.routers.fallback_html.entrypoints=http
+
+  fallback-service-api:
+    image: nginx:1.25.1
+    configs:
+      - source: {{ SWARM_STACK_NAME }}_api_json
+        target: /usr/share/nginx/api/503.json
+      - source: {{ SWARM_STACK_NAME }}_api_nginx_config
+        target: /etc/nginx/conf.d/default.conf
+    networks:
+      - public
+      - monitored
+    deploy:
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      update_config:
+        order: start-first
+      labels:
+          - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+          - traefik.enable=true
+          - traefik.http.routers.fallback_api.priority=1
+          - traefik.http.routers.fallback_api.rule=Path(`/`) || Path(`/v0`) ||  PathPrefix(`/v0/`) || Path(`/api/v0/openapi.json`)
+          - traefik.http.services.fallback_api.loadbalancer.server.port=80
+          - traefik.http.routers.fallback_api.entrypoints=simcore_api
+
+configs:
+  {{ SWARM_STACK_NAME }}_web_html:
+    file: ./configs/fallback-service-nginx/web/503.html
+    name: {{ SWARM_STACK_NAME}}_web_html_{{ "./configs/fallback-service-nginx/web/503.html" | sha256file | substring(0,10) }}
+  {{ SWARM_STACK_NAME }}_api_json:
+    file: ./configs/fallback-service-nginx/api/503.json
+    name: {{ SWARM_STACK_NAME}}_api_json_{{ "./configs/fallback-service-nginx/api/503.json" | sha256file | substring(0,10) }}
+  {{ SWARM_STACK_NAME }}_web_nginx_config:
+    file: ./configs/fallback-service-nginx/web/default.conf
+    name: {{ SWARM_STACK_NAME}}_web_nginx_config_{{ "./configs/fallback-service-nginx/web/default.conf" | sha256file | substring(0,10) }}
+  {{ SWARM_STACK_NAME }}_api_nginx_config:
+    file: ./configs/fallback-service-nginx/api/default.conf
+    name: {{ SWARM_STACK_NAME}}_api_nginx_config_{{ "./configs/fallback-service-nginx/api/default.conf" | sha256file | substring(0,10) }}
+
 volumes:
   rabbit_data:
     name: ${SWARM_STACK_NAME}_rabbit_data
+
 networks:
   public:
     external: true
