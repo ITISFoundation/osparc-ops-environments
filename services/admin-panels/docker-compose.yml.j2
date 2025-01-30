@@ -89,7 +89,6 @@ services:
         - traefik.http.services.adminpanels.loadbalancer.server.port=8888
         - traefik.http.routers.adminpanels.rule=Host(`${ADMINPANELS_DOMAIN}`)
         - traefik.http.routers.adminpanels.entrypoints=https
-        - traefik.http.routers.adminpanels.priority=1
         - traefik.http.routers.adminpanels.tls=true
         - traefik.http.routers.adminpanels.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm
       placement:
