@@ -54,7 +54,6 @@ services:
         - traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)
         - traefik.http.routers.registry.entrypoints=https
         - traefik.http.routers.registry.tls=true
-        - traefik.http.routers.registry.priority=10
         - traefik.http.routers.registry.middlewares=ops_gzip@swarm, ops_auth@swarm
         - prometheus-job=registry
         - prometheus-port=5001
