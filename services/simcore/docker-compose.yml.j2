@@ -925,10 +925,12 @@ services:
       labels:
           - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
           - traefik.enable=true
-          - traefik.http.routers.fallback_html.priority=1
-          - traefik.http.routers.fallback_html.rule=(Path(`/`) || Path(`/v0`) || Path(`/socket.io/`) || Path(`/static-frontend-data.json`) || PathRegexp(`^/study/(?P<study_uuid>\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)`) || Path(`/view`) || Path(`/#/view`) || Path(`/#/error`) || PathPrefix(`/v0/`))
-          - traefik.http.services.fallback_html.loadbalancer.server.port=80
-          - traefik.http.routers.fallback_html.entrypoints=http
+
+          # webserver
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_html.priority=1
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_html.rule=(Path(`/`) || Path(`/v0`) || Path(`/socket.io/`) || Path(`/static-frontend-data.json`) || PathRegexp(`^/study/(?P<study_uuid>\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)`) || Path(`/view`) || Path(`/#/view`) || Path(`/#/error`) || PathPrefix(`/v0/`))
+          - traefik.http.services.${PREFIX_STACK_NAME}_fallback_html.loadbalancer.server.port=80
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_html.entrypoints=http
 
   fallback-service-api:
     image: nginx:1.25.1
@@ -949,24 +951,32 @@ services:
       labels:
           - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
           - traefik.enable=true
-          - traefik.http.routers.fallback_api.priority=1
-          - traefik.http.routers.fallback_api.rule=Path(`/`) || Path(`/v0`) ||  PathPrefix(`/v0/`) || Path(`/api/v0/openapi.json`)
-          - traefik.http.services.fallback_api.loadbalancer.server.port=80
-          - traefik.http.routers.fallback_api.entrypoints=simcore_api
+          # api-server
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.priority=1
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.rule=Path(`/`) || Path(`/v0`) ||  PathPrefix(`/v0/`) || Path(`/api/v0/openapi.json`)
+          - traefik.http.services.${PREFIX_STACK_NAME}_fallback_api.loadbalancer.server.port=80
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.entrypoints=simcore_api
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.service=${PREFIX_STACK_NAME}_fallback_api
+          # invitations
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.priority=1
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.rule=(${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS})
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.entrypoints=http
+          - traefik.http.services.${PREFIX_STACK_NAME}_fallback_invitations_api.loadbalancer.server.port=80
+          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.service=${PREFIX_STACK_NAME}_fallback_invitations_api
 
 configs:
   {{ SWARM_STACK_NAME }}_web_html:
     file: ./configs/fallback-service-nginx/web/503.html
-    name: {{ SWARM_STACK_NAME}}_web_html_{{ "./configs/fallback-service-nginx/web/503.html" | sha256file | substring(0,10) }}
+    name: {{ SWARM_STACK_NAME }}_web_html_{{ "./configs/fallback-service-nginx/web/503.html" | sha256file | substring(0,10) }}
   {{ SWARM_STACK_NAME }}_api_json:
     file: ./configs/fallback-service-nginx/api/503.json
-    name: {{ SWARM_STACK_NAME}}_api_json_{{ "./configs/fallback-service-nginx/api/503.json" | sha256file | substring(0,10) }}
+    name: {{ SWARM_STACK_NAME }}_api_json_{{ "./configs/fallback-service-nginx/api/503.json" | sha256file | substring(0,10) }}
   {{ SWARM_STACK_NAME }}_web_nginx_config:
     file: ./configs/fallback-service-nginx/web/default.conf
-    name: {{ SWARM_STACK_NAME}}_web_nginx_config_{{ "./configs/fallback-service-nginx/web/default.conf" | sha256file | substring(0,10) }}
+    name: {{ SWARM_STACK_NAME }}_web_nginx_config_{{ "./configs/fallback-service-nginx/web/default.conf" | sha256file | substring(0,10) }}
   {{ SWARM_STACK_NAME }}_api_nginx_config:
     file: ./configs/fallback-service-nginx/api/default.conf
-    name: {{ SWARM_STACK_NAME}}_api_nginx_config_{{ "./configs/fallback-service-nginx/api/default.conf" | sha256file | substring(0,10) }}
+    name: {{ SWARM_STACK_NAME }}_api_nginx_config_{{ "./configs/fallback-service-nginx/api/default.conf" | sha256file | substring(0,10) }}
 
 volumes:
   rabbit_data:
