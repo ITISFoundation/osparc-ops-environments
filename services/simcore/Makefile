@@ -36,6 +36,11 @@ compose-aws: .env ${TEMP_COMPOSE}-aws ## Create docker-compose.deploy for AWS
 .PHONY: compose-master
 compose-master: .env ${TEMP_COMPOSE}-master ## Create docker-compose.deploy for Master
 
+.PHONY: docker-compose.yml
+docker-compose.yml: .venv .env
+	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
+	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
+	rm docker-compose.yml.unlinted >/dev/null 2>&1;
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.deploy.local.yml
