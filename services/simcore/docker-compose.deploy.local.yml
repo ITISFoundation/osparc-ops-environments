@@ -63,9 +63,6 @@ services:
   migration:
     deploy:
       replicas: 1
-  rabbit:
-    deploy:
-      replicas: 1
   traefik:
     command:
       - "--api=true"
