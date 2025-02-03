@@ -26,6 +26,9 @@ services:
         reservations:
           memory: 32M
           cpus: "0.1"
+      placement:
+        constraints:
+          - node.labels.ops==true
   onlyoffice:
     image: onlyoffice/documentserver:7.4.0
     networks:
