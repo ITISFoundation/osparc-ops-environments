@@ -8,24 +8,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Define python
-        run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
-
-      - name: Install python version
-        uses: gabrielfalcao/pyenv-action@v11
-        with:
-          default: "${{ env.PYTHON_VERSION }}"
-          command: pip install -U pip
+      - name: Set up Python
+        uses: actions/setup-python@v5  # defaults to .python-version
 
       - name: Show python version
         run: python --version
 
-      - name: Install dependencies
-        run: |
-          pip install pre-commit
-          pre-commit install
-
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        uses: pre-commit/action@v3.0.1

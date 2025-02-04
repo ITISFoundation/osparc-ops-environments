@@ -94,7 +94,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.service=${SWARM_STACK_NAME}_api-server
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.rule=PathPrefix(`/dev/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.entrypoints=simcore_api
-        - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.priority=6
       update_config:
         parallelism: 2
         order: start-first
@@ -153,7 +153,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.service=${SWARM_STACK_NAME}_static_webserver_freshping
         - traefik.http.services.${SWARM_STACK_NAME}_static_webserver_freshping.loadbalancer.server.port=8000
         - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.priority=10 # High number means high priority
+        - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.priority=12 # High number means high priority
         - traefik.http.routers.${SWARM_STACK_NAME}_static_webserver_freshping.middlewares=${SWARM_STACK_NAME}_gzip@swarm,${SWARM_STACK_NAME}_static_webserver_retry,${SWARM_STACK_NAME}_static_webserver_prefix
       update_config:
         parallelism: 2
@@ -229,7 +229,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME}_gzip@swarm, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=PathPrefix(`/dev/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=6
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
       update_config: &webserver_update_config
@@ -584,6 +584,7 @@ services:
     volumes:
       - rabbit_data:/var/lib/rabbitmq
     deploy:
+      replicas: ${RABBIT_SELF_HOSTED_REPLICAS}
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
@@ -619,6 +620,7 @@ services:
     networks:
       - monitored
     deploy:
+      replicas: ${REDIS_SELF_HOSTED_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
@@ -726,7 +728,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_ratelimit@swarm
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.service=${SWARM_STACK_NAME}_simcore_http
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`))
-        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=1 # Lowest possible priority, maintenance page takes priority "2" (higher, maintenance page has precedent) if it is up
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=3
         # oSparc publicAPI
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.rule=(${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}) && PathPrefix(`/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.entrypoints=https
@@ -785,7 +787,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.service=api@internal
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.rule=(PathPrefix(`/dashboard`) || PathPrefix(`/api`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`)
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=6
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=${SWARM_STACK_NAME}_auth@swarm, ${SWARM_STACK_NAME}_whitelist_ips@swarm
         - traefik.http.services.${SWARM_STACK_NAME}_traefik_api.loadbalancer.server.port=8080
         # Middlewares
@@ -829,7 +831,7 @@ services:
         - traefik.http.services.${SWARM_STACK_NAME}_whoami.loadbalancer.server.port=80
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.rule=PathPrefix(`/whoami`)
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=2
+        - traefik.http.routers.${SWARM_STACK_NAME}_whoami.priority=6
         - traefik.http.routers.${SWARM_STACK_NAME}_whoami.middlewares=${SWARM_STACK_NAME}_auth@swarm,${SWARM_STACK_NAME}_gzip@swarm
       update_config:
         parallelism: 2
