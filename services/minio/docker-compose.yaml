@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   minio:
-    image: minio/minio:RELEASE.2024-10-29T16-01-48Z
+    image: minio/minio:RELEASE.2024-10-29T16-01-48Z ## has arm
     init: true
     hostname: minio
     volumes:

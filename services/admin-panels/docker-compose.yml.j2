@@ -7,7 +7,7 @@ configs:
     file: ./data/{{ item.name }}{% endfor %}
 services:
   adminpanels:
-    image: jupyter/base-notebook:18b10e7f732d
+    image: jupyter/base-notebook:18b10e7f732d ## no arm iamge
     user: root
     networks:
       - public
