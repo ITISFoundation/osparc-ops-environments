@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: busybox
+      image: busybox # has arm
       command: ['wget']
       args: ['{{ include "resource-usage-tracker.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never
