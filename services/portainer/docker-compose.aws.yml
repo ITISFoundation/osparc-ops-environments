@@ -2,7 +2,7 @@ version: '3.7'
 services:
   portainer:
     dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
-      8.8.8.8
+      9.9.9.9
     deploy:
       placement:
         constraints:
