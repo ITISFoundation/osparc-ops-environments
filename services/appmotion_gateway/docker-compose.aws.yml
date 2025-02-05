@@ -6,12 +6,12 @@ services:
         deploy:
             replicas: 1
         dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
-          8.8.8.8
+          9.9.9.9
     db:
         deploy:
             replicas: 0
         dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
-          8.8.8.8
+          9.9.9.9
 
     api:
         deploy:
@@ -20,4 +20,4 @@ services:
                     cpus: "0"  # nih staging has not enough cpu
             replicas: 1
         dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
-          8.8.8.8
+          9.9.9.9
