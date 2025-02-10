@@ -54,7 +54,7 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.54.0 ## arm64 available
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -100,7 +100,7 @@ services:
           cpus: "0.2"
   prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.54.0 ## arm64 available
     volumes:
       - prometheus_data_federation:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -145,7 +145,7 @@ services:
           memory: 64M
           cpus: "0.2"
   node-exporter:
-    image: prom/node-exporter:v1.8.2
+    image: prom/node-exporter:v1.8.2  ## arm64 available
     volumes:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
@@ -183,7 +183,7 @@ services:
           cpus: "0.1"
 
   nvidia-exporter:
-    image: mindprince/nvidia_gpu_prometheus_exporter:0.1
+    image: mindprince/nvidia_gpu_prometheus_exporter:0.1 ## No arm support
     networks:
       - monitored
     deploy:
@@ -203,7 +203,7 @@ services:
           cpus: "0.1"
 
   alertmanager:
-    image: prom/alertmanager:v0.27.0
+    image: prom/alertmanager:v0.27.0 ## arm support
     volumes:
       - alertmanager_data:/alertmanager
     command:
@@ -227,7 +227,7 @@ services:
           cpus: "0.1"
 
   docker-events-exporter:
-    image: itisfoundation/docker-events-exporter:latest
+    image: itisfoundation/docker-events-exporter:latest ## no arm support yet
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock:ro
     user: root # only user root can use the docker socket
@@ -247,7 +247,7 @@ services:
           cpus: "0.1"
 
   grafana:
-    image: grafana/grafana-oss:11.2.4
+    image: grafana/grafana-oss:11.2.4 ## arm support
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -279,7 +279,7 @@ services:
           cpus: "0.1"
 
   smokeping-prober-exporter:
-    image: quay.io/superq/smokeping-prober:v0.8.1
+    image: quay.io/superq/smokeping-prober:v0.8.1 ## arm available
     networks:
       - monitored
     volumes: []
@@ -307,7 +307,7 @@ services:
   dcgm-exporter:
     cap_add:
       - SYS_ADMIN
-    image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.7-3.5.0-ubuntu22.04
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.7-3.5.0-ubuntu22.04 ## arm64 available
     hostname: '{{'{{.Node.Hostname}}'}}'
     networks:
       - monitored
@@ -328,7 +328,7 @@ services:
       - prometheus-port=9400
 
   pgsql-query-exporter:
-    image: adonato/query-exporter:2.10.0
+    image: adonato/query-exporter:2.10.0 # no arm available
     volumes: []
     dns: 9.9.9.9
     configs:
@@ -353,7 +353,7 @@ services:
           memory: 64M
           cpus: "0.1"{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
   {{_stack}}-postgres-exporter:
-    image: bitnami/postgres-exporter:0.15.0
+    image: bitnami/postgres-exporter:0.15.0 ## arm64 available
     networks:
       - monitored
     environment:
@@ -373,7 +373,7 @@ services:
           memory: 32M
           cpus: "0.1"
   {{_stack}}-redis-exporter:
-    image: oliver006/redis_exporter:v1.62.0-alpine
+    image: oliver006/redis_exporter:v1.62.0-alpine # no arm available
     networks:
       - monitored
     environment:
