@@ -68,7 +68,8 @@ services:
   clusters-keeper:
     deploy:
       replicas: 0
-  payments:  # test prior to a big bang release Sept 2023. Can be deleted after (YH, 09 2023)
+  payments:
+    # test prior to a big bang release Sept 2023. Can be deleted after (YH, 09 2023)
     deploy:
       replicas: 1
 
@@ -82,4 +83,4 @@ services:
 
   storage:
     deploy:
-      replicas: 3
+      replicas: 1
