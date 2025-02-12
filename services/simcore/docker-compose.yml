@@ -895,6 +895,25 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.tls=true
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.middlewares=ops_gzip@swarm, ops_auth@swarm
 
+  docker-api-proxy:
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      placement:
+        constraints:
+          - node.role==manager
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+
 volumes:
   rabbit_data:
     name: ${SWARM_STACK_NAME}_rabbit_data
