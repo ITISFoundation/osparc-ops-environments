@@ -584,6 +584,7 @@ services:
     volumes:
       - rabbit_data:/var/lib/rabbitmq
     deploy:
+      replicas: ${RABBIT_SELF_HOSTED_REPLICAS}
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
