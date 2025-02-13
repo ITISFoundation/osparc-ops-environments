@@ -896,6 +896,8 @@ services:
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.middlewares=ops_gzip@swarm, ops_auth@swarm
 
   docker-api-proxy:
+    networks:
+      - monitored
     deploy:
       mode: global
       update_config:
@@ -917,6 +919,7 @@ services:
 volumes:
   rabbit_data:
     name: ${SWARM_STACK_NAME}_rabbit_data
+
 networks:
   public:
     external: true
