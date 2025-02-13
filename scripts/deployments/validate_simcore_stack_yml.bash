@@ -79,6 +79,9 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     if [ "${TARGETNAME}" == "efs-guardian" ]; then
         continue
     fi
+    if [ "${TARGETNAME}" == "docker-api-proxy" ]; then
+        continue
+    fi
     export TARGET_BINARY="simcore-service"
     echo "Assuming TARGET_BINARY in ${SETTINGS_BINARY_PATH}/${TARGET_BINARY}"
     # Pull image from registry, just in case
