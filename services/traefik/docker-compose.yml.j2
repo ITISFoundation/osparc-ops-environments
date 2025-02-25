@@ -58,7 +58,7 @@ services:
         mode: host
     volumes:
       # So that Traefik can listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       # mode: global
       replicas: ${OPS_TRAEFIK_REPLICAS}
