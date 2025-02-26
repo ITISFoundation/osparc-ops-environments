@@ -45,8 +45,8 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
