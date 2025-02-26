@@ -22,7 +22,7 @@ up-master: .init .env ${TEMP_COMPOSE}-master ${DOCKER_STACK_DEPLOY_COMMON_DEPEND
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys stack on dalco
-up-dalco: .init .env ${TEMP_COMPOSE}-master ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
+up-dalco: .init .env ${TEMP_COMPOSE}-dalco ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
 .PHONY: up-local ## Deploys stack on local
