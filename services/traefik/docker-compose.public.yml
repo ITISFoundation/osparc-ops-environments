@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   traefik:
-    dns: 9.9.9.9 # This is critical to make the ACME challange work
+    dns: 8.8.8.8 # This is critical to make the ACME challange work
     command:
       - "--api=true"
       - "--api.dashboard=true"
