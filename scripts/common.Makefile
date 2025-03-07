@@ -16,7 +16,7 @@ IS_WIN  := $(strip $(if $(or $(IS_LINUX),$(IS_OSX),$(IS_WSL)),,$(OS)))
 $(if $(IS_WSL2),,$(if $(IS_WSL),$(error WSL1 is not supported in all recipes. Use WSL2 instead. Follow instructions in README.md),))
 
 # Check that a valid location to a config file is set.
-REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
+REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))..)
 export REPO_CONFIG_LOCATION := $(shell cat $(REPO_BASE_DIR)/.config.location)
 $(if $(REPO_CONFIG_LOCATION),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
 $(if $(shell cat $(REPO_CONFIG_LOCATION)),,$(error The location of the repo.config file given in .config.location is invalid. Aborting))
@@ -207,9 +207,39 @@ clean-default: .check_clean ## Cleans all outputs
 	export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE='${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'; \
 	export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS='${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'; \
 	export DOLLAR='$$'; \
+	$(if $(STACK_NAME),export STACK_NAME='$(STACK_NAME)';) \
 	set +o allexport; \
 	envsubst < $< > .env
 
+ifdef STACK_NAME
+
+.PHONY: prune-docker-stack-configs-default
+prune-docker-stack-configs-default: ## Clean all unused stack configs
+	@# Since the introduction of rolling docker config updates old
+	@# [docker config] versions are kept. This target removes them
+	@# https://github.com/docker/cli/issues/203
+	@#
+	@# This should be run before stack update in order to
+	@# keep previous config version for potential rollback
+	@#
+	@# This will not clean "external" configs. To achieve this extend
+	@# this target in related Makefiles.
+	@#
+	@# Long live Kubernetes ConfigMaps!
+
+	@for id in $$(docker config ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" --format '{{.ID}}'); do \
+	    docker config rm "$$id" >/dev/null 2>&1 || true; \
+	done
+
+.PHONY: prune-docker-stack-secrets-default
+prune-docker-stack-secrets-default: ## Clean all unused stack secrets
+	@# Same as for configs
+
+	@for id in $$(docker secret ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" --format '{{.ID}}'); do \
+	    docker secret rm "$$id" >/dev/null 2>&1 || true; \
+	done
+
+endif
 
 # Helpers -------------------------------------------------
 .PHONY: .init
@@ -253,13 +283,16 @@ venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environmen
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2) --customize j2cli_customization.py
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) \
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
+	--customize j2cli_customization.py
 endef
 
 else
 
 define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) .env -o $(2)
+	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) \
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
 endef
 
 endif

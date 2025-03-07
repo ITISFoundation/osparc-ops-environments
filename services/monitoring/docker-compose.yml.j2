@@ -27,8 +27,6 @@ configs:
     file: ./prometheus/prometheus-federation.yml
   prometheus_rules:
     file: ./prometheus/prometheus.rules.yml
-  grafana_image_renderer_config:
-    file: ./grafana-image-renderer/config.json
   pgsql_query_exporter_config:
     file: ./pgsql_query_exporter_config.yaml
   smokeping_prober_config:
@@ -251,7 +249,7 @@ services:
           cpus: "0.1"
 
   grafana:
-    image: grafana/grafana-oss:11.1.3
+    image: grafana/grafana-oss:11.2.4
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -355,16 +353,16 @@ services:
           cpus: "0.5"
         reservations:
           memory: 64M
-          cpus: "0.1"{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
-  {{_stack}}-postgres-exporter:
+          cpus: "0.1"
+  postgres-exporter:
     image: bitnami/postgres-exporter:0.15.0
     networks:
       - monitored
     environment:
-      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
     deploy:
       labels:
-      - prometheus-job={{_stack}}-postgres-exporter
+      - prometheus-job=postgres-exporter
       - prometheus-port=9187
       placement:
         constraints:
@@ -376,17 +374,17 @@ services:
         reservations:
           memory: 32M
           cpus: "0.1"
-  {{_stack}}-redis-exporter:
+  redis-exporter:
     image: oliver006/redis_exporter:v1.62.0-alpine
     networks:
       - monitored
     environment:
-      REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
+      REDIS_ADDR: redis://{{REDIS_HOST}}:{{REDIS_PORT}}
       REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     deploy:
       labels:
-      - prometheus-job={{_stack}}-redis-exporter
+      - prometheus-job=redis-exporter
       - prometheus-port=9121
       placement:
         constraints:

@@ -39,7 +39,7 @@ repos:
       - id: pyupgrade
         name: upgrade code
   - repo: https://github.com/hadialqattan/pycln
-    rev: v2.2.2
+    rev: v2.5.0  # https://github.com/hadialqattan/pycln/issues/249
     hooks:
       - id: pycln
         args: [--all, --expand-stars]
@@ -79,6 +79,10 @@ repos:
     hooks:
       - id: shellcheck
         name: Shell scripts conform to shellcheck
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.89.1 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
+    hooks:
+    -   id: terraform_fmt
   - repo: local
     hooks:
       - id: run-pylint

@@ -1,71 +1,71 @@
-databases:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
-  postgres_{{_stack}}:
-    dsn: postgresql://{{POSTGRES_USER}}:{{MONITORED_POSTGRES_PASSWORDS.split(",")[loop.index0]}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}{% endfor %}
+databases:
+  postgres:
+    dsn: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}
 
-metrics:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}
-  osparc_{{_stack}}_members_in_gid_{{_gid}}:
+metrics:{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}
+  osparc_members_in_gid_{{_gid}}:
     type: gauge
     description: Number of users in group {{_gid}}{% endfor %}
-  osparc_{{_stack}}_total_number_of_users:
+  osparc_total_number_of_users:
     type: gauge
     description: Total nuber of registered users
-  osparc_{{_stack}}_total_number_of_payment_transactions:
+  osparc_total_number_of_payment_transactions:
     type: gauge
     description: Total number of payment transactions
-  osparc_{{_stack}}_total_number_of_successful_payment_transactions:
+  osparc_total_number_of_successful_payment_transactions:
     type: gauge
     description: Total number of successful payment transactions
-  osparc_{{_stack}}_total_number_of_dollars_paid:
+  osparc_total_number_of_dollars_paid:
     type: gauge
     description: Total number of dollars paid successfully
-  osparc_{{_stack}}_total_number_of_credits_purchased_successfully:
+  osparc_total_number_of_credits_purchased_successfully:
     type: gauge
-    description: Total number of credits purchased successfully{% endfor %}
+    description: Total number of credits purchased successfully
 
 
-queries:{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}
-  query_{{_stack}}_members_in_gid_{{_gid}}:
+queries:{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _gid != "" %}
+  query_members_in_gid_{{_gid}}:
     interval: 55
-    databases: [postgres_{{_stack}}]
-    metrics: [osparc_{{_stack}}_members_in_gid_{{_gid}}]
+    databases: [postgres]
+    metrics: [osparc_members_in_gid_{{_gid}}]
     sql: |
-      SELECT COUNT(*) as osparc_{{_stack}}_members_in_gid_{{_gid}}
+      SELECT COUNT(*) as osparc_members_in_gid_{{_gid}}
       FROM users
       JOIN user_to_groups ON users.id = user_to_groups.uid
       JOIN groups ON groups.gid = user_to_groups.gid
       WHERE groups.gid = {{_gid}};{% endfor %}
-  query_{{_stack}}_total_number_of_users_excluding_guests:
+  query_total_number_of_users_excluding_guests:
     interval: 55
-    databases: [postgres_{{_stack}}]
-    metrics: [osparc_{{_stack}}_total_number_of_users]
+    databases: [postgres]
+    metrics: [osparc_total_number_of_users]
     sql: |
-      SELECT COUNT(*) as osparc_{{_stack}}_total_number_of_users
+      SELECT COUNT(*) as osparc_total_number_of_users
       FROM users WHERE role <> 'GUEST';
-  query_{{_stack}}_total_number_of_payment_transactions:
+  query_total_number_of_payment_transactions:
     interval: 55
-    databases: [postgres_{{_stack}}]
-    metrics: [osparc_{{_stack}}_total_number_of_payment_transactions]
+    databases: [postgres]
+    metrics: [osparc_total_number_of_payment_transactions]
     sql: |
-      SELECT COUNT(*) as osparc_{{_stack}}_total_number_of_payment_transactions
+      SELECT COUNT(*) as osparc_total_number_of_payment_transactions
       FROM payments_transactions
-  query_{{_stack}}_total_number_of_successful_payment_transactions:
+  query_total_number_of_successful_payment_transactions:
     interval: 55
-    databases: [postgres_{{_stack}}]
-    metrics: [osparc_{{_stack}}_total_number_of_successful_payment_transactions]
+    databases: [postgres]
+    metrics: [osparc_total_number_of_successful_payment_transactions]
     sql: |
-      SELECT COUNT(*) as osparc_{{_stack}}_total_number_of_successful_payment_transactions
+      SELECT COUNT(*) as osparc_total_number_of_successful_payment_transactions
       FROM payments_transactions WHERE state = 'SUCCESS';
-  query_{{_stack}}_total_number_of_dollars_paid_successfully:
+  query_total_number_of_dollars_paid_successfully:
     interval: 55
-    databases: [postgres_{{_stack}}]
-    metrics: [osparc_{{_stack}}_total_number_of_dollars_paid]
+    databases: [postgres]
+    metrics: [osparc_total_number_of_dollars_paid]
     sql: |
-      SELECT SUM(price_dollars) as osparc_{{_stack}}_total_number_of_dollars_paid_successfully
+      SELECT SUM(price_dollars) as osparc_total_number_of_dollars_paid_successfully
       FROM payments_transactions WHERE state = 'SUCCESS';
-  query_{{_stack}}_total_number_of_credits_purchased_successfully:
+  query_total_number_of_credits_purchased_successfully:
     interval: 55
-    databases: [postgres_{{_stack}}]
-    metrics: [osparc_{{_stack}}_total_number_of_credits_purchased_successfully]
+    databases: [postgres]
+    metrics: [osparc_total_number_of_credits_purchased_successfully]
     sql: |
-      SELECT SUM(osparc_credits) as osparc_{{_stack}}_total_number_of_credits_purchased_successfully
-      FROM payments_transactions WHERE state = 'SUCCESS';{% endfor %}
+      SELECT SUM(osparc_credits) as osparc_total_number_of_credits_purchased_successfully
+      FROM payments_transactions WHERE state = 'SUCCESS';
