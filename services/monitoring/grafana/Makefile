@@ -48,7 +48,7 @@ ensure-grafana-online:
 	attempts=0; \
 	max_attempts=10; \
 	while [ $$attempts -lt $$max_attempts ]; do \
-		status_code=$$(curl -k -o /dev/null -s -w "%{http_code}" $$url); \
+		status_code=$$(curl -k -o /dev/null -s -w "%{http_code}" --max-time 10 $$url); \
 		if [ "$$status_code" -ge 200 ] && [ "$$status_code" -lt 400 ]; then \
 			echo "Grafana is online"; \
 			break; \
