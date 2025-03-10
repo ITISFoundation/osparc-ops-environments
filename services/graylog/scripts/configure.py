@@ -49,7 +49,10 @@ GRAYLOG_LOG_MIN_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
 )
 def wait_graylog_is_online():
     _r = requests.get(
-        GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH, verify=False
+        GRAYLOG_BASE_DOMAIN + "/api/system",
+        auth=REQUESTS_AUTH,
+        verify=False,
+        timeout=10,
     )
 
     if _r.status_code == 401:

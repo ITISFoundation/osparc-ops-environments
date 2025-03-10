@@ -1,4 +1,0 @@
-environs
-requests
-typer
-pyyaml
