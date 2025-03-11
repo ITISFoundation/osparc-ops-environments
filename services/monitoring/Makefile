@@ -4,7 +4,7 @@
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(CURDIR))
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
-REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
+REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../..)
 
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
@@ -49,55 +49,39 @@ up-master: .init .env config.monitoring  config.prometheus.ceph.simcore ${TEMP_C
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	$(MAKE) grafana-import
 
-${TEMP_COMPOSE}: docker-compose.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}: docker-compose.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
 
-${TEMP_COMPOSE}-aws:  docker-compose.yml docker-compose.aws.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-aws:  docker-compose.yml docker-compose.aws.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
 	$(call jinja,$<,.env,$@)
 
-.PHONY: update.grafana.pwd
-update.grafana.pwd: .env ## Change grafana pwd
-	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	set +o allexport; \
-	grafanacontainerid=$$(docker ps | grep grafana | awk '{print $$1;}');\
-	docker exec -ti $$grafanacontainerid grafana-cli admin reset-admin-password $$TRAEFIK_PASSWORD
-
-
-.PHONY: grafana-export
-grafana-export: .venv## Export the remote grafana dashboards and datasources TO YOUR LOCAL MACHINE
-	@cd grafana/scripts;\
-	source ${REPO_BASE_DIR}/.venv/bin/activate;\
-	pip install -r requirements.txt > /dev/null 2>&1;\
-	python3 export.py;
-
 .PHONY: grafana-import
-grafana-import: grafana/assets .venv ## Imports AND OVERWRITES the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
-	@cd grafana/scripts;\
-	source ${REPO_BASE_DIR}/.venv/bin/activate;\
-	pip install -r requirements.txt > /dev/null 2>&1;\
-	python3 import.py
+grafana-import: grafana/assets ## Imports the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
+	@pushd ${REPO_BASE_DIR}/services/monitoring/grafana && \
+	$(MAKE) terraform-plan && \
+	$(MAKE) terraform-apply; \
+	popd > /dev/null
 
 .PHONY: config.grafana.dashboards
 config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters
@@ -152,6 +136,9 @@ pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CON
 
 smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
 	$(call jinja, $<, .env, $@);
+
+tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+	$(call jinja, $<, $@);
 
 .PHONY: grafana/assets
 grafana/assets: ${REPO_CONFIG_LOCATION}
