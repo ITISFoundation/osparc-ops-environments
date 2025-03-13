@@ -10,7 +10,7 @@ services:
       - /dev/disk/:/dev/disk:ro
 
   grafana:
-    dns: 9.9.9.9
+    dns: 8.8.8.8
     deploy:
       placement:
         constraints:

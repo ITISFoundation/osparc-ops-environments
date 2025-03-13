@@ -9,7 +9,7 @@ services:
       - /dev/disk/:/dev/disk:ro
 
   prometheuscatchall:
-    dns: 9.9.9.9
+    dns: 8.8.8.8
     deploy:
       placement:
         constraints:
@@ -18,13 +18,13 @@ services:
         limits:
           memory: 24576M
   prometheusfederation:
-    dns: 9.9.9.9
+    dns: 8.8.8.8
     deploy:
       placement:
         constraints:
           - node.labels.prometheus==true
   grafana:
-    dns: 9.9.9.9
+    dns: 8.8.8.8
     deploy:
       placement:
         constraints:

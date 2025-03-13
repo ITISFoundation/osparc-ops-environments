@@ -49,7 +49,7 @@ services:
         target: /etc/traefik/dynamic_conf.yml
   whoami:
     dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
-      9.9.9.9
+      8.8.8.8
 
 configs:
   traefik_dynamic_config.yml:
