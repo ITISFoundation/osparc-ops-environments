@@ -1,52 +1,52 @@
-version: '3.7'
+version: "3.7"
 services:
-  traefik:
-    command:
-      - '--api=true'
-      - '--api.dashboard=true'
-      - '--log.level=${OPS_TRAEFIK_LOGLEVEL}'
-      - '--accesslog=false'
-      - '--metrics.prometheus=true'
-      - '--metrics.prometheus.addEntryPointsLabels=true'
-      - '--metrics.prometheus.addServicesLabels=true'
-      - '--entryPoints.metrics.address=:8082'
-      - '--metrics.prometheus.entryPoint=metrics'
-      - '--entryPoints.http.address=:80'
-      - "--entrypoints.http.http.redirections.entrypoint.to=https"
-      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
-      - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - '--entryPoints.https.address=:443'
-      - "--entryPoints.https.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - '--entryPoints.master_postgres.address=:5432'
-      - '--entryPoints.smtp.address=:25'
-      - '--providers.swarm.endpoint=unix:///var/run/docker.sock'
-      - '--providers.swarm.exposedByDefault=false'
-      - "--core.defaultRuleSyntax=v2"
-      - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
-      - '--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `.+`)'
-      - '--entryPoints.https.forwardedHeaders.insecure'
-      - '--providers.file.directory=/etc/traefik/'
-      - '--providers.file.watch=true'
-    env_file:
-      - .env
-    configs:
-      - source: traefik_dynamic_config.yml
-        target: /etc/traefik/dynamic_conf.yml
-    deploy:
-      placement:
-        constraints:
-          - node.labels.traefik==true
-    volumes:
-    - /etc/traefik_certs:/etc/traefik_certs
+    traefik:
+        command:
+            - "--api=true"
+            - "--api.dashboard=true"
+            - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
+            - "--accesslog=false"
+            - "--metrics.prometheus=true"
+            - "--metrics.prometheus.addEntryPointsLabels=true"
+            - "--metrics.prometheus.addServicesLabels=true"
+            - "--entryPoints.metrics.address=:8082"
+            - "--metrics.prometheus.entryPoint=metrics"
+            - "--entryPoints.http.address=:80"
+            - "--entrypoints.http.http.redirections.entrypoint.to=https"
+            - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+            - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
+            - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+            - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+            - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+            - "--entryPoints.https.address=:443"
+            - "--entryPoints.https.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+            - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+            - "--entryPoints.https.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
+            - "--entryPoints.postgres.address=:5432"
+            - "--entryPoints.smtp.address=:25"
+            - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+            - "--providers.swarm.exposedByDefault=false"
+            - "--core.defaultRuleSyntax=v2"
+            - "--tracing=true"
+            - "--tracing.addinternals"
+            - "--tracing.otlp=true"
+            - "--tracing.otlp.http=true"
+            - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `.+`)"
+            - "--entryPoints.https.forwardedHeaders.insecure"
+            - "--providers.file.directory=/etc/traefik/"
+            - "--providers.file.watch=true"
+        env_file:
+            - .env
+        configs:
+            - source: traefik_dynamic_config.yml
+              target: /etc/traefik/dynamic_conf.yml
+        deploy:
+            placement:
+                constraints:
+                    - node.labels.traefik==true
+        volumes:
+            - /etc/traefik_certs:/etc/traefik_certs
 
 configs:
-  traefik_dynamic_config.yml:
-    file: ./traefik_dynamic_config.yml
+    traefik_dynamic_config.yml:
+        file: ./traefik_dynamic_config.yml
