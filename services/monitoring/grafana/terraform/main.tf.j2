@@ -12,7 +12,7 @@ terraform {
     encrypt        = false
     bucket         = "{{ TF_GRAFANA_STATE_BACKEND_S3_BUCKET_NAME }}"
     region         = "{{ TF_GRAFANA_STATE_BACKEND_AWS_REGION }}"
-    {% if GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT %}
+    {% if "amazonaws.com" not in GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT %}
     skip_credentials_validation = true
     skip_requesting_account_id  = true
     skip_metadata_api_check     = true
