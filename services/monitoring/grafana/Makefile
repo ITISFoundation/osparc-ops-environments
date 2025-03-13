@@ -6,7 +6,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 # Internal VARIABLES ------------------------------------------------
 TF_STATE_FILE := terraform/.terraform/terraform.tfstate
-
+.PHONY: terraform/main.tf
 terraform/main.tf: terraform/main.tf.j2 .venv $(REPO_CONFIG_LOCATION)
 	# generate $@
 	@$(call jinja, $<, $(REPO_CONFIG_LOCATION), $@)
