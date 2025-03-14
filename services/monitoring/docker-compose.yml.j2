@@ -377,9 +377,12 @@ services:
     networks:
       - monitored
     environment:
-      REDIS_ADDR: redis://{{REDIS_HOST}}:{{REDIS_PORT}}
-      REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
+      REDIS_ADDR: ${REDIS_ADDRESS}
+{%- if REDIS_USER %}
+      REDIS_USER: ${REDIS_USER}
+{%- endif %}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
     deploy:
       labels:
       - prometheus-job=redis-exporter
