@@ -13,9 +13,12 @@ terraform {
     bucket         = "{{ TF_GRAFANA_STATE_BACKEND_S3_BUCKET_NAME }}"
     region         = "{{ TF_GRAFANA_STATE_BACKEND_AWS_REGION }}"
     {% if "amazonaws.com" not in GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT %}
+    # via https://github.com/hashicorp/terraform/issues/34086#issuecomment-1814188931
     skip_credentials_validation = true
     skip_requesting_account_id  = true
     skip_metadata_api_check     = true
+    skip_region_validation = true
+    skip_s3_checksum = true
     use_path_style              = true
     endpoints = {
       s3 = "{{ GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT }}"
