@@ -62,3 +62,18 @@ ensure-grafana-online:
 		echo "Max attempts reached, Grafana is still unreachable."; \
 		exit 1; \
 	fi;
+
+.PHONY: assets
+assets: ${REPO_CONFIG_LOCATION}
+	@if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana" ]; then \
+		echo "Error: folder does not exist $$GRAFANA_ASSETS_DIR" >&2; \
+		exit 1; \
+	fi; \
+	if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana" ]; then \
+		echo "Error: folder does not exist $$GRAFANA_COMMON_ASSETS_DIR" >&2; \
+		exit 1; \
+	fi; \
+	rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true; \
+	mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared; \
