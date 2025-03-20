@@ -15,14 +15,6 @@ compactor:
   compaction:
     block_retention: 96h             # overall Tempo trace retention.
 
-memberlist:
-  abort_if_cluster_join_fails: false
-  bind_port: 7946
-  join_members:
-  - tempo1:7946
-  - tempo2:7946
-  - tempo3:7946
-
 metrics_generator:
   registry:
     external_labels:
@@ -31,7 +23,7 @@ metrics_generator:
   storage:
     path: /var/tempo/generator/wal
     remote_write:
-      - url: http://prometheuscatchall:9090/api/v1/write
+      - url: {{ TF_VAR_PROMETHEUS_CATCHALL_URL }}/api/v1/write
 
 storage:
   trace:
@@ -50,9 +42,9 @@ storage:
       # endpoint: s3.dualstack.us-west-2.amazonaws.com
       # region: us-west-2
 
-#querier:
-#  frontend_worker:
-#    frontend_address: {{MONITORING_DOMAIN}}/tempo:9095
+querier:
+  frontend_worker:
+    frontend_address: localhost:9095
 
 overrides:
   defaults:
