@@ -153,15 +153,4 @@ tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
 
 .PHONY: grafana/assets
 grafana/assets: ${REPO_CONFIG_LOCATION}
-	@if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana" ]; then \
-		echo "Error: folder does not exist $$GRAFANA_ASSETS_DIR" >&2; \
-		exit 1; \
-	fi; \
-	if [ ! -d "$(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana" ]; then \
-		echo "Error: folder does not exist $$GRAFANA_COMMON_ASSETS_DIR" >&2; \
-		exit 1; \
-	fi; \
-	rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true; \
-	mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
-	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
-	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared; \
+	@$(MAKE_C) grafana assets
