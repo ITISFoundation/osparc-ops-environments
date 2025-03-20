@@ -9,6 +9,16 @@ REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../..)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+define create-s3-bucket
+	# ensure bucket is available in S3...
+	@set -o allexport; \
+	source .env; \
+	echo Creating bucket "$${TEMPO_S3_BUCKET}";\
+	${REPO_BASE_DIR}/scripts/create-s3-bucket.bash "$${TEMPO_S3_BUCKET}" && \
+	set +o allexport; \
+	# bucket is available in S3
+endef
+
 .PHONY: up
 up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
@@ -16,6 +26,7 @@ up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current s
 
 .PHONY: up-local
 up-local: .init .env config.prometheus.simcore ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
 	$(MAKE) grafana-import
 
@@ -49,28 +60,28 @@ up-master: .init .env config.monitoring  config.prometheus.ceph.simcore ${TEMP_C
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	$(MAKE) grafana-import
 
-${TEMP_COMPOSE}: docker-compose.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}: docker-compose.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
 
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
 
-${TEMP_COMPOSE}-aws:  docker-compose.yml docker-compose.aws.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-aws:  docker-compose.yml docker-compose.aws.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml
@@ -135,6 +146,9 @@ pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CON
 	$(call jinja, $<, .env, $@);
 
 smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+	$(call jinja, $<, .env, $@);
+
+tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
 	$(call jinja, $<, .env, $@);
 
 .PHONY: grafana/assets
