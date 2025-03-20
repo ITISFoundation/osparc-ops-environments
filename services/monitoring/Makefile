@@ -9,6 +9,16 @@ REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../..)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+define create-s3-bucket
+	# ensure bucket is available in S3...
+	@set -o allexport; \
+	source .env; \
+	echo Creating bucket "$${TEMPO_S3_BUCKET}";\
+	${REPO_BASE_DIR}/scripts/create-s3-bucket.bash "$${TEMPO_S3_BUCKET}" && \
+	set +o allexport; \
+	# bucket is available in S3
+endef
+
 .PHONY: up
 up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
@@ -16,6 +26,7 @@ up: .init .env config.prometheus ${TEMP_COMPOSE} ## Deploys or updates current s
 
 .PHONY: up-local
 up-local: .init .env config.prometheus.simcore ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
 	$(MAKE) grafana-import
 
@@ -138,7 +149,7 @@ smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCA
 	$(call jinja, $<, .env, $@);
 
 tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
-	$(call jinja, $<, $@);
+	$(call jinja, $<, .env, $@);
 
 .PHONY: grafana/assets
 grafana/assets: ${REPO_CONFIG_LOCATION}
