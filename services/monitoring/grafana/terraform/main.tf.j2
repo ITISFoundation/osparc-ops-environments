@@ -1,0 +1,44 @@
+terraform {
+  required_version = "~> 1.10.1"
+  {% if GRAFANA_TERRAFORM_STATE_BACKEND_TYPE == "local" %}
+  backend "{{ GRAFANA_TERRAFORM_STATE_BACKEND_TYPE }}" {
+    path = "terraform.tfstate" # Specify the path for the state file, can be a different path if needed
+  }
+  {% endif %}
+  {% if GRAFANA_TERRAFORM_STATE_BACKEND_TYPE == "s3" %}
+  backend "s3" {
+    key            = "{{ GRAFANA_TERRAFORM_STATE_BACKEND_S3_KEY }}"
+    use_lockfile = true
+    encrypt        = false
+    bucket         = "{{ TF_GRAFANA_STATE_BACKEND_S3_BUCKET_NAME }}"
+    region         = "{{ TF_GRAFANA_STATE_BACKEND_AWS_REGION }}"
+    {% if "amazonaws.com" not in GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT %}
+    # via https://github.com/hashicorp/terraform/issues/34086#issuecomment-1814188931
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_region_validation = true
+    skip_s3_checksum = true
+    use_path_style              = true
+    endpoints = {
+      s3 = "{{ GRAFANA_TERRAFORM_STATE_BACKEND_S3_ENDPOINT }}"
+    }
+    {% endif %}
+  }
+  {% endif %}
+  required_providers {
+    grafana = {
+      source  = "grafana/grafana"
+      version = "~> 3.13"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.1"
+    }
+  }
+}
+
+provider "grafana" {
+  url  = var.GRAFANA_URL
+  auth = var.GRAFANA_AUTH
+}
