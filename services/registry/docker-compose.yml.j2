@@ -38,7 +38,7 @@ services:
       replicas: ${OPS_REGISTRY_REPLICAS}
       placement:
         constraints:
-          - node.labels.io.simcore.autoscaled-node!=true
+          - node.labels.ops==true
       resources:
         limits:
           memory: 1G
