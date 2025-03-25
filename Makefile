@@ -71,7 +71,6 @@ down-maintenance: ## Stop the maintenance mode
 	fi \
 	,)
 
-
 # Misc: info & clean
 .PHONY: info info-vars info-local
 info: ## Displays some important info

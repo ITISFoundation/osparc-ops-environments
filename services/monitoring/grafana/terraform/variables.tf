@@ -2,6 +2,10 @@ variable "GRAFANA_URL" {
   description = "grafana_url"
   sensitive   = false
 }
+variable "TEMPO_URL" {
+  description = "tempo_url"
+  sensitive   = false
+}
 variable "GRAFANA_AUTH" {
   description = "Username:Password"
   sensitive   = true
