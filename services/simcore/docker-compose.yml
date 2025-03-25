@@ -344,6 +344,7 @@ services:
     networks:
       - monitored
     deploy:
+      replicas: ${SIMCORE_STORAGE_REPLICAS}
       labels:
         # internal traefik
         - traefik.enable=true
