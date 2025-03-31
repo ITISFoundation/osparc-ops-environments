@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 # pylint: disable=logging-fstring-interpolation
 import json
 import logging
@@ -33,12 +34,22 @@ env.read_env("./../.env", recurse=False)
 
 SUPPORTED_GRAYLOG_MAJOR_VERSION = 6
 
-GRAYLOG_BASE_DOMAIN = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog"
-GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC = env.int("GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC")
+MACHINE_FQDN = env.str("MACHINE_FQDN")
+GRAYLOG_BASE_DOMAIN = "https://monitoring." + MACHINE_FQDN + "/graylog"
+GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC = env.int("GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC", 30)
 REQUESTS_AUTH = (env.str("SERVICES_USER"), env.str("SERVICES_PASSWORD"))
-
+GRAYLOG_SYSLOG_CAPTURE_PORT = env.int("GRAYLOG_SYSLOG_CAPTURE_PORT")
 GRAYLOG_LOG_MAX_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MAX_DAYS_IN_STORAGE")
 GRAYLOG_LOG_MIN_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
+GRAYLOG_SLACK_WEBHOOK_URL = env.str("GRAYLOG_SLACK_WEBHOOK_URL")
+GRAYLOG_ALERT_MAIL_ADDRESS = env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
+GRAYLOG_SLACK_WEBHOOK_ICON_URL = env.str("GRAYLOG_SLACK_WEBHOOK_ICON_URL")
+GRAYLOG_SLACK_WEBHOOK_CHANNEL = env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
+assert MACHINE_FQDN
+assert REQUESTS_AUTH
+assert GRAYLOG_SYSLOG_CAPTURE_PORT
+assert GRAYLOG_LOG_MAX_DAYS_IN_STORAGE
+assert GRAYLOG_LOG_MIN_DAYS_IN_STORAGE
 
 
 @retry(
@@ -97,28 +108,23 @@ def get_graylog_inputs(_session, _headers, _url):
 
 
 def configure_email_notifications(_session, _headers):
-    _url = (
-        "https://monitoring."
-        + env.str("MACHINE_FQDN")
-        + "/graylog/api/events/notifications"
-    )
+    _url = GRAYLOG_BASE_DOMAIN + "/api/events/notifications"
     _r = _session.get(_url, headers=_headers, verify=False)
     if (
         len(
             [
                 noti
                 for noti in r.json()["notifications"]
-                if noti["title"]
-                == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
+                if noti["title"] == "Graylog " + MACHINE_FQDN + " mail notification"
             ]
         )
         == 0
     ):
         raw_data = (
             '{"title":"Graylog '
-            + env.str("MACHINE_FQDN")
+            + MACHINE_FQDN
             + ' mail notification","description":"","config":{"sender":"","subject":"Graylog event notification: ${event_definition_title}","user_recipients":[],"email_recipients":["'
-            + env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
+            + GRAYLOG_ALERT_MAIL_ADDRESS
             + '"],"type":"email-notification-v1"}}'
         )
         _r = _session.post(_url, headers=_headers, data=raw_data, verify=False)
@@ -139,17 +145,96 @@ def configure_email_notifications(_session, _headers):
     _mail_notification_id = [
         noti
         for noti in _r.json()["notifications"]
-        if noti["title"] == "Graylog " + env.str("MACHINE_FQDN") + " mail notification"
+        if noti["title"] == "Graylog " + MACHINE_FQDN + " mail notification"
     ][0]["id"]
 
     return _mail_notification_id
 
 
+def configure_slack_notification_channel(_session, _hed) -> str:
+    # Configure sending Slack notifications
+    if GRAYLOG_SLACK_WEBHOOK_URL != "":
+        assert GRAYLOG_SLACK_WEBHOOK_CHANNEL
+        assert GRAYLOG_SLACK_WEBHOOK_ICON_URL
+        print(
+            f"Starting Graylock Slack Channel Setup. Assuming:\nGRAYLOG_SLACK_WEBHOOK_URL={GRAYLOG_SLACK_WEBHOOK_URL}\nGRAYLOG_SLACK_WEBHOOK_URL={GRAYLOG_SLACK_WEBHOOK_CHANNEL}\nGRAYLOG_SLACK_WEBHOOK_ICON_URL={GRAYLOG_SLACK_WEBHOOK_ICON_URL}"
+        )
+        _url = (
+            "https://monitoring." + MACHINE_FQDN + "/graylog/api/events/notifications"
+        )
+        _r = _session.get(_url, headers=_hed, verify=False)
+        if (
+            len(
+                [
+                    noti
+                    for noti in _r.json()["notifications"]
+                    if noti["title"]
+                    == "Graylog " + MACHINE_FQDN + " Slack notification"
+                ]
+            )
+            == 0
+        ):
+            raw_data = (
+                '{"title":"Graylog '
+                + MACHINE_FQDN
+                + """ Slack notification","description":"Slack notification","config": {
+	    	    "color": "#FF0000",
+	    	    "webhook_url": \""""
+                + GRAYLOG_SLACK_WEBHOOK_URL
+                + """\",
+	    	    "channel": "#"""
+                + GRAYLOG_SLACK_WEBHOOK_CHANNEL
+                + """\",
+                "custom_message":"--- [Event Definition] ---------------------------\\nTitle:       ${event_definition_title}\\nType:        ${event_definition_type}\\n--- [Event] --------------------------------------\\nTimestamp:            ${event.timestamp}\\nMessage:              ${event.message}\\nSource:               ${event.source}\\nKey:                  ${event.key}\\nPriority:             ${event.priority}\\nAlert:                ${event.alert}\\nTimestamp Processing: ${event.timestamp}\\nTimerange Start:      ${event.timerange_start}\\nTimerange End:        ${event.timerange_end}\\nEvent Fields:\\n${foreach event.fields field}\\n${field.key}: ${field.value}\\n${end}\\n${if backlog}\\n--- [Backlog] ------------------------------------\\nLast messages accounting for this alert:\\n${foreach backlog message}\\n"""
+                + "https://monitoring."
+                + MACHINE_FQDN
+                + "/graylog/messages"
+                + """/${message.index}/${message.id}\\n${end}${end}\\n",
+	    	    "user_name": "Graylog",
+	    	    "notify_channel": true,
+	    	    "link_names": false,
+	    	    "icon_url": \""""
+                + GRAYLOG_SLACK_WEBHOOK_ICON_URL
+                + """\",
+	    	    "icon_emoji": "",
+	    	    "backlog_size": 5,
+	    	    "type": "slack-notification-v1"}}"""
+            )
+            _r = _session.post(
+                _url, headers=_hed, verify=False, data=raw_data.encode("utf-8")
+            )
+            if _r.status_code == 200:
+                print("Slack Notification added with success !")
+                # Keeping notification ID
+                _r = _session.get(_url, headers=_hed, verify=False)
+                _slack_notification_id = [
+                    noti
+                    for noti in _r.json()["notifications"]
+                    if noti["title"]
+                    == "Graylog " + MACHINE_FQDN + " Slack notification"
+                ][0]["id"]
+                return _slack_notification_id
+            print(
+                "Error while adding the Slack Notification. Status code of the request : "
+                + str(r.status_code)
+                + " "
+                + r.text
+            )
+            sys.exit(1)
+        print("Graylog Slack Notification already present - skipping...")
+        _r = _session.get(_url, headers=_hed, verify=False)
+        _slack_notification_id = [
+            noti
+            for noti in _r.json()["notifications"]
+            if noti["title"] == "Graylog " + MACHINE_FQDN + " Slack notification"
+        ][0]["id"]
+        return _slack_notification_id
+    return ""
+
+
 def configure_log_retention(_session, _headers):
     _url = (
-        "https://monitoring."
-        + env.str("MACHINE_FQDN")
-        + "/graylog/api/system/indices/index_sets"
+        "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/indices/index_sets"
     )
     _r = _session.get(_url, headers=_headers, verify=False)
     index_of_interest = [
@@ -167,9 +252,7 @@ def configure_log_retention(_session, _headers):
         "index_lifetime_max": f"P{GRAYLOG_LOG_MAX_DAYS_IN_STORAGE}D",
     }
     _url = (
-        "https://monitoring."
-        + env.str("MACHINE_FQDN")
-        + "/graylog/api/system/indices/index_sets"
+        "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/indices/index_sets"
     )
     raw_data = json.dumps(index_of_interest)
     _r = _session.put(
@@ -188,26 +271,22 @@ def configure_log_retention(_session, _headers):
             + r.text
         )
 
+
+def configure_syslog_capture(_session, _headers):
     try:
         _url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/system/cluster/nodes"
+            "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/cluster/nodes"
         )
         _r = _session.get(_url, headers=_headers, verify=False).json()
         assert len(_r["nodes"]) == 1
         node_uuid = _r["nodes"][0]["node_id"]
         #
-        _url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/system/inputs"
-        )
+        _url = "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/inputs"
         r2 = _session.get(_url, headers=_headers, verify=False).json()
         if len([i for i in r2["inputs"] if i["title"] == "Syslog"]) == 0:
             raw_data = (
                 '{"title":"Syslog","type":"org.graylog2.inputs.syslog.udp.SyslogUDPInput","configuration":{"bind_address":"0.0.0.0","port":'
-                + env.str("GRAYLOG_SYSLOG_CAPTURE_PORT")
+                + GRAYLOG_SYSLOG_CAPTURE_PORT
                 + ',"recv_buffer_size":262144,"number_worker_threads":8,"override_source":null,"force_rdns":false,"allow_override_date":true,"store_full_message":true,"expand_structured_data":false},"global":true,"node":"'
                 + node_uuid
                 + '"}'
@@ -219,7 +298,7 @@ def configure_log_retention(_session, _headers):
             sleep(0.3)
             _url = (
                 "https://monitoring."
-                + env.str("MACHINE_FQDN")
+                + MACHINE_FQDN
                 + "/graylog/api/system/inputs/"
                 + input_id
                 + "/extractors"
@@ -233,11 +312,16 @@ def configure_log_retention(_session, _headers):
         print("Error setting up graylog syslog capturing.")
 
 
-def configure_alerts(_mail_notification_id, _session, _headers):
+def configure_alerts(
+    _session,
+    _headers,
+    _mail_notification_id: str | None = None,
+    _slack_notification_id: str | None = None,
+):
     print("Configuring Graylog Alerts...")
     with open("alerts.yaml") as f:
         data = yaml.load(f, Loader=SafeLoader)
-        _url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/streams"
+        _url = "https://monitoring." + MACHINE_FQDN + "/graylog/api/streams"
         _r = _session.get(_url, headers=_headers, verify=False)
         if _r.status_code == 200:
             streams_list = _r.json()["streams"]
@@ -253,11 +337,8 @@ def configure_alerts(_mail_notification_id, _session, _headers):
                 "Could not determine ID of stream containing all events. Is graylog misconfigured? Exiting with error!"
             )
             sys.exit(1)
-        _url = (
-            "https://monitoring."
-            + env.str("MACHINE_FQDN")
-            + "/graylog/api/events/definitions"
-        )
+        _url = "https://monitoring." + MACHINE_FQDN + "/graylog/api/events/definitions"
+        # Deleting existing alerts - this ensures idemptency
         _r = _session.get(
             _url, headers=_headers, params={"per_page": 2500}, verify=False
         )
@@ -285,12 +366,14 @@ def configure_alerts(_mail_notification_id, _session, _headers):
                     sys.exit(1)
         for i in data:
             i["notifications"] = []
-            if env.str("GRAYLOG_ALERT_MAIL_ADDRESS"):
+            if GRAYLOG_ALERT_MAIL_ADDRESS != "" and _mail_notification_id:
                 i["notifications"] += [{"notification_id": str(_mail_notification_id)}]
+            if GRAYLOG_SLACK_WEBHOOK_URL != "" and _slack_notification_id:
+                i["notifications"] += [{"notification_id": str(_slack_notification_id)}]
             i["config"]["streams"] = [str(stream_id_for_all_messages)]
             _url = (
                 "https://monitoring."
-                + env.str("MACHINE_FQDN")
+                + MACHINE_FQDN
                 + "/graylog/api/events/definitions?schedule=true"
             )
             resp = _session.post(_url, headers=_headers, json=i, verify=False)
@@ -402,26 +485,32 @@ if __name__ == "__main__":
 
     session = requests.Session()
     session.verify = False
-    session.auth = (
-        env.str("SERVICES_USER"),
-        env.str("SERVICES_PASSWORD"),
-    )  # Graylog username is always "admin"
+    session.auth = REQUESTS_AUTH  # Graylog username is always "admin"
     hed = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-Requested-By": "cli",
     }
-    url = "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api/system/inputs"
+    url = "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/inputs"
     r = get_graylog_inputs(session, hed, url)
 
     configure_log_retention(session, hed)
-
+    configure_syslog_capture(session, hed)
     # Configure sending email notifications
-    if env.str("GRAYLOG_ALERT_MAIL_ADDRESS") != "":
+    mail_notification_id = None
+    slack_notification_id = None
+    if GRAYLOG_ALERT_MAIL_ADDRESS != "":
         mail_notification_id = configure_email_notifications(session, hed)
+    if GRAYLOG_SLACK_WEBHOOK_URL != "":
+        slack_notification_id = configure_slack_notification_channel(session, hed)
+    if mail_notification_id or slack_notification_id:
         # Configure Alerts
-        configure_alerts(mail_notification_id, session, hed)
-    # Configure log retention time
+        configure_alerts(
+            session,
+            hed,
+            _mail_notification_id=mail_notification_id,
+            _slack_notification_id=slack_notification_id,
+        )
 
     # content pack will create GELF UDP Input
     # NOTE: When you introduce changes, revision number increase is mandatory
@@ -429,7 +518,5 @@ if __name__ == "__main__":
     # Autoloader is only good at loading content packs first time but not updating / adding new ones to existing.
     # https://community.graylog.org/t/update-content-packs-using-autoloading-functionality/6205
     # https://github.com/Graylog2/graylog2-server/issues/14672
-    content_pack_base_url = (
-        "https://monitoring." + env.str("MACHINE_FQDN") + "/graylog/api"
-    )
+    content_pack_base_url = "https://monitoring." + MACHINE_FQDN + "/graylog/api"
     configure_content_packs(session, hed, content_pack_base_url)
