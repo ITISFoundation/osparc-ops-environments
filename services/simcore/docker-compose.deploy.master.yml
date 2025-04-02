@@ -79,7 +79,3 @@ services:
   wb-api-server:
     deploy:
       replicas: 3
-
-  storage:
-    deploy:
-      replicas: 1
