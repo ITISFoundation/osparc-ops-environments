@@ -274,7 +274,7 @@ $(REPO_BASE_DIR)/.venv/bin/activate:
 	$(REPO_BASE_DIR)/.venv/bin/pip3 install --upgrade pip wheel setuptools
 	$(REPO_BASE_DIR)/.venv/bin/pip3 install jinja2 j2cli[yaml] typer
 	@echo "To activate the venv, execute 'source $(REPO_BASE_DIR)/.venv/bin/activate'"
-PHONY: .venv
+.PHONY: .venv
 .venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 .PHONY: venv
 venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)

@@ -30,6 +30,6 @@ resource "grafana_dashboard" "dashboards" {
     ]]
   ))
   # CSV approach
-  config_json = jsonencode(jsondecode(file(split(",", each.value)[1])).dashboard)
+  config_json = jsonencode(jsondecode(file(split(",", each.value)[1])))
   folder      = grafana_folder.subfolders[split(",", each.value)[0]].id
 }
