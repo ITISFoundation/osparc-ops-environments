@@ -1,16 +1,19 @@
 # pylint: disable=invalid-name
 # pylint: disable=logging-fstring-interpolation
+
 import json
 import logging
 import os
 import sys
 import warnings
 from time import sleep
+from typing import Any, Dict, Optional, Tuple
 
 import requests
 import yaml
 from environs import Env, EnvError
 from requests.exceptions import HTTPError
+from requests.sessions import Session
 from tenacity import (
     before_log,
     retry,
@@ -22,8 +25,7 @@ from tenacity import (
 from yaml.loader import SafeLoader
 
 logging.basicConfig(level="INFO")
-logger = logging.getLogger()
-
+logger: logging.Logger = logging.getLogger()
 warnings.filterwarnings(
     "ignore",
     ".*Adding certificate verification is strongly advised.*",
@@ -32,19 +34,22 @@ warnings.filterwarnings(
 env = Env()
 env.read_env("./../.env", recurse=False)
 
-SUPPORTED_GRAYLOG_MAJOR_VERSION = 6
+SUPPORTED_GRAYLOG_MAJOR_VERSION: int = 6
+MACHINE_FQDN: str = env.str("MACHINE_FQDN")
+GRAYLOG_BASE_DOMAIN: str = f"https://monitoring.{MACHINE_FQDN}/graylog"
+GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC: int = env.int("GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC", 30)
+REQUESTS_AUTH: Tuple[str, str] = (
+    env.str("SERVICES_USER"),
+    env.str("SERVICES_PASSWORD"),
+)
+GRAYLOG_SYSLOG_CAPTURE_PORT: int = env.int("GRAYLOG_SYSLOG_CAPTURE_PORT")
+GRAYLOG_LOG_MAX_DAYS_IN_STORAGE: int = env.int("GRAYLOG_LOG_MAX_DAYS_IN_STORAGE")
+GRAYLOG_LOG_MIN_DAYS_IN_STORAGE: int = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
+GRAYLOG_SLACK_WEBHOOK_URL: str = env.str("GRAYLOG_SLACK_WEBHOOK_URL")
+GRAYLOG_ALERT_MAIL_ADDRESS: str = env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
+GRAYLOG_SLACK_WEBHOOK_ICON_URL: str = env.str("GRAYLOG_SLACK_WEBHOOK_ICON_URL")
+GRAYLOG_SLACK_WEBHOOK_CHANNEL: str = env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
 
-MACHINE_FQDN = env.str("MACHINE_FQDN")
-GRAYLOG_BASE_DOMAIN = "https://monitoring." + MACHINE_FQDN + "/graylog"
-GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC = env.int("GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC", 30)
-REQUESTS_AUTH = (env.str("SERVICES_USER"), env.str("SERVICES_PASSWORD"))
-GRAYLOG_SYSLOG_CAPTURE_PORT = env.int("GRAYLOG_SYSLOG_CAPTURE_PORT")
-GRAYLOG_LOG_MAX_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MAX_DAYS_IN_STORAGE")
-GRAYLOG_LOG_MIN_DAYS_IN_STORAGE = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
-GRAYLOG_SLACK_WEBHOOK_URL = env.str("GRAYLOG_SLACK_WEBHOOK_URL")
-GRAYLOG_ALERT_MAIL_ADDRESS = env.str("GRAYLOG_ALERT_MAIL_ADDRESS")
-GRAYLOG_SLACK_WEBHOOK_ICON_URL = env.str("GRAYLOG_SLACK_WEBHOOK_ICON_URL")
-GRAYLOG_SLACK_WEBHOOK_CHANNEL = env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
 assert MACHINE_FQDN
 assert REQUESTS_AUTH
 assert GRAYLOG_SYSLOG_CAPTURE_PORT
@@ -53,35 +58,34 @@ assert GRAYLOG_LOG_MIN_DAYS_IN_STORAGE
 
 
 @retry(
-    stop=stop_after_attempt(GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC / 5),
+    stop=stop_after_attempt(GRAYLOG_WAIT_ONLINE_TIMEOUT_SEC // 5),
     wait=wait_fixed(5),
     retry=retry_if_exception_type(HTTPError),
     before=before_log(logger, logging.INFO),
 )
-def wait_graylog_is_online():
-    _r = requests.get(
+def wait_graylog_is_online() -> None:
+    _r: requests.Response = requests.get(
         GRAYLOG_BASE_DOMAIN + "/api/system",
         auth=REQUESTS_AUTH,
         verify=False,
         timeout=10,
     )
-
     if _r.status_code == 401:
         raise TypeError(f"Graylog unauthorized HTTP response: {_r}")
-
     _r.raise_for_status()
     logger.info("Graylog is online")
 
 
-def validate_graylog_version_is_supported():
-    _r = requests.get(
-        GRAYLOG_BASE_DOMAIN + "/api/system", auth=REQUESTS_AUTH, verify=False
+def validate_graylog_version_is_supported() -> None:
+    _r: requests.Response = requests.get(
+        GRAYLOG_BASE_DOMAIN + "/api/system",
+        auth=REQUESTS_AUTH,
+        verify=False,
+        timeout=30,
     )
     _r.raise_for_status()
-
-    graylog_version = _r.json()["version"]
-    major_version = int(graylog_version.split(".")[0])
-
+    graylog_version: str = _r.json()["version"]
+    major_version: int = int(graylog_version.split(".")[0])
     if major_version != SUPPORTED_GRAYLOG_MAJOR_VERSION:
         raise TypeError(
             f"Graylog major version {major_version} is not supported by this script. "
@@ -90,14 +94,16 @@ def validate_graylog_version_is_supported():
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_random(min=1, max=10))
-def get_graylog_inputs(_session, _headers, _url):
+def get_graylog_inputs(
+    _session: Session, _headers: Dict[str, str], _url: str
+) -> requests.Response:
     # We check if graylog has inputs, if not we add a new one
-    _r = _session.get(_url, headers=_headers, verify=False)
+    _r: requests.Response = _session.get(_url, headers=_headers, verify=False)
     # DEBUG
     if _r.status_code == 200:
         print("Successfully send GET /api/system/inputs")
         return _r
-    error_message = (
+    error_message: str = (
         "Error while sending GET /api/system/inputs. Status code of the request : "
         + str(_r.status_code)
         + " "
@@ -107,7 +113,7 @@ def get_graylog_inputs(_session, _headers, _url):
     raise RuntimeError(error_message)
 
 
-def configure_email_notifications(_session, _headers):
+def configure_email_notifications(_session: requests.Session, _headers: dict) -> str:
     _url = GRAYLOG_BASE_DOMAIN + "/api/events/notifications"
     _r = _session.get(_url, headers=_headers, verify=False)
     if (
@@ -137,7 +143,7 @@ def configure_email_notifications(_session, _headers):
                 + " "
                 + _r.text
             )
-            sys.exit(1)
+            sys.exit(os.EX_USAGE)
     else:
         print("Graylog Mail Notification already present - skipping...")
     # Keeping notification ID
@@ -151,7 +157,7 @@ def configure_email_notifications(_session, _headers):
     return _mail_notification_id
 
 
-def configure_slack_notification_channel(_session, _hed) -> str:
+def configure_slack_notification_channel(_session: requests.Session, _hed: dict) -> str:
     # Configure sending Slack notifications
     if GRAYLOG_SLACK_WEBHOOK_URL != "":
         assert GRAYLOG_SLACK_WEBHOOK_CHANNEL
@@ -220,7 +226,7 @@ def configure_slack_notification_channel(_session, _hed) -> str:
                 + " "
                 + r.text
             )
-            sys.exit(1)
+            sys.exit(os.EX_USAGE)
         print("Graylog Slack Notification already present - skipping...")
         _r = _session.get(_url, headers=_hed, verify=False)
         _slack_notification_id = [
@@ -232,7 +238,7 @@ def configure_slack_notification_channel(_session, _hed) -> str:
     return ""
 
 
-def configure_log_retention(_session, _headers):
+def configure_log_retention(_session: requests.Session, _headers: dict) -> None:
     _url = (
         "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/indices/index_sets"
     )
@@ -272,7 +278,7 @@ def configure_log_retention(_session, _headers):
         )
 
 
-def configure_syslog_capture(_session, _headers):
+def configure_syslog_capture(_session: requests.Session, _headers: dict) -> None:
     try:
         _url = (
             "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/cluster/nodes"
@@ -313,11 +319,11 @@ def configure_syslog_capture(_session, _headers):
 
 
 def configure_alerts(
-    _session,
-    _headers,
-    _mail_notification_id: str | None = None,
-    _slack_notification_id: str | None = None,
-):
+    _session: requests.Session,
+    _headers: dict,
+    _mail_notification_id: Optional[str] = None,
+    _slack_notification_id: Optional[str] = None,
+) -> None:
     print("Configuring Graylog Alerts...")
     with open("alerts.yaml") as f:
         data = yaml.load(f, Loader=SafeLoader)
@@ -336,7 +342,7 @@ def configure_alerts(
             print(
                 "Could not determine ID of stream containing all events. Is graylog misconfigured? Exiting with error!"
             )
-            sys.exit(1)
+            sys.exit(os.EX_USAGE)
         _url = "https://monitoring." + MACHINE_FQDN + "/graylog/api/events/definitions"
         # Deleting existing alerts - this ensures idemptency
         _r = _session.get(
@@ -363,7 +369,7 @@ def configure_alerts(
                     )
                     print(resp.status_code)
                     print(resp.json())
-                    sys.exit(1)
+                    sys.exit(os.EX_USAGE)
         for i in data:
             i["notifications"] = []
             if GRAYLOG_ALERT_MAIL_ADDRESS != "" and _mail_notification_id:
@@ -382,11 +388,13 @@ def configure_alerts(
             else:
                 print("Could not add alert. Failure:", resp.status_code)
                 print(resp.json())
-                sys.exit(1)
+                sys.exit(os.EX_USAGE)
 
 
-def configure_content_packs(_session, _headers, base_url):
-    def get_installation(content_pack):
+def configure_content_packs(
+    _session: Session, _headers: Dict[str, str], base_url: str
+) -> None:
+    def get_installation(content_pack: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         logger.debug(f"Getting installations for content pack {content_pack['id']}")
         resp = _session.get(
             base_url + "/system/content_packs/" + content_pack["id"] + "/installations"
@@ -404,7 +412,9 @@ def configure_content_packs(_session, _headers, base_url):
 
         return installations[0] if installations else None
 
-    def delete_installation(content_pack, installation):
+    def delete_installation(
+        content_pack: Dict[str, Any], installation: Dict[str, Any]
+    ) -> None:
         logger.debug(f"Deleting installation {installation['_id']}")
 
         resp = _session.delete(
@@ -421,7 +431,7 @@ def configure_content_packs(_session, _headers, base_url):
                 f"Error while deleting installation {installation['_id']} for content pack {content_pack['id']}"
             )
 
-    def create_content_pack_revision(content_pack):
+    def create_content_pack_revision(content_pack: Dict[str, Any]) -> None:
         logger.debug(
             f"Uploading content pack {content_pack['id']} revision {content_pack['rev']}"
         )
@@ -440,7 +450,7 @@ def configure_content_packs(_session, _headers, base_url):
                 f"Unexpected {resp.status_code=} while uploading content pack {content_pack['id']} revision {content_pack['rev']}. Error: {resp.text}"
             )
 
-    def install_content_pack_revision(content_pack):
+    def install_content_pack_revision(content_pack: Dict[str, Any]) -> None:
         logger.debug(
             f"Installing content pack {content_pack['id']} revision {content_pack['rev']}"
         )
@@ -459,7 +469,7 @@ def configure_content_packs(_session, _headers, base_url):
 
     for file in os.listdir("../data/contentpacks"):
         with open(f"../data/contentpacks/{file}") as f:
-            logger.debug(f"Configuring content pack {f.name}")
+            logger.debug(f"Configuring content pack {file}")
             content_pack = json.loads(f.read())
 
         create_content_pack_revision(content_pack)
@@ -476,7 +486,7 @@ def configure_content_packs(_session, _headers, base_url):
                 "This revision of content pack is already installed. Nothing to do..."
             )
 
-        logging.info(f"{f.name} content pack has been configured")
+        logging.info(f"{file} content pack has been configured")
 
 
 if __name__ == "__main__":
