@@ -5,7 +5,7 @@ configs:
     file: ./jupyter_server_config.py
 {% for item in contents %}
   {{ item.name }}:
-    name: {% raw %}${STACK_NAME}{% endraw %}_{{item.name}}_{{ ("./data/" + item.name) | sha256file | substring(0,10) }}
+    name: {% raw %}${STACK_NAME}{% endraw %}_{{item.name}}_{{ ("./data/" ~ item.name) | sha256file | substring(0,10) }}
     file: ./data/{{ item.name }}{% endfor %}
 services:
   adminpanels:
