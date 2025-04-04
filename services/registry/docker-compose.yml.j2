@@ -36,6 +36,11 @@ services:
       - monitored
     deploy:
       replicas: ${OPS_REGISTRY_REPLICAS}
+      update_config:
+        order: start-first
+        delay: 10s
+        failure_action: rollback
+        parallelism: 1
       placement:
         constraints:
           - node.labels.ops==true
@@ -103,6 +108,11 @@ services:
       - monitored
     deploy:
       mode: global
+      update_config:
+        order: start-first
+        delay: 10s
+        failure_action: rollback
+        parallelism: 1
       placement:
         constraints:
           - node.labels.ops==true
