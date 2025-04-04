@@ -21,7 +21,6 @@ endef
 .data.json:
 	@$(_tree) -J ${PWD}/data | jq ".[0]" > .data.json
 
-
 .PHONY: docker-compose.yml
 docker-compose.yml: docker-compose.yml.j2 .venv .data.json .env jupyter_server_config.py
 	$(call custom-jinja, $<, .data.json, tmp.yml)
@@ -29,27 +28,27 @@ docker-compose.yml: docker-compose.yml.j2 .venv .data.json .env jupyter_server_c
 	@rm tmp.yml
 
 .PHONY: up
-up: .init .env jupyter_server_config.py ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys jaeger stack
+up: .init ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys jaeger stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-letsencrypt-http
-up-letsencrypt-http: .init .env jupyter_server_config.py ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys jaeger stack using let's encrypt http challenge
+up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys jaeger stack using let's encrypt http challenge
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
 
 .PHONY: up-letsencrypt-dns
-up-letsencrypt-dns: .init .env jupyter_server_config.py ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys jaeger stack using let's encrypt dns challenge
+up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys jaeger stack using let's encrypt dns challenge
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys jaeger stack for Dalco Cluster
-up-dalco: .init .env jupyter_server_config.py ${TEMP_COMPOSE}-dalco prune-docker-stack-configs
+up-dalco: .init ${TEMP_COMPOSE}-dalco prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
 .PHONY: up-aws
-up-aws: .init .env jupyter_server_config.py ${TEMP_COMPOSE}-aws prune-docker-stack-configs ## Deploys jaeger stack in aws
+up-aws: .init ${TEMP_COMPOSE}-aws prune-docker-stack-configs ## Deploys jaeger stack in aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-master
-up-master:  .init .env jupyter_server_config.py ${TEMP_COMPOSE}-master prune-docker-stack-configs
+up-master:  .init ${TEMP_COMPOSE}-master prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
 .PHONY: up-local
