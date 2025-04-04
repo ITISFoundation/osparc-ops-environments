@@ -1,7 +1,5 @@
 .DEFAULT_GOAL := help
 
-
-
 # Internal VARIABLES ------------------------------------------------
 # STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
 STACK_NAME = $(notdir $(shell pwd))
@@ -22,24 +20,24 @@ define create-s3-bucket
 endef
 
 .PHONY: up-local
-up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys registry stack
+up-local: .init ${TEMP_COMPOSE}-local prune-docker-stack-configs ## Deploys registry stack
 	@$(create-s3-bucket)
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-.PHONY: up-letsencrypt-http  ## Deploys registry stack using let's encrypt http challenge
-up-letsencrypt-http: .init .env ${TEMP_COMPOSE}-letsencrypt-http
+.PHONY: up-letsencrypt-http
+up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys registry stack using let's encrypt http challenge
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
 
-.PHONY: up-letsencrypt-dns ## Deploys registry stack using let's encrypt dns challenge
-up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns
+.PHONY: up-letsencrypt-dns
+up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys registry stack using let's encrypt dns challenge
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
-.PHONY: up-dalco ## Deploys registry stack for Dalco Cluster
-up-dalco: .init .env ${TEMP_COMPOSE}
+.PHONY: up-dalco
+up-dalco: .init ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys registry stack for Dalco Cluster
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys registry on AWS
+up-aws: .init ${TEMP_COMPOSE}-aws prune-docker-stack-configs  ## Deploys registry on AWS
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-master ## Deploys registry on master cluster

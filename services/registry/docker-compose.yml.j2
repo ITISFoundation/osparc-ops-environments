@@ -128,8 +128,11 @@ networks:
 
 configs:
   registry_config.yml:
+    name: ${STACK_NAME}_registry_config_{{ "./config.yml" | sha256file | substring(0,10) }}
     file: ./config.yml
   nsswitch_conf:
+    name: ${STACK_NAME}_nsswitch_conf_{{ "./nsswitch.conf" | sha256file | substring(0,10) }}
     file: ./nsswitch.conf
   registry_init:
+    name: ${STACK_NAME}_registry_init_{{ "./init" | sha256file | substring(0,10) }}
     file: ./init
