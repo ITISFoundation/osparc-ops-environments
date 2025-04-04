@@ -10,33 +10,36 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up ## Deploys redis stack
-up: .init .env ${TEMP_COMPOSE}
+up: .init ${TEMP_COMPOSE}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 .PHONY: up-letsencrypt-http ## Deploys redis stack using let's encrypt http challenge
-up-letsencrypt-http: .init .env ${TEMP_COMPOSE}-letsencrypt-http
+up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
 
 .PHONY: up-letsencrypt-dns ## Deploys redis stack using let's encrypt dns challenge
-up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns
+up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
-.PHONY: up-dalco ## Deploys redis-commander stack for Dalco Cluster
+.PHONY: up-dalco prune-docker-stack-configs ## Deploys redis-commander stack for Dalco Cluster
 up-dalco: up
 
-.PHONY: up-master ## Deploys redis-commander stack for Master Cluster
+.PHONY: up-master prune-docker-stack-configs ## Deploys redis-commander stack for Master Cluster
 up-master: up
 
-.PHONY: up-public ## Deploys redis-commander stack for public access Cluster
+.PHONY: up-public prune-docker-stack-configs ## Deploys redis-commander stack for public access Cluster
 up-public: up
 
-.PHONY: up-local ## Deploys redis-commander stack for local deployment
+.PHONY: up-local prune-docker-stack-configs ## Deploys redis-commander stack for local deployment
 up-local: up
 
-.PHONY: up-aws ## Deploys redis-commander stack in aws
+.PHONY: up-aws prune-docker-stack-configs ## Deploys redis-commander stack in aws
 up-aws: up
 
-docker-compose.yml: config.json
+docker-compose.yml: .env config.json
+	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
+	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
+	rm docker-compose.yml.unlinted >/dev/null 2>&1;
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
