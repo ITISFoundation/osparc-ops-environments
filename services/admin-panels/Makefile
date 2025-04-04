@@ -23,7 +23,7 @@ endef
 
 
 .PHONY: docker-compose.yml
-docker-compose.yml: docker-compose.yml.j2 .venv .data.json .env
+docker-compose.yml: docker-compose.yml.j2 .venv .data.json .env jupyter_server_config.py
 	$(call custom-jinja, $<, .data.json, tmp.yml)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
 	@rm tmp.yml
