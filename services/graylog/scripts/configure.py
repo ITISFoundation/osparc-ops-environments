@@ -292,7 +292,7 @@ def configure_syslog_capture(_session: requests.Session, _headers: dict) -> None
         if len([i for i in r2["inputs"] if i["title"] == "Syslog"]) == 0:
             raw_data = (
                 '{"title":"Syslog","type":"org.graylog2.inputs.syslog.udp.SyslogUDPInput","configuration":{"bind_address":"0.0.0.0","port":'
-                + GRAYLOG_SYSLOG_CAPTURE_PORT
+                + str(GRAYLOG_SYSLOG_CAPTURE_PORT)
                 + ',"recv_buffer_size":262144,"number_worker_threads":8,"override_source":null,"force_rdns":false,"allow_override_date":true,"store_full_message":true,"expand_structured_data":false},"global":true,"node":"'
                 + node_uuid
                 + '"}'
