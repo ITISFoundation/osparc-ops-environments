@@ -330,9 +330,10 @@ services:
       - prometheus-port=9400
 
   pgsql-query-exporter:
-    image: adonato/query-exporter:2.10.0
+    image: ghcr.io/albertodonato/query-exporter:sha-a1d908e
     volumes: []
-    dns: 9.9.9.9
+    dns:
+      - 8.8.8.8
     configs:
       - source: pgsql_query_exporter_config
         target: /config/config.yaml
@@ -375,7 +376,7 @@ services:
           memory: 32M
           cpus: "0.1"
   redis-exporter:
-    image: oliver006/redis_exporter:v1.62.0-alpine
+    image: oliver006/redis_exporter:v1.69.0-alpine
     networks:
       - monitored
     environment:
