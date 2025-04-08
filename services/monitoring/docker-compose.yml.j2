@@ -17,6 +17,8 @@ networks:
 configs:
   alertmanager_config:
     file: ./alertmanager/config.yml
+  tempo_config:
+    file: ./tempo_config.yaml
   node_exporter_entrypoint:
     file: ./node-exporter/docker-entrypoint.sh
   prometheus_config:
@@ -398,3 +400,27 @@ services:
         reservations:
           memory: 32M
           cpus: "0.1"
+  tempo:
+    image: grafana/tempo:2.6.1
+    command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
+    configs:
+      - source: tempo_config
+        target: /etc/tempo.yaml
+    networks:
+      - monitored
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.tempo.loadbalancer.server.port=9095
+        - traefik.http.routers.tempo.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/tempo`)
+        - traefik.http.routers.tempo.priority=10
+        - traefik.http.routers.tempo.entrypoints=https
+        - traefik.http.routers.tempo.tls=true
+        - traefik.http.middlewares.tempo_replace_regex.replacepathregex.regex=^/tempo/?(.*)$$
+        - traefik.http.middlewares.tempo_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.tempo.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, tempo_replace_regex
+      resources:
+        limits:
+          memory: 2000M
+          cpus: "2.0"
