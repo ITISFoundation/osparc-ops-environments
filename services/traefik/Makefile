@@ -9,33 +9,32 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-
 .PHONY: up-local
-up-local: .init .create_secrets .env ${TEMP_COMPOSE}-local ## Deploys the stack using provided certificates
+up-local: .init .create_secrets ${TEMP_COMPOSE}-local prune-docker-stack-configs ## Deploys the stack using provided certificates
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
 .PHONY: up-letsencrypt-http
-up-letsencrypt-http: .init .env ${TEMP_COMPOSE}-letsencrypt-http ## Deploys the stack with let's encrypt http challenge
+up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys the stack with let's encrypt http challenge
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
 
 .PHONY: up-letsencrypt-dns
-up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns ## Deploys the stack with let's encrypt dns challenge
+up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys the stack with let's encrypt dns challenge
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dns ${STACK_NAME}
 
 .PHONY: up-dalco
-up-dalco: .init .env ${TEMP_COMPOSE}-dalco ## Deploys the stack on dalco cluster
+up-dalco: .init ${TEMP_COMPOSE}-dalco prune-docker-stack-configs ## Deploys the stack on dalco cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
 .PHONY: up-public
-up-public: .init .env ${TEMP_COMPOSE}-public ## Deploys the stack on dalco cluster
+up-public: .init ${TEMP_COMPOSE}-public prune-docker-stack-configs ## Deploys the stack on dalco cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
 
 .PHONY: up-aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws ## Deploys the stack aws
+up-aws: .init ${TEMP_COMPOSE}-aws prune-docker-stack-configs ## Deploys the stack aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
 .PHONY: up-master ## Deploys the stack on master
-up-master: .init .env ${TEMP_COMPOSE}-master ## Deploys the stack on dalco cluster
+up-master: .init ${TEMP_COMPOSE}-master prune-docker-stack-configs ## Deploys the stack on dalco cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
 # Helpers -------------------------------------------------

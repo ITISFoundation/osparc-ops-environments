@@ -40,12 +40,5 @@ services:
             placement:
                 constraints:
                     - node.labels.traefik==true
-        configs:
-            - source: traefik_dynamic_config.yml
-              target: /etc/traefik/dynamic_conf.yml
         volumes:
             - /etc/traefik_certs:/etc/traefik_certs
-
-configs:
-    traefik_dynamic_config.yml:
-        file: ./traefik_dynamic_config.yml
