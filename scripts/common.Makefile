@@ -297,6 +297,18 @@ endef
 
 endif
 
+# Check that given variables are set and all have non-empty values,
+# die with an error otherwise.
+#
+# Params:
+#   1. Variable name(s) to test.
+#   2. (optional) Error message to print.
+guard-%:
+	@ if [ "${${*}}" = "" ]; then \
+		echo "Argument '$*' is missing. TIP: make <rule> $*=<value>"; \
+		exit 1; \
+	fi
+
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default
 	@ true
