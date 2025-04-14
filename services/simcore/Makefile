@@ -27,7 +27,7 @@ stack_with_prefix.yml: $(SIMCORE_REPO_DIR) $(REPO_CONFIG_LOCATION)
 #
 # USAGE:
 #
-# make stack_with_prefix.yml DOCKER_IMAGE_TAG=v1.81.0
+# make stack_with_prefix.yml
 # make up STACK_FILE=stack_with_prefix.yml
 #
 .PHONY: up
