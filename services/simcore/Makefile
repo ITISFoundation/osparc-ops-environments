@@ -15,10 +15,9 @@ $(SIMCORE_REPO_DIR):
 	$(error $@ repo not found. Please clone this repo manually)
 
 .PHONY: stack_with_prefix.yml
-stack_with_prefix.yml: $(SIMCORE_REPO_DIR) $(REPO_CONFIG_LOCATION) guard-DOCKER_IMAGE_TAG
+stack_with_prefix.yml: $(SIMCORE_REPO_DIR) $(REPO_CONFIG_LOCATION)
 	# generating $@
-	@DOCKER_IMAGE_TAG=$(DOCKER_IMAGE_TAG) \
-	$(REPO_BASE_DIR)/scripts/deployments/prepare_simcore_stack.bash
+	@$(REPO_BASE_DIR)/scripts/deployments/prepare_simcore_stack.bash
 	@mv $(REPO_BASE_DIR)/scripts/deployments/stack_with_prefix.yml $@
 
 # We don't want to generate stack file automatically here.
