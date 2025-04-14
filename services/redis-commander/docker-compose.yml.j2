@@ -14,6 +14,11 @@ services:
     environment:
       - URL_PREFIX=/redis
     deploy:
+      update_config:
+        order: start-first
+        delay: 10s
+        failure_action: rollback
+        parallelism: 1
       placement:
         constraints:
           - node.labels.ops == true
@@ -37,6 +42,7 @@ services:
 configs:
   redis_commander_config:
     file: ./config.json
+    name: ${STACK_NAME}_config_{{ "./config.json" | sha256file | substring(0,10) }}
 
 networks:
   public:
