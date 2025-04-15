@@ -45,4 +45,5 @@ networks:
 
 configs:
   filestash_config:
+    name: ${STACK_NAME}_filestash_config_{{ "./filestash_config.json" | sha256file | substring(0,10) }}
     file: ./filestash_config.json
