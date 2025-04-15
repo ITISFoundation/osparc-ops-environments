@@ -404,9 +404,6 @@ configs:
   node_exporter_entrypoint:
     name: ${STACK_NAME}_node_exporter_entrypoint_{{ "./node-exporter/docker-entrypoint.sh" | sha256file | substring(0,10) }}
     file: ./node-exporter/docker-entrypoint.sh
-  prometheus_config:
-    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
-    file: ./prometheus/prometheus.yml
   prometheus_config_federation:
     name: ${STACK_NAME}_prometheus_config_federation_{{ "./prometheus/prometheus-federation.yml" | sha256file | substring(0,10) }}
     file: ./prometheus/prometheus-federation.yml

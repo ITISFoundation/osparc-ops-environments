@@ -26,3 +26,8 @@ services:
       placement:
         constraints:
           - node.labels.prometheus==true
+
+configs:
+  prometheus_config:
+    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.yml
