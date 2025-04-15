@@ -48,6 +48,9 @@ up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local c
 
 # Helpers -------------------------------------------------
 
+docker-compose.yml: docker-compose.yml.j2 .venv .env
+	@$(call jinja, $<, .env, $@)
+
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml ## Deploys stack
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
@@ -87,6 +90,8 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	export GRAYLOG_ROOT_PASSWORD_SHA2;\
 	GRAYLOG_PASSWORD_SECRET=$$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16 ; echo '');\
 	export GRAYLOG_PASSWORD_SECRET;\
+	STACK_NAME=$(STACK_NAME); \
+	export STACK_NAME; \
 	set +o allexport; \
 	envsubst < $< > $@
 
