@@ -101,7 +101,7 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml  docker-compose.aws.yml $(TEMP_COMPOSE_C
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-${TEMP_COMPOSE}-local: docker-compose.yml config.prometheus.simcore $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 #
