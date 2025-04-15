@@ -84,15 +84,15 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml config.moni
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.letsencrypt.dns.yml config.monitoring .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
-docker-compose.yml: docker-compose.yml.j2 .env .venv pgsql_query_exporter_config.yaml \
-					./alertmanager/config.yml \
-					./tempo_config.yaml \
-					./node-exporter/docker-entrypoint.sh \
-					./prometheus/prometheus.yml \
-					./prometheus/prometheus-federation.yml \
-					./prometheus/prometheus.rules.yml \
-					./pgsql_query_exporter_config.yaml \
-					./smokeping_prober_config.yaml
+docker-compose.yml: docker-compose.yml.j2 .env .venv \
+					prometheus/prometheus.yml \
+					prometheus/prometheus-federation.yml \
+					prometheus/prometheus.rules.yml \
+					node-exporter/docker-entrypoint.sh \
+					pgsql_query_exporter_config.yaml \
+					smokeping_prober_config.yaml \
+					tempo_config.yaml \
+					alertmanager/config.yml
 	$(call jinja,$<,.env,$@)
 
 .PHONY: grafana-import
