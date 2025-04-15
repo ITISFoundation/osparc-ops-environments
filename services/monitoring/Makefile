@@ -94,23 +94,23 @@ docker-compose.master.yml: docker-compose.master.yml.j2 config.prometheus.ceph.s
 
 TEMP_COMPOSE_COMMON_DEPENDENCIES := docker-compose.yml .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
 
-${TEMP_COMPOSE}: config.prometheus $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+${TEMP_COMPOSE}: docker-compose.yml config.prometheus $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
-${TEMP_COMPOSE}-dalco: docker-compose.dalco.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
-${TEMP_COMPOSE}-public: docker-compose.public.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
 
-${TEMP_COMPOSE}-aws:  docker-compose.aws.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+${TEMP_COMPOSE}-aws: docker-compose.yml  docker-compose.aws.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
-${TEMP_COMPOSE}-master: docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-${TEMP_COMPOSE}-local: docker-compose.letsencrypt.dns.yml config.prometheus.simcore $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
+${TEMP_COMPOSE}-local: docker-compose.yml config.prometheus.simcore $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 #
 # artifacts targets
@@ -146,7 +146,7 @@ config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} .venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus.ceph.simcore
-config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .venv
+config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env .venv
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
