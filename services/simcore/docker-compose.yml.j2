@@ -382,9 +382,9 @@ services:
     deploy:
       replicas: ${SIMCORE_STO_WORKER_REPLICAS}
       update_config:
-        parallelism: 2
+        parallelism: 1
         order: start-first
-        failure_action: continue
+        failure_action: rollback
         delay: 10s
       placement:
         constraints:
@@ -396,6 +396,27 @@ services:
         limits:
           cpus: "1"
           memory: "700M"
+
+  sto-worker-cpu-bound:
+    networks:
+      - monitored
+    deploy:
+      replicas: ${SIMCORE_STO_WORKER_CPU_BOUND_REPLICAS}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "200M"
+        limits:
+          cpus: "1"
+          memory: "500M"
 
   director:
     # Certificate necessary for local deploiement only
