@@ -1,36 +1,5 @@
 version: "3.7"
 
-volumes:
-  prometheus_data: {}
-  grafana_data: {}
-  alertmanager_data: {}
-  prometheus_data_federation: {}
-
-networks:
-  monitored:
-    name: ${MONITORED_NETWORK}
-    external: true
-  public:
-    external: true
-    name: ${PUBLIC_NETWORK}
-
-configs:
-  alertmanager_config:
-    file: ./alertmanager/config.yml
-  tempo_config:
-    file: ./tempo_config.yaml
-  node_exporter_entrypoint:
-    file: ./node-exporter/docker-entrypoint.sh
-  prometheus_config:
-    file: ./prometheus/prometheus.yml
-  prometheus_config_federation:
-    file: ./prometheus/prometheus-federation.yml
-  prometheus_rules:
-    file: ./prometheus/prometheus.rules.yml
-  pgsql_query_exporter_config:
-    file: ./pgsql_query_exporter_config.yaml
-  smokeping_prober_config:
-    file: ./smokeping_prober_config.yaml
 services:
   cadvisor-exporter:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
@@ -424,3 +393,43 @@ services:
         limits:
           memory: 2000M
           cpus: "2.0"
+
+configs:
+  alertmanager_config:
+    name: ${STACK_NAME}_alertmanager_config_{{ "./alertmanager/config.yml" | sha256file | substring(0,10) }}
+    file: ./alertmanager/config.yml
+  tempo_config:
+    name: ${STACK_NAME}_tempo_config_{{ "./tempo_config.yaml" | sha256file | substring(0,10) }}
+    file: ./tempo_config.yaml
+  node_exporter_entrypoint:
+    name: ${STACK_NAME}_node_exporter_entrypoint_{{ "./node-exporter/docker-entrypoint.sh" | sha256file | substring(0,10) }}
+    file: ./node-exporter/docker-entrypoint.sh
+  prometheus_config:
+    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.yml
+  prometheus_config_federation:
+    name: ${STACK_NAME}_prometheus_config_federation_{{ "./prometheus/prometheus-federation.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus-federation.yml
+  prometheus_rules:
+    name: ${STACK_NAME}_prometheus_rules_{{ "./prometheus/prometheus.rules.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.rules.yml
+  pgsql_query_exporter_config:
+    name: ${STACK_NAME}_pgsql_query_exporter_config_{{ "./pgsql_query_exporter_config.yaml" | sha256file | substring(0,10) }}
+    file: ./pgsql_query_exporter_config.yaml
+  smokeping_prober_config:
+    name: ${STACK_NAME}_smokeping_prober_config_{{ "./smokeping_prober_config.yaml" | sha256file | substring(0,10) }}
+    file: ./smokeping_prober_config.yaml
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  alertmanager_data: {}
+  prometheus_data_federation: {}
+
+networks:
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
