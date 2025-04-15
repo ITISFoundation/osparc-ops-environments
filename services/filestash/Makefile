@@ -41,7 +41,7 @@ up-local: up
 
 # Helpers -------------------------------------------------
 
-docker-compose.yml: docker-compose.yml.j2 .venv .env
+docker-compose.yml: docker-compose.yml.j2 .venv .env filestash_config.json
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}
