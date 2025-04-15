@@ -92,7 +92,7 @@ docker-compose.master.yml: docker-compose.master.yml.j2 config.prometheus.ceph.s
 # temp compose targets
 #
 
-TEMP_COMPOSE_COMMON_DEPENDENCIES := docker-compose.yml .env pgsql_query_exporter_config.yaml smokeping_prober_config.yaml tempo_config.yaml
+TEMP_COMPOSE_COMMON_DEPENDENCIES := docker-compose.yml .env
 
 ${TEMP_COMPOSE}: docker-compose.yml config.prometheus $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
