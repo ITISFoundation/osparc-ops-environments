@@ -22,11 +22,6 @@ endef
 # up targets
 #
 
-.PHONY: up
-up: ${TEMP_COMPOSE} ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
-	$(MAKE) grafana-import
-
 .PHONY: up-local
 up-local: ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
 	@$(create-s3-bucket)
@@ -93,9 +88,6 @@ docker-compose.master.yml: docker-compose.master.yml.j2 config.prometheus.ceph.s
 #
 
 TEMP_COMPOSE_COMMON_DEPENDENCIES := docker-compose.yml .env
-
-${TEMP_COMPOSE}: docker-compose.yml config.prometheus $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
