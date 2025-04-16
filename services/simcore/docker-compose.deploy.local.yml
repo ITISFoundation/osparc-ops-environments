@@ -27,9 +27,9 @@ services:
       - DIRECTOR_SELF_SIGNED_SSL_SECRET_NAME=rootca.crt
       - DIRECTOR_SELF_SIGNED_SSL_SECRET_ID=${DIRECTOR_SELF_SIGNED_SSL_SECRET_ID}
       - DIRECTOR_REGISTRY_CACHING=False
-      - DIRECTOR_REGISTRY_CACHING_TTL=15
+      - DIRECTOR_REGISTRY_CACHING_TTL=00:15:00
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt # via https://stackoverflow.com/questions/31448854/how-to-force-requests-use-the-certificates-on-my-ubuntu-system#comment78596389_37447847
-      #- SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/osparc.crt
     secrets:
         - source: rootca.crt
           target: /usr/local/share/ca-certificates/osparc.crt
@@ -104,7 +104,6 @@ services:
       labels:
         # oSparc postgres
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=postgres
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=${PREFIX_STACK_NAME}_postgres
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.tls=false
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.service=${SWARM_STACK_NAME}_postgresRoute
         - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432

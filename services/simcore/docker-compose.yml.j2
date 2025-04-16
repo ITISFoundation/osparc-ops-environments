@@ -53,7 +53,7 @@ services:
   agent:
     networks:
       - monitored
-    hostname: "{{.Node.Hostname}}-{{.Service.Name}}"
+    hostname: "{% raw %}{{.Node.Hostname}}-{{.Service.Name}}{% endraw %}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -272,7 +272,7 @@ services:
 
 
   wb-db-event-listener:
-    hostname: "{{.Service.Name}}"
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     environment:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
     networks:
@@ -311,7 +311,7 @@ services:
       - default
       - interactive_services_subnet
       - monitored
-    hostname: "{{.Service.Name}}"
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     deploy:
       update_config:
         parallelism: 2
@@ -344,6 +344,7 @@ services:
     networks:
       - monitored
     deploy:
+      replicas: ${SIMCORE_STORAGE_REPLICAS}
       labels:
         # internal traefik
         - traefik.enable=true
@@ -374,6 +375,48 @@ services:
         limits:
           cpus: "1"
           memory: "3G"
+
+  sto-worker:
+    networks:
+      - monitored
+    deploy:
+      replicas: ${SIMCORE_STO_WORKER_REPLICAS}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "350M"
+        limits:
+          cpus: "1"
+          memory: "700M"
+
+  sto-worker-cpu-bound:
+    networks:
+      - monitored
+    deploy:
+      replicas: ${SIMCORE_STO_WORKER_CPU_BOUND_REPLICAS}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "200M"
+        limits:
+          cpus: "1"
+          memory: "1G"
 
   director:
     # Certificate necessary for local deploiement only
@@ -538,7 +581,7 @@ services:
           cpus: '0.1'
 
   efs-guardian:
-    hostname: "{{.Service.Name}}"
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     networks:
       - monitored
     deploy:
@@ -646,7 +689,7 @@ services:
     networks:
       - monitored
       - public
-    hostname: "{{.Service.Name}}"
+    hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     deploy:
       # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
       # NOTE: this MUSTN'T change, or weird things might happen
@@ -899,6 +942,7 @@ services:
 volumes:
   rabbit_data:
     name: ${SWARM_STACK_NAME}_rabbit_data
+
 networks:
   public:
     external: true
@@ -918,3 +962,11 @@ networks:
   interactive_services_subnet:
     name: ${SWARM_STACK_NAME}_interactive_services_subnet
     external: true
+
+secrets:
+  dask_tls_key:
+    file: ./assets/dask-certificates/dask-key.pem
+    name: ${SWARM_STACK_NAME}_dask_tls_key_{{ "./assets/dask-certificates/dask-key.pem" | sha256file | substring(0,10) }}
+  dask_tls_cert:
+    file: ./assets/dask-certificates/dask-cert.pem
+    name: ${SWARM_STACK_NAME}_dask_tls_cert_{{ "./assets/dask-certificates/dask-cert.pem" | sha256file | substring(0,10) }}

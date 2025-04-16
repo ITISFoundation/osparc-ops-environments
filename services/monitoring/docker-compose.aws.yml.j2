@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   cadvisor-exporter:
     volumes:
@@ -8,21 +8,29 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
 
+  prometheuscatchall:
+    dns: 8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
+      resources:
+        limits:
+          memory: 24576M
+  prometheusfederation:
+    dns: 8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.prometheus==true
   grafana:
-    dns: 9.9.9.9
+    dns: 8.8.8.8
     deploy:
       placement:
         constraints:
           - node.labels.grafana==true
 
-  prometheuscatchall:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.prometheus==true
-
-  prometheusfederation:
-    deploy:
-      placement:
-        constraints:
-          - node.labels.prometheus==true
+configs:
+  prometheus_config:
+    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.yml

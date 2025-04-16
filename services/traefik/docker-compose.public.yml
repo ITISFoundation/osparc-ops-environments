@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   traefik:
-    dns: 9.9.9.9 # This is critical to make the ACME challange work
+    dns: 8.8.8.8 # This is critical to make the ACME challange work
     command:
       - "--api=true"
       - "--api.dashboard=true"
@@ -36,9 +36,6 @@ services:
       - "--entryPoints.https.forwardedHeaders.insecure"
       - "--providers.file.directory=/etc/traefik/"
       - "--providers.file.watch=true"
-    configs:
-      - source: traefik_dynamic_config.yml
-        target: /etc/traefik/dynamic_conf.yml
     deploy:
       replicas: ${OPS_TRAEFIK_REPLICAS}
       placement:
@@ -46,7 +43,3 @@ services:
           - node.labels.traefik==true
     volumes:
       - /etc/traefik_certs:/etc/traefik_certs
-
-configs:
-  traefik_dynamic_config.yml:
-    file: ./traefik_dynamic_config.yml
