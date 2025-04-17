@@ -11,25 +11,14 @@ defaultSettings:
   # https://longhorn.io/docs/1.8.1/best-practices/#minimal-available-storage-and-over-provisioning
   storageMinimalAvailablePercentage: 10
 
+  # https://longhorn.io/docs/1.8.1/references/settings/#deleting-confirmation-flag
+  deletingConfirmationFlag: false
+
 persistence:
   # https://longhorn.io/docs/1.8.1/best-practices/#io-performance
   defaultDataLocality: least-effort
   defaultClassReplicaCount: 2
-
   defaultFsType: xfs
-
-ingress:
-    enabled: true
-    className: ""
-    annotations:
-      namespace: {{ .Release.Namespace }}
-      cert-manager.io/cluster-issuer: "cert-issuer"
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    tls: true
-    tlsSecretL: monitoring-tls
-    host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
-    path: /longhorn
-    pathType: Prefix
 
 resources: # https://longhorn.io/docs/1.8.1/best-practices/#minimum-recommended-hardware
     requests:
@@ -38,3 +27,17 @@ resources: # https://longhorn.io/docs/1.8.1/best-practices/#minimum-recommended-
     limits:
       cpu: 4
       memory: 4Gi
+
+ingress:
+    enabled: true
+    className: ""
+    annotations:
+      namespace: {{ .Release.Namespace }}
+      cert-manager.io/cluster-issuer: "cert-issuer"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd,traefik-longhorn-strip-prefix@kubernetescrd  # namespace + middleware name
+    tls: true
+    tlsSecret: monitoring-tls
+    host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+    path: /longhorn
+    pathType: Prefix
