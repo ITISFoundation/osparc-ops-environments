@@ -1,6 +1,7 @@
-global:
-  nodeSelector:
-    ops: "true"
+global: {}
+  # uncomment once we have >1 ops nodes
+  # nodeSelector:
+  #  ops: "true"
 
 defaultSettings:
   replicaAutoBalance: best-effort
@@ -15,8 +16,13 @@ defaultSettings:
   deletingConfirmationFlag: false
 
 persistence:
+  # use only for non-critical ops workloads
+  # for critical workloads (e.g. database)
+  # use application replication (e.g. postgres HA operator)
+  defaultClass: false
+
   # https://longhorn.io/docs/1.8.1/best-practices/#io-performance
-  defaultDataLocality: least-effort
+  defaultDataLocality: best-effort
   defaultClassReplicaCount: 2
   defaultFsType: xfs
 
