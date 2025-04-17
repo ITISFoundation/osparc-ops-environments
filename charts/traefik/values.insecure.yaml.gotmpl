@@ -14,6 +14,7 @@ extraObjects:
       name: traefik
       targetPort: 9000
       protocol: TCP
+
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -22,6 +23,7 @@ extraObjects:
   data:
     users: |2
       {{ requiredEnv "TRAEFIK_K8S_AUTHORIZED_USER" }}
+
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
@@ -29,6 +31,7 @@ extraObjects:
   spec:
     basicAuth:
       secret: traefik-authorized-users  # https://doc.traefik.io/traefik/middlewares/http/basicauth/#users
+
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
@@ -38,6 +41,17 @@ extraObjects:
     stripPrefix:
       prefixes:
       - /portainer
+
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: longhorn-strip-prefix
+    namespace: {{.Release.Namespace}}
+  spec:
+    stripPrefix:
+      prefixes:
+      - /longhorn
+
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:

@@ -49,7 +49,6 @@ helmfile-sync: .check-helmfile-installed helmfile.yaml ## Syncs the helmfile con
 		$(MAKE) -s .helmfile-local-post-install; \
 	fi
 
-
 .PHONY: configure-local-hosts
 configure-local-hosts: ## Adds local hosts entries for the machine
 	@echo "Adding $(MACHINE_FQDN) hosts to /etc/hosts ..."
