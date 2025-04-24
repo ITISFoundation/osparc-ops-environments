@@ -1,9 +1,11 @@
 version: "3.7"
 configs:
   adminpanel-jupyter-server-config:
+    name: ${STACK_NAME}_adminpanel-jupyter-server-config_{{ "./jupyter_server_config.py" | sha256file | substring(0,10) }}
     file: ./jupyter_server_config.py
 {% for item in contents %}
   {{ item.name }}:
+    name: {% raw %}${STACK_NAME}{% endraw %}_{{item.name}}_{{ ("./data/" ~ item.name) | sha256file | substring(0,10) }}
     file: ./data/{{ item.name }}{% endfor %}
 services:
   adminpanels:
