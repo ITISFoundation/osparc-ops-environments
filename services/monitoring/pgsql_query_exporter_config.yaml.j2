@@ -58,7 +58,7 @@ queries:{% for _gid in MONITORING_PROMETHEUS_PGSQL_GID_MONITORED.split(",") if _
   query_total_number_of_dollars_paid_successfully:
     interval: 55
     databases: [postgres]
-    metrics: [osparc_total_number_of_dollars_paid]
+    metrics: [osparc_total_number_of_dollars_paid_successfully]
     sql: |
       SELECT SUM(price_dollars) as osparc_total_number_of_dollars_paid_successfully
       FROM payments_transactions WHERE state = 'SUCCESS';
