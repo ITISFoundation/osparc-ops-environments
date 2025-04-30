@@ -10,7 +10,7 @@ services:
       - /dev/disk/:/dev/disk:ro
 
   grafana:
-    dns: 9.9.9.9
+    dns: 8.8.8.8
     deploy:
       placement:
         constraints:
@@ -27,3 +27,8 @@ services:
       placement:
         constraints:
           - node.labels.prometheus==true
+
+configs:
+  prometheus_config:
+    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.yml
