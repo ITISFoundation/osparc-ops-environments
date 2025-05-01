@@ -631,13 +631,13 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
-        - traefik.http.services.${PREFIX_STACK_NAME}_rabbit.loadbalancer.server.port=15672
-        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/${PREFIX_STACK_NAME}_rabbit`)
-        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.entrypoints=https
-        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.tls=true
-        - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_replace_regex.replacepathregex.regex=^/${PREFIX_STACK_NAME}_rabbit/(.*)$$
-        - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit.middlewares=${PREFIX_STACK_NAME}_rabbit_replace_regex@swarm, ops_gzip@swarm
+        - traefik.http.services.${PREFIX_STACK_NAME}_rabbit_console.loadbalancer.server.port=15672
+        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit_console.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/${PREFIX_STACK_NAME}_rabbit`)
+        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit_console.entrypoints=https
+        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit_console.tls=true
+        - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_console_replace_regex.replacepathregex.regex=^/${PREFIX_STACK_NAME}_rabbit/(.*)$$
+        - traefik.http.middlewares.${PREFIX_STACK_NAME}_rabbit_console_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit_console.middlewares=${PREFIX_STACK_NAME}_rabbit_console_replace_regex@swarm, ops_gzip@swarm
       update_config:
         parallelism: 2
         order: start-first
@@ -931,13 +931,64 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
+        # dynamic-scheduler service
         - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.server.port=8000
         - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.sticky.cookie=true
         - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.sticky.cookie.name=sticky_session
+        # dynamic-scheduler GUI Router
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/dynamic-scheduler`)
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.entrypoints=https
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.tls=true
         - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler.middlewares=ops_gzip@swarm, ops_auth@swarm
+        # dynamic-scheduler API Router
+        - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler_api.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/dynamic-scheduler/v1`)
+        - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler_api.entrypoints=https
+        - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler_api.tls=true
+        - traefik.http.middlewares.dynamic_scheduler_api_replace_regex.replacepathregex.regex=^/dynamic-scheduler/v1(.*)$$
+        - traefik.http.middlewares.dynamic_scheduler_api_replace_regex.replacepathregex.replacement=/v1$${1}
+        - traefik.http.routers.${PREFIX_STACK_NAME}_dynamic_scheduler_api.middlewares=ops_gzip@swarm, ops_auth@swarm, dynamic_scheduler_api_replace_regex
+
+  notifications:
+    networks:
+      - monitored
+    deploy:
+      replicas: ${SIMCORE_NOTIFICATIONS_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      resources:
+        limits:
+          memory: 500M
+          cpus: '0.5'
+        reservations:
+          memory: 50M
+          cpus: '0.1'
+
+  docker-api-proxy:
+    networks:
+      - monitored
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      placement:
+        constraints:
+          - node.role==manager
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "0.5"
+          memory: "512M"
 
 volumes:
   rabbit_data:

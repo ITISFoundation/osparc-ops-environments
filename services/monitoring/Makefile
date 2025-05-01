@@ -176,6 +176,7 @@ grafana/assets: ${REPO_CONFIG_LOCATION}
 .PHONY: grafana-import
 grafana-import: grafana/assets ## Imports the remote grafana dashboards and datasources FROM YOUR LOCAL MACHINE
 	@pushd ${REPO_BASE_DIR}/services/monitoring/grafana && \
+	rm -r ./terraform/.terraform 2>/dev/null | true && \
 	$(MAKE) terraform-plan && \
 	$(MAKE) terraform-apply; \
 	popd > /dev/null

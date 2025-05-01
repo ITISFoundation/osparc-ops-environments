@@ -6,7 +6,7 @@
       container_name: /.*director-v2.*/ AND "could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 600000
-    event_limit: 1
+    event_limit: 1000
     execute_every_ms: 600000
     group_by: []
     series: []
@@ -46,7 +46,7 @@
       "lock is no longer owned. This is unexpected and requires investigation" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 3600000
-    event_limit: 1
+    event_limit: 1000
     execute_every_ms: 3600000
     group_by: []
     series: []
@@ -85,7 +85,7 @@
       "LockNotOwnedError" AND NOT container_name:/.*graylog_graylog.*/
     query_parameters: []
     search_within_ms: 3600000
-    event_limit: 1
+    event_limit: 1000
     execute_every_ms: 3600000
     group_by: []
     series: []
@@ -125,7 +125,7 @@
     query_parameters: []
     search_within_ms: 86400000
     execute_every_ms: 86400000
-    event_limit: 1
+    event_limit: 1000
     group_by: []
     series: []
     conditions: {}
@@ -157,7 +157,7 @@
       query: log_service:/.+payments/ AND (log_level:ERROR OR log_level:WARNING)
       query_parameters: []
       search_within_ms: 600000
-      event_limit: 1
+      event_limit: 1000
       execute_every_ms: 600000
       group_by: []
       series: []
