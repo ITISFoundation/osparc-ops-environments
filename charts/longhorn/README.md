@@ -1,19 +1,24 @@
-# Exaplaining misc. questions regarding Longhorn (LH)
+# Longhorn (LH) Knowledge Base
+
+### Can LH be used for critical services (e.g. Database)
+
+As of now we shall avoid using LH for critical services. Instead we should refer to a more reliable and easy-to-maintain solution (e.g. Application-Level replication [Postgres Operators], S3, ...)
+
+LH is using networking for keeping replicas in sync and IO-heavy workloads may overload it easily leading to unpredictable consequances. Before we manage to extensively monitor LH and scale properly on demand, we shall not use it for critical services or IO-heave services
 
 ### How does LH decide which node's disk to use as storage
 
-There are 3 ways (could be combined together) https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/
-* storag tag feature https://longhorn.io/docs/1.8.1/nodes-and-volumes/nodes/storage-tags/
-* node selectors that will restrict LH to certain nodes only (and disks on these nodes)
-* using https://longhorn.io/docs/archives/1.2.2/references/settings/#create-default-disk-on-labeled-nodes
-
-### Will LH pick up disks from a newly-added node
-
-Use 2 articles below to get detailed information
-* https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/
-* https://longhorn.io/docs/1.8.1/nodes-and-volumes/nodes/default-disk-and-node-config/
-
-### Running LH on subset of Nodes (via nodeSelectors) has a limitation
-
-The workloads that use PV (from LH) can only run on the nodes where LH runs. Check the Result description in the article below:
+It depends on configuration. There are 3 possibilities:
 * https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/#deploy-longhorn-components-only-on-a-specific-set-of-nodes
+
+### Will LH pick up storage from a newly-added node
+
+By default LH will use storage on all (newly created as well) Nodes where it runs. If `createDefaultDiskLabeledNodes` is configured, then it depends on label of the node
+
+https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/#deploy-longhorn-components-only-on-a-specific-set-of-nodes
+
+### Can workloads be run on nodes where there is no LH
+
+They can as long as LH is not bound to specific nodes via `nodeSelector` or `systemManagedComponentsNodeSelector` settings. If LH is configure to run on specific nodes, then workloads can only be run on these nodes only.
+
+Source: https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/#deploy-longhorn-components-only-on-a-specific-set-of-nodes
