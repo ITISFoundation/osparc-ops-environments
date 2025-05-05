@@ -28,6 +28,9 @@ defaultSettings:
   # let replicas to be scheduled on the same node
   replicaSoftAntiAffinity: false
 
+  # we always use dedicated disks. 5% is a good value
+  storageReservedPercentageForDefaultDisk: 5
+
 persistence:
   # use only for non-critical ops workloads
   # for critical workloads (e.g. database)
