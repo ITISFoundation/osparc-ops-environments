@@ -30,3 +30,16 @@ Workloads can run on nodes without LH as long as LH is not restricted to specifi
 Note: There is an [ongoing bug](https://github.com/longhorn/longhorn/discussions/7312#discussioncomment-13030581) where LH will raise warnings when workloads run on nodes without LH. However, it will still function correctly.
 
 Source: https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/
+
+### Adding new volumes to (PVs that rely on) LH
+
+Monitor carefully whether LH is capable of handling new volumes. Test the new volume under load (when many read/write operations occur) and ensure LH does not fail due to insufficient resource capacities (e.g., network or CPU). YOu can also consider LH's performance section from this Readme.
+
+LH's minimum recommended resource requirements:
+* https://longhorn.io/docs/1.8.1/best-practices/#minimum-recommended-hardware
+
+### LH's performance
+
+Insights into LH's performance:
+* https://longhorn.io/blog/performance-scalability-report-aug-2020/
+* https://github.com/longhorn/longhorn/wiki/Performance-Benchmark
