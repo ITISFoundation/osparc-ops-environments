@@ -40,6 +40,9 @@ persistence:
   # https://longhorn.io/docs/1.8.1/best-practices/#io-performance
   defaultDataLocality: best-effort
   defaultClassReplicaCount: 2
+
+  # minimum volume size is 300Mi
+  # https://github.com/longhorn/longhorn/issues/8488
   defaultFsType: xfs
 
 resources: # https://longhorn.io/docs/1.8.1/best-practices/#minimum-recommended-hardware
