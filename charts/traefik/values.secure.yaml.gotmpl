@@ -39,6 +39,7 @@ extraObjects:
   spec:
     basicAuth:
       secret: traefik-authorized-users  # https://doc.traefik.io/traefik/middlewares/http/basicauth/#users
+
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
@@ -48,6 +49,17 @@ extraObjects:
     stripPrefix:
       prefixes:
       - /portainer
+
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: longhorn-strip-prefix
+    namespace: {{.Release.Namespace}}
+  spec:
+    stripPrefix:
+      prefixes:
+      - /longhorn
+
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
