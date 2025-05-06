@@ -40,8 +40,11 @@ Monitor carefully whether LH is capable of handling new volumes. Test the new vo
 LH's minimum recommended resource requirements:
 * https://longhorn.io/docs/1.8.1/best-practices/#minimum-recommended-hardware
 
-### LH's performance
+### LH's performance / resources
 
 Insights into LH's performance:
 * https://longhorn.io/blog/performance-scalability-report-aug-2020/
 * https://github.com/longhorn/longhorn/wiki/Performance-Benchmark
+
+Resource requirements:
+* https://github.com/longhorn/longhorn/issues/1691
