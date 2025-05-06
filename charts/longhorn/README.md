@@ -2,7 +2,9 @@
 
 ### Can LH be used for critical services (e.g., Databases)?
 
-As of now, we should avoid using LH for critical services. Instead, we should rely on more reliable and easier-to-maintain solutions (e.g., application-level replication [Postgres Operators], S3, etc.).
+No (as of now). , we should not use it for volumes of critical services.
+
+As of now, we should avoid using LH for critical services. Instead, we should rely on easier-to-maintain solutions (e.g., application-level replication [Postgres Operators], S3, etc.). Once we get hands-on experience, extensive monitoring and ability to scale LH, we can consider using it for critical services.
 
 LH uses networking to keep replicas in sync, and IO-heavy workloads may easily overload it, leading to unpredictable consequences. Until we can extensively monitor LH and scale it properly on demand, it should not be used for critical or IO-heavy services.
 
@@ -33,7 +35,7 @@ Source: https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/
 
 ### Adding new volumes to (PVs that rely on) LH
 
-Monitor carefully whether LH is capable of handling new volumes. Test the new volume under load (when many read/write operations occur) and ensure LH does not fail due to insufficient resource capacities (e.g., network or CPU). YOu can also consider LH's performance section from this Readme.
+Monitor carefully whether LH is capable of handling new volumes. Test the new volume under load (when many read/write operations occur) and ensure LH does not fail due to insufficient resource capacities (e.g., network or CPU). You can also consider LH's performance section from this Readme.
 
 LH's minimum recommended resource requirements:
 * https://longhorn.io/docs/1.8.1/best-practices/#minimum-recommended-hardware
