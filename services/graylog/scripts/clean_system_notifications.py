@@ -1,9 +1,3 @@
-import json
-import warnings
-from typing import Optional
-
-import requests
-
 #!/usr/bin/env -S uv --quiet run --script
 # /// script
 # requires-python = ">=3.13"
@@ -12,6 +6,11 @@ import requests
 #   "requests",
 # ]
 # ///
+import json
+import warnings
+from typing import Optional
+
+import requests
 import typer
 from requests.auth import HTTPBasicAuth
 
