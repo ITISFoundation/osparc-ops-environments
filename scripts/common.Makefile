@@ -274,7 +274,7 @@ $(REPO_BASE_DIR)/.venv/bin/activate:
 	$(REPO_BASE_DIR)/.venv/bin/pip3 install --upgrade pip wheel setuptools
 	$(REPO_BASE_DIR)/.venv/bin/pip3 install jinja2 j2cli[yaml] typer
 	@echo "To activate the venv, execute 'source $(REPO_BASE_DIR)/.venv/bin/activate'"
-PHONY: .venv
+.PHONY: .venv
 .venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
 .PHONY: venv
 venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
@@ -296,6 +296,18 @@ define jinja
 endef
 
 endif
+
+# Check that given variables are set and all have non-empty values,
+# die with an error otherwise.
+#
+# Params:
+#   1. Variable name(s) to test.
+#   2. (optional) Error message to print.
+guard-%:
+	@ if [ "${${*}}" = "" ]; then \
+		echo "Argument '$*' is missing. TIP: make <rule> $*=<value>"; \
+		exit 1; \
+	fi
 
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default

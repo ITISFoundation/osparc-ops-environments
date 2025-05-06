@@ -75,5 +75,5 @@ assets: ${REPO_CONFIG_LOCATION}
 	fi; \
 	rm -rf $(REPO_BASE_DIR)/services/monitoring/grafana/assets || true; \
 	mkdir -p $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
-	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets; \
 	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/../shared/assets/grafana $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared; \
+	cp -r $(shell dirname ${REPO_CONFIG_LOCATION})/assets/grafana/* $(REPO_BASE_DIR)/services/monitoring/grafana/assets/shared/;

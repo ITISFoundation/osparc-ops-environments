@@ -56,12 +56,20 @@ services:
       - target: 5433
         published: 5433
         mode: host
+    configs:
+      - source: traefik_dynamic_config.yml
+        target: /etc/traefik/dynamic_conf.yml
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       # mode: global
       replicas: ${OPS_TRAEFIK_REPLICAS}
+      update_config:
+        order: stop-first
+        delay: 20s
+        failure_action: rollback
+        parallelism: 1
       resources:
         limits:
           memory: 2048M
@@ -97,7 +105,8 @@ services:
         # via https://community.traefik.io/t/v2-2-8-global-redirect-www-to-non-www-with-http-to-https/7428
         # see also: https://community.traefik.io/t/get-a-valid-ssl-certificate-for-www-domains-via-traefik-and-lets-encrypt/2023
         # Global redirection: https (www.) to https
-        - traefik.http.routers.www-catchall.rule={{ DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE.strip("\"") }}
+        # why .strip("\"'") ? --> https://github.com/kolypto/j2cli/issues/77
+        - traefik.http.routers.www-catchall.rule={{ DEPLOYMENT_FQDNS_WWW_CAPTURE_TRAEFIK_RULE.strip("\"'") }}
         - traefik.http.routers.www-catchall.priority=100000
         - traefik.http.routers.www-catchall.entrypoints=https,http
         - traefik.http.routers.www-catchall.tls=true
@@ -211,3 +220,8 @@ networks:
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
+
+configs:
+  traefik_dynamic_config.yml:
+    name: ${STACK_NAME}_traefik_dynamic_config_{{ "./traefik_dynamic_config.yml" | sha256file | substring(0,10) }}
+    file: ./traefik_dynamic_config.yml
