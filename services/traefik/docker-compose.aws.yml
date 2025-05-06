@@ -23,6 +23,7 @@ services:
       - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.https.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.smtp.address=:25"
+      - "--entryPoints.rabbit.address=:5672"
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
       - "--core.defaultRuleSyntax=v2"
@@ -34,6 +35,10 @@ services:
       - "--entryPoints.https.forwardedHeaders.insecure"
       - "--providers.file.directory=/etc/traefik/"
       - "--providers.file.watch=true"
+    ports:
+      - target: 5672
+        published: 5672
+        mode: host
     environment:
       - AWS_ACCESS_KEY_ID=${ROUTE53_DNS_CHALLANGE_ACCESS_KEY}
       - AWS_SECRET_ACCESS_KEY=${ROUTE53_DNS_CHALLANGE_SECRET_KEY}
@@ -44,13 +49,6 @@ services:
           - node.labels.traefik==true
     volumes:
       - /etc/traefik_certs:/etc/traefik_certs
-    configs:
-      - source: traefik_dynamic_config.yml
-        target: /etc/traefik/dynamic_conf.yml
   whoami:
     dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
       8.8.8.8
-
-configs:
-  traefik_dynamic_config.yml:
-    file: ./traefik_dynamic_config.yml
