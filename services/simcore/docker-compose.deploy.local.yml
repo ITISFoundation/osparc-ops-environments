@@ -96,10 +96,8 @@ services:
       - "--providers.swarm.refreshSeconds=1"
       - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
-      - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
+      - "--tracing.serviceName=simcore-traefik"
+      - "--tracing.otlp.http.endpoint=http://otel-collector:4318/v1/traces"
     deploy:
       labels:
         # oSparc postgres
