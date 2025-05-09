@@ -6,6 +6,16 @@ services:
         constraints:
           - node.labels.grafana==true
   prometheuscatchall:
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention=${MONITORING_PROMETHEUS_RETENTION}"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
+      - "--web.route-prefix=/"
+      - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
+      - "--enable-feature=exemplar-storage"
     deploy:
       placement:
         constraints:
