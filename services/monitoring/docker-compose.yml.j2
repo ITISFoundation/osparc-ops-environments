@@ -25,7 +25,7 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.55.1
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -71,7 +71,7 @@ services:
           cpus: "0.2"
   prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.55.1
     volumes:
       - prometheus_data_federation:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -218,7 +218,7 @@ services:
           cpus: "0.1"
 
   grafana:
-    image: grafana/grafana-oss:11.2.4
+    image: grafana/grafana-oss:12.0.0
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -370,7 +370,7 @@ services:
           memory: 32M
           cpus: "0.1"
   tempo:
-    image: grafana/tempo:2.6.1
+    image: grafana/tempo:2.7.2
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
     configs:
       - source: tempo_config

@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   agent:
-    image: portainer/agent:2.20.3 # Needs to match portainer-ce version
+    image: portainer/agent:2.27.6 # Needs to match portainer-ce version
     init: true
     environment:
       # REQUIRED: Should be equal to the service name prefixed by "tasks." when
@@ -26,7 +26,7 @@ services:
           memory: 50M
 
   portainer:
-    image: portainer/portainer-ce:2.20.3
+    image: portainer/portainer-ce:2.27.6
     init: true
     command: >
       -H tcp://tasks.agent:9001 --tlsskipverify
