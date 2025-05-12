@@ -4,45 +4,7 @@ services:
   traefik:
     image: "traefik:v3.1.2@sha256:ec1a82940b8e00eaeef33fb4113aa1d1573b2ebb6440e10c023743fe96f08475"
     init: true
-    command:
-      - "--api=true"
-      - "--api.dashboard=true"
-      - "--accesslog=true"
-      - "--accesslog.format=json"
-      - "--accesslog.fields.defaultmode=keep"
-      - "--accesslog.fields.names.ClientUsername=keep"
-      - "--accesslog.fields.headers.defaultmode=keep"
-      - "--accesslog.fields.headers.names.User-Agent=keep"
-      - "--accesslog.fields.headers.names.Authorization=drop"
-      - "--accesslog.fields.headers.names.Content-Type=keep"
-      - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
-      - "--metrics.prometheus=true"
-      - "--metrics.prometheus.addEntryPointsLabels=true"
-      - "--metrics.prometheus.addServicesLabels=true"
-      - "--entryPoints.metrics.address=:8082"
-      - "--metrics.prometheus.entryPoint=metrics"
-      - "--entryPoints.http.address=:80"
-      - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entrypoints.http.http.redirections.entrypoint.to=https"
-      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
-      - '--entryPoints.postgres.address=:5432'
-      - '--entryPoints.postgres2.address=:5433'
-      - "--entryPoints.https.address=:443"
-      - "--entryPoints.https.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.exposedByDefault=false"
-      # so that internal services are not picked up
-      - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
-      - "--core.defaultRuleSyntax=v2"
-      - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
+    dns: 8.8.8.8
     ports:
       - target: 80
         published: 80
@@ -62,6 +24,7 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/traefik_certs:/etc/traefik_certs
     deploy:
       # mode: global
       replicas: ${OPS_TRAEFIK_REPLICAS}
@@ -79,6 +42,7 @@ services:
           cpus: '1.000'
       placement:
         constraints:
+          - node.labels.traefik==true
           - node.role == manager
       labels:
         - traefik.enable=true
@@ -183,12 +147,15 @@ services:
         - traefik.http.routers.{{ from_domain_no_dots }}.tls=true
 
 {% endfor %}
-
+    env_file:
+        - .env
     networks:
       public: null
       monitored: null
   whoami:
     image: "containous/whoami"
+    dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
+            8.8.8.8
     deploy:
       placement:
         constraints:
