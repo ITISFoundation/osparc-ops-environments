@@ -41,6 +41,10 @@ storage:
       insecure: false
       tls_insecure_skip_verify: true
 
+querier:
+  frontend_worker:
+    frontend_address: localhost:9095
+
 overrides:
   defaults:
     metrics_generator:
