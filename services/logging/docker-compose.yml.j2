@@ -1,0 +1,198 @@
+version: "3.8"
+services:
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongodb:
+    image: mongo:6.0.6
+    init: true
+    volumes:
+      # data persistency
+      - mongo_data:/data/db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 1.2G
+          cpus: "1"
+        reservations:
+          memory: 300M
+          cpus: "0.1"
+    networks:
+      graylog:
+        aliases:
+          - mongo # needed because of graylog configuration
+
+  # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    init: true
+    volumes:
+      # data persistency
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2"
+        reservations:
+          memory: 1G
+          cpus: "0.1"
+    networks:
+      graylog:
+  # Graylog: https://hub.docker.com/r/graylog/graylog/
+  graylog:
+    image: graylog/graylog:6.0.5
+    init: true
+    # user: "1000:1001"
+    configs:
+    - source: graylog_config
+      target: /files/osparc-custom-content-pack-v2.json
+    volumes:
+      # Mount local configuration directory into Docker container
+      # - graylog_config:/usr/share/graylog/data/config
+      # data persistency
+      - graylog_journal:/usr/share/graylog/data/journal
+    env_file:
+      - .env
+    environment:
+      # CHANGE ME (must be at least 16 characters)!
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
+      # Username: admin
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
+      - GRAYLOG_HTTP_EXTERNAL_URI=${GRAYLOG_HTTP_EXTERNAL_URI}
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200,
+    networks:
+      public:
+      monitoring:
+      graylog:
+        aliases:
+          - graylog
+    ports:
+    - 12201:12201/udp
+    - 12202:12202/udp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "2.00"
+          memory: 5G
+        reservations:
+          cpus: "0.1"
+          memory: 1G
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # direct access through port
+        - traefik.http.services.graylog.loadbalancer.server.port=9000
+        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)
+        - traefik.http.routers.graylog.entrypoints=https
+        - traefik.http.routers.graylog.tls=true
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
+        - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
+  fluentd:
+    image: itisfoundation/fluentd:v1.16.8-1.0
+    configs:
+      - source: fluentd_config
+        target: /fluentd/etc/fluent.conf
+    environment:
+      - GRAYLOG_HOST=graylog
+      - GRAYLOG_PORT=12201
+      - LOKI_URL=http://loki:3100
+      - FLUENTD_HOSTNAME={% raw %}{{.Node.Hostname}}{% endraw %}
+    ports:
+      - "24224:24224/tcp"
+    deploy:
+      #mode: global  # Run on all nodes
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    networks:
+      - monitoring
+      - graylog
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:24220/api/plugins"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  loki:
+    image: grafana/loki:3.5.0
+    configs:
+      - source: loki_config
+        target: /etc/loki/loki.yaml
+    command: -config.file=/etc/loki/loki.yaml
+    deploy:
+      placement:
+        constraints: []
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://0.0.0.0:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+volumes:
+  loki-data:
+  mongo_data:
+  elasticsearch_data:
+  graylog_journal:
+
+networks:
+  graylog:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitoring:
+    external: true
+    name: ${MONITORED_NETWORK}
+configs:
+  graylog_config:
+    name: ${STACK_NAME}_graylog_config_{{ "./data/contentpacks/osparc-custom-content-pack-v2.json" | sha256file | substring(0,10) }}
+    file: ./data/contentpacks/osparc-custom-content-pack-v2.json
+  fluentd_config:
+    name: ${STACK_NAME}_fluentd_config_{{ "./fluentd/fluent.conf" | sha256file | substring(0,10) }}
+    file: ./fluentd/fluent.conf
+  loki_config:
+    name: ${STACK_NAME}_loki_config_{{ "./loki.yaml" | sha256file | substring(0,10) }}
+    file: ./loki.yaml
