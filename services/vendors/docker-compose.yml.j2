@@ -26,7 +26,7 @@ services:
         delay: 10s
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.vendor_manual.loadbalancer.server.port=${VENDOR_MANUAL_PORT}
         - traefik.http.routers.vendor_manual.entrypoints=https
         - traefik.http.routers.vendor_manual.tls=true

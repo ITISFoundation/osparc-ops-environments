@@ -17,7 +17,7 @@ services:
           - node.labels.ops==true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.jaeger.loadbalancer.server.port=16686
         - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https

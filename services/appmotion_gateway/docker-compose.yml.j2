@@ -13,7 +13,7 @@ services:
             replicas: 0
             labels:
                 - traefik.enable=true
-                - traefik.docker.network=${PUBLIC_NETWORK}
+                - traefik.swarm.network=${PUBLIC_NETWORK}
                 - traefik.http.services.adminer_appmotion_gateway.loadbalancer.server.port=8080
                 - traefik.http.routers.adminer_appmotion_gateway.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer/appmotion_gateway`)
                 - traefik.http.routers.adminer_appmotion_gateway.entrypoints=https
@@ -75,7 +75,7 @@ services:
             replicas: 1
             labels:
                 - traefik.enable=true
-                - traefik.docker.network=${PUBLIC_NETWORK}
+                - traefik.swarm.network=${PUBLIC_NETWORK}
                 - traefik.http.routers.appmotion_gateway.rule=${DEPLOYMENT_FQDNS_APPMOTION_CAPTURE_TRAEFIK_RULE}
                 - traefik.http.routers.appmotion_gateway.entrypoints=https
                 - traefik.http.routers.appmotion_gateway.tls=true
