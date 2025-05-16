@@ -18,3 +18,18 @@ variable "PROMETHEUS_CATCHALL_URL" {
   description = "Prometheus Catchall URL"
   sensitive   = false
 }
+
+variable "AWS_DEFAULT_REGION" {
+  description = "AWS Default Region"
+  sensitive   = false
+}
+
+variable "AWS_GRAFANA_CLOUDWATCH_DATASOURCE_USER_ACCESS_KEY" {
+  description = "AWS Grafana Cloudwatch User Access Key"
+  sensitive   = true
+}
+
+variable "AWS_GRAFANA_CLOUDWATCH_DATASOURCE_USER_SECRET_KEY" {
+  description = "AWS Grafana Cloudwatch User Secret Key"
+  sensitive   = true
+}
