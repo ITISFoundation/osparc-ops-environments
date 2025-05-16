@@ -23,3 +23,18 @@ resource "grafana_data_source" "tempo" {
   basic_auth_enabled = false
   is_default         = false
 }
+
+resource "grafana_data_source" "cloudwatch" {
+  type = "cloudwatch"
+  name = "cloudwatch"
+
+  json_data_encoded = jsonencode({
+    defaultRegion = var.AWS_DEFAULT_REGION
+    authType      = "keys"
+  })
+
+  secure_json_data_encoded = jsonencode({
+    accessKey = var.AWS_GRAFANA_CLOUDWATCH_DATASOURCE_USER_ACCESS_KEY
+    secretKey = var.AWS_GRAFANA_CLOUDWATCH_DATASOURCE_USER_SECRET_KEY
+  })
+}

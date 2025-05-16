@@ -27,7 +27,7 @@ terraform/plan.cache:
 	@exit 1
 
 .PHONY: terraform-plan
-terraform-plan: $(REPO_CONFIG_LOCATION) $(TF_STATE_FILE) ensure-grafana-online ## terraform plan
+terraform-plan: $(REPO_CONFIG_LOCATION) $(TF_STATE_FILE) ensure-grafana-online assets ## terraform plan
 	# terraform plan
 	@set -a; source $<; set +a; \
 	terraform -chdir=./terraform plan -out=plan.cache
