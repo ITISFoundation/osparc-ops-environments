@@ -40,10 +40,8 @@ services:
       - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
       - "--core.defaultRuleSyntax=v2"
-      - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
+      - "--tracing.serviceName=ops-traefik"
+      - "--tracing.otlp.http.endpoint=http://otel-collector:4318/v1/traces"
       - "--providers.file.directory=/etc/traefik/"
       - "--providers.file.watch=true"
     networks:
