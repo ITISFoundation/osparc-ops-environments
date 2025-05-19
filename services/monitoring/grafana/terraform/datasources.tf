@@ -25,6 +25,9 @@ resource "grafana_data_source" "tempo" {
 }
 
 resource "grafana_data_source" "cloudwatch" {
+  # This resource is only created if the AWS Deployments
+  count = var.IS_AWS_DEPLOYMENT ? 1 : 0
+
   type = "cloudwatch"
   name = "cloudwatch"
   uid  = "fem2inr5v64n4c"
@@ -35,7 +38,7 @@ resource "grafana_data_source" "cloudwatch" {
   })
 
   secure_json_data_encoded = jsonencode({
-    accessKey = var.AWS_GRAFANA_CLOUDWATCH_DATASOURCE_USER_ACCESS_KEY
-    secretKey = var.AWS_GRAFANA_CLOUDWATCH_DATASOURCE_USER_SECRET_KEY
+    accessKey = var.GRAFANA_CLOUDWATCH_DATASOURCE_USER_ACCESS_KEY
+    secretKey = var.GRAFANA_CLOUDWATCH_DATASOURCE_USER_SECRET_KEY
   })
 }
