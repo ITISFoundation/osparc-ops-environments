@@ -27,6 +27,7 @@ resource "grafana_data_source" "tempo" {
 resource "grafana_data_source" "cloudwatch" {
   type = "cloudwatch"
   name = "cloudwatch"
+  uid  = "fem2inr5v64n4c"
 
   json_data_encoded = jsonencode({
     defaultRegion = var.AWS_DEFAULT_REGION
