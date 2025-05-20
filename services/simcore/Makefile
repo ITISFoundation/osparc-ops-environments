@@ -15,7 +15,7 @@ $(SIMCORE_REPO_DIR):
 	$(error $@ repo not found. Please clone this repo manually)
 
 .PHONY: stack_with_prefix.yml
-stack_with_prefix.yml: $(SIMCORE_REPO_DIR) $(REPO_CONFIG_LOCATION)
+stack_with_prefix.yml: $(SIMCORE_REPO_DIR) $(REPO_CONFIG_LOCATION) ## generate stack file with prefix
 	# generating $@
 	@$(REPO_BASE_DIR)/scripts/deployments/prepare_simcore_stack.bash
 	@mv $(REPO_BASE_DIR)/scripts/deployments/stack_with_prefix.yml $@
