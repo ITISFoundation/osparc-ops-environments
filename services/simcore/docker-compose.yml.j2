@@ -348,7 +348,7 @@ services:
       labels:
         # internal traefik
         - traefik.enable=true
-        - traefik.docker.network=${SWARM_STACK_NAME}_default
+        - traefik.swarm.network=${SWARM_STACK_NAME}_default
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
         - traefik.http.routers.${SWARM_STACK_NAME}_storage.rule=${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}
         - traefik.http.routers.${SWARM_STACK_NAME}_storage.entrypoints=http
@@ -538,7 +538,7 @@ services:
           - node.labels.simcore==true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.${PREFIX_STACK_NAME}_dask_scheduler.loadbalancer.server.port=8787
         - traefik.http.routers.${PREFIX_STACK_NAME}_dask_scheduler.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/${PREFIX_STACK_NAME}_dask`)
         - traefik.http.routers.${PREFIX_STACK_NAME}_dask_scheduler.entrypoints=https
@@ -630,7 +630,7 @@ services:
       replicas: ${RABBIT_SELF_HOSTED_REPLICAS}
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.${PREFIX_STACK_NAME}_rabbit_console.loadbalancer.server.port=15672
         - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit_console.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/${PREFIX_STACK_NAME}_rabbit`)
         - traefik.http.routers.${PREFIX_STACK_NAME}_rabbit_console.entrypoints=https
@@ -724,7 +724,7 @@ services:
       labels:
         - traefik.enable=true
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.tcp.services.${SWARM_STACK_NAME}_postgres.loadBalancer.server.port=5432
         - traefik.tcp.routers.postgres.service=${SWARM_STACK_NAME}_postgres
         - traefik.tcp.routers.postgres.entrypoints=postgres
@@ -763,7 +763,7 @@ services:
         - prometheus-port=8082
         # external traefik
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # oSparc web
         - traefik.http.services.${SWARM_STACK_NAME}_simcore_http.loadbalancer.server.port=80
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.entrypoints=https
@@ -930,7 +930,7 @@ services:
           cpus: '0.1'
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # dynamic-scheduler service
         - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.server.port=8000
         - traefik.http.services.${PREFIX_STACK_NAME}_dynamic_scheduler.loadbalancer.sticky.cookie=true

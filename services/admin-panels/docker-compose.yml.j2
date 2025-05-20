@@ -87,7 +87,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.adminpanels.loadbalancer.server.port=8888
         - traefik.http.routers.adminpanels.rule=Host(`${ADMINPANELS_DOMAIN}`)
         - traefik.http.routers.adminpanels.entrypoints=https

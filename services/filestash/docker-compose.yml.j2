@@ -13,7 +13,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.filestash.loadbalancer.server.port=8334
         - traefik.http.routers.filestash.rule=Host(`${FILESTASH_DOMAIN}`)
         - traefik.http.routers.filestash.entrypoints=https
