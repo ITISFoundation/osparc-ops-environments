@@ -14,6 +14,16 @@ resource "grafana_data_source" "prometheuscatchall" {
   basic_auth_enabled = false
   is_default         = false
   uid                = "RmZEr52nz"
+
+  json_data_encoded = jsonencode({
+    exemplarTraceIdDestinations = [
+      {
+        datasourceUid = "tempo"
+        name          = "TraceID"
+      }
+    ]
+  })
+
 }
 
 resource "grafana_data_source" "tempo" {
