@@ -22,7 +22,7 @@ services:
         window: 60s
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access without path (necessary for minio client it does not like /path)
         - traefik.http.services.minio9000.loadbalancer.server.port=9000
         - traefik.http.services.minio9000.loadbalancer.healthcheck.path=/minio/health/ready
