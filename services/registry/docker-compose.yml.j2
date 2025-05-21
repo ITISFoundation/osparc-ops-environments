@@ -53,7 +53,7 @@ services:
           cpus: '0.1'
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.registry.loadbalancer.server.port=5000
         - traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)

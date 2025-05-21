@@ -44,6 +44,7 @@ services:
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
       - "--web.route-prefix=/"
       - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
+      - "--enable-feature=exemplar-storage"
       #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
     networks:
       - monitored
@@ -52,7 +53,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheuscatchall.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
         - traefik.http.routers.prometheuscatchall.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
@@ -98,7 +99,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheusfederation.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
         - traefik.http.routers.prometheusfederation.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheusfederation`)
@@ -232,7 +233,7 @@ services:
       #  condition: on-failure
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.grafana.loadbalancer.server.port=3000
         - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
@@ -380,7 +381,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.tempo.loadbalancer.server.port=9095
         - traefik.http.routers.tempo.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/tempo`)
         - traefik.http.routers.tempo.priority=10

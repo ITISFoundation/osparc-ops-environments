@@ -26,7 +26,7 @@ services:
           - node.labels.ops==true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule=Host(`{{VENDOR_MANUAL_SUBDOMAIN_PREFIX}}.{{j2item}}`) || (Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`,`{subhost:[a-zA-Z0-9-]+}.services.{{j2item}}`) && PathPrefix(`/`))
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.tls=true
@@ -50,7 +50,7 @@ services:
           - node.labels.ops==true
       labels:
           - traefik.enable=true
-          - traefik.docker.network=${PUBLIC_NETWORK}
+          - traefik.swarm.network=${PUBLIC_NETWORK}
           - traefik.http.routers.nginx_api.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
           - traefik.http.routers.nginx_api.tls=true
           - traefik.http.routers.nginx_api.rule=${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}
