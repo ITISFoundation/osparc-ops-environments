@@ -3,7 +3,7 @@
   priority: 3
   config:
     query: >
-      container_name: /.*director-v2.*/ AND "could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network" AND NOT container_name:/.*graylog_graylog.*/
+      container_name: /.*director-v2.*/ AND "could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network" AND NOT container_name:/.*logging_graylog.*/
     query_parameters: []
     search_within_ms: 600000
     event_limit: 1000
@@ -43,7 +43,7 @@
   priority: 2
   config:
     query: >
-      "lock is no longer owned. This is unexpected and requires investigation" AND NOT container_name:/.*graylog_graylog.*/
+      "lock is no longer owned. This is unexpected and requires investigation" AND NOT container_name:/.*logging_graylog.*/
     query_parameters: []
     search_within_ms: 3600000
     event_limit: 1000
@@ -82,7 +82,7 @@
   priority: 2
   config:
     query: >
-      "LockNotOwnedError" AND NOT container_name:/.*graylog_graylog.*/
+      "LockNotOwnedError" AND NOT container_name:/.*logging_graylog.*/
     query_parameters: []
     search_within_ms: 3600000
     event_limit: 1000
@@ -121,7 +121,7 @@
   priority: 3
   config:
     query: >
-      (message:"Traceback (most recent call last):" OR (ERROR AND NOT container_name:/monitoring.*/)) AND NOT container_name:/.*graylog_graylog.*/'
+      (message:"Traceback (most recent call last):" OR (ERROR AND NOT container_name:/monitoring.*/)) AND NOT container_name:/.*logging_graylog.*/'
     query_parameters: []
     search_within_ms: 86400000
     execute_every_ms: 86400000
