@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   jaeger:
-    image: jaegertracing/all-in-one:1.60.0
+    image: jaegertracing/all-in-one:1.68.0
     command: >
       --query.base-path=/jaeger
     init: true
@@ -17,7 +17,7 @@ services:
           - node.labels.ops==true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.jaeger.loadbalancer.server.port=16686
         - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
@@ -33,7 +33,7 @@ services:
           memory: 64M
           cpus: "0.1"
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.105.0
+    image: otel/opentelemetry-collector-contrib:0.123.0
     configs:
       - source: opentelemetry-collector-config
         target: /etc/otel/config.yaml
