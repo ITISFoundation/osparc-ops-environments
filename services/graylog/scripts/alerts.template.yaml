@@ -116,40 +116,6 @@
     grace_period_ms: 0
     backlog_size: 99
   alert: true
-- title: "${MACHINE_FQDN}: Unhandled python exceptions or errors"
-  description: "${MACHINE_FQDN}: Unhandled python exceptions or errors"
-  priority: 3
-  config:
-    query: >
-      (message:"Traceback (most recent call last):" OR (ERROR AND NOT container_name:/monitoring.*/)) AND NOT container_name:/.*graylog_graylog.*/'
-    query_parameters: []
-    search_within_ms: 86400000
-    execute_every_ms: 86400000
-    event_limit: 1000
-    group_by: []
-    series: []
-    conditions: {}
-    type: aggregation-v1
-  field_spec:
-    source:
-      data_type: string
-      providers:
-      - type: template-v1
-        template: "${source.source}"
-        require_values: false
-    container_name:
-      data_type: string
-      providers:
-      - type: template-v1
-        template: "${source.container_name}"
-        require_values: false
-  key_spec:
-    - source
-    - container_name
-  notification_settings:
-    grace_period_ms: 0
-    backlog_size:
-  alert: true
 - title: "${MACHINE_FQDN}: Payments service errors or warnings"
   description: "${MACHINE_FQDN}: Payments service errors or warnings"
   priority: 2
