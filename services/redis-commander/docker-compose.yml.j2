@@ -24,7 +24,7 @@ services:
           - node.labels.ops == true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.redis.loadbalancer.server.port=8081
         - traefik.http.routers.redis.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/redis`)
         - traefik.http.routers.redis.entrypoints=https

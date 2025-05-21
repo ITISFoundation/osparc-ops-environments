@@ -88,7 +88,7 @@ services:
 
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.graylog.loadbalancer.server.port=9000
         - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)

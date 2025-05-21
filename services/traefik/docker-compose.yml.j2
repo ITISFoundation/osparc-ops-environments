@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   traefik:
-    image: "traefik:v3.1.2@sha256:ec1a82940b8e00eaeef33fb4113aa1d1573b2ebb6440e10c023743fe96f08475"
+    image: "traefik:v3.4.0"
     init: true
     command:
       - "--api=true"
@@ -82,7 +82,7 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
         - traefik.http.middlewares.ops_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
         ####### SECURITY HEADERS --> See https://infosec.mozilla.org/guidelines/web_security
@@ -195,7 +195,7 @@ services:
           - node.labels.traefik==true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.whoami.loadbalancer.server.port=80
         - traefik.http.routers.whoami.rule=Host(`${MONITORING_DOMAIN}`) &&
           PathPrefix(`/whoami`)
