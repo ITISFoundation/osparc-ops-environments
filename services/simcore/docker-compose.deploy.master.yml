@@ -35,6 +35,7 @@ services:
       - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
       - "--entryPoints.postgres.address=:5432"
+      - "--entryPoints.redis.address=:${REDIS_EXTERNAL_PORT}"
       - "--entryPoints.simcore_api.address=:10081"
       - "--entryPoints.simcore_api.forwardedHeaders.insecure"
       - "--entryPoints.simcore_api.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
@@ -56,17 +57,24 @@ services:
           memory: 2048M
           cpus: '2.000'
       labels:
-        # oSparc postgres
+        # postgres
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.entrypoints=postgres
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.tls=false
         - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.service=${SWARM_STACK_NAME}_postgresRoute
         - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432
-        - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+        # redis
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.entrypoints=redis
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.tls=false
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.service=${SWARM_STACK_NAME}_redisRoute
+        - traefik.tcp.services.${SWARM_STACK_NAME}_redisRoute.loadbalancer.server.port=${REDIS_EXTERNAL_PORT}
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.rule=HostSNI(`*`)"
+
   clusters-keeper:
     deploy:
       replicas: 0
+
   payments:
-    # test prior to a big bang release Sept 2023. Can be deleted after (YH, 09 2023)
     deploy:
       replicas: 1
 
@@ -77,3 +85,28 @@ services:
   wb-api-server:
     deploy:
       replicas: 3
+
+  redis:
+    networks:
+      - public
+    deploy:
+      labels:
+        - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.swarm.network=${SWARM_STACK_NAME}_default
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_redis.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.entrypoints=redis
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.tls=false
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.service=${SWARM_STACK_NAME}_redis
+        - traefik.tcp.services.${SWARM_STACK_NAME}_redis.loadbalancer.server.port=${REDIS_PORT}
+
+  rabbit:
+    # rabbit is already exposed via ops traefik
+    # adding one more route to this configuration
+    deploy:
+      labels:
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.entrypoints=rabbitmq
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.tls=false
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.service=${SWARM_STACK_NAME}_rabbitmq
+        - traefik.tcp.services.${SWARM_STACK_NAME}_rabbitmq.loadbalancer.server.port=${RABBIT_PORT}

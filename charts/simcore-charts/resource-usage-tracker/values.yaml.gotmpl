@@ -104,14 +104,14 @@ env:
   - name: POSTGRES_DB
     value: {{ requiredEnv "POSTGRES_DB" }}
   - name: POSTGRES_ENDPOINT
-    value: {{ requiredEnv "POSTGRES_ENDPOINT" }}
+    value: {{ requiredEnv "POSTGRES_EXTERNAL_ENDPOINT" }}
   - name: POSTGRES_HOST
-    value: {{ requiredEnv "POSTGRES_HOST" }}
+    value: {{ requiredEnv "POSTGRES_EXTERNAL_HOST" }}
   - name: POSTGRES_PASSWORD
     value: {{ requiredEnv "POSTGRES_PASSWORD" }}
     sensitive: true
   - name: POSTGRES_PORT
-    value: {{ requiredEnv "POSTGRES_PORT" }}
+    value: {{ requiredEnv "POSTGRES_EXTERNAL_PORT" }}
   - name: POSTGRES_USER
     value: {{ requiredEnv "POSTGRES_USER" }}
   - name: PROMETHEUS_URL
@@ -122,12 +122,12 @@ env:
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}
     sensitive: true
   - name: RABBIT_HOST
-    value: {{ requiredEnv "RABBIT_HOST" }}
+    value: {{ requiredEnv "RABBIT_EXTERNAL_HOST" }}
   - name: RABBIT_PASSWORD
     value: {{ requiredEnv "RABBIT_PASSWORD" }}
     sensitive: true
   - name: RABBIT_PORT
-    value: {{ requiredEnv "RABBIT_PORT" }}
+    value: {{ requiredEnv "RABBIT_EXTERNAL_PORT" }}
   - name: RABBIT_SECURE
     value: {{ requiredEnv "RABBIT_SECURE" }}
   - name: RABBIT_USER
