@@ -58,7 +58,7 @@ scrape_configs:
           - "tasks.staging_director"
           - "tasks.master_director"
         type: "A"
-        port: 8080
+        port: 8000
       - names:
           - "tasks.production_director-v2"
           - "tasks.staging_director-v2"
