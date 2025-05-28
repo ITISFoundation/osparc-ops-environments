@@ -1,0 +1,39 @@
+# https://github.com/elastic/cloud-on-k8s/blob/3.0/deploy/eck-stack/charts/eck-elasticsearch/values.yaml
+eck-elasticsearch:
+  nodeSets:
+    - name: default
+      count: 1
+      config:
+        node.store.allow_mmap: false
+
+      # https://www.elastic.co/docs/deploy-manage/deploy/cloud-on-k8s/volume-claim-templates
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data # do not change without extra configuration
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 20Gi
+            storageClassName:
+      podTemplate:
+        nodeSelector:
+          ops: true
+        spec:
+          containers:
+            - name: elasticsearch
+
+              # List of environment variables to set in the 'elasticsearch' container.
+              # https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+              # env:
+              # - name: "my-env-var"
+              #   value: "my-value"
+
+              resources:
+                limits:
+                  cpu: 1
+                  memory: 2Gi
+                requests:
+                  cpu: 0.5
+                  memory: 512Mi
