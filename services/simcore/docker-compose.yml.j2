@@ -92,7 +92,7 @@ services:
         # NOTE: apiserver does not need sslheader since there is no socket.io
         - traefik.http.routers.${SWARM_STACK_NAME}_api-server.middlewares=${SWARM_STACK_NAME}_gzip@swarm
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.service=${SWARM_STACK_NAME}_api-server
-        - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.rule=PathPrefix(`/dev/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.rule=PathPrefix(`/dev/`) || PathPrefix(`/doc/`) || PathPrefix(`/doc`)
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.entrypoints=simcore_api
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.priority=6
       update_config:
@@ -227,7 +227,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver.middlewares=${SWARM_STACK_NAME}_gzip@swarm, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.service=${SWARM_STACK_NAME}_webserver
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.middlewares=${SWARM_STACK_NAME}_gzip@swarm, ${SWARM_STACK_NAME_NO_HYPHEN}_sslheader
-        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=PathPrefix(`/dev/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.rule=PathPrefix(`/dev/`) || PathPrefix(`/doc/`) || PathPrefix(`/doc`)
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.entrypoints=http
         - traefik.http.routers.${SWARM_STACK_NAME}_webserver_swagger.priority=6
         - traefik.http.middlewares.${SWARM_STACK_NAME_NO_HYPHEN}_webserver_swagger_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
@@ -770,7 +770,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_ratelimit@swarm
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.service=${SWARM_STACK_NAME}_simcore_http
-        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`))
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/doc`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`))
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=3
         # oSparc publicAPI
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.rule=(${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}) && PathPrefix(`/`)
