@@ -1,5 +1,13 @@
+# App-level settings (e.g. elasticsearch, kibana)
+
 # https://github.com/elastic/cloud-on-k8s/blob/3.0/deploy/eck-stack/charts/eck-elasticsearch/values.yaml
+
 eck-elasticsearch:
+  # access internally over plain http
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
   nodeSets:
     - name: default
       count: 1
@@ -16,11 +24,12 @@ eck-elasticsearch:
             resources:
               requests:
                 storage: 20Gi
-            storageClassName:
+            storageClassName: "{{ .Values.ebsStorageClassName }}"
+
       podTemplate:
-        nodeSelector:
-          ops: true
         spec:
+          nodeSelector:
+            ops: "true"
           containers:
             - name: elasticsearch
 
@@ -36,4 +45,54 @@ eck-elasticsearch:
                   memory: 2Gi
                 requests:
                   cpu: 0.5
-                  memory: 512Mi
+                  memory: 2Gi
+
+# https://github.com/elastic/cloud-on-k8s/blob/3.0/deploy/eck-stack/charts/eck-kibana/values.yaml
+
+eck-kibana:
+  count: 1
+  podTemplate:
+    spec:
+      nodeSelector:
+        ops: "true"
+      containers:
+        - name: kibana
+          env:
+            # https://discuss.elastic.co/t/ingress-for-kibana-dashboard-when-using-kubernetes-traefik/198236
+            - name: "SERVER_BASEPATH"
+              value: "/kibana"
+            - name: "SERVER_REWRITEBASEPATH"
+              value: "true"
+            - name: "SERVER_PUBLICBASEURL"
+              value: "https://{{ requiredEnv "K8S_MONITORING_FQDN" }}/kibana"
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 0.5
+            limits:
+              memory: 1Gi
+              cpu: 1
+  # tls fails if this is not disabled
+  # https://github.com/elastic/cloud-on-k8s/issues/2118#issuecomment-558981590
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  # https://github.com/elastic/cloud-on-k8s/blob/3.0/deploy/eck-stack/charts/eck-kibana/templates/ingress.yaml
+  ingress:
+    annotations:
+      # kibana has built-in auth support
+      # kibana can be configured to be served from a /kibana path (no strip middleware needed)
+      namespace: {{ .Release.Namespace }}
+      cert-manager.io/cluster-issuer: "cert-issuer"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    enabled: true
+    tls:
+      enabled: true
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      secretName: monitoring-tls
+    hosts:
+      - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        path: /kibana
+        pathType: Prefix

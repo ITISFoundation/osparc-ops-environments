@@ -1,0 +1,35 @@
+role: "Agent"
+
+env:
+    - name: ELASTICSEARCH_USERNAME
+      value: &elasticsearch_username lastic
+    - name: ELASTICSEARCH_PASSWORD
+        valueFrom:
+            secretKeyRef:
+                name: elasticsearch-es-elastic-user
+                key: *elasticsearch_username
+
+customConfig:
+    dataDir: /vector-data-dir
+
+    sources:
+        kubernetes_logs:
+            type: kubernetes_logs
+
+    sinks:
+        es_out:
+            type: elasticsearch
+            inputs: ["kubernetes_logs"]
+            endpoint: "http://your-elasticsearch-cluster:9200"
+            auth:
+                username: "${ELASTICSEARCH_USERNAME}"
+                password: "${ELASTICSEARCH_PASSWORD}"
+            index: "vector-k8s-%F"
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
