@@ -1,30 +1,60 @@
+# values.yaml for Vector Helm chart
+# https://github.com/vectordotdev/helm-charts/blob/vector-0.43.0/charts/vector/values.yaml
+
+
+# Useful example
+# https://github.com/vectordotdev/vector/issues/19136#issuecomment-1809927271
+
+
 role: "Agent"
 
+# avoid error
+#
+#  Release "vector" does not exist. Installing it now.
+#  Error: 1 error occurred:
+#      * Service "vector" is invalid: spec.ports: Required val
+service:
+  enabled: false
+
 env:
-    - name: ELASTICSEARCH_USERNAME
-      value: &elasticsearch_username lastic
-    - name: ELASTICSEARCH_PASSWORD
-        valueFrom:
-            secretKeyRef:
-                name: elasticsearch-es-elastic-user
-                key: *elasticsearch_username
+  - name: ELASTICSEARCH_USERNAME
+    value: &elasticsearch_username elastic
+  - name: ELASTICSEARCH_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-es-elastic-user
+        key: *elasticsearch_username
 
 customConfig:
-    dataDir: /vector-data-dir
+  # https://github.com/vectordotdev/helm-charts/issues/226
+  data_dir: /vector-data-dir
 
-    sources:
-        kubernetes_logs:
-            type: kubernetes_logs
+  sources:
+    kubernetes_logs:
+      type: kubernetes_logs
 
-    sinks:
-        es_out:
-            type: elasticsearch
-            inputs: ["kubernetes_logs"]
-            endpoint: "http://your-elasticsearch-cluster:9200"
-            auth:
-                username: "${ELASTICSEARCH_USERNAME}"
-                password: "${ELASTICSEARCH_PASSWORD}"
-            index: "vector-k8s-%F"
+  transforms:
+    # https://github.com/vectordotdev/vector/discussions/23144
+    dedot_labels_for_elasticsearch:
+      type: remap
+      inputs:
+        - kubernetes_logs
+      source: |-
+        . = map_keys(., recursive: true) -> |key| { replace(key, ".", "_") }
+
+  sinks:
+    # https://vector.dev/docs/reference/configuration/sinks/elasticsearch
+    elasticsearch_out:
+      type: elasticsearch
+      inputs: ["dedot_labels_for_elasticsearch"]
+      endpoint: "http://elasticsearch-es-http.{{.Release.Namespace}}.svc:9200"
+      auth:
+        strategy: basic
+        user: "${ELASTICSEARCH_USERNAME}"
+        password: "${ELASTICSEARCH_PASSWORD}"
+      bulk:
+        action: index
+        index: "logs-kubernetes-%Y-%m-%d"
 
 resources:
   requests:

@@ -64,7 +64,7 @@ eck-kibana:
             - name: "SERVER_REWRITEBASEPATH"
               value: "true"
             - name: "SERVER_PUBLICBASEURL"
-              value: "https://{{ requiredEnv "K8S_MONITORING_FQDN" }}/kibana"
+              value: https://{{ requiredEnv "K8S_MONITORING_FQDN" }}/kibana
           resources:
             requests:
               memory: 1Gi
