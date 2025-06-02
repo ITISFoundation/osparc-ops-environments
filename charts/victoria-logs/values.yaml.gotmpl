@@ -1,0 +1,34 @@
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.11.1/charts/victoria-logs-single/values.yaml
+
+ingress:
+  enabled: true
+  annotations:
+    namespace: "{{ .Release.Namespace }}"
+    cert-manager.io/cluster-issuer: "cert-issuer"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+  tls:
+    - hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      secretName: monitoring-tls
+  hosts:
+    - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path:
+        - /logs
+      pathType: Prefix
+
+vector:
+  enabled: true
+
+persistentVolume:
+  enabled: true
+  storageClass: "{{ .Values.ebsStorageClassName }}"
+  size: 10Gi
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
