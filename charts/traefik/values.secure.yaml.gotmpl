@@ -63,6 +63,16 @@ extraObjects:
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
+    name: logs-strip-prefix
+    namespace: {{.Release.Namespace}}
+  spec:
+    stripPrefix:
+      prefixes:
+      - /logs
+
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
     name: internal-ipallowlist
   spec:
     ipAllowList:

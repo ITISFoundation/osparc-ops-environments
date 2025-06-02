@@ -1,34 +1,29 @@
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.11.1/charts/victoria-logs-single/values.yaml
 
-ingress:
-  enabled: true
-  annotations:
-    namespace: "{{ .Release.Namespace }}"
-    cert-manager.io/cluster-issuer: "cert-issuer"
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-
-  tls:
-    - hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      secretName: monitoring-tls
-  hosts:
-    - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      path:
-        - /logs
-      pathType: Prefix
-
 vector:
   enabled: true
 
-persistentVolume:
-  enabled: true
-  storageClass: "{{ .Values.ebsStorageClassName }}"
-  size: 10Gi
+server:
+  # keeps logs for 30 days
+  retentionPeriod: 30d
 
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 500m
-    memory: 512Mi
+  ingress:
+    # we use victoria metrics auth to expose, load balance and authenticate access
+    # https://github.com/VictoriaMetrics/VictoriaMetrics/issues/8690#issuecomment-2805803514
+    enabled: false
+
+  persistentVolume:
+    enabled: true
+    storageClassName: "{{ .Values.ebsStorageClassName }}"
+    size: 10Gi
+
+  nodeSelector:
+    ops: "true"
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
