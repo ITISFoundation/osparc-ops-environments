@@ -1,9 +1,13 @@
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.11.1/charts/victoria-logs-single/values.yaml
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.11.2/charts/victoria-logs-single/values.yaml
 
-vector:
-  enabled: true
+vector: # configured in main server to send logs to standby server
+  enabled: false
+  # helm chart still creates the configmap, so we need to use a different name
+  # to avoid conflicts with configmap from main server where vector is enabled
 
 server:
+  fullnameOverride: "victoria-logs-standby-single-server"
+
   # keeps logs for 30 days
   retentionPeriod: 30d
 

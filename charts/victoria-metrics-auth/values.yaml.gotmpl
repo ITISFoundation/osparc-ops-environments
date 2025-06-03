@@ -2,6 +2,13 @@
 
 replicaCount: 1
 
+env:
+  - name: SERVICES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: victoria-logs-user-password
+        key: password
+
 ingress:
   enabled: true
   annotations:
@@ -22,7 +29,19 @@ ingress:
 config:
   users:
     - username: {{ requiredEnv "SERVICES_USER" }}
-      password: {{ requiredEnv "SERVICES_PASSWORD" }}
+      # https://github.com/VictoriaMetrics/helm-charts/issues/2213#issuecomment-2933605684
+      password: "%{SERVICES_PASSWORD}"
       # https://docs.victoriametrics.com/victoriametrics/vmauth/#high-availability
       url_prefix:
-      - http://victoria-logs-victoria-logs-single-server.{{ .Release.Namespace }}.svc.cluster.local:9428/
+        - http://victoria-logs-main-single-server.{{ .Release.Namespace }}.svc.cluster.local:9428/
+        - http://victoria-logs-standby-single-server.{{ .Release.Namespace }}.svc.cluster.local:9428/
+
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: victoria-logs-user-password
+      namespace: {{ .Release.Namespace }}
+    type: Opaque
+    data:
+      password: {{ requiredEnv "SERVICES_PASSWORD" | b64enc }}
