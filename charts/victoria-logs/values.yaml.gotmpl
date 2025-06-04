@@ -18,7 +18,7 @@ server:
         namespace: "{{ .Release.Namespace }}"
         cert-manager.io/cluster-issuer: "cert-issuer"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-append-slash@kubernetescrd,traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
     tls:
       - hosts:
           - {{ requiredEnv "K8S_MONITORING_FQDN" }}
