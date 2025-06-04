@@ -1,0 +1,59 @@
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.11.2/charts/victoria-logs-single/values.yaml
+
+vector:
+  # by default it will generate sink per statefulset's pod
+  # each pod has a separate PV, so the data is replicated
+  enabled: true
+
+server:
+  # HA trough multiple replicas
+  # https://github.com/VictoriaMetrics/VictoriaMetrics/issues/9076
+  replicaCount: 2
+
+  retentionPeriod: 30d
+
+  ingress:
+    enabled: true
+    annotations:
+        namespace: "{{ .Release.Namespace }}"
+        cert-manager.io/cluster-issuer: "cert-issuer"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-append-slash@kubernetescrd,traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+    tls:
+      - hosts:
+          - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        secretName: monitoring-tls
+    hosts:
+      - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        path:
+          - /logs
+        pathType: Prefix
+
+  persistentVolume:
+    enabled: true
+    storageClassName: "{{ .Values.ebsStorageClassName }}"
+    size: 10Gi
+
+  nodeSelector:
+    ops: "true"
+
+  # Schedule pods on different nodes if possible (HA)
+  # https://stackoverflow.com/a/64958458/12124525
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: "kubernetes.io/hostname"
+      whenUnsatisfiable: DoNotSchedule
+      # hardcoded due to https://github.com/VictoriaMetrics/helm-charts/issues/2219
+      labelSelector:
+        matchLabels:
+          app: server
+          app.kubernetes.io/instance: victoria-logs
+          app.kubernetes.io/name: victoria-logs-single
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi

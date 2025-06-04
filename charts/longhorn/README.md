@@ -2,7 +2,7 @@
 
 ### Can LH be used for critical services (e.g., Databases)?
 
-No (as of now). , we should not use it for volumes of critical services.
+No. We should not use it for volumes of critical services.
 
 As of now, we should avoid using LH for critical services. Instead, we should rely on easier-to-maintain solutions (e.g., application-level replication [Postgres Operators], S3, etc.). Once we get hands-on experience, extensive monitoring and ability to scale LH, we can consider using it for critical services.
 
