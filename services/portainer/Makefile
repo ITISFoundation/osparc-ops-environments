@@ -95,6 +95,7 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 secrets: .env ## Construct secrets for portainer pwd, to change pwd it need to be done manually https://git.speag.com/oSparc/osparc-ops-deployment-configuration/-/wikis/Update-Portainer-Password
 	@if [ -z $(IS_PORTAINER_SERVICE_RUNNING) ]; then\
 		echo "Setting portainer_admin_password (can only set but not update password!)" \
+		&& echo "To update password follow https://portal.portainer.io/knowledge/how-do-i-reset-my-portainer-password" \
 		&& docker secret rm portainer_admin_password 2>/dev/null; \
 		set -o allexport; source .env; set +o allexport; \
 		echo -n "$${PORTAINER_ADMIN_PWD}" | docker secret create portainer_admin_password -  2>/dev/null; \

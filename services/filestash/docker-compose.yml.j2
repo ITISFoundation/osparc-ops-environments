@@ -13,7 +13,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.filestash.loadbalancer.server.port=8334
         - traefik.http.routers.filestash.rule=Host(`${FILESTASH_DOMAIN}`)
         - traefik.http.routers.filestash.entrypoints=https
@@ -26,6 +26,9 @@ services:
         reservations:
           memory: 32M
           cpus: "0.1"
+      placement:
+        constraints:
+          - node.labels.ops==true
   onlyoffice:
     image: onlyoffice/documentserver:7.4.0
     networks:
@@ -42,4 +45,5 @@ networks:
 
 configs:
   filestash_config:
+    name: ${STACK_NAME}_filestash_config_{{ "./filestash_config.json" | sha256file | substring(0,10) }}
     file: ./filestash_config.json

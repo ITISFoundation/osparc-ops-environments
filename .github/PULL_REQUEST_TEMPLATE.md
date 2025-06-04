@@ -18,6 +18,8 @@
 - [ ] Service has placement constraints or is global
 - [ ] Service is restartable
 - [ ] Service restart is zero-downtime
+- [ ] Service is monitored (via prometheus and grafana)
 - [ ] Service is not bound to one specific node (e.g. via files or volumes)
 - [ ] Relevant OPS E2E Test are added
-- [ ] Service's Public URL is included in maintenance mode -->
+- [ ] Service's Public URL is included in maintenance mode
+- [ ] Service's Public URL is included in testing mode -->

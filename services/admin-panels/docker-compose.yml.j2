@@ -1,13 +1,15 @@
 version: "3.7"
 configs:
   adminpanel-jupyter-server-config:
+    name: ${STACK_NAME}_adminpanel-jupyter-server-config_{{ "./jupyter_server_config.py" | sha256file | substring(0,10) }}
     file: ./jupyter_server_config.py
 {% for item in contents %}
   {{ item.name }}:
+    name: {% raw %}${STACK_NAME}{% endraw %}_{{item.name}}_{{ ("./data/" ~ item.name) | sha256file | substring(0,10) }}
     file: ./data/{{ item.name }}{% endfor %}
 services:
   adminpanels:
-    image: jupyter/base-notebook:18b10e7f732d
+    image: jupyter/base-notebook:notebook-7.0.6
     user: root
     networks:
       - public
@@ -85,7 +87,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.adminpanels.loadbalancer.server.port=8888
         - traefik.http.routers.adminpanels.rule=Host(`${ADMINPANELS_DOMAIN}`)
         - traefik.http.routers.adminpanels.entrypoints=https

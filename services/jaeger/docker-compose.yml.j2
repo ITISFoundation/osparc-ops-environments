@@ -1,10 +1,8 @@
 version: "3.7"
-configs:
-  opentelemetry-collector-config:
-    file: ./opentelemetry-collector-config.yaml
+
 services:
   jaeger:
-    image: jaegertracing/all-in-one:1.60.0
+    image: jaegertracing/all-in-one:1.68.0
     command: >
       --query.base-path=/jaeger
     init: true
@@ -19,7 +17,7 @@ services:
           - node.labels.ops==true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.jaeger.loadbalancer.server.port=16686
         - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
         - traefik.http.routers.jaeger.entrypoints=https
@@ -35,11 +33,11 @@ services:
           memory: 64M
           cpus: "0.1"
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.105.0
+    image: otel/opentelemetry-collector-contrib:0.123.0
     configs:
       - source: opentelemetry-collector-config
         target: /etc/otel/config.yaml
-    hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
+    hostname: "{% raw %}{{.Node.Hostname}}-{{.Task.Slot}}{% endraw %}"
     command:
       - "--config=/etc/otel/config.yaml"
     deploy:
@@ -57,6 +55,12 @@ services:
       TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE: ${TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE}
       TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}
       TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL: ${TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL}
+
+configs:
+  opentelemetry-collector-config:
+    name: ${STACK_NAME}_opentelemetry-collector-config_{{ "./opentelemetry-collector-config.yaml" | sha256file | substring(0,10) }}
+    file: ./opentelemetry-collector-config.yaml
+
 networks:
   public:
     external: true

@@ -1,34 +1,5 @@
 version: "3.7"
 
-volumes:
-  prometheus_data: {}
-  grafana_data: {}
-  alertmanager_data: {}
-  prometheus_data_federation: {}
-
-networks:
-  monitored:
-    name: ${MONITORED_NETWORK}
-    external: true
-  public:
-    external: true
-    name: ${PUBLIC_NETWORK}
-
-configs:
-  alertmanager_config:
-    file: ./alertmanager/config.yml
-  node_exporter_entrypoint:
-    file: ./node-exporter/docker-entrypoint.sh
-  prometheus_config:
-    file: ./prometheus/prometheus.yml
-  prometheus_config_federation:
-    file: ./prometheus/prometheus-federation.yml
-  prometheus_rules:
-    file: ./prometheus/prometheus.rules.yml
-  pgsql_query_exporter_config:
-    file: ./pgsql_query_exporter_config.yaml
-  smokeping_prober_config:
-    file: ./smokeping_prober_config.yaml
 services:
   cadvisor-exporter:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
@@ -54,7 +25,7 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.55.1
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -73,6 +44,7 @@ services:
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
       - "--web.route-prefix=/"
       - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
+      - "--enable-feature=exemplar-storage"
       #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
     networks:
       - monitored
@@ -81,7 +53,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheuscatchall.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
         - traefik.http.routers.prometheuscatchall.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheus`)
@@ -100,7 +72,7 @@ services:
           cpus: "0.2"
   prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.55.1
     volumes:
       - prometheus_data_federation:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -127,7 +99,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheusfederation.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
         - traefik.http.routers.prometheusfederation.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/prometheusfederation`)
@@ -247,7 +219,7 @@ services:
           cpus: "0.1"
 
   grafana:
-    image: grafana/grafana-oss:11.2.4
+    image: grafana/grafana-oss:12.0.0
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -261,7 +233,7 @@ services:
       #  condition: on-failure
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.grafana.loadbalancer.server.port=3000
         - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
@@ -328,9 +300,10 @@ services:
       - prometheus-port=9400
 
   pgsql-query-exporter:
-    image: adonato/query-exporter:2.10.0
+    image: ghcr.io/albertodonato/query-exporter:sha-a1d908e
     volumes: []
-    dns: 9.9.9.9
+    dns:
+      - 8.8.8.8
     configs:
       - source: pgsql_query_exporter_config
         target: /config/config.yaml
@@ -351,16 +324,16 @@ services:
           cpus: "0.5"
         reservations:
           memory: 64M
-          cpus: "0.1"{% for _stack in MONITORED_STACK_NAMES.split(",") if _stack != "" %}
-  {{_stack}}-postgres-exporter:
+          cpus: "0.1"
+  postgres-exporter:
     image: bitnami/postgres-exporter:0.15.0
     networks:
       - monitored
     environment:
-      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{_stack + '_postgres' if 'rds.amazonaws.com' not in POSTGRES_HOST else POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}:{{POSTGRES_PORT}}/{{POSTGRES_DB}}?sslmode=disable
     deploy:
       labels:
-      - prometheus-job={{_stack}}-postgres-exporter
+      - prometheus-job=postgres-exporter
       - prometheus-port=9187
       placement:
         constraints:
@@ -372,17 +345,20 @@ services:
         reservations:
           memory: 32M
           cpus: "0.1"
-  {{_stack}}-redis-exporter:
-    image: oliver006/redis_exporter:v1.62.0-alpine
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.69.0-alpine
     networks:
       - monitored
     environment:
-      REDIS_ADDR: redis://{{_stack}}_redis:{{REDIS_PORT}}
-      REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
+      REDIS_ADDR: ${REDIS_ADDRESS}
+{%- if REDIS_USER %}
+      REDIS_USER: ${REDIS_USER}
+{%- endif %}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_EXPORTER_CHECK_KEYS: db0=user_id*client_session_id*alive,db0=user_id*client_session_id*resources,db1=project_lock*,db3=*
     deploy:
       labels:
-      - prometheus-job={{_stack}}-redis-exporter
+      - prometheus-job=redis-exporter
       - prometheus-port=9121
       placement:
         constraints:
@@ -393,4 +369,65 @@ services:
           cpus: "0.5"
         reservations:
           memory: 32M
-          cpus: "0.1"{% endfor %}
+          cpus: "0.1"
+  tempo:
+    image: grafana/tempo:2.7.2
+    command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
+    configs:
+      - source: tempo_config
+        target: /etc/tempo.yaml
+    networks:
+      - monitored
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${PUBLIC_NETWORK}
+        - traefik.http.services.tempo.loadbalancer.server.port=9095
+        - traefik.http.routers.tempo.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/tempo`)
+        - traefik.http.routers.tempo.priority=10
+        - traefik.http.routers.tempo.entrypoints=https
+        - traefik.http.routers.tempo.tls=true
+        - traefik.http.middlewares.tempo_replace_regex.replacepathregex.regex=^/tempo/?(.*)$$
+        - traefik.http.middlewares.tempo_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.tempo.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, tempo_replace_regex
+      resources:
+        limits:
+          memory: 2000M
+          cpus: "2.0"
+
+configs:
+  alertmanager_config:
+    name: ${STACK_NAME}_alertmanager_config_{{ "./alertmanager/config.yml" | sha256file | substring(0,10) }}
+    file: ./alertmanager/config.yml
+  tempo_config:
+    name: ${STACK_NAME}_tempo_config_{{ "./tempo_config.yaml" | sha256file | substring(0,10) }}
+    file: ./tempo_config.yaml
+  node_exporter_entrypoint:
+    name: ${STACK_NAME}_node_exporter_entrypoint_{{ "./node-exporter/docker-entrypoint.sh" | sha256file | substring(0,10) }}
+    file: ./node-exporter/docker-entrypoint.sh
+  prometheus_config_federation:
+    name: ${STACK_NAME}_prometheus_config_federation_{{ "./prometheus/prometheus-federation.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus-federation.yml
+  prometheus_rules:
+    name: ${STACK_NAME}_prometheus_rules_{{ "./prometheus/prometheus.rules.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.rules.yml
+  pgsql_query_exporter_config:
+    name: ${STACK_NAME}_pgsql_query_exporter_config_{{ "./pgsql_query_exporter_config.yaml" | sha256file | substring(0,10) }}
+    file: ./pgsql_query_exporter_config.yaml
+  smokeping_prober_config:
+    name: ${STACK_NAME}_smokeping_prober_config_{{ "./smokeping_prober_config.yaml" | sha256file | substring(0,10) }}
+    file: ./smokeping_prober_config.yaml
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  alertmanager_data: {}
+  prometheus_data_federation: {}
+
+networks:
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}

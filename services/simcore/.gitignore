@@ -2,3 +2,5 @@
 docker-compose.deploy.yml
 docker-compose.yml
 dask-sidecar/**
+assets/
+docker-compose.yml

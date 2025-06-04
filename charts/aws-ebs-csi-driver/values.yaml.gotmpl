@@ -5,7 +5,7 @@ image:
     tag: "v1.38.1"
 
 storageClasses:
-  - name: "ebs-sc"
+  - name: "{{ .Values.ebsStorageClassName }}"
     parameters:
         type: "gp3"
     allowVolumeExpansion: true
