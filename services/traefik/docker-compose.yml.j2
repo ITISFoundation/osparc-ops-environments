@@ -6,6 +6,9 @@ services:
     init: true
     command:
       - "--api=true"
+      - "--ping=true"
+      - "--entryPoints.ping.address=:9082"
+      - "--ping.entryPoint=ping"
       - "--api.dashboard=true"
       - "--accesslog=true"
       - "--accesslog.format=json"
@@ -41,6 +44,14 @@ services:
       - "--tracing.addinternals"
       - "--tracing.otlp=true"
       - "--tracing.otlp.http=true"
+    healthcheck:
+      # NOTE: this healthcheck to check if traefik is up and running must be run on the ping entrypoint defined in command!
+      test: traefik healthcheck --ping --ping.entryPoint=ping --entryPoints.ping.address=:9082
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+      start_interval: 1s
     ports:
       - target: 80
         published: 80
