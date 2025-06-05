@@ -13,14 +13,6 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 up-local: .init .create_secrets ${TEMP_COMPOSE}-local prune-docker-stack-configs ## Deploys the stack using provided certificates
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-.PHONY: up-letsencrypt-http
-up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys the stack with let's encrypt http challenge
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns
-up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys the stack with let's encrypt dns challenge
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dns ${STACK_NAME}
-
 .PHONY: up-dalco
 up-dalco: .init ${TEMP_COMPOSE}-dalco prune-docker-stack-configs ## Deploys the stack on dalco cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
@@ -55,20 +47,6 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 	source .env; \
 	set +o allexport; \
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml  > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
-	@set -o allexport; \
-	source .env; \
-	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@set -o allexport; \
-	source .env; \
-	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
