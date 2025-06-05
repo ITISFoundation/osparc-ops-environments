@@ -1,5 +1,3 @@
-version: "3.12"
-
 services:
   traefik:
     dns: 8.8.8.8 # This is critical to make the ACME challange work
