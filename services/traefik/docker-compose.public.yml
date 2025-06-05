@@ -4,6 +4,9 @@ services:
     dns: 8.8.8.8 # This is critical to make the ACME challange work
     command:
       - "--api=true"
+      - "--ping=true"
+      - "--entryPoints.ping.address=:9082"
+      - "--ping.entryPoint=ping"
       - "--api.dashboard=true"
       - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
       - "--accesslog=false"
