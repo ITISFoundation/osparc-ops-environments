@@ -221,63 +221,10 @@ services:
     networks:
       - public
 
-  error-pages-static-webserver:
-    image: nginx:1.25.1
-    networks:
-      - public
-    configs:
-      - source: ${STACK_NAME}_503_api_json
-        target: /usr/share/nginx/api/503.json
-      - source: ${STACK_NAME}_503_web_html
-        target: /usr/share/nginx/html/503.html
-      - source: ${STACK_NAME}_nginx_error_pages_config
-        target: /etc/nginx/conf.d/default.conf
-    deploy:
-      labels:
-        # defining labels as list has advantage in interpolation
-        # https://docs.docker.com/reference/compose-file/interpolation/
-        # disadvantage: we cannot reuse values with yaml `& and *` syntax
-        - traefik.enable=true
-
-        # middleware for ops traefik. Use for custom 503 (json) api response
-        - traefik.http.middlewares.custom-50x-json-errors.errors.status=500,501,503,505-599
-        - traefik.http.middlewares.custom-50x-json-errors.errors.service=traefik_error_page_json
-        - traefik.http.middlewares.custom-50x-json-errors.errors.query=/503.json
-
-        # middleware for ops traefik. Use for custom 503 html response
-        - traefik.http.middlewares.custom-50x-html-errors.errors.status=500,501,503,505-599
-        - traefik.http.middlewares.custom-50x-html-errors.errors.service=traefik_error_page_html
-        - traefik.http.middlewares.custom-50x-html-errors.errors.query=/503.json
-
-        # rule to serve custom 503 error html page
-        - traefik.http.routers.traefik_error_page_html.entrypoints=http
-        - traefik.http.routers.traefik_error_page_html.priority=1
-        - traefik.http.routers.traefik_error_page_html.rule=Path(`/503.html`)
-        - traefik.http.routers.traefik_error_page_html.tls=false
-        - traefik.http.routers.traefik_error_page_html.service=traefik_error_page_html
-        - traefik.http.services.traefik_error_page_html.loadbalancer.server.port=80 # nginx port for (non-api) http
-
-        # rule to serve custom 503 error json page
-        - traefik.http.routers.traefik_error_page_json.entrypoints=http
-        - traefik.http.routers.traefik_error_page_json.priority=1
-        - traefik.http.routers.traefik_error_page_json.rule=Path(`/503.json`)
-        - traefik.http.routers.traefik_error_page_json.tls=false
-        - traefik.http.routers.traefik_error_page_json.service=traefik_error_page_json
-        - traefik.http.services.traefik_error_page_json.loadbalancer.server.port=8000 # nginx port for (non-api) http
-
 configs:
   traefik_dynamic_config.yml:
     name: {{ STACK_NAME }}_traefik_dynamic_config_{{ "./traefik_dynamic_config.yml" | sha256file | substring(0,10) }}
     file: ./traefik_dynamic_config.yml
-  {{ STACK_NAME }}_503_web_html:
-    file: ./config/error_pages/503.html
-    name: {{ STACK_NAME }}_web_html_{{ "./config/error_pages/503.html" | sha256file | substring(0,10) }}
-  {{ STACK_NAME }}_503_api_json:
-    file: ./config/error_pages/503.json
-    name: {{ STACK_NAME }}_api_json_{{ "./config/error_pages/503.json" | sha256file | substring(0,10) }}
-  {{ STACK_NAME }}_nginx_error_pages_config:
-    file: ./config/error_pages/default.conf
-    name: {{ STACK_NAME }}_web_nginx_config_{{ "./config/error_pages/default.conf" | sha256file | substring(0,10) }}
 
 networks:
   public:
