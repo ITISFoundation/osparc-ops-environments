@@ -186,6 +186,7 @@ services:
         # internal traefik
         - traefik.enable=true
         - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        # NOTE: keep in sync with fallback router (rule and entrypoint)
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.rule=(${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS})
         - traefik.http.routers.${SWARM_STACK_NAME}_invitations.entrypoints=http
         - traefik.http.services.${SWARM_STACK_NAME}_invitations.loadbalancer.server.port=8000
@@ -769,9 +770,11 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_ratelimit@swarm
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.service=${SWARM_STACK_NAME}_simcore_http
+        # Note: keep in sync with fallback router (rule and entrypoint)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/doc`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`))
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http.priority=3
         # oSparc publicAPI
+        # Note: keep in sync with fallback router (rule and entrypoint)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.rule=(${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}) && PathPrefix(`/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api.entrypoints=https
         - traefik.http.services.${SWARM_STACK_NAME}_simcore_api.loadbalancer.server.port=10081
@@ -813,31 +816,96 @@ services:
           memory: 128M
           cpus: '0.1'
 
-  traefik_api:
-    # NOTE: this is a trick to allow to access the internal traefik REST API
-    # A comment
-    # list router like so: curl https://domain/api/http/routers | jq
+  # use to define fallback routes for simcore traefik
+  # if docker healthcheck fails, simcore traefik configurarion is
+  # removed from ops traeifik https://github.com/traefik/traefik/issues/7842
+  #
+  # use fallback routes to return proper 503 (instead of 404)
+  # this service must be running at all times
+  ops-traefik-configuration-placeholder: # TODO reuse same skeleton
     image: busybox:1.35.0
-    command: sleep 900000d
+    command: sleep infinity
+    networks:
+      - public
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik==true
+      resources:
+        limits:
+          memory: 16M
+          cpus: '0.1'
+        reservations:
+          memory: 8M
+          cpus: '0.1'
+
+      labels:
+        # external traefik
+        - traefik.enable=true
+
+        ### oSparc web (fallback low priority rule)
+        # TODO: remove copy / paste
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_ratelimit@swarm
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.service=${SWARM_STACK_NAME}_simcore_http_fallback
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.rule=((${DEPLOYMENT_FQDNS_CAPTURE_TRAEFIK_RULE_CATCHALL}) && PathPrefix(`/`)) || ( (PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/doc`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`))
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.priority=1
+        # always return 503
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_http_fallback.loadbalancer.server.port=0
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_http_fallback.loadbalancer.healthcheck.path=/some/invalid/path/to/generate/a/503
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_http_fallback.loadbalancer.healthcheck.interval=10s
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_http_fallback.loadbalancer.healthcheck.timeout=1ms
+
+        ### oSparc publicAPI (fallback low priority rule)
+        # TODO: remove copy / paste
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.rule=(${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}) && PathPrefix(`/`)
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.priority=1
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.entrypoints=https
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.tls=true
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.middlewares=ops_gzip@swarm, ops_ratelimit@swarm
+        - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.service=${SWARM_STACK_NAME}_simcore_api_fallback
+        # always return 503
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_api_fallback.loadbalancer.server.port=0
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_api_fallback.loadbalancer.healthcheck.path=/some/invalid/path/to/generate/a/503
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_api_fallback.loadbalancer.healthcheck.interval=10s
+        - traefik.http.services.${SWARM_STACK_NAME}_simcore_api_fallback.loadbalancer.healthcheck.timeout=1ms
+
+  traefik-configuration-placeholder: # simcore traefik with `io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}` label
+    image: busybox:1.35.0
+    command: sleep infinity
     networks:
       - default
     deploy:
       labels:
         # route to internal traefik
-        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-        # traefik UI
         - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+
+        # traefik UI
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.service=api@internal
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.rule=(PathPrefix(`/dashboard`) || PathPrefix(`/api`) ) && Host(`traefikdashboard.${MACHINE_FQDN}`)
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.entrypoints=http
-        - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.priority=6
         - traefik.http.routers.${SWARM_STACK_NAME}_traefik_api.middlewares=${SWARM_STACK_NAME}_auth@swarm, ${SWARM_STACK_NAME}_whitelist_ips@swarm
         - traefik.http.services.${SWARM_STACK_NAME}_traefik_api.loadbalancer.server.port=8080
+
         # Middlewares
         # basic authentication
         - traefik.http.middlewares.${SWARM_STACK_NAME}_auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}
         # OPS IP Whitelist
         - traefik.http.middlewares.${SWARM_STACK_NAME}_whitelist_ips.ipallowlist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
+
+        ### Fallback for invitations
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_fallback.rule=${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_fallback.service=${SWARM_STACK_NAME}_invitations_fallback
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_fallback.entrypoints=http
+        - traefik.http.routers.${SWARM_STACK_NAME}_invitations_fallback.priority=1
+        # always fail and return 503 via unhealthy loadbalancer healthcheck
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations_fallback.loadbalancer.server.port=0
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations_fallback.loadbalancer.healthcheck.path=/some/invalid/path/to/generate/a/503
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations_fallback.loadbalancer.healthcheck.interval=10s
+        - traefik.http.services.${SWARM_STACK_NAME}_invitations_fallback.loadbalancer.healthcheck.timeout=1ms
+
       update_config:
         parallelism: 2
         order: start-first
@@ -991,78 +1059,6 @@ services:
         limits:
           cpus: "0.5"
           memory: "512M"
-
-  fallback-service-web:
-    image: nginx:1.25.1
-    configs:
-      - source: {{ SWARM_STACK_NAME }}_web_html
-        target: /usr/share/nginx/html/503.html
-      - source: {{ SWARM_STACK_NAME }}_web_nginx_config
-        target: /etc/nginx/conf.d/default.conf
-    networks:
-      - public
-      - monitored
-    deploy:
-      placement:
-        constraints:
-          - node.labels.simcore==true
-      update_config:
-        order: start-first
-      labels:
-          - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-          - traefik.enable=true
-
-          # webserver
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_html.priority=1
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_html.rule=(Path(`/`) || Path(`/v0`) || Path(`/socket.io/`) || Path(`/static-frontend-data.json`) || PathRegexp(`^/study/(?P<study_uuid>\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)`) || Path(`/view`) || Path(`/#/view`) || Path(`/#/error`) || PathPrefix(`/v0/`))
-          - traefik.http.services.${PREFIX_STACK_NAME}_fallback_html.loadbalancer.server.port=80
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_html.entrypoints=http
-
-  fallback-service-api:
-    image: nginx:1.25.1
-    configs:
-      - source: {{ SWARM_STACK_NAME }}_api_json
-        target: /usr/share/nginx/api/503.json
-      - source: {{ SWARM_STACK_NAME }}_api_nginx_config
-        target: /etc/nginx/conf.d/default.conf
-    networks:
-      - public
-      - monitored
-    deploy:
-      placement:
-        constraints:
-          - node.labels.simcore==true
-      update_config:
-        order: start-first
-      labels:
-          - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-          - traefik.enable=true
-          # api-server
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.priority=1
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.rule=Path(`/`) || Path(`/v0`) ||  PathPrefix(`/v0/`) || Path(`/api/v0/openapi.json`)
-          - traefik.http.services.${PREFIX_STACK_NAME}_fallback_api.loadbalancer.server.port=80
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.entrypoints=simcore_api
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_api.service=${PREFIX_STACK_NAME}_fallback_api
-          # invitations
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.priority=1
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.rule=(${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS})
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.entrypoints=http
-          - traefik.http.services.${PREFIX_STACK_NAME}_fallback_invitations_api.loadbalancer.server.port=80
-          - traefik.http.routers.${PREFIX_STACK_NAME}_fallback_invitations_api.service=${PREFIX_STACK_NAME}_fallback_invitations_api
-
-configs:
-  {{ SWARM_STACK_NAME }}_web_html:
-    file: ./configs/fallback-service-nginx/web/503.html
-    name: {{ SWARM_STACK_NAME }}_web_html_{{ "./configs/fallback-service-nginx/web/503.html" | sha256file | substring(0,10) }}
-  {{ SWARM_STACK_NAME }}_api_json:
-    file: ./configs/fallback-service-nginx/api/503.json
-    name: {{ SWARM_STACK_NAME }}_api_json_{{ "./configs/fallback-service-nginx/api/503.json" | sha256file | substring(0,10) }}
-  {{ SWARM_STACK_NAME }}_web_nginx_config:
-    file: ./configs/fallback-service-nginx/web/default.conf
-    name: {{ SWARM_STACK_NAME }}_web_nginx_config_{{ "./configs/fallback-service-nginx/web/default.conf" | sha256file | substring(0,10) }}
-  {{ SWARM_STACK_NAME }}_api_nginx_config:
-    file: ./configs/fallback-service-nginx/api/default.conf
-    name: {{ SWARM_STACK_NAME }}_api_nginx_config_{{ "./configs/fallback-service-nginx/api/default.conf" | sha256file | substring(0,10) }}
 
 volumes:
   rabbit_data:
