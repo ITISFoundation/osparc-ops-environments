@@ -822,7 +822,7 @@ services:
   #
   # use fallback routes to return proper 503 (instead of 404)
   # this service must be running at all times
-  ops-traefik-configuration-placeholder: # TODO reuse same skeleton
+  ops-traefik-configuration-placeholder:
     image: busybox:1.35.0
     command: sleep infinity
     networks:
@@ -844,7 +844,6 @@ services:
         - traefik.enable=true
 
         ### oSparc web (fallback low priority rule)
-        # TODO: remove copy / paste
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.tls=true
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_http_fallback.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_ratelimit@swarm
@@ -858,7 +857,6 @@ services:
         - traefik.http.services.${SWARM_STACK_NAME}_simcore_http_fallback.loadbalancer.healthcheck.timeout=1ms
 
         ### oSparc publicAPI (fallback low priority rule)
-        # TODO: remove copy / paste
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.rule=(${DEPLOYMENT_API_DOMAIN_CAPTURE_TRAEFIK_RULE}) && PathPrefix(`/`)
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.priority=1
         - traefik.http.routers.${SWARM_STACK_NAME}_simcore_api_fallback.entrypoints=https
