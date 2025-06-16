@@ -831,6 +831,7 @@ services:
     networks:
       - public
     deploy:
+      replicas: ${OPS_TRAEFIK_CONFIGURATION_PLACEHOLDER_REPLICAS}
       placement:
         constraints:
           - node.labels.traefik==true
@@ -884,6 +885,7 @@ services:
     networks:
       - default
     deploy:
+      replicas: ${SIMCORE_TRAEFIK_CONFIGURATION_PLACEHOLDER_REPLICAS}
       labels:
         # route to internal traefik
         - traefik.enable=true
