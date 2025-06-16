@@ -876,7 +876,7 @@ services:
       interval: 10s
       timeout: 1s
       start_period: 1s
-      retries: 1
+      retries: 3
 
   traefik-configuration-placeholder: # simcore traefik with `io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}` label
     image: busybox:1.35.0
