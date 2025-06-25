@@ -194,6 +194,7 @@ services:
     networks:
       public: null
       monitored: null
+
   whoami:
     image: "containous/whoami"
     deploy:
@@ -220,6 +221,11 @@ services:
     networks:
       - public
 
+configs:
+  traefik_dynamic_config.yml:
+    name: {{ STACK_NAME }}_traefik_dynamic_config_{{ "./traefik_dynamic_config.yml" | sha256file | substring(0,10) }}
+    file: ./traefik_dynamic_config.yml
+
 networks:
   public:
     external: true
@@ -227,8 +233,3 @@ networks:
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
-
-configs:
-  traefik_dynamic_config.yml:
-    name: ${STACK_NAME}_traefik_dynamic_config_{{ "./traefik_dynamic_config.yml" | sha256file | substring(0,10) }}
-    file: ./traefik_dynamic_config.yml
