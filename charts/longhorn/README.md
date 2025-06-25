@@ -25,6 +25,12 @@ Source:
 * https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/
 * https://longhorn.io/docs/1.8.1/nodes-and-volumes/nodes/default-disk-and-node-config/#customizing-default-disks-for-new-nodes
 
+### How to configure disks for LH
+
+As of now, we follow the same approach we use for `/docker` folder (via ansible playbook) but we use `/longhorn` folder name
+
+Issue asking LH to clearly document requirements: https://github.com/longhorn/longhorn/issues/11125
+
 ### Can workloads be run on nodes where LH is not installed?
 
 Workloads can run on nodes without LH as long as LH is not restricted to specific nodes via the `nodeSelector` or `systemManagedComponentsNodeSelector` settings. If LH is configured to run on specific nodes, workloads can only run on those nodes.
