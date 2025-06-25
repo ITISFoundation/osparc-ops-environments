@@ -1,0 +1,59 @@
+# https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker
+
+# https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker#example-docker-compose-yaml-file
+services:
+  metabase:
+    image: metabase/metabase:v0.54.13.3
+    networks:
+      - public
+      - monitored
+    environment:
+      # https://www.metabase.com/docs/v0.54/installation-and-operation/configuring-application-database
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=metabase
+      - MB_DB_HOST=${POSTGRES_HOST}
+      - MB_DB_PORT=${POSTGRES_PORT}
+      - MB_DB_USER=${POSTGRES_USER}
+      - MB_DB_PASS=${POSTGRES_PASSWORD}
+      # https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker#setting-the-java-timezone
+      - JAVA_TIMEZONE=UTC
+    deploy:
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 30s
+      placement:
+        constraints:
+          - node.labels.ops==true
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # router
+        - traefik.http.routers.metabase.rule=Host(`${ADMIN_DOMAIN}`) && PathPrefix(`/metabase`)
+        - traefik.http.routers.metabase.entrypoints=https
+        - traefik.http.routers.metabase.tls=true
+        - traefik.http.middlewares.metabase_stripprefixregex.stripprefixregex.regex=^/metabase
+        - traefik.http.routers.metabase.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm, metabase_stripprefixregex
+        # service
+        - traefik.http.services.metabase.loadbalancer.server.port=3000
+      # resources:
+      #     limits:
+      #         memory: 512M
+      #         cpus: "1.0"
+      #     reservations:
+      #         memory: 128M
+      #         cpus: "0.2"
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
