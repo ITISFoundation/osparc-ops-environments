@@ -8,16 +8,20 @@ services:
       - public
       - monitored
     environment:
+      # Metabase logsd doc: https://www.metabase.com/docs/v0.54/configuring-metabase/log-configuration
+      - JAVA_OPTS=-Dlog4j.configurationFile=file:/tmp/my_log4j2.xml
       # https://www.metabase.com/docs/v0.54/installation-and-operation/configuring-application-database
       - MB_DB_TYPE=postgres
       - MB_DB_DBNAME=metabase
       - MB_DB_HOST=${POSTGRES_HOST}
       - MB_DB_PORT=${POSTGRES_PORT}
-      - MB_DB_USER=${POSTGRES_USER}
-      - MB_DB_PASS=${POSTGRES_PASSWORD}
+      - MB_DB_USER=${METABASE_POSTGRES_USER}
+      - MB_DB_PASS=${METABASE_POSTGRES_PASSWORD}
       # https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker#setting-the-java-timezone
       - JAVA_TIMEZONE=UTC
     deploy:
+      # we do not need high availability. This service is not critical
+      replicas: 1
       update_config:
         parallelism: 1
         order: start-first
@@ -27,6 +31,7 @@ services:
         constraints:
           - node.labels.ops==true
       labels:
+        # TODO: add prometheus metrics
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
         # router
@@ -37,18 +42,31 @@ services:
         - traefik.http.routers.metabase.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm, metabase_stripprefixregex
         # service
         - traefik.http.services.metabase.loadbalancer.server.port=3000
-      # resources:
-      #     limits:
-      #         memory: 512M
-      #         cpus: "1.0"
-      #     reservations:
-      #         memory: 128M
-      #         cpus: "0.2"
+        - traefik.http.services.metabase.loadbalancer.healthcheck.path=/api/health
+        - traefik.http.services.metabase.loadbalancer.healthcheck.interval=5s
+        - traefik.http.services.metabase.loadbalancer.healthcheck.timeout=1s
+
+      # https://www.metabase.com/learn/metabase-basics/administration/administration-and-operation/metabase-in-production
+      resources:
+          limits:
+              memory: 2G
+              cpus: "2.0"
+          reservations:
+              memory: 1G
+              cpus: "1.0"
     healthcheck:
       test: curl --fail -I http://localhost:3000/api/health || exit 1
       interval: 15s
       timeout: 5s
       retries: 5
+    configs:
+      - source: logging_configuration
+        target: /tmp/my_log4j2.xml
+
+configs:
+  logging_configuration:
+    file: ./logging_configuration.xml
+    name: {{ STACK_NAME }}_logging_configuration_{{ "./logging_configuration.xml" | sha256file | substring(0,10) }}
 
 networks:
   public:
