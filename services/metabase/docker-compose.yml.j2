@@ -8,6 +8,7 @@ services:
       - public
       - monitored
     environment:
+      - MB_HEALTH_CHECK_LOGGING_ENABLED=false
       # Avoid: site URL basename "/" does not match the actual basename
       # https://www.metabase.com/docs/latest/configuring-metabase/environment-variables#mb_site_url
       - MB_SITE_URL=https://${ADMIN_DOMAIN}/metabase/
@@ -52,7 +53,11 @@ services:
         # service
         - traefik.http.services.metabase.loadbalancer.server.port=3000
         - traefik.http.services.metabase.loadbalancer.healthcheck.path=/api/health
-        - traefik.http.services.metabase.loadbalancer.healthcheck.interval=5s
+        - traefik.http.services.metabase.loadbalancer.healthcheck.interval=10s
+        # GET method sometimes fails (`Request canceled before finishing`) log
+        # This does not happen with HEAD method. Official healthcheck documentation
+        # defines HEAD as well
+        - traefik.http.services.metabase.loadbalancer.healthcheck.method=HEAD
         - traefik.http.services.metabase.loadbalancer.healthcheck.timeout=1s
 
       # https://www.metabase.com/learn/metabase-basics/administration/administration-and-operation/metabase-in-production
