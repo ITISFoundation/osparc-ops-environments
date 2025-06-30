@@ -6,6 +6,16 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 .PHONY: up
 up: ${TEMP_COMPOSE}  ## Deploys metabase stack
 
+up-aws: up
+
+up-master: up
+
+up-dalco: up
+
+up-local: up
+
+up-public: up
+
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
