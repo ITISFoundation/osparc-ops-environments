@@ -8,8 +8,11 @@ services:
       - public
       - monitored
     environment:
-      # Metabase logsd doc: https://www.metabase.com/docs/v0.54/configuring-metabase/log-configuration
-      - JAVA_OPTS=-Dlog4j.configurationFile=file:/tmp/my_log4j2.xml
+      # Avoid: site URL basename "/" does not match the actual basename
+      # https://www.metabase.com/docs/latest/configuring-metabase/environment-variables#mb_site_url
+      - MB_SITE_URL=https://${ADMIN_DOMAIN}/metabase/
+      # Metabase logs: https://www.metabase.com/docs/v0.54/configuring-metabase/log-configuration
+      - JAVA_OPTS=-Dlog4j.configurationFile=file:/etc/metabase/log4j2.xml
       # https://www.metabase.com/docs/v0.54/installation-and-operation/configuring-application-database
       - MB_DB_TYPE=postgres
       - MB_DB_DBNAME=metabase
@@ -19,9 +22,11 @@ services:
       - MB_DB_PASS=${METABASE_POSTGRES_PASSWORD}
       # https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker#setting-the-java-timezone
       - JAVA_TIMEZONE=UTC
+      # https://www.metabase.com/docs/latest/installation-and-operation/observability-with-prometheus
+      - MB_PROMETHEUS_SERVER_PORT=9191
     deploy:
-      # we do not need high availability. This service is not critical
-      replicas: 1
+      # https://www.metabase.com/learn/metabase-basics/administration/administration-and-operation/metabase-at-scale
+      replicas: ${METABASE_REPLICAS}
       update_config:
         parallelism: 1
         order: start-first
@@ -31,6 +36,10 @@ services:
         constraints:
           - node.labels.ops==true
       labels:
+        # prometheus only keeps jobs with `prometheus-job` label
+        - prometheus-job=metabase
+        # Set in `MB_PROMETHEUS_SERVER_PORT` environment variable
+        - prometheus-port=9191
         # TODO: add prometheus metrics
         - traefik.enable=true
         - traefik.docker.network=${PUBLIC_NETWORK}
@@ -61,7 +70,7 @@ services:
       retries: 5
     configs:
       - source: logging_configuration
-        target: /tmp/my_log4j2.xml
+        target: /etc/metabase/log4j2.xml
 
 configs:
   logging_configuration:
