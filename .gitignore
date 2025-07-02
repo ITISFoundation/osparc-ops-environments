@@ -142,7 +142,7 @@ yq
 **/.env-devel
 **/.stack.*.yml
 **/.stack.*.yaml
-docker-compose.yml
+
 stack.yml
 stack_with_prefix.yml
 docker-compose.simcore.yml

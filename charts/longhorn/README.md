@@ -2,7 +2,7 @@
 
 ### Can LH be used for critical services (e.g., Databases)?
 
-No (as of now). , we should not use it for volumes of critical services.
+No. We should not use it for volumes of critical services.
 
 As of now, we should avoid using LH for critical services. Instead, we should rely on easier-to-maintain solutions (e.g., application-level replication [Postgres Operators], S3, etc.). Once we get hands-on experience, extensive monitoring and ability to scale LH, we can consider using it for critical services.
 
@@ -24,6 +24,12 @@ By default, LH will use storage on all nodes (including newly created ones) wher
 Source:
 * https://longhorn.io/kb/tip-only-use-storage-on-a-set-of-nodes/
 * https://longhorn.io/docs/1.8.1/nodes-and-volumes/nodes/default-disk-and-node-config/#customizing-default-disks-for-new-nodes
+
+### How to configure disks for LH
+
+As of now, we follow the same approach we use for `/docker` folder (via ansible playbook) but we use `/longhorn` folder name
+
+Issue asking LH to clearly document requirements: https://github.com/longhorn/longhorn/issues/11125
 
 ### Can workloads be run on nodes where LH is not installed?
 
