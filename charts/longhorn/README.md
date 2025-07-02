@@ -54,3 +54,9 @@ Insights into LH's performance:
 
 Resource requirements:
 * https://github.com/longhorn/longhorn/issues/1691
+
+### (Kubernetes) Node maintenance
+
+https://longhorn.io/docs/1.8.1/maintenance/maintenance/
+
+Note: you can use Longhorn GUI to perform some operations
