@@ -42,7 +42,7 @@ traefik_dynamic_config.yml:
 
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env traefik_dynamic_config.yml
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
