@@ -17,7 +17,13 @@ compactor:
   compaction:
     block_retention: 96h             # overall Tempo trace retention.
 
+# via https://grafana.com/docs/tempo/latest/operations/traceql-metrics/
+# and via https://github.com/ITISFoundation/osparc-ops-environments/issues/1086
 metrics_generator:
+  processor:
+    local_blocks:
+      filter_server_spans: false
+      flush_to_storage: true
   registry:
     external_labels:
       source: tempo
@@ -48,4 +54,4 @@ querier:
 overrides:
   defaults:
     metrics_generator:
-      processors: ['service-graphs', 'span-metrics']
+      processors: ['service-graphs', 'span-metrics', 'local-blocks']
