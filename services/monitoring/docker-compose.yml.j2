@@ -326,7 +326,7 @@ services:
           memory: 64M
           cpus: "0.1"
   postgres-exporter:
-    image: bitnami/postgres-exporter:0.15.0
+    image: bitnami/postgres-exporter:0.17.1
     networks:
       - monitored
     environment:
@@ -408,6 +408,9 @@ configs:
   prometheus_config_federation:
     name: ${STACK_NAME}_prometheus_config_federation_{{ "./prometheus/prometheus-federation.yml" | sha256file | substring(0,10) }}
     file: ./prometheus/prometheus-federation.yml
+  prometheus_config:
+    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.yml
   prometheus_rules:
     name: ${STACK_NAME}_prometheus_rules_{{ "./prometheus/prometheus.rules.yml" | sha256file | substring(0,10) }}
     file: ./prometheus/prometheus.rules.yml

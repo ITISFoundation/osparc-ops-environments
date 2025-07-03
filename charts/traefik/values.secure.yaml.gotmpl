@@ -60,6 +60,27 @@ extraObjects:
       prefixes:
       - /longhorn
 
+  # a (href) links do not work properly without trailing slash
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: logs-append-slash
+    namespace: {{ .Release.Namespace }}
+  spec:
+    redirectRegex:
+      regex: "^(https?://[^/]+/logs)$"
+      replacement: "${1}/"
+
+- apiVersion: traefik.io/v1alpha1
+  kind: Middleware
+  metadata:
+    name: logs-strip-prefix
+    namespace: {{.Release.Namespace}}
+  spec:
+    stripPrefix:
+      prefixes:
+      - /logs
+
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:

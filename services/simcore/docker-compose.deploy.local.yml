@@ -9,6 +9,18 @@ services:
   catalog:
     deploy:
       replicas: ${SIMCORE_CATALOG_REPLICAS}
+  sto-worker-cpu-bound:
+    secrets:
+        - source: storageca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+  sto-worker:
+    secrets:
+        - source: storageca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
   storage:
     secrets:
         - source: storageca.crt
@@ -107,12 +119,12 @@ services:
         - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432
         - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
       replicas: 1
-  traefik_api:
-    deploy:
-      replicas: 1
+
   webserver:
     deploy:
       replicas: 1
+    healthcheck:
+      test: ["CMD", "echo", "health"]
     secrets:
       - source: rootca.crt
         target: /usr/local/share/ca-certificates/osparc.crt

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original file: https://github.com/metabase/metabase/blob/v0.54.14.3/resources/log4j2.xml -->
+
+<Configuration>
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT" follow="true">
+      <PatternLayout pattern="%date %level %logger{2} :: %message %notEmpty{%X}%n%throwable">
+        <replace regex=":basic-auth \\[.*\\]" replacement=":basic-auth [redacted]"/>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+    <Logger name="com.mchange" level="ERROR"/>
+    <Logger name="liquibase" level="INFO"/>
+    <Logger name="metabase" level="INFO"/>
+    <Logger name="metabase-enterprise" level="INFO"/>
+    <Logger name="metabase.metabot" level="INFO"/>
+    <Logger name="metabase.plugins" level="INFO"/>
+    <Logger name="metabase.query-processor.async" level="INFO"/>
+    <Logger name="metabase.server.middleware" level="INFO"/>
+    <Logger name="org.quartz" level="INFO"/>
+    <Logger name="net.snowflake.client.jdbc.SnowflakeConnectString" level="ERROR"/>
+    <Logger name="net.snowflake.client.core.SessionUtil" level="FATAL"/>
+
+    <Root level="WARN">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+  </Loggers>
+</Configuration>

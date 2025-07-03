@@ -1,0 +1,91 @@
+# https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker
+
+# https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker#example-docker-compose-yaml-file
+services:
+  metabase:
+    image: metabase/metabase:v0.54.13.3
+    networks:
+      - public
+      - monitored
+    environment:
+      - MB_HEALTH_CHECK_LOGGING_ENABLED=false
+      # Avoid: site URL basename "/" does not match the actual basename
+      # https://www.metabase.com/docs/latest/configuring-metabase/environment-variables#mb_site_url
+      - MB_SITE_URL=https://${ADMIN_DOMAIN}/metabase/
+      # Metabase logs: https://www.metabase.com/docs/v0.54/configuring-metabase/log-configuration
+      - JAVA_OPTS=-Dlog4j.configurationFile=file:/etc/metabase/log4j2.xml
+      # https://www.metabase.com/docs/v0.54/installation-and-operation/configuring-application-database
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=metabase
+      - MB_DB_HOST=${POSTGRES_HOST}
+      - MB_DB_PORT=${POSTGRES_PORT}
+      - MB_DB_USER=${METABASE_POSTGRES_USER}
+      - MB_DB_PASS=${METABASE_POSTGRES_PASSWORD}
+      # https://www.metabase.com/docs/v0.54/installation-and-operation/running-metabase-on-docker#setting-the-java-timezone
+      - JAVA_TIMEZONE=UTC
+      # https://www.metabase.com/docs/latest/installation-and-operation/observability-with-prometheus
+      - MB_PROMETHEUS_SERVER_PORT=9191
+    deploy:
+      # https://www.metabase.com/learn/metabase-basics/administration/administration-and-operation/metabase-at-scale
+      replicas: ${METABASE_REPLICAS}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 30s
+      placement:
+        constraints:
+          - node.labels.ops==true
+      labels:
+        # prometheus only keeps jobs with `prometheus-job` label
+        - prometheus-job=metabase
+        # Set in `MB_PROMETHEUS_SERVER_PORT` environment variable
+        - prometheus-port=9191
+        # TODO: add prometheus metrics
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        # router
+        - traefik.http.routers.metabase.rule=Host(`${ADMIN_DOMAIN}`) && PathPrefix(`/metabase`)
+        - traefik.http.routers.metabase.entrypoints=https
+        - traefik.http.routers.metabase.tls=true
+        - traefik.http.middlewares.metabase_stripprefixregex.stripprefixregex.regex=^/metabase
+        - traefik.http.routers.metabase.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm, metabase_stripprefixregex
+        # service
+        - traefik.http.services.metabase.loadbalancer.server.port=3000
+        - traefik.http.services.metabase.loadbalancer.healthcheck.path=/api/health
+        - traefik.http.services.metabase.loadbalancer.healthcheck.interval=10s
+        # GET method sometimes fails (`Request canceled before finishing`) log
+        # This does not happen with HEAD method. Official healthcheck documentation
+        # defines HEAD as well
+        - traefik.http.services.metabase.loadbalancer.healthcheck.method=HEAD
+        - traefik.http.services.metabase.loadbalancer.healthcheck.timeout=1s
+
+      # https://www.metabase.com/learn/metabase-basics/administration/administration-and-operation/metabase-in-production
+      resources:
+          limits:
+              memory: 2G
+              cpus: "2.0"
+          reservations:
+              memory: 1G
+              cpus: "1.0"
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    configs:
+      - source: logging_configuration
+        target: /etc/metabase/log4j2.xml
+
+configs:
+  logging_configuration:
+    file: ./logging_configuration.xml
+    name: {{ STACK_NAME }}_logging_configuration_{{ "./logging_configuration.xml" | sha256file | substring(0,10) }}
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
