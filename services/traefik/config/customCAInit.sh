@@ -4,7 +4,8 @@
 # If necessary.
 #
 #Uncomment this to debug:
-#echo Remaining arguments passed to Traefik: "$@"
+echo Running custom entrypointsh to add self-signed CAs
+echo Remaining arguments passed to Traefik: "$@"
 #
 # Add cp statements for the certificates here:
 cp /secrets/storageca.crt /usr/local/share/ca-certificates

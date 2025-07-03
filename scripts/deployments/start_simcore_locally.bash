@@ -72,7 +72,7 @@ if [[ "$devel_repo_path" = "0" ]] ; then
     #       IF GETREPO DOESNT EXIST
     if [ ! -d osparc-simcore ]; then
         export GIT_SIMCORE_REPO_URL="https://github.com/ITISFoundation/osparc-simcore.git"
-        git clone "$GIT_SIMCORE_REPO_URL"
+        git clone --depth 1 "$GIT_SIMCORE_REPO_URL"
     fi
     #       FI
     #
