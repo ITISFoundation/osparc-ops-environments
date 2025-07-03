@@ -70,6 +70,8 @@ https://longhorn.io/docs/1.8.1/maintenance/maintenance/
 Note: you can use Longhorn GUI to perform some operations
 
 ### Zero downtime updating longhorn disks (procedure)
+Notes:
+* Update one node at a time so that other nodes can still serve data
 
 1. Go to LH GUI and select a Node
     1. Disable scheduling
