@@ -1,0 +1,106 @@
+lvmd:
+  # set up lvmd service with DaemonSet
+  managed: true
+
+  # device classes (VGs) need to be created outside of topolvm (e.g. manually, via ansible, ...)
+  deviceClasses:
+    - name: ssd
+      volume-group: topovg-sdd
+      default: true
+      spare-gb: 5
+
+storageClasses:
+  - name: {{ .Values.topolvmStorageClassName }}
+    storageClass:
+      # Want to use non-default device class?
+      # See configuration example in
+      # https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/snapshot-and-restore.md#set-up-a-storage-class
+
+      fsType: xfs
+      isDefaultClass: false
+      # volumeBindingMode can be either WaitForFirstConsumer or Immediate. WaitForFirstConsumer is recommended because TopoLVM cannot schedule pods wisely if volumeBindingMode is Immediate.
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      # NOTE: On removal requires manual clean up of PVs, LVMs
+      # and Logical Volumes (CR logicalvolumes.topolvm.io).
+      # Removal Logical Volume (CR) would clean up the LVM on the node,
+      # but PV has still to be removed manually.
+      # Read more: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/advanced-setup.md#storageclass
+      reclaimPolicy: Retain
+
+resources:
+  topolvm_node:
+   requests:
+     memory: 100Mi
+     cpu: 100m
+   limits:
+     memory: 500Mi
+     cpu: 500m
+
+  topolvm_controller:
+   requests:
+     memory: 50Mi
+     cpu: 50m
+   limits:
+     memory: 200Mi
+     cpu: 200m
+
+  lvmd:
+   requests:
+     memory: 100Mi
+     cpu: 100m
+   limits:
+     memory: 500Mi
+     cpu: 500m
+
+  csi_registrar:
+    requests:
+      cpu: 25m
+      memory: 10Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+
+  csi_provisioner:
+   requests:
+     memory: 50Mi
+     cpu: 50m
+   limits:
+     memory: 200Mi
+     cpu: 200m
+
+  csi_resizer:
+    requests:
+      memory: 50Mi
+      cpu: 50m
+    limits:
+      memory: 200Mi
+      cpu: 200m
+
+  csi_snapshotter:
+    requests:
+      memory: 50Mi
+      cpu: 50m
+    limits:
+      memory: 200Mi
+      cpu: 200m
+
+  liveness_probe:
+    requests:
+      cpu: 25m
+      memory: 10Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+
+# https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/topolvm-scheduler.md
+scheduler:
+  # start simple
+  enabled: false
+
+cert-manager:
+  # start simple
+  enabled: false
+
+snapshot:
+  enabled: true

@@ -27,7 +27,15 @@ Source:
 
 ### How to configure disks for LH
 
-As of now, we follow the same approach we use for `/docker` folder (via ansible playbook) but we use `/longhorn` folder name
+Manual configuration performed (to be moved to ansible)
+1. Create partition on the disk
+    * e.g. via using `fdisk` https://phoenixnap.com/kb/linux-create-partition
+2. Format partition as XFS
+    * `sudo mkfs.xfs -f /dev/sda1`
+3. Mount partition `sudo mount -t xfs /dev/sda1 /longhorn`
+4. Persist mount in `/etc/fstab` by adding line
+    * `UUID=<partition's uuid> /longhorn xfs pquota 0 0`
+    * UUID can be received from `lsblk -f`
 
 Issue asking LH to clearly document requirements: https://github.com/longhorn/longhorn/issues/11125
 
@@ -54,3 +62,22 @@ Insights into LH's performance:
 
 Resource requirements:
 * https://github.com/longhorn/longhorn/issues/1691
+
+### (Kubernetes) Node maintenance
+
+https://longhorn.io/docs/1.8.1/maintenance/maintenance/
+
+Note: you can use Longhorn GUI to perform some operations
+
+### Zero downtime updating longhorn disks (procedure)
+Notes:
+* Update one node at a time so that other nodes can still serve data
+
+1. Go to LH GUI and select a Node
+    1. Disable scheduling
+    2. Request eviction
+1. Remove disk from the node
+    * If remove icon is disabled, disable eviction on disk to enable the remove button
+2. Perform disks updates on the node
+3. Make sure LH didn't pick up wrongly configured disk in the meantime and remove the wrong disk if it did so
+4. Wait till LH automatically adds the disk to the Node
