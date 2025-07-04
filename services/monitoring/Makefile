@@ -63,6 +63,7 @@ docker-compose.yml: docker-compose.yml.j2 \
 					tempo_config.yaml \
 					alertmanager/config.yml \
 					grafana/config.monitoring \
+					config.prometheus \
 					$(COMMON_COMPOSE_DEPENDENCIES)
 	# generating $@
 	@$(call jinja,$<,.env,$@)
