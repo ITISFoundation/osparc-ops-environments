@@ -83,6 +83,10 @@ docker-compose.master.yml: docker-compose.master.yml.j2 config.prometheus.ceph.s
 	# generating $@
 	@$(call jinja,$<,.env,$@)
 
+docker-compose.local.yml: docker-compose.local.yml.j2 config.prometheus.ceph.simcore $(COMMON_COMPOSE_DEPENDENCIES)
+	# generating $@
+	@$(call jinja,$<,.env,$@)
+
 #
 # temp compose targets
 #
@@ -101,8 +105,8 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml  docker-compose.aws.yml $(TEMP_COMPOSE_C
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 #
 # artifacts targets

@@ -2,3 +2,4 @@ docker-compose.aws.yml
 docker-compose.dalco.yml
 docker-compose.public.yml
 docker-compose.master.yml
+docker-compose.local.yml
