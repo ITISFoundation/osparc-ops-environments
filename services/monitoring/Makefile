@@ -71,7 +71,7 @@ docker-compose.dalco.yml: docker-compose.dalco.yml.j2 config.prometheus.ceph.sim
 	# generating $@
 	@$(call jinja,$<,.env,$@)
 
-docker-compose.public.yml: docker-compose.public.yml.j2 config.prometheus $(COMMON_COMPOSE_DEPENDENCIES)
+docker-compose.public.yml: docker-compose.public.yml.j2 config.prometheus.simcore $(COMMON_COMPOSE_DEPENDENCIES)
 	# generating $@
 	@$(call jinja,$<,.env,$@)
 
