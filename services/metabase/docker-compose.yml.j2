@@ -43,7 +43,7 @@ services:
         - prometheus-port=9191
         # TODO: add prometheus metrics
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         # router
         - traefik.http.routers.metabase.rule=Host(`${ADMIN_DOMAIN}`) && PathPrefix(`/metabase`)
         - traefik.http.routers.metabase.entrypoints=https
