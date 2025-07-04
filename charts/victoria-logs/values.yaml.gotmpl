@@ -29,11 +29,6 @@ server:
           - /logs
         pathType: Prefix
 
-  persistentVolume:
-    enabled: true
-    storageClassName: "{{ .Values.ebsStorageClassName }}"
-    size: 10Gi
-
   nodeSelector:
     ops: "true"
 
