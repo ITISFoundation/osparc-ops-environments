@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  grafana:
+    deploy:
+      placement:
+        constraints: []
+  prometheuscatchall:
+    deploy:
+      placement:
+        constraints: []
+  prometheusfederation:
+    deploy:
+      placement:
+        constraints: []
+  redis-exporter:
+    deploy:
+      placement:
+        constraints: []
+  postgres-exporter:
+    deploy:
+      placement:
+        constraints: []
+configs:
+  prometheus_config:
+    name: ${STACK_NAME}_prometheus_config_{{ "./prometheus/prometheus.yml" | sha256file | substring(0,10) }}
+    file: ./prometheus/prometheus.yml
