@@ -32,7 +32,8 @@ metrics_generator:
     path: /var/tempo/generator/wal
     remote_write:
       - url: {{ TF_VAR_PROMETHEUS_CATCHALL_URL }}/api/v1/write
-
+  traces_storage:   # traces_storage is REQUIRED whenever the local-blocks processor is enabled.
+    path: /var/tempo/generator/traces   # <--- create & persist this directory
 storage:
   trace:
     backend: s3                        # backend configuration to use
