@@ -9,6 +9,18 @@ services:
   catalog:
     deploy:
       replicas: ${SIMCORE_CATALOG_REPLICAS}
+  sto-worker-cpu-bound:
+    secrets:
+        - source: storageca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+  sto-worker:
+    secrets:
+        - source: storageca.crt
+          target: /usr/local/share/ca-certificates/osparc.crt
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
   storage:
     secrets:
         - source: storageca.crt
@@ -113,6 +125,8 @@ services:
   webserver:
     deploy:
       replicas: 1
+    healthcheck:
+      test: ["CMD", "echo", "health"]
     secrets:
       - source: rootca.crt
         target: /usr/local/share/ca-certificates/osparc.crt

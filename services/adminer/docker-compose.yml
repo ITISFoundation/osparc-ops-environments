@@ -13,7 +13,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.adminer_simcore.loadbalancer.server.port=8080
         - traefik.http.routers.adminer_simcore.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/adminer/simcore`)
         - traefik.http.routers.adminer_simcore.entrypoints=https

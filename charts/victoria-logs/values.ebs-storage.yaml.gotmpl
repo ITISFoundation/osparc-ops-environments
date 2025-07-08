@@ -1,0 +1,5 @@
+server:
+  persistentVolume:
+    enabled: true
+    storageClassName: "{{ .Values.ebsStorageClassName }}"
+    size: 10Gi

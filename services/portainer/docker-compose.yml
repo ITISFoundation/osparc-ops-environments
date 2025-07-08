@@ -54,7 +54,7 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
-        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.portainer.loadbalancer.server.port=9000
         - traefik.http.routers.portainer.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/portainer`)
         - traefik.http.routers.portainer.entrypoints=https

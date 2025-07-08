@@ -63,8 +63,10 @@ services:
       - source: customEntrypoint.sh
         target: /customEntrypoint.sh
     secrets:
-      - domain.key
-      - domain.crt
+      - source: domain.key
+        target: /etc/traefik_certs/osparc.local.key
+      - source: domain.crt
+        target: /etc/traefik_certs/osparc.local.crt
       - source: storageca.crt
         target: /secrets/storageca.crt
 
