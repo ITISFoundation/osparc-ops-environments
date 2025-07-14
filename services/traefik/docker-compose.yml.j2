@@ -36,7 +36,9 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+    {% if MACHINE_FQDN|lower != "osparc.local"%}
       - /etc/traefik_certs:/etc/traefik_certs
+    {% endif %}
     deploy:
       # mode: global
       replicas: ${OPS_TRAEFIK_REPLICAS}

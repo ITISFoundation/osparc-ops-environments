@@ -1,5 +1,8 @@
 services:
   traefik:
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       public:
       monitored:
@@ -10,8 +13,6 @@ services:
     deploy:
       placement:
         constraints: []
-    env_file:
-      - .env
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
