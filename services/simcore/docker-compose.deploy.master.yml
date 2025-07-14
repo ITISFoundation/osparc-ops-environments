@@ -70,7 +70,7 @@ services:
         - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.entrypoints=redis
         - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.tls=false
         - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.service=${SWARM_STACK_NAME}_redisRoute
-        - traefik.tcp.services.${SWARM_STACK_NAME}_redisRoute.loadbalancer.server.port=6379
+        - traefik.tcp.services.${SWARM_STACK_NAME}_redisRoute.loadbalancer.server.port=${REDIS_EXTERNAL_PORT}
         - "traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.rule=HostSNI(`*`)"
 
   clusters-keeper:
