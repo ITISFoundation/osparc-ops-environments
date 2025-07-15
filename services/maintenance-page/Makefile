@@ -32,7 +32,7 @@ up-master: up
 # Helpers -------------------------------------------------
 
 .PHONY: docker-compose.yml
-docker-compose.yml: .venv .env
+docker-compose.yml: venv .env
 	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
 	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;
