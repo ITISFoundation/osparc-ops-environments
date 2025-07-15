@@ -109,7 +109,7 @@ services:
     deploy:
       mode: global
       update_config:
-        order: start-first
+        order: stop-first
         delay: 10s
         failure_action: rollback
         parallelism: 1
