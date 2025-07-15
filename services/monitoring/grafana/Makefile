@@ -39,29 +39,11 @@ terraform-apply: $(REPO_CONFIG_LOCATION) terraform/plan.cache $(TF_STATE_FILE) e
 	terraform -chdir=./terraform apply plan.cache
 
 .PHONY: ensure-grafana-online
-ensure-grafana-online:
+ensure-grafana-online: $(WAIT_FOR_IT)
 	@set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	set +o allexport; \
-	url=$${TF_VAR_GRAFANA_URL}; \
-	echo "Waiting for grafana at $$url to become reachable..."; \
-	attempts=0; \
-	max_attempts=10; \
-	while [ $$attempts -lt $$max_attempts ]; do \
-		status_code=$$(curl -k -o /dev/null -s -w "%{http_code}" --max-time 10 $$url); \
-		if [ "$$status_code" -ge 200 ] && [ "$$status_code" -lt 400 ]; then \
-			echo "Grafana is online"; \
-			break; \
-		else \
-			echo "Grafana still unreachable, waiting 5s for grafana to become reachable... (Attempt $$((attempts+1)))"; \
-			sleep 5; \
-			attempts=$$((attempts + 1)); \
-		fi; \
-	done; \
-	if [ $$attempts -eq $$max_attempts ]; then \
-		echo "Max attempts reached, Grafana is still unreachable."; \
-		exit 1; \
-	fi;
+	$(WAIT_FOR_IT) http $$TF_VAR_GRAFANA_URL --timeout=120s --interval=5s --expect-status-code 200
 
 .PHONY: assets
 assets: ${REPO_CONFIG_LOCATION}
