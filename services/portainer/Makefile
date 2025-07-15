@@ -20,14 +20,6 @@ up: .init .env secrets ${TEMP_COMPOSE}
 up-local: .init .env secrets ${TEMP_COMPOSE} ${TEMP_COMPOSE}-local
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-.PHONY: up-letsencrypt-http ## Deploys portainer stack using let's encrypt http challenge
-up-letsencrypt-http: .init .env secrets ${TEMP_COMPOSE}-letsencrypt-http
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns ## Deploys portainer stack using let's encrypt dns challenge
-up-letsencrypt-dns: .init .env secrets ${TEMP_COMPOSE}-letsencrypt-dns
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
-
 .PHONY: up-dalco ## Deploys portainer stack for Dalco Cluster
 up-dalco: .init .env secrets ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
@@ -66,14 +58,6 @@ configure-registry:  ## Add if necessary dockerhub registry configuration to por
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
