@@ -49,38 +49,32 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env traefik_
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
+${TEMP_COMPOSE}-aws: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
+${TEMP_COMPOSE}-dalco: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml .env
+${TEMP_COMPOSE}-public: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
+${TEMP_COMPOSE}-master: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
-
-.PHONY: docker-compose.letsencrypt.dns.yml
-docker-compose.letsencrypt.dns.yml: venv .env
-	@$(call jinja, docker-compose.letsencrypt.dns.yml.j2, .env, docker-compose.letsencrypt.dns.yml.unlinted) && \
-	$(_yq) docker-compose.letsencrypt.dns.yml.unlinted > docker-compose.letsencrypt.dns.yml; \
-	rm docker-compose.letsencrypt.dns.yml.unlinted >/dev/null 2>&1;
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: docker-compose.yml
 docker-compose.yml: traefik_dynamic_config.yml venv .env
