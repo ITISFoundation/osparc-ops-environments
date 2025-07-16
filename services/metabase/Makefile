@@ -22,7 +22,7 @@ up-public: up
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
-docker-compose.yml: docker-compose.yml.j2 .env .venv
+docker-compose.yml: docker-compose.yml.j2 .env venv
 	@$(call jinja, $<, .env, $@)
 
 configure_metabase.sql: .env

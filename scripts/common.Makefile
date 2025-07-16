@@ -267,35 +267,6 @@ endif
 	fi
 
 # Helpers -------------------------------------------------
-# Replace the existing .venv target with the following
-$(REPO_BASE_DIR)/.venv/bin/activate:
-	# creating virtual environment with tooling (jinja, etc)
-	python3 -m venv $(REPO_BASE_DIR)/.venv
-	$(REPO_BASE_DIR)/.venv/bin/pip3 install --upgrade pip wheel setuptools
-	$(REPO_BASE_DIR)/.venv/bin/pip3 install jinja2 j2cli[yaml] typer
-	@echo "To activate the venv, execute 'source $(REPO_BASE_DIR)/.venv/bin/activate'"
-.PHONY: .venv
-.venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
-.PHONY: venv
-venv: $(REPO_BASE_DIR)/.venv/bin/activate ## Creates a python virtual environment with dev tools (pip, pylint, ...)
-
-# https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
-ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
-
-define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) \
-	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
-	--customize j2cli_customization.py
-endef
-
-else
-
-define jinja
-	$(REPO_BASE_DIR)/.venv/bin/j2 --format=env $(1) $(2) -o $(3) \
-	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
-endef
-
-endif
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
@@ -309,6 +280,108 @@ guard-%:
 		exit 1; \
 	fi
 
+# Explicitly define optional arguments
+# do nothing target https://stackoverflow.com/a/46648773/12124525
+guard-optional-%:
+	@:
+
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default
 	@ true
+
+#
+# Automatic VENV management
+#
+# Inspired from https://potyarkin.com/posts/2019/manage-python-virtual-environment-from-your-makefile/
+
+VENV_DIR=$(REPO_BASE_DIR)/.venv
+VENV_BIN=$(VENV_DIR)/bin
+
+# NOTE: this is because the gitlab CI does not allow to source cargon/env on the fly
+UV := $$HOME/.local/bin/uv
+
+$(UV):
+	@if [ ! -f $@ ]; then \
+		echo "Installing uv..."; \
+		curl -LsSf https://astral.sh/uv/install.sh | sh; \
+	fi
+
+UVX := $$HOME/.local/bin/uvx
+$(UVX): $(UV)
+
+# Use venv for any target that requires virtual environment to be created and configured
+venv: $(VENV_DIR)  ## configure repo's virtual environment
+$(VENV_BIN): $(VENV_DIR)
+
+$(VENV_DIR): $(UV)
+	@if [ ! -d $@ ]; then \
+		$< venv $@; \
+		VIRTUAL_ENV=$@ $< pip install --upgrade pip wheel setuptools; \
+		VIRTUAL_ENV=$@ $< pip install jinja2 j2cli[yaml] typer; \
+		$(VENV_BIN)/pre-commit install > /dev/null 2>&1; \
+		$(UV) self update || true; \
+	fi
+
+# Ensure tool is available or fail otherwise
+#
+# USAGE:
+#
+#	codestyle: $(VENV_BIN)/pyflakes
+#		$(VENV_BIN)/pyflakes .
+#
+$(VENV_BIN)/%: $(VENV_DIR)
+	@if [ ! -f "$@" ]; then \
+		echo "ERROR: '$*' is not found in $(VENV_BIN)"; \
+		exit 1; \
+	fi
+
+.PHONY: show-venv
+show-venv: venv  ## show venv info
+	@$(VENV_BIN)/python -c "import sys; print('Python ' + sys.version.replace('\n',''))"
+	@$(UV) --version
+	@echo venv: $(VENV_DIR)
+
+.PHONY: install
+install: guard-optional-REQUIREMENTS_FILE venv ## install requirements.txt dependencies
+	@if [ -z "$(REQUIREMENTS_FILE)" ]; then \
+		REQUIREMENTS_FILE=./requirements.txt; \
+	else \
+		REQUIREMENTS_FILE=$(REQUIREMENTS_FILE); \
+	fi; \
+	VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement $$REQUIREMENTS_FILE
+
+# https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
+ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
+
+define jinja
+	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
+	--customize j2cli_customization.py
+endef
+
+else
+
+define jinja
+	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
+endef
+
+endif
+
+#
+# wait-fot-it functionality
+#
+
+WAIT_FOR_IT := $(REPO_BASE_DIR)/scripts/wait4x
+
+alias: $(WAIT_FOR_IT)
+
+# https://github.com/wait4x/wait4x
+$(WAIT_FOR_IT):  ## installs wait4x utility for WAIT_FOR_IT functionality
+	# installing wait4x
+	@mkdir --parents /tmp/wait4x
+	@cd /tmp/wait4x && curl --silent --location --remote-name https://github.com/wait4x/wait4x/releases/download/v3.5.0/wait4x-linux-amd64.tar.gz
+	@tar -xf /tmp/wait4x/wait4x-linux-amd64.tar.gz -C /tmp/wait4x
+	@mv /tmp/wait4x/wait4x $@
+	@rm -rf /tmp/wait4x
+	@$@ version

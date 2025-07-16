@@ -53,7 +53,7 @@ ${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.
 ${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
-config.json: config.json.j2 .env .venv
+config.json: config.json.j2 .env venv
 	# generate $@
 	@$(call jinja, $<, .env, $@)
 	# validate and format $@
