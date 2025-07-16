@@ -374,9 +374,14 @@ endif
 
 WAIT_FOR_IT := $(REPO_BASE_DIR)/scripts/wait4x
 
+alias: $(WAIT_FOR_IT)
+
 # https://github.com/wait4x/wait4x
-$(WAIT_FOR_IT):
-	@curl --output-dir /tmp --silent --location --remote-name https://github.com/wait4x/wait4x/releases/download/v3.5.0/wait4x-linux-amd64.tar.gz
-	@tar -xf /tmp/wait4x-linux-amd64.tar.gz -C $(REPO_BASE_DIR)/scripts/
-	@rm /tmp/wait4x-linux-amd64.tar.gz
-	$@ version
+$(WAIT_FOR_IT):  ## installs wait4x utility for WAIT_FOR_IT functionality
+	# installing wait4x
+	@mkdir --parents /tmp/wait4x
+	@cd /tmp/wait4x && curl --silent --location --remote-name https://github.com/wait4x/wait4x/releases/download/v3.5.0/wait4x-linux-amd64.tar.gz
+	@tar -xf /tmp/wait4x/wait4x-linux-amd64.tar.gz -C /tmp/wait4x
+	@mv /tmp/wait4x/wait4x $@
+	@rm -rf /tmp/wait4x
+	@$@ version
