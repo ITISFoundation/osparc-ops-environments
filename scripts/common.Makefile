@@ -342,8 +342,13 @@ show-venv: venv  ## show venv info
 	@echo venv: $(VENV_DIR)
 
 .PHONY: install
-install: requirements.txt venv ## install dependencies from ./requirements.txt
-	@VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement $<
+install: guard-optional-REQUIREMENTS_FILE venv ## install requirements.txt dependencies
+	@if [ -z "$(REQUIREMENTS_FILE)" ]; then \
+		REQUIREMENTS_FILE=./requirements.txt; \
+	else \
+		REQUIREMENTS_FILE=$(REQUIREMENTS_FILE); \
+	fi; \
+	VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement $$REQUIREMENTS_FILE
 
 # https://github.com/kolypto/j2cli?tab=readme-ov-file#customization
 ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
@@ -362,3 +367,21 @@ define jinja
 endef
 
 endif
+
+#
+# wait-fot-it functionality
+#
+
+WAIT_FOR_IT := $(REPO_BASE_DIR)/scripts/wait4x
+
+alias: $(WAIT_FOR_IT)
+
+# https://github.com/wait4x/wait4x
+$(WAIT_FOR_IT):  ## installs wait4x utility for WAIT_FOR_IT functionality
+	# installing wait4x
+	@mkdir --parents /tmp/wait4x
+	@cd /tmp/wait4x && curl --silent --location --remote-name https://github.com/wait4x/wait4x/releases/download/v3.5.0/wait4x-linux-amd64.tar.gz
+	@tar -xf /tmp/wait4x/wait4x-linux-amd64.tar.gz -C /tmp/wait4x
+	@mv /tmp/wait4x/wait4x $@
+	@rm -rf /tmp/wait4x
+	@$@ version
