@@ -17,6 +17,7 @@ up: .init .env secrets ${TEMP_COMPOSE}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 	@$(MAKE) --no-print-directory configure-portainer-registry
 
+
 .PHONY: up-local ## Deploys portainer stack for local deployment
 up-local: .init .env secrets ${TEMP_COMPOSE} ${TEMP_COMPOSE}-local
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
@@ -40,14 +41,9 @@ up-master: .init .env secrets ${TEMP_COMPOSE}-master
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	@$(MAKE) --no-print-directory configure-portainer-registry
 
-
 .PHONY: configure-portainer-registry
 configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add registry to Portainer
 	@$(MAKE) --no-print-directory install REQUIREMENTS_FILE=./scripts/requirements.txt
-	@set -o allexport; source $(REPO_CONFIG_LOCATION); set +o allexport; \
-	$(WAIT_FOR_IT) http $$PORTAINER_URL --timeout=120s --interval=5s --expect-status-code 200 && \
-	$(VENV_BIN)/python ./scripts/configure_portainer_registry.py
-
 
 # Helpers -------------------------------------------------
 
