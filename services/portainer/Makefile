@@ -44,6 +44,9 @@ up-master: .init .env secrets ${TEMP_COMPOSE}-master
 .PHONY: configure-portainer-registry
 configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add registry to Portainer
 	@$(MAKE) --no-print-directory install REQUIREMENTS_FILE=./scripts/requirements.txt
+	@set -o allexport; source $(REPO_CONFIG_LOCATION); set +o allexport; \
+	$(WAIT_FOR_IT) http $$PORTAINER_URL --timeout=120s --interval=5s --expect-status-code 200 && \
+	$(VENV_BIN)/python ./scripts/configure_portainer_registry.py
 
 # Helpers -------------------------------------------------
 
