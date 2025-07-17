@@ -17,7 +17,6 @@ up: .init .env secrets ${TEMP_COMPOSE}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 	@$(MAKE) --no-print-directory configure-portainer-registry
 
-
 .PHONY: up-local ## Deploys portainer stack for local deployment
 up-local: .init .env secrets ${TEMP_COMPOSE} ${TEMP_COMPOSE}-local
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
