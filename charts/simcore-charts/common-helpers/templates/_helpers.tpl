@@ -72,3 +72,36 @@ data:
   {{- end }}
 {{- end }}
 {{- end -}}
+
+{{/*
+
+Usage:
+{{- include "common-helpers.defaultPodSecurityContext" . | nindent 0 }}
+
+Defines a common pod security context to ensure minimal privileges for containers.
+
+Values inspired from https://medium.com/dynatrace-engineering/kubernetes-security-part-3-security-context-7d44862c4cfa
+*/}}
+{{- define "common-helpers.defaultPodSecurityContext" -}}
+runAsNonRoot: true
+seccompProfile:
+  type: RuntimeDefault
+{{- end -}}
+
+{{/*
+
+Usage:
+{{- include "common-helpers.defaultContainerSecurityContext" . | nindent 0 }}
+
+Defines a common container security context to ensure minimal privileges for containers.
+
+Values inspired from https://medium.com/dynatrace-engineering/kubernetes-security-part-3-security-context-7d44862c4cfa
+*/}}
+{{- define "common-helpers.defaultContainerSecurityContext" -}}
+privileged: false
+readOnlyRootFilesystem: true
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+    - ALL
+{{- end -}}
