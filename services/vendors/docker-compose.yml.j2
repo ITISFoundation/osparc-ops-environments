@@ -30,11 +30,36 @@ services:
         - traefik.http.services.vendor_manual.loadbalancer.server.port=${VENDOR_MANUAL_PORT}
         - traefik.http.routers.vendor_manual.entrypoints=https
         - traefik.http.routers.vendor_manual.tls=true
-        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_manual_traefik_rule(VENDOR_MANUAL_PRODUCTS, VENDOR_MANUAL_SUBDOMAIN_PREFIX) }}
+        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_traefik_rule(VENDOR_MANUAL_PRODUCTS, VENDOR_MANUAL_SUBDOMAIN_PREFIX) }}
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, authenticated_platform_user@swarm
     networks:
       - public
-
+  chatbot:
+    image: ${VENDOR_CHATBOT_IMAGE}
+    init: true
+{%- raw %}
+    hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
+{%- endraw %}
+    deploy:
+      replicas: ${VENDOR_CHATBOT_REPLICAS}
+      placement:
+        constraints: []
+      resources: []
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${PUBLIC_NETWORK}
+        - traefik.http.services.vendor_chatbot.loadbalancer.server.port=${VENDOR_CHATBOT_PORT}
+        - traefik.http.routers.vendor_chatbot.entrypoints=https
+        - traefik.http.routers.vendor_chatbot.tls=true
+        - traefik.http.routers.vendor_chatbot.rule={{ generate_vendors_traefik_rule(VENDOR_CHATBOT_PRODUCTS, VENDOR_CHATBOT_SUBDOMAIN_PREFIX) }}
+        - traefik.http.routers.vendor_chatbot.middlewares=authenticated_platform_user@swarm
+    networks:
+      - public
 networks:
   public:
     external: true
