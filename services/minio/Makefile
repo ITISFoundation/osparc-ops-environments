@@ -25,7 +25,7 @@ up-master: up
 up-local: up
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yaml .venv .env
+${TEMP_COMPOSE}: docker-compose.yaml venv .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env docker-compose.yaml > $@
 
 
