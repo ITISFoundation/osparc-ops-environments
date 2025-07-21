@@ -122,10 +122,10 @@ repos:
         always_run: true
         language: script
         files: '^(.*\/Makefile.*)|(.*\.deploy_everything_locally.bash)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
-      - id: helm-deps
+      - id: helm-update-dependencies
         name: Helm Dependency Update
         description: Make sure all Chart.lock files are up-to-date
-        entry: bash -c 'find . -name Chart.yaml -exec dirname {} \; | xargs -t -I% helm dep up %'
+        entry: bash -c 'find . -name Chart.yaml -exec dirname {} \; | xargs -t -I% helm dependency update %'
         language: system
         files: ^charts/
         pass_filenames: false
