@@ -9,8 +9,8 @@ Full list: https://kubernetes.io/docs/concepts/security/application-security-che
 #### Pod-level securityContext recommendations
 
 Enable pod security standard on namespace level:
-* create namespace with labels https://aro-labs.com/pod-security-standards/
-* configure pod and container security context to satisfy security standards
+* create namespace with labels (examples and explanations https://aro-labs.com/pod-security-standards/)
+* configure pod and container security context to satisfy security standards (read more https://medium.com/dynatrace-engineering/kubernetes-security-part-3-security-context-7d44862c4cfa)
 
 ## Cluster / OPS developers
 
