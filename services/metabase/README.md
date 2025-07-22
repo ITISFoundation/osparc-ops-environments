@@ -7,6 +7,11 @@ Before deploying metabase first time, make sure that postgres is configured:
 
 This can be automated via https://github.com/ITISFoundation/osparc-ops-environments/issues/827
 
+## Removing metabase from deployment
+1. Remove stack from CI pipelines
+2. Manuall delete stack
+3. Clean up database with sql scripts (generated via metabase's Makefile)
+
 ## Extra Configuration (optional)
 
 Setting up email (manual):
