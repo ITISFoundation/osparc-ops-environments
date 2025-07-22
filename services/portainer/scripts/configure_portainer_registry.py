@@ -32,6 +32,7 @@ def get_portainer_api_auth_token(
         f"{portainer_api_url}/auth",
         # https://app.swaggerhub.com/apis/portainer/portainer-ce/2.27.6#/auth.authenticatePayload
         json={"Username": portainer_username, "Password": portainer_password},
+        verify=False,
     )
 
     try:
@@ -49,6 +50,7 @@ def get_registries(portainer_api_url: str, auth_token: str) -> list[Registry]:
     response = requests.get(
         f"{portainer_api_url}/registries",
         headers={"Authorization": f"Bearer {auth_token}"},
+        verify=False,
     )
 
     try:
@@ -81,6 +83,7 @@ def create_authenticated_dockerhub_registry(
             "password": dockerhub_password,
             "type": RegistryType.DOCKER_HUB.value,
         },
+        verify=False,
     )
 
     try:
