@@ -9,7 +9,7 @@ This can be automated via https://github.com/ITISFoundation/osparc-ops-environme
 
 ## Removing metabase from deployment
 1. Remove stack from CI pipelines
-2. Manuall delete stack
+2. Manually delete stack
 3. Clean up database with sql scripts (generated via metabase's Makefile)
 
 ## Extra Configuration (optional)
