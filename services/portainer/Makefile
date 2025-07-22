@@ -20,7 +20,7 @@ up: .init .env secrets ${TEMP_COMPOSE}
 .PHONY: up-local ## Deploys portainer stack for local deployment
 up-local: .init .env secrets ${TEMP_COMPOSE} ${TEMP_COMPOSE}-local
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
-	@$(MAKE) --noprint configure-portainer-registry
+	@$(MAKE) configure-portainer-registry
 
 .PHONY: up-dalco ## Deploys portainer stack for Dalco Cluster
 up-dalco: .init .env secrets ${TEMP_COMPOSE}-dalco
@@ -43,7 +43,7 @@ up-master: .init .env secrets ${TEMP_COMPOSE}-master
 
 .PHONY: configure-portainer-registry
 configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add registry to Portainer
-	@$(MAKE) --no-print install REQUIREMENTS_FILE=./scripts/requirements.txt
+	@$(MAKE) install REQUIREMENTS_FILE=./scripts/requirements.txt
 	@set -o allexport; source $(REPO_CONFIG_LOCATION); set +o allexport; \
 	$(WAIT_FOR_IT) http $$PORTAINER_URL --timeout=120s --interval=5s --expect-status-code 200 && \
 	$(VENV_BIN)/python ./scripts/configure_portainer_registry.py
