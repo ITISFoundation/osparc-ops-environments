@@ -29,11 +29,19 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "resource-usage-tracker.serviceAccountName" . }}
       securityContext:
+      {{- if .Values.podSecurityContext }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- else }}
+        {{- include "common-helpers.defaultPodSecurityContext" . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
+          {{- if .Values.securityContext }}
             {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- else }}
+            {{- include "common-helpers.defaultContainerSecurityContext" . | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
