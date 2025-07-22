@@ -30,5 +30,5 @@ up-public: up
 # Helpers -------------------------------------------------
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml .venv .env
+${TEMP_COMPOSE}: docker-compose.yml venv .env
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@

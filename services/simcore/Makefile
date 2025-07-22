@@ -71,7 +71,7 @@ assets/dask-certificates:
 		exit 1; \
 	fi
 
-docker-compose.yml: docker-compose.yml.j2 .venv .env assets/dask-certificates
+docker-compose.yml: docker-compose.yml.j2 venv .env assets/dask-certificates
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}-local

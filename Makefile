@@ -26,7 +26,7 @@ certificates/domain.key:
 	# Done: Creating docker secrets
 
 .PHONY: up-local
-up-local: .init .venv .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
+up-local: .init venv .install-fqdn certificates/domain.crt certificates/domain.key .create-secrets ## deploy osparc ops stacks and simcore, use minio_disabled=1 if minio s3 should not be started (if you have custom S3 set up)
 	@bash scripts/deployments/deploy_everything_locally.bash --stack_target=local --minio_enabled=0 --vcs_check=1
 	@$(MAKE) info-local
 
