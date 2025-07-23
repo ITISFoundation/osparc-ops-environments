@@ -28,6 +28,11 @@ services:
         published: 5672
         mode: host
       {% endif %}
+      {% if OPS_TRAEFIK_EXPOSE_REDIS|lower == "true" %}
+      - target: 6379
+        published: 6379
+        mode: host
+      {% endif %}
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
