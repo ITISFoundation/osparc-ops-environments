@@ -19,10 +19,11 @@
 - [ ] Service is restartable
 - [ ] Service restart is zero-downtime
 - [ ] Service has >1 replicas in PROD
-- [ ] Service has docker heathlcheck enabled
+- [ ] Service has docker healthcheck enabled
 - [ ] Service is monitored (via prometheus and grafana)
 - [ ] Service is not bound to one specific node (e.g. via files or volumes)
 - [ ] Relevant OPS E2E Test are added
+- [ ] Grafana dashboards updated accordingly
 
 If exposed via traefik
 - [ ] Service's Public URL is included in maintenance mode
