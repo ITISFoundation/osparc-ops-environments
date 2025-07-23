@@ -48,7 +48,7 @@ up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local c
 
 # Helpers -------------------------------------------------
 
-docker-compose.yml: docker-compose.yml.j2 .venv .env
+docker-compose.yml: docker-compose.yml.j2 venv .env
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}
@@ -97,12 +97,11 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 
 
 .PHONY: configure
-configure: .env .venv ## Test is Graylog is online and configure Graylog inputs
+configure: .env venv ## Test is Graylog is online and configure Graylog inputs
 	@cd scripts;\
-	source ${REPO_BASE_DIR}/.venv/bin/activate;\
-	pip install -r requirements.txt > /dev/null 2>&1;\
+	VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement requirements.txt > /dev/null 2>&1;\
 	set -o allexport; \
 	source ../$<;\
 	set +o allexport; \
 	envsubst < alerts.template.yaml > alerts.yaml;\
-	python configure.py;
+	$(VENV_BIN)/python configure.py;

@@ -52,7 +52,7 @@ up-master: ${TEMP_COMPOSE}-master ## Deploys monitoring stack for Master Cluster
 # docker compose targets
 #
 
-COMMON_COMPOSE_DEPENDENCIES: .env .venv
+COMMON_COMPOSE_DEPENDENCIES: .env venv
 
 docker-compose.yml: docker-compose.yml.j2 \
 					prometheus/prometheus-federation.yml \
@@ -71,7 +71,7 @@ docker-compose.dalco.yml: docker-compose.dalco.yml.j2 config.prometheus.ceph.sim
 	# generating $@
 	@$(call jinja,$<,.env,$@)
 
-docker-compose.public.yml: docker-compose.public.yml.j2 config.prometheus $(COMMON_COMPOSE_DEPENDENCIES)
+docker-compose.public.yml: docker-compose.public.yml.j2 config.prometheus.simcore $(COMMON_COMPOSE_DEPENDENCIES)
 	# generating $@
 	@$(call jinja,$<,.env,$@)
 
@@ -80,6 +80,10 @@ docker-compose.aws.yml: docker-compose.aws.yml.j2 config.prometheus.simcore.aws 
 	@$(call jinja,$<,.env,$@)
 
 docker-compose.master.yml: docker-compose.master.yml.j2 config.prometheus.ceph.simcore $(COMMON_COMPOSE_DEPENDENCIES)
+	# generating $@
+	@$(call jinja,$<,.env,$@)
+
+docker-compose.local.yml: docker-compose.local.yml.j2 config.prometheus.ceph.simcore $(COMMON_COMPOSE_DEPENDENCIES)
 	# generating $@
 	@$(call jinja,$<,.env,$@)
 
@@ -101,15 +105,15 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml  docker-compose.aws.yml $(TEMP_COMPOSE_C
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.master.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml $(TEMP_COMPOSE_COMMON_DEPENDENCIES)
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 #
 # artifacts targets
 #
 
 .PHONY: config.grafana.dashboards
-config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 .venv #Configure dashboards for aws or dalco clusters
+config.grafana.dashboards: grafana/templates-provisioning/dashboards/simcore/Metrics-dashboard.json.j2 venv #Configure dashboards for aws or dalco clusters
 	$(call jinja, $<, .env, grafana/provisioning/dashboards/simcore/Metrics-dashboard.json)
 
 .PHONY: grafana/config.monitoring
@@ -120,7 +124,7 @@ grafana/config.monitoring: grafana/template-config.monitoring ${REPO_CONFIG_LOCA
 	envsubst < $< > $@
 
 .PHONY: config.prometheus.simcore
-config.prometheus.simcore: ${REPO_CONFIG_LOCATION} .venv
+config.prometheus.simcore: ${REPO_CONFIG_LOCATION} venv
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -129,7 +133,7 @@ config.prometheus.simcore: ${REPO_CONFIG_LOCATION} .venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus.simcore.aws
-config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} .venv
+config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -138,7 +142,7 @@ config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} .venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus.ceph.simcore
-config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env .venv
+config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -149,20 +153,20 @@ config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env .venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus
-config.prometheus: ${REPO_CONFIG_LOCATION} .venv
+config.prometheus: ${REPO_CONFIG_LOCATION} venv
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
 	envsubst < prometheus/prometheus-base.yml > prometheus/prometheus.temp.yml; \
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
-pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+pgsql_query_exporter_config.yaml: pgsql_query_exporter_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env venv
 	$(call jinja, $<, .env, $@);
 
-smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env venv
 	$(call jinja, $<, .env, $@);
 
-tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env .venv
+tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env venv
 	$(call jinja, $<, .env, $@);
 
 #

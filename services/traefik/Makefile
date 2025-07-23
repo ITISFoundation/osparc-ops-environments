@@ -13,14 +13,6 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 up-local: .init .create_secrets ${TEMP_COMPOSE}-local prune-docker-stack-configs ## Deploys the stack using provided certificates
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-.PHONY: up-letsencrypt-http
-up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys the stack with let's encrypt http challenge
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns
-up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys the stack with let's encrypt dns challenge
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dns ${STACK_NAME}
-
 .PHONY: up-dalco
 up-dalco: .init ${TEMP_COMPOSE}-dalco prune-docker-stack-configs ## Deploys the stack on dalco cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
@@ -50,62 +42,42 @@ traefik_dynamic_config.yml:
 
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env traefik_dynamic_config.yml
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
 	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml  > $@
 
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
-	@set -o allexport; \
-	source .env; \
-	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@set -o allexport; \
-	source .env; \
-	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
-
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
+${TEMP_COMPOSE}-aws: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
+${TEMP_COMPOSE}-dalco: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.public.yml .env
+${TEMP_COMPOSE}-public: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.public.yml > $@
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
+${TEMP_COMPOSE}-master: docker-compose.yml .env
 	@set -o allexport; \
 	source .env; \
 	set +o allexport; \
-	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
-
-.PHONY: docker-compose.letsencrypt.dns.yml
-docker-compose.letsencrypt.dns.yml: .venv .env
-	@$(call jinja, docker-compose.letsencrypt.dns.yml.j2, .env, docker-compose.letsencrypt.dns.yml.unlinted) && \
-	$(_yq) docker-compose.letsencrypt.dns.yml.unlinted > docker-compose.letsencrypt.dns.yml; \
-	rm docker-compose.letsencrypt.dns.yml.unlinted >/dev/null 2>&1;
+	${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: docker-compose.yml
-docker-compose.yml: traefik_dynamic_config.yml .venv .env
+docker-compose.yml: traefik_dynamic_config.yml venv .env
 	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
 	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;
