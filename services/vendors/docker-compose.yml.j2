@@ -43,7 +43,8 @@ services:
     deploy:
       replicas: ${VENDOR_CHATBOT_REPLICAS}
       placement:
-        constraints: []
+        constraints:
+          - node.labels.simcore==true
       resources:
         limits:
           cpus: "1.0"
@@ -64,6 +65,8 @@ services:
         - traefik.http.routers.vendor_chat.tls=true
         - traefik.http.routers.vendor_chat.rule={{ generate_vendors_traefik_rule(VENDOR_CHATBOT_PRODUCTS, VENDOR_CHATBOT_SUBDOMAIN_PREFIX) }}
         - traefik.http.routers.vendor_chat.middlewares=authenticated_platform_user@swarm
+        - prometheus-job=vendor-chat
+        - prometheus-port=8000
     networks:
       - public
 networks:
