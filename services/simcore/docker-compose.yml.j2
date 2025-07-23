@@ -341,7 +341,7 @@ services:
     networks:
       - monitored
     deploy:
-      replicas: ${SIMCORE_WB_AUTH_REPLICAS}
+      replicas: ${WB_AUTH_REPLICAS}
       update_config:
         parallelism: 2
         order: start-first
