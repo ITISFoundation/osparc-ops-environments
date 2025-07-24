@@ -258,4 +258,9 @@ if [ "$start_simcore" -eq 0 ]; then
     pushd "${service_dir}"
     call_make "." up-"$stack_target"
     popd
+    log_info "starting vendor services..."
+    service_dir="${repo_basedir}"/services/vendors
+    pushd "${service_dir}"
+    call_make "." up-"$stack_target"
+    popd
 fi

@@ -5,7 +5,7 @@ services:
     image: ${VENDOR_MANUAL_IMAGE}
     init: true
 {%- raw %}
-    hostname: "{{.Node.Hostname}}-{{.Task.Slot}}"
+    hostname: "v-manual-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
     deploy:
       replicas: ${VENDOR_MANUAL_REPLICAS}
@@ -30,11 +30,45 @@ services:
         - traefik.http.services.vendor_manual.loadbalancer.server.port=${VENDOR_MANUAL_PORT}
         - traefik.http.routers.vendor_manual.entrypoints=https
         - traefik.http.routers.vendor_manual.tls=true
-        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_manual_traefik_rule(VENDOR_MANUAL_PRODUCTS, VENDOR_MANUAL_SUBDOMAIN_PREFIX) }}
+        - traefik.http.routers.vendor_manual.rule={{ generate_vendors_traefik_rule(VENDOR_MANUAL_PRODUCTS, VENDOR_MANUAL_SUBDOMAIN_PREFIX) }}
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, authenticated_platform_user@swarm
     networks:
       - public
-
+  chat:
+    image: ${VENDOR_CHATBOT_IMAGE}
+    init: true
+{%- raw %}
+    hostname: "v-chat-{{.Node.Hostname}}-{{.Task.Slot}}"
+{%- endraw %}
+    deploy:
+      replicas: ${VENDOR_CHATBOT_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2.5G
+        reservations:
+          cpus: "0.1"
+          memory: 512M
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${PUBLIC_NETWORK}
+        - traefik.http.services.vendor_chat.loadbalancer.server.port=${VENDOR_CHATBOT_PORT}
+        - traefik.http.routers.vendor_chat.entrypoints=https
+        - traefik.http.routers.vendor_chat.tls=true
+        - traefik.http.routers.vendor_chat.rule={{ generate_vendors_traefik_rule(VENDOR_CHATBOT_PRODUCTS, VENDOR_CHATBOT_SUBDOMAIN_PREFIX) }}
+        - traefik.http.routers.vendor_chat.middlewares=authenticated_platform_user@swarm
+        - prometheus-job=vendor-chat
+        - prometheus-port=8000
+    networks:
+      - public
 networks:
   public:
     external: true
