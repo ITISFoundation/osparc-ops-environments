@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   # MongoDB: https://hub.docker.com/_/mongo/
   mongodb:
@@ -102,7 +101,7 @@ services:
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
   fluentd:
-    image: itisfoundation/fluentd:v1.16.8-1.0
+    image: itisfoundation/fluentd:v1.16.9-1.0
     configs:
       - source: fluentd_config
         target: /fluentd/etc/fluent.conf
