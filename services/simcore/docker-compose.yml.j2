@@ -339,7 +339,8 @@ services:
 
   wb-auth:
     networks:
-      - monitored
+      - monitored  # traces
+      - public  # public service use auth
     deploy:
       replicas: ${WB_AUTH_REPLICAS}
       update_config:
