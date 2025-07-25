@@ -337,6 +337,34 @@ services:
           cpus: "1.0"
           memory: "512M"
 
+  wb-auth:
+    networks:
+      - monitored  # traces
+      - public  # public service use auth
+    deploy:
+      replicas: ${WB_AUTH_REPLICAS}
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits:
+          cpus: "1"
+          memory: "1G"
+      # healthcheck: defined in image
+
   storage:
     environment:
       - S3_ENDPOINT=${S3_ENDPOINT}
