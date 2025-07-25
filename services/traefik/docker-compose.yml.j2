@@ -1,47 +1,8 @@
 services:
   traefik:
-    image: "traefik:v3.4.0"
+    image: "traefik:v3.4.4"
     init: true
-    command:
-      - "--api=true"
-      - "--ping=true"
-      - "--entryPoints.ping.address=:9082"
-      - "--ping.entryPoint=ping"
-      - "--api.dashboard=true"
-      - "--accesslog=true"
-      - "--accesslog.format=json"
-      - "--accesslog.fields.defaultmode=keep"
-      - "--accesslog.fields.names.ClientUsername=keep"
-      - "--accesslog.fields.headers.defaultmode=keep"
-      - "--accesslog.fields.headers.names.User-Agent=keep"
-      - "--accesslog.fields.headers.names.Authorization=drop"
-      - "--accesslog.fields.headers.names.Content-Type=keep"
-      - "--log.level=${OPS_TRAEFIK_LOGLEVEL}"
-      - "--metrics.prometheus=true"
-      - "--metrics.prometheus.addEntryPointsLabels=true"
-      - "--metrics.prometheus.addServicesLabels=true"
-      - "--entryPoints.metrics.address=:8082"
-      - "--metrics.prometheus.entryPoint=metrics"
-      - "--entryPoints.http.address=:80"
-      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entrypoints.http.http.redirections.entrypoint.to=https"
-      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
-      - '--entryPoints.postgres.address=:5432'
-      - '--entryPoints.postgres2.address=:5433'
-      - "--entryPoints.https.address=:443"
-      - "--entryPoints.https.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.https.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.exposedByDefault=false"
-      # so that internal services are not picked up
-      - "--providers.swarm.constraints=!LabelRegex(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
-      - "--core.defaultRuleSyntax=v2"
-      - "--tracing=true"
-      - "--tracing.addinternals"
-      - "--tracing.otlp=true"
-      - "--tracing.otlp.http=true"
+    dns: 8.8.8.8
     healthcheck:
       # NOTE: this healthcheck to check if traefik is up and running must be run on the ping entrypoint defined in command!
       test: traefik healthcheck --ping --ping.entryPoint=ping --entryPoints.ping.address=:9082
@@ -57,18 +18,35 @@ services:
       - target: 443
         published: 443
         mode: host
+      {% if OPS_TRAEFIK_EXPOSE_POSTGRES|lower == "true" %}
       - target: 5432
         published: 5432
         mode: host
-      - target: 5433
-        published: 5433
+      {% endif %}
+      {% if OPS_TRAEFIK_EXPOSE_RABBITMQ|lower == "true" %}
+      - target: 5672
+        published: 5672
         mode: host
+      {% endif %}
+      {% if OPS_TRAEFIK_EXPOSE_REDIS|lower == "true" %}
+      - target: 6379
+        published: 6379
+        mode: host
+      {% endif %}
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml
+    env_file:
+      - .env
+    environment: # This is strictly needed to make the tricky TRAEFIK_PROVIDERS_SWARM_CONSTRAINTS expression work
+      TRAEFIK_PROVIDERS_SWARM_CONSTRAINTS: |
+        ${TRAEFIK_PROVIDERS_SWARM_CONSTRAINTS}
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+    {% if MACHINE_FQDN|lower != "osparc.local"%}
+      - /etc/traefik_certs:/etc/traefik_certs
+    {% endif %}
     deploy:
       # mode: global
       replicas: ${OPS_TRAEFIK_REPLICAS}
@@ -86,6 +64,7 @@ services:
           cpus: '1.000'
       placement:
         constraints:
+          - node.labels.traefik==true
           - node.role == manager
       labels:
         - traefik.enable=true
@@ -136,8 +115,7 @@ services:
           (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
         - traefik.http.routers.api.entrypoints=https
         - traefik.http.routers.api.tls=true
-        - traefik.http.routers.api.middlewares=ops_whitelist_ips@swarm,
-          ops_auth@swarm, ops_gzip@swarm
+        - traefik.http.routers.api.middlewares=ops_whitelist_ips@swarm,ops_auth@swarm,ops_gzip@swarm
         - traefik.http.services.api.loadbalancer.server.port=8080
         # prometheus labels
         - prometheus-job=traefik_ops
@@ -161,7 +139,6 @@ services:
         - traefik.http.middlewares.strip-www.redirectregex.regex=^(https?)://www\.(.+)
         - traefik.http.middlewares.strip-www.redirectregex.replacement=$${1}://$${2}
         - traefik.http.middlewares.strip-www.redirectregex.permanent=true
-
 
         ###
         # Domain redirects
@@ -190,13 +167,14 @@ services:
         - traefik.http.routers.{{ from_domain_no_dots }}.tls=true
 
 {% endfor %}
-
     networks:
       public: null
       monitored: null
 
   whoami:
     image: "containous/whoami"
+    dns: # Add this always for AWS, otherwise we get "No such image: " for docker services
+            8.8.8.8
     deploy:
       placement:
         constraints:
@@ -205,12 +183,10 @@ services:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.whoami.loadbalancer.server.port=80
-        - traefik.http.routers.whoami.rule=Host(`${MONITORING_DOMAIN}`) &&
-          PathPrefix(`/whoami`)
+        - traefik.http.routers.whoami.rule=Host("${MONITORING_DOMAIN}") && PathPrefix("/whoami")
         - traefik.http.routers.whoami.entrypoints=https
         - traefik.http.routers.whoami.tls=true
-        - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@swarm,
-          ops_auth@swarm, ops_gzip@swarm
+        - traefik.http.routers.whoami.middlewares=ops_whitelist_ips@swarm,ops_auth@swarm
       resources:
         limits:
           memory: 50M

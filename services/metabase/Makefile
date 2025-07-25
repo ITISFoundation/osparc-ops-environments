@@ -28,3 +28,7 @@ docker-compose.yml: docker-compose.yml.j2 .env venv
 configure_metabase.sql: .env
 	@set -o allexport; source $<; set +o allexport; \
 	envsubst < $@.template > $@
+
+remove_metabase.sql: .env
+	@set -o allexport; source $<; set +o allexport; \
+	envsubst < $@.template > $@
