@@ -50,9 +50,12 @@ helmfile-sync: .check-helmfile-installed helmfile.yaml ## Syncs the helmfile con
 	fi
 
 .PHONY: configure-local-hosts
-configure-local-hosts: ## Adds local hosts entries for the machine
-	@echo "Adding $(MACHINE_FQDN) hosts to /etc/hosts ..."
-	@grep -q '127.0.0.1 k8s.monitoring.$(MACHINE_FQDN)' /etc/hosts || echo '127.0.0.1 k8s.monitoring.$(MACHINE_FQDN)' | sudo tee -a /etc/hosts
+configure-local-hosts: $(REPO_CONFIG_LOCATION) ## Adds local hosts entries for the machine
+	# "Updating /etc/hosts with k8s $(MACHINE_FQDN) hosts ..."
+	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
+	grep -q "127.0.0.1 $$K8S_MONITORING_FQDN" /etc/hosts || echo "127.0.0.1 $$K8S_MONITORING_FQDN" | sudo tee -a /etc/hosts
+	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
+	grep -q "127.0.0.1 $$K8S_PRIVATE_FQDN" /etc/hosts || echo "127.0.0.1 $$K8S_PRIVATE_FQDN" | sudo tee -a /etc/hosts
 
 .PHONY: helmfile-diff
 helmfile-diff: .check-helmfile-installed helmfile.yaml ## Shows the differences that would be applied by helmfile
