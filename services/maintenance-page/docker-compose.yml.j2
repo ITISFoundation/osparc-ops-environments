@@ -28,6 +28,7 @@ services:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.priority={{MAINTENANCE_PAGES_TRAEFIK_PRIORITY}}
+        - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule=Host(`{{VENDOR_CHATBOT_SUBDOMAIN_PREFIX}}.{{j2item}}`) || (Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`) && PathPrefix(`/`))
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.rule=Host(`{{VENDOR_MANUAL_SUBDOMAIN_PREFIX}}.{{j2item}}`) || (Host(`{{j2item}}`) && PathPrefix(`/`)) || (HostRegexp(`services.{{j2item}}`) && PathPrefix(`/`))
         - traefik.http.routers.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.tls=true
         - traefik.http.services.{{"maintenance_" + j2item.replace('@','').replace(' ','').replace('.','').replace('-','').replace('\'','') + "_html"}}.loadbalancer.server.port=80
