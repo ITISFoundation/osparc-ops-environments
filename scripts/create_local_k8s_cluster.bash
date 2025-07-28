@@ -6,7 +6,7 @@ set -o pipefail
 
 THIS_SCRIPT_DIR=$(dirname "$0")
 KIND_CONFIG_FILE="$THIS_SCRIPT_DIR/kind_config.yaml"
-KIND_CLUSTER_NAME="kind"
+KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-osparc-cluster}"
 
 if ! command -v kind &> /dev/null; then
     echo "Error: kind is not installed. Please install kind and try again."
@@ -19,7 +19,7 @@ if ! command -v kubectl &> /dev/null; then
 fi
 
 if kind get clusters | grep -q "^$KIND_CLUSTER_NAME$"; then
-        echo "A cluster is already up."
+        echo "A cluster '$KIND_CLUSTER_NAME' is already up."
         exit 0
 fi
 
@@ -28,5 +28,24 @@ if [[ ! -f "$KIND_CONFIG_FILE" ]]; then
     exit 1
 fi
 
+#
 # create a k8s cluster
+#
+
+echo "Creating a local Kubernetes cluster named '$KIND_CLUSTER_NAME' using configuration from '$KIND_CONFIG_FILE'..."
+
 kind create cluster --config "$KIND_CONFIG_FILE" --name "$KIND_CLUSTER_NAME"
+
+#
+# install Calico network CNI
+#
+
+# https://archive-os-3-26.netlify.app/calico/3.26/getting-started/kubernetes/kind/
+
+echo "Installing Calico network CNI ..."
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/custom-resources.yaml
+
+echo "Waiting for Calico pods to start..."
+while ! kubectl get pods -A -l k8s-app=calico-node 2>/dev/null | grep -q "Running"; do sleep 1; done
