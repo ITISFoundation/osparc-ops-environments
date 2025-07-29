@@ -40,7 +40,7 @@ kind create cluster --config "$KIND_CONFIG_FILE" --name "$KIND_CLUSTER_NAME"
 # install Calico network CNI
 #
 
-# https://archive-os-3-26.netlify.app/calico/3.26/getting-started/kubernetes/kind/
+# https://docs.tigera.io/calico/3.30/getting-started/kubernetes/kind
 
 echo "Installing Calico network CNI ..."
 
