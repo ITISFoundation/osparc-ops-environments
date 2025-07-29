@@ -37,6 +37,8 @@ services:
   chat:
     image: ${VENDOR_CHATBOT_IMAGE}
     init: true
+    env_file:
+      - .env
 {%- raw %}
     hostname: "v-chat-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
