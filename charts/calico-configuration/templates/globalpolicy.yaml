@@ -1,0 +1,26 @@
+# Source: https://docs.tigera.io/calico-enterprise/latest/network-policy/default-deny#best-practice-2-keep-the-scope-to-non-system-pods
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: default-global-deny-network-policy
+spec:
+  # on local deployment, calico is installed in the `calico-system` namespace
+  # and the operator is in the `tigera-operator` namespace
+  namespaceSelector: kubernetes.io/metadata.name in {"adminer"}
+  types:
+  - Ingress
+  - Egress
+  egress:
+   # allow all namespaces to communicate to DNS pods
+  - action: Allow
+    protocol: UDP
+    destination:
+      selector: 'k8s-app == "kube-dns"'
+      ports:
+      - 53
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: 'k8s-app == "kube-dns"'
+      ports:
+      - 53

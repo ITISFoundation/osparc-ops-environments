@@ -1,0 +1,1 @@
+This chart configures Calico but does not deploy Calico itself. This is done via Kubespray during Kubernetes Cluster provisioning.

@@ -1,69 +1,68 @@
-# Default values for adminer.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+servicePort: &servicePort 9000
 
-replicaCount: 1
+portainer:
+  replicaCount: 1
 
-image:
-  repository: portainer/portainer-ce
-  pullPolicy: IfNotPresent
+  image:
+    repository: portainer/portainer-ce
+    pullPolicy: IfNotPresent
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
 
-serviceAccount:
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: portainer-sa-clusteradmin
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: portainer-sa-clusteradmin
 
-persistence: {}
+  persistence: {}
 
-podAnnotations: {}
-podLabels: {}
+  podAnnotations: {}
+  podLabels: {}
 
-podSecurityContext:
-  {}
+  podSecurityContext:
+    {}
 
-securityContext:
-  {}
+  securityContext:
+    {}
 
-service:
-  type: "ClusterIP"
-  port: 9000
+  service:
+    type: "ClusterIP"
+    port: *servicePort
 
-ingress:
-  enabled: true
-  className: ""
-  annotations:
-    namespace: {{ .Release.Namespace }}
-    cert-manager.io/cluster-issuer: "cert-issuer"
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd,traefik-portainer-strip-prefix@kubernetescrd  # namespace + middleware name
-  tls:
-    - hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      secretName: monitoring-tls
-  hosts:
-    - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      paths:
-        - path: /portainer
-          pathType: Prefix
-          backend:
-            service:
-              name: portainer
-              port:
-                number: 9000
+  ingress:
+    enabled: true
+    className: ""
+    annotations:
+      namespace: {{ .Release.Namespace }}
+      cert-manager.io/cluster-issuer: "cert-issuer"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd,traefik-portainer-strip-prefix@kubernetescrd  # namespace + middleware name
+    tls:
+      - hosts:
+          - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        secretName: monitoring-tls
+    hosts:
+      - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        paths:
+          - path: /portainer
+            pathType: Prefix
+            backend:
+              service:
+                name: portainer
+                port:
+                  number: *servicePort
 
-resources:
-  limits:
-    cpu: 2
-    memory: 1024Mi
-  requests:
-    cpu: 0.1
-    memory: 128Mi
+  resources:
+    limits:
+      cpu: 2
+      memory: 1024Mi
+    requests:
+      cpu: 0.1
+      memory: 128Mi
 
-nodeSelector:
-  ops: "true"
+  nodeSelector:
+    ops: "true"
