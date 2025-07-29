@@ -44,8 +44,10 @@ kind create cluster --config "$KIND_CONFIG_FILE" --name "$KIND_CLUSTER_NAME"
 
 echo "Installing Calico network CNI ..."
 
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/custom-resources.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/operator-crds.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/tigera-operator.yaml
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/custom-resources.yaml
 
 echo "Waiting for Calico pods to start..."
 while ! kubectl get pods -A -l k8s-app=calico-node 2>/dev/null | grep -q "Running"; do sleep 1; done
