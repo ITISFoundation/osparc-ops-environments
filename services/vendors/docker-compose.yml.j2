@@ -63,7 +63,7 @@ services:
         - traefik.http.services.vendor_chat_backend.loadbalancer.server.port=${VENDOR_CHATBOT_BACKEND_PORT}
         - traefik.http.routers.vendor_chat_backend.entrypoints=https
         - traefik.http.routers.vendor_chat_backend.tls=true
-        - traefik.http.routers.vendor_chat_backend.rule=(PathPrefix(`/v1/`) && {{ generate_vendors_traefik_rule(VENDOR_CHATBOT_FRONTEND_PRODUCTS, VENDOR_CHATBOT_FRONTEND_SUBDOMAIN_PREFIX) }})
+        - traefik.http.routers.vendor_chat_backend.rule=(PathPrefix(`/v1/`) && ({{ generate_vendors_traefik_rule(VENDOR_CHATBOT_FRONTEND_PRODUCTS, VENDOR_CHATBOT_FRONTEND_SUBDOMAIN_PREFIX) }}))
     networks:
       - public
   chat-frontend:
@@ -95,7 +95,7 @@ services:
         - traefik.http.services.vendor_chat_frontend.loadbalancer.server.port=${VENDOR_CHATBOT_FRONTEND_PORT}
         - traefik.http.routers.vendor_chat_frontend.entrypoints=https
         - traefik.http.routers.vendor_chat_frontend.tls=true
-        - traefik.http.routers.vendor_chat_frontend.rule=(!PathPrefix(`/v1/`) && {{ generate_vendors_traefik_rule(VENDOR_CHATBOT_FRONTEND_PRODUCTS, VENDOR_CHATBOT_FRONTEND_SUBDOMAIN_PREFIX) }})
+        - traefik.http.routers.vendor_chat_frontend.rule=(!PathPrefix(`/v1/`) && ({{ generate_vendors_traefik_rule(VENDOR_CHATBOT_FRONTEND_PRODUCTS, VENDOR_CHATBOT_FRONTEND_SUBDOMAIN_PREFIX) }}))
         - traefik.http.routers.vendor_chat_frontend.middlewares=authenticated_platform_user@swarm
     networks:
       - public
