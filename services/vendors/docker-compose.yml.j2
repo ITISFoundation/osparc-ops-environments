@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   manual:
     image: ${VENDOR_MANUAL_IMAGE}
@@ -34,16 +32,16 @@ services:
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, authenticated_platform_user@swarm
     networks:
       - public
-  chat:
-    image: ${VENDOR_CHATBOT_IMAGE}
+  chat-backend:
+    image: ${VENDOR_CHATBOT_BACKEND_IMAGE}
     init: true
     env_file:
       - .env
 {%- raw %}
-    hostname: "v-chat-{{.Node.Hostname}}-{{.Task.Slot}}"
+    hostname: "v-chat-backend-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
     deploy:
-      replicas: ${VENDOR_CHATBOT_REPLICAS}
+      replicas: ${VENDOR_CHATBOT_BACKEND_REPLICAS}
       placement:
         constraints:
           - node.labels.simcore==true
@@ -62,13 +60,43 @@ services:
       labels:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
-        - traefik.http.services.vendor_chat.loadbalancer.server.port=${VENDOR_CHATBOT_PORT}
-        - traefik.http.routers.vendor_chat.entrypoints=https
-        - traefik.http.routers.vendor_chat.tls=true
-        - traefik.http.routers.vendor_chat.rule={{ generate_vendors_traefik_rule(VENDOR_CHATBOT_PRODUCTS, VENDOR_CHATBOT_SUBDOMAIN_PREFIX) }}
-        - traefik.http.routers.vendor_chat.middlewares=authenticated_platform_user@swarm
-        - prometheus-job=vendor-chat
-        - prometheus-port=8000
+        - traefik.http.services.vendor_chat_backend.loadbalancer.server.port=${VENDOR_CHATBOT_BACKEND_PORT}
+        - traefik.http.routers.vendor_chat_backend.entrypoints=https
+        - traefik.http.routers.vendor_chat_backend.tls=true
+        - traefik.http.routers.vendor_chat_backend.rule=(PathPrefix(`/v1/`) && ({{ generate_vendors_traefik_rule(VENDOR_CHATBOT_FRONTEND_PRODUCTS, VENDOR_CHATBOT_FRONTEND_SUBDOMAIN_PREFIX) }}))
+    networks:
+      - public
+  chat-frontend:
+    image: ${VENDOR_CHATBOT_FRONTEND_IMAGE}
+    init: true
+{%- raw %}
+    hostname: "v-chat-frontend-{{.Node.Hostname}}-{{.Task.Slot}}"
+{%- endraw %}
+    deploy:
+      replicas: ${VENDOR_CHATBOT_FRONTEND_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2.5G
+        reservations:
+          cpus: "0.1"
+          memory: 512M
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${PUBLIC_NETWORK}
+        - traefik.http.services.vendor_chat_frontend.loadbalancer.server.port=${VENDOR_CHATBOT_FRONTEND_PORT}
+        - traefik.http.routers.vendor_chat_frontend.entrypoints=https
+        - traefik.http.routers.vendor_chat_frontend.tls=true
+        - traefik.http.routers.vendor_chat_frontend.rule=(!PathPrefix(`/v1/`) && ({{ generate_vendors_traefik_rule(VENDOR_CHATBOT_FRONTEND_PRODUCTS, VENDOR_CHATBOT_FRONTEND_SUBDOMAIN_PREFIX) }}))
+        - traefik.http.routers.vendor_chat_frontend.middlewares=authenticated_platform_user@swarm
     networks:
       - public
 networks:
