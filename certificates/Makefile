@@ -84,7 +84,8 @@ remove-root-certificate: ## removes the certificate from the host system
 		$(if $(IS_OSX), \
 			sudo security remove-trusted-cert -d rootca.crt; \
 		, \
-		sudo rm -f /usr/local/share/ca-certificates/osparc.crt; \
-		sudo update-ca-certificates -f; \
+		sudo rm -f /etc/ca-certificates/trust-source/anchors/osparc.crt; \
+		sudo trust extract-compat; \
+		sudo systemctl restart docker; \
 		) \
 	)
