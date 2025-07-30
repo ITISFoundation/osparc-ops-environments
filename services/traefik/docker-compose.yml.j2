@@ -131,7 +131,7 @@ services:
         - traefik.http.middlewares.ops_ratelimit.ratelimit.sourcecriterion.ipstrategy.depth=1
         # Platform user auth: Use this middleware to enforce only authenticated users
         # https://doc.traefik.io/traefik/middlewares/http/forwardauth
-        - traefik.http.middlewares.authenticated_platform_user.forwardauth.address=http://${WEBSERVER_HOST}:${WEBSERVER_PORT}/v0/auth:check
+        - traefik.http.middlewares.authenticated_platform_user.forwardauth.address=http://${WB_AUTH_WEBSERVER_HOST}:${WB_AUTH_WEBSERVER_PORT}/v0/auth:check
         - traefik.http.middlewares.authenticated_platform_user.forwardauth.trustForwardHeader=true
         - traefik.http.middlewares.authenticated_platform_user.forwardauth.authResponseHeaders=Set-Cookie,osparc-sc2
         #
