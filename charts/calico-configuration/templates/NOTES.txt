@@ -1,1 +1,3 @@
 This chart configures Calico but does not deploy Calico itself. This is done via Kubespray during Kubernetes Cluster provisioning.
+
+Note: to make sure network policies are applied correctly, you may need to restart targeted application pods.

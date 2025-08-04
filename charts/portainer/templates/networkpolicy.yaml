@@ -22,7 +22,9 @@ spec:
     - action: Allow
       protocol: UDP
       destination:
-        selector: 'k8s-app == "kube-dns"'
+        # `selector: 'k8s-app == "kube-dns"'` does not work (so global policy default dns allow does not work)
+        # manually allow dns and use different selector that works.
+        selectorNamespace: kubernetes.io/metadata.name == "kube-system"
         ports:
           - 53
   ingress:
@@ -31,4 +33,4 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - 9000
+          - {{ .Values.servicePort }}

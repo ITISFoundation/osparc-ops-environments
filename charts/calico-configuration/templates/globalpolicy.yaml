@@ -1,26 +1,30 @@
-# Source: https://docs.tigera.io/calico-enterprise/latest/network-policy/default-deny#best-practice-2-keep-the-scope-to-non-system-pods
+# Source: https://docs.tigera.io/calico/3.30/network-policy/get-started/kubernetes-default-deny
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
   name: default-global-deny-network-policy
 spec:
-  # on local deployment, calico is installed in the `calico-system` namespace
-  # and the operator is in the `tigera-operator` namespace
-  namespaceSelector: kubernetes.io/metadata.name in {"adminer"}
+  # "kube-public", "kube-system", "kube-node-lease" -- system namespaces
+  # "calico-system", "calico-apiserver", "tigera-operator" -- calico namespaces (when installed via scripts [local deployment])
+  # TODO: other namespaces are to be removed from this list (once appropriate network policies are created)
+  namespaceSelector:
+    kubernetes.io/metadata.name not in {"kube-public", "kube-system", "kube-node-lease", "calico-system", "calico-apiserver", "tigera-operator", "simcore", "cert-manager", "reflector", "traefik", "victoria-logs", "csi-s3", "portainer", "topolvm", "local-path-storage"}
   types:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   egress:
-   # allow all namespaces to communicate to DNS pods
-  - action: Allow
-    protocol: UDP
-    destination:
-      selector: 'k8s-app == "kube-dns"'
-      ports:
-      - 53
-  - action: Allow
-    protocol: TCP
-    destination:
-      selector: 'k8s-app == "kube-dns"'
-      ports:
-      - 53
+    # allow all namespaces to communicate to DNS pods
+    # this will also apply to pods that have network policy defined
+    # so that we don't need to define DNS policy for each pod
+    - action: Allow
+      protocol: UDP
+      destination:
+        selector: 'k8s-app == "kube-dns"'
+        ports:
+          - 53
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: 'k8s-app == "kube-dns"'
+        ports:
+          - 53
