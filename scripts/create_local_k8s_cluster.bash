@@ -49,5 +49,4 @@ kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2
 
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/custom-resources.yaml
 
-echo "Waiting for Calico pods to start..."
-while ! kubectl get pods -A -l k8s-app=calico-node 2>/dev/null | grep -q "Running"; do sleep 1; done
+while ! kubectl get pods -A -l k8s-app=calico-node 2>/dev/null | grep -q "Running"; do echo "Waiting for Calico pods to start..."; sleep 1; done
