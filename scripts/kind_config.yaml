@@ -13,3 +13,9 @@ nodes:
     labels:
       ops: "true"
       simcore: "true"
+
+# https://archive-os-3-26.netlify.app/calico/3.26/getting-started/kubernetes/kind/
+networking:
+  disableDefaultCNI: true
+  # must match with cidr in https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/custom-resources.yaml
+  podSubnet: 192.168.0.0/16
