@@ -4,7 +4,7 @@ server:
   http_listen_port: 3100
 
 common:
-  path_prefix: /tmp/loki  # Required for automatic directory resolution
+  path_prefix: /tmp/loki  # Required for internal directories
 
 ingester:
   lifecycler:
@@ -18,22 +18,27 @@ schema_config:
   configs:
     - from: 2020-10-15
       store: tsdb
-      object_store: filesystem
+      object_store: s3
       schema: v13
       index:
         prefix: index_
         period: 24h
 
 storage_config:
-  tsdb_shipper:  # Correct section name
-    active_index_directory: /tmp/loki/tsdb-index
-    cache_location: /tmp/loki/tsdb-cache
-  filesystem:
-    directory: /tmp/loki/chunks
+  tsdb_shipper:
+    active_index_directory: /tmp/loki/tsdb-index   # Local cache for index metadata
+    cache_location: /tmp/loki/tsdb-cache          # Local cache for tsdb
+  aws:
+    s3: s3://${S3_BUCKET_NAME_LOKI}
+    region: ${S3_REGION_LOKI}
+    access_key_id: ${S3_ACCESS_KEY_LOKI}
+    secret_access_key: ${S3_SECRET_KEY_LOKI}
+    s3forcepathstyle: ${S3_FORCE_PATH_STYLE_LOKI}     # Set to true if using MinIO or S3-compatible API; optional for AWS
+    endpoint: ${S3_ENDPOINT_LOKI} # Optional; use for non-default endpoints
 
-compactor:  # Required for TSDB
+compactor:
   working_directory: /tmp/loki/compactor
   retention_enabled: false
 
 limits_config:
-  retention_period: 48h  # Must be ≥24h and multiple of index period (24h)
+  retention_period: ${LOKI_RETENTION_PERIOD}  # must be >= 24h and multiple of index period (24h)
