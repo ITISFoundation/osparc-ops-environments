@@ -114,6 +114,12 @@ scrape_configs:
         type: "A"
         port: 8080
       - names:
+          - "tasks.production_wb-auth"
+          - "tasks.staging_wb-auth"
+          - "tasks.master_wb-auth"
+        type: "A"
+        port: 8080
+      - names:
           - "tasks.production_wb-api-server"
           - "tasks.staging_wb-api-server"
           - "tasks.master_wb-api-server"
