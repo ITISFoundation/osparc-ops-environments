@@ -12,7 +12,7 @@ How to discover ports / networks that are used by application
   - https://docs.tigera.io/calico/3.30/observability/enable-whisker
   - https://docs.tigera.io/calico/3.30/observability/view-flow-logs
 
-Warning: make sure that calico version being used support Whisker (e.g. in v3.26 whisker is not documented at all)
+Warning: make sure that calico version being used support Whisker (first introduced in v3.30)
 
 ## Known issues
 
