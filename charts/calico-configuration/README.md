@@ -7,7 +7,7 @@ How to discover ports / networks that are used by application
 * add staged policies to make sure all cases are included https://docs.tigera.io/calico/3.30/network-policy/staged-network-policies
 * transform staged policies to "normal" policies
 
-## Debug network policies:
+## Debug network policies
 * observe traffic and check `policies` field in whisker logs
   - https://docs.tigera.io/calico/3.30/observability/enable-whisker
   - https://docs.tigera.io/calico/3.30/observability/view-flow-logs
