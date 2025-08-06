@@ -18,3 +18,9 @@ spec:
       destination:
         ports:
           - 5432
+    # allow dns requests to public dns servers
+    - action: Allow
+      protocol: UDP
+      destination:
+        ports:
+          - 53
