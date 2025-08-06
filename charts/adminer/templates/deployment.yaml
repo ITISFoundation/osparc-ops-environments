@@ -15,7 +15,6 @@ spec:
     metadata:
       {{- if .Values.podAnnotations }}
       annotations:
-        # allow dynamic values in pod annotations
         {{- tpl (toYaml .Values.podAnnotations) . | nindent 8 }}
       {{- end }}
       labels:
