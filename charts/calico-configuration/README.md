@@ -30,3 +30,16 @@ if calico version <= 3.29
 ## Known issues
 
 If network policy is created after pod, pod **MUST** be restarted for policy to take effect. Read more https://github.com/projectcalico/calico/issues/10753#issuecomment-3140717418
+
+## How to view existing policies
+
+via kubectl:
+* `kubectl get networkpolicies.crd.projectcalico.org -n adminer`
+* `kubectl describe networkpolicies.crd.projectcalico.org -n adminer default.adminer-network-policy`
+
+via calicoctl:
+* `calicoctl get networkpolicy -n adminer -o yaml`
+
+Note:
+* global network policies and network policies are separate resources for calico
+* To see all resources execute `kubectl get crd | grep calico` or `calicoctl get --help`
