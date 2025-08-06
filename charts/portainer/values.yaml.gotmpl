@@ -20,7 +20,10 @@ portainer:
 
   persistence: {}
 
-  podAnnotations: {}
+  # podAnnotations: {}
+  # Not implemented in portainer chart (see https://github.com/portainer/k8s/pull/183)
+  # Once implemented, we can use it to add checksum of network policy like in adminer
+
   podLabels: {}
 
   podSecurityContext:
