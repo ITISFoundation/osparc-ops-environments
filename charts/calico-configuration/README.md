@@ -43,3 +43,6 @@ via calicoctl:
 Note:
 * global network policies and network policies are separate resources for calico
 * To see all resources execute `kubectl get crd | grep calico` or `calicoctl get --help`
+
+Warning:
+* Network policies update are only applied to "new connections". To make them act, one may need to restart affected applications (pods)
