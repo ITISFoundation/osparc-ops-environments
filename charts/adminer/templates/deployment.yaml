@@ -13,9 +13,9 @@ spec:
       {{- include "adminer.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- if .Values.podAnnotations }}
+      {{- with .Values.podAnnotations }}
       annotations:
-        {{- tpl (toYaml .Values.podAnnotations) . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "adminer.labels" . | nindent 8 }}

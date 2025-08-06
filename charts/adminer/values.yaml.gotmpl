@@ -25,9 +25,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations:
-  # automatically restart pod on network policy change (to be sure new rules are applied)
-  checksum/networkpolicy: '{{`{{ include (print $.Template.BasePath "/networkpolicy.yaml") . | sha256sum }}`}}'
+podAnnotations: {}
 podLabels: {}
 
 podSecurityContext:

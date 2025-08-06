@@ -1,5 +1,4 @@
-portainer:
-  persistence:
-    enabled: true
-    size: "300Mi" # cannot be lower https://github.com/longhorn/longhorn/issues/8488
-    storageClass: "{{ .Values.longhornStorageClassName }}"
+persistence:
+  enabled: true
+  size: "300Mi" # cannot be lower https://github.com/longhorn/longhorn/issues/8488
+  storageClass: "{{ .Values.longhornStorageClassName }}"

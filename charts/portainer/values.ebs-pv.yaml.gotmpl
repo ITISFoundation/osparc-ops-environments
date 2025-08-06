@@ -1,5 +1,4 @@
-portainer:
-  persistence:
-    enabled: true
-    size: "1Gi"  # minimal size for gp3 is 1Gi
-    storageClass: "{{ .Values.ebsStorageClassName }}"
+persistence:
+  enabled: true
+  size: "1Gi"  # minimal size for gp3 is 1Gi
+  storageClass: "{{ .Values.ebsStorageClassName }}"
