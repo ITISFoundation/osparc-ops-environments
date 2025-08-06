@@ -76,7 +76,7 @@ services:
     deploy:
       labels:
         - traefik.tcp.services.rabbit.loadBalancer.server.port=5672
-        - traefik.tcp.routers.rabbit.entrypoints=rabbit
+        - traefik.tcp.routers.rabbit.entrypoints=rabbitmq
         - traefik.tcp.routers.rabbit.tls=false
         - traefik.tcp.routers.rabbit.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)
 
