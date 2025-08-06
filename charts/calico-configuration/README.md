@@ -30,6 +30,7 @@ if calico version <= 3.29
 ## Known issues
 
 If network policy is created after pod, pod **MUST** be restarted for policy to take effect. Read more https://github.com/projectcalico/calico/issues/10753#issuecomment-3140717418
+* To automate this, we can add annotations with network policy checksum to pods (see https://stackoverflow.com/questions/58602311/will-helm-upgrade-restart-pods-even-if-they-are-not-affected-by-upgrade)
 
 ## How to view existing policies
 
