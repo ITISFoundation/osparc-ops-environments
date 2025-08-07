@@ -1,0 +1,37 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: resource-usage-tracker-network-policy
+  labels:
+    {{- include "resource-usage-tracker.labels" . | nindent 4 }}
+spec:
+  selector: app.kubernetes.io/instance == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.service.port }}
+  egress:
+    # allow dns requests to public dns servers
+    - action: Allow
+      protocol: UDP
+      destination:
+        # allow DNS requests to public DNS servers
+        ports:
+          - 53
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.networkPolicyEgressPorts.postgres }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.networkPolicyEgressPorts.redis }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.networkPolicyEgressPorts.rabbit }}

@@ -8,7 +8,7 @@ spec:
   # "calico-system", "calico-apiserver", "tigera-operator" -- calico namespaces (when installed via scripts [local deployment])
   # TODO: other namespaces are to be removed from this list (once appropriate network policies are created)
   namespaceSelector:
-    kubernetes.io/metadata.name not in {"kube-public", "kube-system", "kube-node-lease", "calico-system", "calico-apiserver", "tigera-operator", "simcore", "cert-manager", "reflector", "traefik", "victoria-logs", "csi-s3", "portainer", "topolvm", "local-path-storage", "longhorn"}
+    kubernetes.io/metadata.name not in {"kube-public", "kube-system", "kube-node-lease", "calico-system", "calico-apiserver", "tigera-operator", "cert-manager", "reflector", "traefik", "victoria-logs", "csi-s3", "portainer", "topolvm", "local-path-storage", "longhorn"}
   types:
     - Ingress
     - Egress
