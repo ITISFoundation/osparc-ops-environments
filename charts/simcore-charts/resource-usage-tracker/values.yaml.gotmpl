@@ -25,7 +25,9 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations: {}
+podAnnotations:
+  checksum/networkpolicy: '{{`{{ include (print $.Template.BasePath "/networkpolicy.yaml") . | sha256sum }}`}}'
+
 podLabels: {}
 
 podSecurityContext:
@@ -150,3 +152,8 @@ env:
   - name: RESOURCE_USAGE_TRACKER_S3
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_S3" | quote }}  # without quote `null` won't work
     sensitive: true
+
+networkPolicyEgressPorts:
+  rabbit: {{ requiredEnv "RABBIT_EXTERNAL_PORT" }}
+  redis: {{ requiredEnv "REDIS_EXTERNAL_PORT" }}
+  postgres: {{ requiredEnv "POSTGRES_EXTERNAL_PORT" }}

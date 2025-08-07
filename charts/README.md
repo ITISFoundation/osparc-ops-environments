@@ -45,7 +45,4 @@ helmfile init
 
 ## Running k8s cluster locally
 
-```bash
-cd ./osparc-ops-environments
-./scripts/create_local_k8s_cluster.bash
-```
+Use `./local-k8s.Makefile` targets
