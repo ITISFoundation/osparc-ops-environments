@@ -13,13 +13,6 @@ spec:
         ports:
           - {{ .Values.service.port }}
   egress:
-    # allow dns requests to public dns servers
-    - action: Allow
-      protocol: UDP
-      destination:
-        # allow DNS requests to public DNS servers
-        ports:
-          - 53
     - action: Allow
       protocol: TCP
       destination:
