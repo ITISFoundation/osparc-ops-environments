@@ -32,7 +32,7 @@ resource "grafana_data_source" "tempo" {
   url                = var.TEMPO_URL
   basic_auth_enabled = false
   is_default         = false
-  uid                = delr011tpeupsc
+  uid                = "delr011tpeupsc"
 }
 
 resource "grafana_data_source" "cloudwatch" {
