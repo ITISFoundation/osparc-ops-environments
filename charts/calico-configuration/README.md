@@ -14,7 +14,7 @@ if calico version 3.30+ is installed
   - https://docs.tigera.io/calico/3.30/observability/view-flow-logs
 
 if calico version <= 3.29
-* create network policy with action log
+* create network policy with action log (read more https://docs.tigera.io/calico/latest/network-policy/policy-rules/log-rules)
   ```yaml
   apiVersion: projectcalico.org/v3
   kind: NetworkPolicy
@@ -25,7 +25,8 @@ if calico version <= 3.29
     ingress:
     - action: Log
   ```
-* apply policy and see logs via journalctl (you can grep with `calico-packet`)
+* apply policy and see logs via journalctl (you can grep with `calico-packet` on the node where the pod is running)
+* Note: one may implement policy step by step (allowing all traffic that is known and making last rule `Log` to see what traffic is still missing)
 
 ## Known issues
 
@@ -43,7 +44,7 @@ via calicoctl:
 
 Note:
 * global network policies and network policies are separate resources for calico
-* To see all resources execute `kubectl get crd | grep calico` or `calicoctl get --help`
+* To see all calico resources execute `kubectl get crd | grep calico` or `calicoctl get --help`
 
 Warning:
 * Network policies update are only applied to "new connections". To make them act, one may need to restart affected applications (pods)
