@@ -1,6 +1,10 @@
-crds:
-  enabled: true
-  keep: true
+cert-manager:
+  crds:
+    enabled: true
+    keep: true
 
-nodeSelector:
-  ops: "true"
+  nodeSelector:
+    ops: "true"
+
+  webhook:
+    securePort: 10250
