@@ -13,3 +13,8 @@ services:
     deploy:
       placement:
         constraints: []
+
+  fluentd:
+    deploy:
+      placement:
+        constraints: []
