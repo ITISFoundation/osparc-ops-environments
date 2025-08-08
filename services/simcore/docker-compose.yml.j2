@@ -346,7 +346,7 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       restart_policy:
         condition: any
@@ -415,7 +415,7 @@ services:
       update_config:
         parallelism: 1
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       placement:
         constraints:
@@ -436,7 +436,7 @@ services:
       update_config:
         parallelism: 1
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       placement:
         constraints:
@@ -1066,7 +1066,7 @@ services:
       update_config:
         parallelism: 1
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       resources:
         limits:
