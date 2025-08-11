@@ -9,11 +9,18 @@ spec:
     - action: Allow
       protocol: TCP
       source:
-        selector: 'component == "kube-apiserver"'
+        # both selectors below did not work
+        # selector: 'component == "kube-apiserver"'
+        # namespaceSelector: kubernetes.io/metadata.name == "kube-system"
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
       destination:
         selector: 'app.kubernetes.io/component == "webhook"'
         ports:
-          - {{ .Values.cert-manager.webhook.securePort }}
+          # https://stackoverflow.com/a/63863410/12124525
+          - {{ index .Values "cert-manager" "webhook" "securePort" }}
   egress:
     # 3. TCP: cert-manager (webhook, controller, cainjector, startupapicheck) -> Kubernetes API server
     - action: Allow
