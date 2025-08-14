@@ -853,7 +853,7 @@ services:
   #
   # use fallback routes to return proper 503 (instead of 404)
   # this service must be running at all times
-  ops-traefik-configuration-placeholder:
+  ops-traefik-config-placeholder:
     image: busybox:1.35.0
     command: sleep infinity
     networks:
@@ -907,7 +907,7 @@ services:
       start_period: 1s
       retries: 3
 
-  traefik-configuration-placeholder: # simcore traefik with `io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}` label
+  traefik-config-placeholder: # simcore traefik with `io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}` label
     image: busybox:1.35.0
     command: sleep infinity
     networks:

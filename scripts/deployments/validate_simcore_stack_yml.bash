@@ -82,10 +82,10 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     if [ "${TARGETNAME}" == "docker-api-proxy" ]; then
         continue
     fi
-    if [ "${TARGETNAME}" == "traefik-configuration-placeholder" ]; then
+    if [ "${TARGETNAME}" == "traefik-config-placeholder" ]; then
         continue
     fi
-    if [ "${TARGETNAME}" == "ops-traefik-configuration-placeholder" ]; then
+    if [ "${TARGETNAME}" == "ops-traefik-config-placeholder" ]; then
         continue
     fi
     export TARGET_BINARY="simcore-service"
