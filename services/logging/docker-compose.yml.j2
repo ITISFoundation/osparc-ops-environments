@@ -142,7 +142,7 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki.yaml
-    command: -config.file=/etc/loki/loki.yaml
+    command: -config.file=/etc/loki/loki.yaml -config.expand-env=true
     environment:
       - S3_BUCKET_NAME_LOKI=${S3_BUCKET_NAME_LOKI}
       - S3_REGION_LOKI=${S3_REGION_LOKI}
