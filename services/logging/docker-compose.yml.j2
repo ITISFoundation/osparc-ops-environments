@@ -143,7 +143,14 @@ services:
       - source: loki_config
         target: /etc/loki/loki.yaml
     command: -config.file=/etc/loki/loki.yaml
-    deploy:
+    environment:
+      - S3_BUCKET_NAME_LOKI=${S3_BUCKET_NAME_LOKI}
+      - S3_REGION_LOKI=${S3_REGION_LOKI}
+      - S3_ACCESS_KEY_LOKI=${S3_ACCESS_KEY_LOKI}
+      - S3_SECRET_KEY_LOKI=${S3_SECRET_KEY_LOKI}
+      - S3_FORCE_PATH_STYLE_LOKI=${S3_FORCE_PATH_STYLE_LOKI}
+      - S3_ENDPOINT_LOKI=${S3_ENDPOINT_LOKI}
+      - LOKI_RETENTION_PERIOD=${LOKI_RETENTION_PERIOD}
       placement:
         constraints: []
       replicas: 1
