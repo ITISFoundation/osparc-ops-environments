@@ -151,6 +151,7 @@ services:
       - S3_FORCE_PATH_STYLE_LOKI=${S3_FORCE_PATH_STYLE_LOKI}
       - S3_ENDPOINT_LOKI=${S3_ENDPOINT_LOKI}
       - LOKI_RETENTION_PERIOD=${LOKI_RETENTION_PERIOD}
+    deploy:
       placement:
         constraints: []
       replicas: 1
