@@ -1,0 +1,36 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: portainer-network-policy
+spec:
+  selector: app.kubernetes.io/instance == "portainer"
+  types:
+  - Ingress
+  - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      # connect to the Kubernetes API server
+      destination:
+        ports:
+          - 6443
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+    # coredns 53 allow from kube system
+    - action: Allow
+      protocol: UDP
+      destination:
+        # `selector: 'k8s-app == "kube-dns"'` does not work (so global policy default dns allow does not work)
+        # manually allow dns and use different selector that works.
+        selectorNamespace: kubernetes.io/metadata.name == "kube-system"
+        ports:
+          - 53
+  ingress:
+    - action: Allow
+      # allow traffic to portainer GUI
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.servicePort }}

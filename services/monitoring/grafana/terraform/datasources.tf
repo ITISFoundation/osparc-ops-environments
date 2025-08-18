@@ -32,8 +32,16 @@ resource "grafana_data_source" "tempo" {
   url                = var.TEMPO_URL
   basic_auth_enabled = false
   is_default         = false
+  uid                = "delr011tpeupsc"
 }
 
+resource "grafana_data_source" "loki" {
+  type               = "loki"
+  name               = "loki"
+  url                = "http://loki:3100"
+  basic_auth_enabled = false
+  is_default         = false
+}
 resource "grafana_data_source" "cloudwatch" {
   # This resource is only created if the AWS Deployments
   count = var.IS_AWS_DEPLOYMENT ? 1 : 0

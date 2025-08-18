@@ -1,9 +1,9 @@
 {
   "v": "1",
-  "id": "daaeea11-bde6-4203-9cfe-6ca2a23ca22e",
-  "rev": 1,
-  "name": "osparc-custom-content-pack-v3",
-  "summary": "osparc-custom-content-pack-v3",
+  "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
+  "rev": 45,
+  "name": "osparc-custom-content-pack-v2",
+  "summary": "osparc-custom-content-pack-v2",
   "description": "",
   "vendor": "Osparc team",
   "url": "",
@@ -623,7 +623,7 @@
             "configuration": {
               "grok_pattern": {
                 "@type": "string",
-                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{DATA:log_source} \\| (log_uid=%{WORD:log_uid} \\| (log_oec=%{WORD:log_oec} \\| )?log_msg=%{GREEDYDATA:log_msg}"
+                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{NOTSPACE:log_source} \\| log_uid=%{NOTSPACE:log_uid} \\| log_oec=%{NOTSPACE:log_oec} \\| log_trace_id=%{NOTSPACE:log_trace_id} \\| log_span_id=%{DATA:log_span_id} \\| log_msg=%{GREEDYDATA:log_msg}"
               },
               "named_captures_only": {
                 "@type": "boolean",
