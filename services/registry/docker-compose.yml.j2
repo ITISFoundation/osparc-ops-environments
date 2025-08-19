@@ -114,7 +114,9 @@ services:
         failure_action: rollback
         parallelism: 1
       placement:
-        constraints: []
+        constraints:
+          - node.labels.gpu!=true
+          - node.labels.dynamicsidecar!=true
       resources:
         limits:
           memory: 1G
