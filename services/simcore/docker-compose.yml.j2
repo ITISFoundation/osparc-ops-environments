@@ -777,7 +777,7 @@ services:
       resources:
         limits:
           memory: 3G
-          cpus: '3.0'
+          # cpus: '3.0' CPU Spikes are throttled, this impacts PG performance. Disabling.. DK Aug 2025
         reservations:
           memory: 1.5G
           # cpus: '0.1'  # tmp fix due to lack of resources on master | YH Dec 2023
