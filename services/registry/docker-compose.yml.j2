@@ -114,12 +114,11 @@ services:
         failure_action: rollback
         parallelism: 1
       placement:
-        constraints:
-          - node.labels.ops==true
+        constraints: []
       resources:
         limits:
           memory: 1G
-          cpus: '2'
+          cpus: '6'
         reservations:
           memory: 128M
           cpus: '0.1'
