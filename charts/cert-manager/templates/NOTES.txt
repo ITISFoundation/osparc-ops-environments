@@ -1,0 +1,3 @@
+This is a wrap around the cert-manager Helm chart.
+
+NOTE: on network policy change, manual restart of the cert-manager pods might be necessary to apply new rules.

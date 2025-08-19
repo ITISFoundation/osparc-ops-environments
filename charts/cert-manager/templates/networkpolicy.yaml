@@ -1,0 +1,50 @@
+# https://cert-manager.io/docs/installation/best-practice/#network-requirements
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: cert-manager-network-policy
+spec:
+  ingress:
+    # 2. TCP: Kubernetes (API server) -> cert-manager (webhook)
+    - action: Allow
+      protocol: TCP
+      source:
+        # both selectors below did not work
+        # selector: 'component == "kube-apiserver"'
+        # namespaceSelector: kubernetes.io/metadata.name == "kube-system"
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      destination:
+        selector: 'app.kubernetes.io/component == "webhook"'
+        ports:
+          # https://stackoverflow.com/a/63863410/12124525
+          - {{ index .Values "cert-manager" "webhook" "securePort" }}
+  egress:
+    # 3. TCP: cert-manager (webhook, controller, cainjector, startupapicheck) -> Kubernetes API server
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
+    # 6. TCP: cert-manager (controller) -> DNS API endpoints (for ACME DNS01)
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: 'app.kubernetes.io/component == "controller"'
+      destination:
+        ports:
+          - 443
+    # 7. UDP / TCP: cert-manager (controller) -> External DNS
+    - action: Allow
+      protocol: UDP
+      source:
+        selector: 'app.kubernetes.io/component == "controller"'
+      destination:
+        ports:
+          - 53

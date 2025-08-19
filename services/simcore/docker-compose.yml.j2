@@ -346,7 +346,7 @@ services:
       update_config:
         parallelism: 2
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       restart_policy:
         condition: any
@@ -415,7 +415,7 @@ services:
       update_config:
         parallelism: 1
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       placement:
         constraints:
@@ -436,7 +436,7 @@ services:
       update_config:
         parallelism: 1
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       placement:
         constraints:
@@ -777,7 +777,7 @@ services:
       resources:
         limits:
           memory: 3G
-          cpus: '3.0'
+          # cpus: '3.0' CPU Spikes are throttled, this impacts PG performance. Disabling.. DK Aug 2025
         reservations:
           memory: 1.5G
           # cpus: '0.1'  # tmp fix due to lack of resources on master | YH Dec 2023
@@ -853,7 +853,7 @@ services:
   #
   # use fallback routes to return proper 503 (instead of 404)
   # this service must be running at all times
-  ops-traefik-configuration-placeholder:
+  ops-traefik-config-placeholder:
     image: busybox:1.35.0
     command: sleep infinity
     networks:
@@ -907,7 +907,7 @@ services:
       start_period: 1s
       retries: 3
 
-  traefik-configuration-placeholder: # simcore traefik with `io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}` label
+  traefik-config-placeholder: # simcore traefik with `io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}` label
     image: busybox:1.35.0
     command: sleep infinity
     networks:
@@ -1066,7 +1066,7 @@ services:
       update_config:
         parallelism: 1
         order: start-first
-        failure_action: rollback
+        failure_action: continue
         delay: 10s
       resources:
         limits:

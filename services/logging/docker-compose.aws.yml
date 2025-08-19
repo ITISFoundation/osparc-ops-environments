@@ -1,0 +1,28 @@
+services:
+  mongodb:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.logging==true
+  elasticsearch:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.logging==true
+  graylog:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.logging==true
+
+  fluentd:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.logging==true
+
+  loki:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.logging==true
