@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   registry:
-    image: registry:3.0.0
+    image: registry:2.8.3
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       REGISTRY_HTTP_HOST: "https://${REGISTRY_DOMAIN}"
@@ -31,9 +31,6 @@ services:
       REGISTRY_LOG_ACCESSLOG_DISABLED: ${REGISTRY_LOG_ACCESSLOG_DISABLED}
       # set to true if using self-signed certificates
       UPDATE_CERTIFICATES: "false"
-      # OpenTelemetry
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${TRACING_OPENTELEMETRY_COLLECTOR_ENDPOINT}:${TRACING_OPENTELEMETRY_COLLECTOR_PORT}
-      OTEL_SERVICE_NAME: registry-simcore
     networks:
       - public
       - monitored
@@ -80,7 +77,7 @@ services:
     {%- raw %}
     hostname: "registry-ptc-{{.Node.Hostname}}-{{.Task.Slot}}"
     {%- endraw %}
-    image: registry:3.0.0
+    image: registry:2.8.3
     environment:
       REGISTRY_HTTP_SECRET: ${REGISTRY_PULL_THROUGH_CACHE_HTTP_SECRET}
       # S3
@@ -103,9 +100,6 @@ services:
       # Logs
       REGISTRY_LOG_LEVEL: ${REGISTRY_PULL_THROUGH_CACHE_LOG_LEVEL}
       REGISTRY_LOG_ACCESSLOG_DISABLED: ${REGISTRY_PULL_THROUGH_CACHE_LOG_ACCESSLOG_DISABLED}
-      # OpenTelemetry
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${TRACING_OPENTELEMETRY_COLLECTOR_ENDPOINT}:${TRACING_OPENTELEMETRY_COLLECTOR_PORT}
-      OTEL_SERVICE_NAME: registry-pull-through-cache
     ports:
     - mode: host
       target: 5000
