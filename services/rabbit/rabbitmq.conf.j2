@@ -1,0 +1,14 @@
+{% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
+
+# https://www.rabbitmq.com/docs/cluster-formation#peer-discovery-configuring-mechanism
+cluster_formation.peer_discovery_backend = classic_config
+
+{% for ix in NODE_IXS %}
+cluster_formation.classic_config.nodes.{{ ix }} = rabbit@rabbit_rabbit0{{ ix }}
+{%- endfor %}
+
+## Sets the initial quorum queue replica count for newly declared quorum queues.
+## This value can be overridden using the 'x-quorum-initial-group-size' queue argument
+## at declaration time.
+# https://www.rabbitmq.com/docs/quorum-queues#quorum-requirements
+quorum_queue.initial_cluster_size = {{ RABBIT_QUORUM_QUEUE_DEFAULT_REPLICA_COUNT }}

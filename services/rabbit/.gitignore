@@ -1,0 +1,3 @@
+docker-compose.yml
+!erlang.cookie.secret.template
+rabbitmq.conf

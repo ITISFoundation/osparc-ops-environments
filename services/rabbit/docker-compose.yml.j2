@@ -1,5 +1,8 @@
+{% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
+
 services:
-  rabbit01:
+{% for ix in NODE_IXS %}
+  rabbit0{{ ix }}:
     image: itisfoundation/rabbitmq:4.1.2-management
     init: true
     # https://docs.docker.com/reference/cli/docker/service/create/#create-services-using-templates
@@ -8,25 +11,77 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
       RABBITMQ_NODENAME: {% raw %}"rabbit@{{.Service.Name}}"{% endraw %}
+    # https://docs.docker.com/reference/compose-file/services/#long-syntax-5
+    # https://hub.docker.com/_/rabbitmq#erlang-cookie
+{% if ix == 1 %}
+    # TODO: remove
+    ports:
+      - "15672:15672"  # management UI
+{% endif %}
+    secrets:
+      # https://github.com/docker-library/rabbitmq/issues/279
+      - source: rabbit_erlang_cookie
+        target: /var/lib/rabbitmq/.erlang.cookie
+        mode: 0600
+        # as long as "default" user is used (no user explicitly specified)
+        uid: "999"
+        gid: "999"
+    configs:
+      - source: rabbitmq.conf
+        target: /etc/rabbitmq/rabbitmq.conf
+        mode: 0600
+        uid: "999"
+        gid: "999"
     volumes:
-      - rabbit_data:/var/lib/rabbitmq
+      - rabbit0{{ ix }}_data:/var/lib/rabbitmq
     # TODO: sync with existing rabbit attached networks
     networks:
       - rabbit
     # TODO: consider another healthcheck (e.g. check kubernetes operator)
     healthcheck:
-      # see https://www.rabbitmq.com/monitoring.html#individual-checks for info about health-checks available in rabbitmq
-      test: rabbitmq-diagnostics -q status
-      interval: 5s
-      timeout: 30s
-      retries: 5
-      start_period: 5s
+      # see https://hub.docker.com/_/rabbitmq#healthlivenessreadiness-checking
+      # https://www.rabbitmq.com/docs/clustering#restarting-readiness-probes
+      # we must have a healthcheck that does not require node to be fully booted (i.e. joined a cluster)
+      # because it creates a deadlock: docker swarm will not route to the node until it is healthy
+      # node is not healthy until it is part of a cluster (other node can talk to it)
+      test: rabbitmq-diagnostics ping
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 30s
+      start_interval: 10s
+{% endfor %}
 
-  busybox:
-    image: ubuntu:22.04
-    command: /bin/sh -c "sleep infinity"
+  subscriber:
+    image: python:3.11
+    command: sh -c "pip install pika && python /app/sub.py"
+    environment:
+      - RABBIT_HOSTS=rabbit_rabbit01,rabbit_rabbit02,rabbit_rabbit03
+      - RABBIT_USER=${RABBIT_USER}
+      - RABBIT_PASS=${RABBIT_PASSWORD}
     networks:
       - rabbit
+    volumes:
+      - ./test/sub.py:/app/sub.py
+
+  publisher:
+    image: python:3.11
+    command: sh -c "pip install pika && python /app/pub.py"
+    environment:
+      - RABBIT_HOSTS=rabbit_rabbit01,rabbit_rabbit02,rabbit_rabbit03
+      - RABBIT_USER=${RABBIT_USER}
+      - RABBIT_PASS=${RABBIT_PASSWORD}
+    networks:
+      - rabbit
+    volumes:
+      - ./test/pub.py:/app/pub.py
+
+volumes:
+{% for ix in NODE_IXS %}
+  rabbit0{{ ix }}_data:
+    name: ${STACK_NAME}0{{ ix }}_data
+{%- endfor %}
+
 networks:
   # TODO: consider creating it externally for better control over subnets size and ip ranges
   rabbit:
@@ -34,6 +89,13 @@ networks:
     driver: overlay
     attachable: true
 
-volumes:
-  rabbit_data:
-    name: ${STACK_NAME}_rabbit_data
+configs:
+  rabbitmq.conf:
+    file: ./rabbitmq.conf
+    name: ${STACK_NAME}_rabbitmq_conf_{{ "./rabbitmq.conf" | sha256file | substring(0,10) }}
+
+secrets:
+  rabbit_erlang_cookie:
+    # TODO: rolling secrets update?
+    name: ${STACK_NAME}_erlang_cookie
+    file: ./erlang.cookie.secret
