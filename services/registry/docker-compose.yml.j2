@@ -121,11 +121,12 @@ services:
         parallelism: 1
       placement:
         constraints:
-          - node.labels.ops==true
+          - node.labels.gpu!=true
+          - node.labels.dynamicsidecar!=true
       resources:
         limits:
           memory: 1G
-          cpus: '2'
+          cpus: '6'
         reservations:
           memory: 128M
           cpus: '0.1'
