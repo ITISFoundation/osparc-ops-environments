@@ -1,0 +1,49 @@
+import logging
+import os
+import random
+import time
+
+import pika
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+hosts = os.environ["RABBIT_HOSTS"].split(",")
+credentials = pika.PlainCredentials(os.getenv("RABBIT_USER"), os.getenv("RABBIT_PASS"))
+
+endpoints = [
+    pika.URLParameters(
+        f"amqp://{credentials.username}:{credentials.password}@{h.strip()}:5672/"
+    )
+    for h in hosts
+]
+
+while True:
+    logger.info(f"Verbinde zu RabbitMQ Hosts: {hosts}")
+
+    random.shuffle(endpoints)
+    connection = pika.BlockingConnection(endpoints)
+    try:
+        channel = connection.channel()
+
+        logger.info("Queue 'hello' (quorum) deklarieren...")
+        channel.queue_declare(
+            queue="hello", durable=True, arguments={"x-queue-type": "quorum"}
+        )
+
+        for i in range(10_000):
+            msg = f"Nachricht {i}"
+            channel.basic_publish(
+                exchange="",
+                routing_key="hello",
+                body=msg,
+                properties=pika.BasicProperties(delivery_mode=2),
+            )
+            logger.info(f"Gesendet: {msg}")
+            time.sleep(3)
+    except pika.exceptions.ConnectionClosedByBroker:
+        logger.error(
+            "Verbindung zum RabbitMQ Broker wurde geschlossen. Versuche erneut zu verbinden..."
+        )
