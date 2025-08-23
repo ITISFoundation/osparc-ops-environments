@@ -7,6 +7,10 @@ services:
     init: true
     # https://docs.docker.com/reference/cli/docker/service/create/#create-services-using-templates
     hostname: {% raw %}"{{.Service.Name}}"{% endraw %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rabbit0{{ ix }} == true
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}

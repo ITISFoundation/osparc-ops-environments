@@ -30,5 +30,5 @@ rabbitmq.conf: rabbitmq.conf.j2 .env venv
 	# generate $@
 	@$(call jinja, $<, .env, $@)
 
-docker-compose.yml: docker-compose.yml.j2 .env rabbitmq.conf erlang.cookie.secret venv
+docker-compose.yml: docker-compose.yml.j2 .env rabbitmq.conf erlang.cookie.secret venv $(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
