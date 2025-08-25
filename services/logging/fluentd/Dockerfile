@@ -1,16 +1,18 @@
-FROM fluent/fluentd:v1.16.9-1.0
+FROM fluent/fluentd:v1.16.9-debian-1.0
 
 USER root
 
-# Install dependencies and plugins
-RUN apk add --no-cache --update --virtual .build-deps \
-    sudo build-base ruby-dev curl \
- && sudo gem install fluent-plugin-grafana-loki \
- && sudo gem install fluent-plugin-gelf-best \
- && sudo gem install fluent-plugin-prometheus \
- && apk del .build-deps \
- && apk add --no-cache curl jq \
- && rm -rf /var/cache/apk/* \
+# Install dependencies and plugins using apt instead of apk
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ruby-dev \
+    curl \
+    jq \
+ && gem install fluent-plugin-grafana-loki \
+ && gem install fluent-plugin-gelf-best \
+ && gem install fluent-plugin-prometheus \
+ && apt-get purge -y --auto-remove build-essential ruby-dev \
+ && rm -rf /var/lib/apt/lists/* \
  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 
 # Create directories with appropriate permissions
