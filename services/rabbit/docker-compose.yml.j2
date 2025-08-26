@@ -1,6 +1,16 @@
 {% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
 
 services:
+  loadbalancer:
+    image: haproxy:3.2
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - rabbit
+    configs:
+      - source: haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
 {% for ix in NODE_IXS %}
   rabbit0{{ ix }}:
     image: itisfoundation/rabbitmq:4.1.2-management
@@ -17,11 +27,6 @@ services:
       RABBITMQ_NODENAME: {% raw %}"rabbit@{{.Service.Name}}"{% endraw %}
     # https://docs.docker.com/reference/compose-file/services/#long-syntax-5
     # https://hub.docker.com/_/rabbitmq#erlang-cookie
-{% if ix == 1 %}
-    # TODO: remove
-    ports:
-      - "15672:15672"  # management UI
-{% endif %}
     secrets:
       # https://github.com/docker-library/rabbitmq/issues/279
       - source: rabbit_erlang_cookie
@@ -60,7 +65,7 @@ services:
     image: python:3.11
     command: sh -c "pip install pika && python /app/sub.py"
     environment:
-      - RABBIT_HOSTS=rabbit_rabbit01,rabbit_rabbit02,rabbit_rabbit03
+      - RABBIT_HOSTS=rabbit_loadbalancer
       - RABBIT_USER=${RABBIT_USER}
       - RABBIT_PASS=${RABBIT_PASSWORD}
     networks:
@@ -72,7 +77,7 @@ services:
     image: python:3.11
     command: sh -c "pip install pika && python /app/pub.py"
     environment:
-      - RABBIT_HOSTS=rabbit_rabbit01,rabbit_rabbit02,rabbit_rabbit03
+      - RABBIT_HOSTS=rabbit_loadbalancer
       - RABBIT_USER=${RABBIT_USER}
       - RABBIT_PASS=${RABBIT_PASSWORD}
     networks:
@@ -96,7 +101,9 @@ networks:
 configs:
   rabbitmq.conf:
     file: ./rabbitmq.conf
-    name: ${STACK_NAME}_rabbitmq_conf_{{ "./rabbitmq.conf" | sha256file | substring(0,10) }}
+  haproxy.cfg:
+    file: ./haproxy.cfg
+    name: ${STACK_NAME}_haproxy_conf_{{ "./haproxy.cfg" | sha256file | substring(0,10) }}
 
 secrets:
   rabbit_erlang_cookie:
