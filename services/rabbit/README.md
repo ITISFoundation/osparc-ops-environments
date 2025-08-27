@@ -9,9 +9,13 @@ Source: https://www.rabbitmq.com/docs/next/configure#config-changes-effects
 
 ## How to add / remove nodes
 
-The only supported way, is to completely shutdown the cluster (docker stack and most likely rabbit node volumes) and start brand new. 
+The only supported way, is to completely shutdown the cluster (docker stack and most likely rabbit node volumes) and start brand new.
 
 With manual effort this can be done on the running cluster, by adding 1 more rabbit node manually (as a separate docker stack or new service) and manually executing rabbitmqctl commands (some hints can be found here https://www.rabbitmq.com/docs/clustering#creating)
+
+## Autoscaling
+
+Not supported at the moment.
 
 ## Enable node Maintenance mode
 
