@@ -3,9 +3,14 @@
 services:
   loadbalancer:
     image: haproxy:3.2
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    deploy:
+      # https://discourse.haproxy.org/t/haproxy-high-availability-configuration/11983
+      replicas: 2
+      # necessary to preserve client ip
+      # otherwise we see overlay network lb ip
+      # (rabbitmq management dashboard connection section)
+      endpoint_mode: dnsrr
+    # healthcheck: https://github.com/haproxy/haproxy/issues/3091
     networks:
       - rabbit
     configs:

@@ -10,21 +10,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-hosts = os.environ["RABBIT_HOSTS"].split(",")
-credentials = pika.PlainCredentials(os.getenv("RABBIT_USER"), os.getenv("RABBIT_PASS"))
-
-endpoints = [
-    pika.URLParameters(
-        f"amqp://{credentials.username}:{credentials.password}@{h.strip()}:5672/"
-    )
-    for h in hosts
-]
+host = os.environ["RABBIT_HOSTS"].strip()
+credentials = pika.PlainCredentials(os.environ["RABBIT_USER"], os.environ["RABBIT_PASS"])
+parameters = pika.ConnectionParameters(host=host, port=5672, credentials=credentials, client_properties={"connection_name": "publisher"})
 
 while True:
-    logger.info(f"Verbinde zu RabbitMQ Hosts: {hosts}")
-
-    random.shuffle(endpoints)
-    connection = pika.BlockingConnection(endpoints)
+    connection = pika.BlockingConnection(parameters)
     try:
         channel = connection.channel()
 
@@ -43,7 +34,8 @@ while True:
             )
             logger.info(f"Gesendet: {msg}")
             time.sleep(3)
-    except pika.exceptions.ConnectionClosedByBroker:
+    except Exception:
         logger.error(
             "Verbindung zum RabbitMQ Broker wurde geschlossen. Versuche erneut zu verbinden..."
         )
+        time.sleep(5)
