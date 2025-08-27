@@ -45,12 +45,12 @@ services:
         failure_action: rollback
         parallelism: 1
       placement:
-        constraints:
+        constraints: ${OPS_REGISTRY_PLACEMENT_CONSTRAINTS}
           - node.labels.ops==true
       resources:
         limits:
           memory: 1G
-          cpus: '6'
+          cpus: ${OPS_REGISTRY_CPU_LIMIT}
         reservations:
           memory: 128M
           cpus: '0.1'
@@ -121,8 +121,7 @@ services:
         parallelism: 1
       placement:
         constraints:
-          - node.labels.gpu!=true
-          - node.labels.dynamicsidecar!=true
+          - node.labels.ops==true
       resources:
         limits:
           memory: 1G
