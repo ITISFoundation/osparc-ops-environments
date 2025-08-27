@@ -1,3 +1,5 @@
+{% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
+
 global
     log stdout format raw local0
     maxconn 4096
@@ -29,20 +31,20 @@ defaults
     timeout server 30s
 
 frontend rabbit
-    bind *:5672
+    bind *:{{ RABBIT_PORT }}
     default_backend rabbit_backends
 
 frontend rabbit_dashboard
-    bind *:15672
+    bind *:{{ RABBIT_MANAGEMENT_PORT }}
     default_backend rabbit_dashboard_backends
 
 backend rabbit_backends
     balance roundrobin
 
-    # init-addrs libc,none - start even if there aren’t any running
-    server rabbit01 rabbit_rabbit01:5672 check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
-    server rabbit02 rabbit_rabbit02:5672 check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
-    server rabbit03 rabbit_rabbit03:5672 check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
+    # init-addrs libc,none - start even if there aren’t any backend servers running
+{% for ix in NODE_IXS %}
+    server rabbit0{{ ix }} rabbit_rabbit0{{ ix }}:{{ RABBIT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
+{%- endfor %}
 
 backend rabbit_dashboard_backends
     mode http
@@ -52,6 +54,7 @@ backend rabbit_dashboard_backends
     http-request set-header X-Forwarded-Port %[dst_port]
     http-request add-header X-Forwarded-Proto https if { ssl_fc }
 
-    server rabbit01 rabbit_rabbit01:15672 check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
-    server rabbit02 rabbit_rabbit02:15672 check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
-    server rabbit03 rabbit_rabbit03:15672 check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
+{% for ix in NODE_IXS %}
+    server rabbit0{{ ix }} rabbit_rabbit0{{ ix }}:{{ RABBIT_MANAGEMENT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
+{%- endfor %}
+# keep new line in the end to avoid "Missing LF on last line" error

@@ -5,7 +5,7 @@ services:
     image: haproxy:3.2
     deploy:
       # https://discourse.haproxy.org/t/haproxy-high-availability-configuration/11983
-      replicas: 2
+      replicas: ${RABBIT_LB_REPLICAS}
       # necessary to preserve client ip
       # otherwise we see overlay network lb ip
       # (rabbitmq management dashboard connection section)
@@ -13,9 +13,11 @@ services:
     # healthcheck: https://github.com/haproxy/haproxy/issues/3091
     networks:
       - rabbit
+      - public
     configs:
       - source: haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg
+
 {% for ix in NODE_IXS %}
   rabbit0{{ ix }}:
     image: itisfoundation/rabbitmq:4.1.2-management
@@ -27,9 +29,11 @@ services:
         constraints:
           - node.labels.rabbit0{{ ix }} == true
     environment:
+      # https://www.rabbitmq.com/docs/configure#supported-environment-variables
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
       RABBITMQ_NODENAME: {% raw %}"rabbit@{{.Service.Name}}"{% endraw %}
+      RABBITMQ_NODE_PORT: ${RABBIT_PORT}
     # https://docs.docker.com/reference/compose-file/services/#long-syntax-5
     # https://hub.docker.com/_/rabbitmq#erlang-cookie
     secrets:
@@ -97,14 +101,13 @@ volumes:
 {%- endfor %}
 
 networks:
-  # TODO: consider creating it externally for better control over subnets size and ip ranges
   rabbit:
-    name: ${RABBIT_DOCKER_SWARM_NETWORK_NAME}
-    driver: overlay
-    attachable: true
+    name: ${RABBIT_NETWORK}
+    external: true
 
 configs:
   rabbitmq.conf:
+    # no rolling update since it requires full cluster restart
     file: ./rabbitmq.conf
   haproxy.cfg:
     file: ./haproxy.cfg
@@ -112,6 +115,6 @@ configs:
 
 secrets:
   rabbit_erlang_cookie:
-    # TODO: rolling secrets update?
+    # no rolling update since it requires full cluster restart
     name: ${STACK_NAME}_erlang_cookie
     file: ./erlang.cookie.secret
