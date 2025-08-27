@@ -42,3 +42,8 @@ groups:
     rules:
       - record: osparc_autoscaling_machines_buffer
         expr: sum(swarm_node_info{instance=~"^ip-.*$"}) - ( sum(count_values("instance",node_boot_time_seconds{instance=~"^ip-.*$"})) OR clamp_max(absent(node_boot_time_seconds{instance=~"^ip-.*$"}),0) )
+  - name: osparc_ops_cpu_throttling_seconds
+    interval: 120s
+    rules:
+      - record: osparc_ops_cpu_throttling_seconds
+        expr: sum by (name) (rate(container_cpu_cfs_throttled_seconds_total[5m])) > 0.2
