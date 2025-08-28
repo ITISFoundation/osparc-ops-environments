@@ -20,7 +20,13 @@ services:
         reservations:
           cpus: "0.1"
           memory: "128M"
-    # healthcheck: https://github.com/haproxy/haproxy/issues/3091
+    healthcheck: # https://stackoverflow.com/a/76513320/12124525
+      test: bash -c 'echo "" > /dev/tcp/127.0.0.1/32087 || exit 1'
+      start_period: 5s
+      timeout: 2s
+      retries: 2
+      interval: 10s
+
     networks:
       - rabbit
     configs:

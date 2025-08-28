@@ -38,6 +38,11 @@ frontend rabbit_dashboard
     bind *:{{ RABBIT_MANAGEMENT_PORT }}
     default_backend rabbit_dashboard_backends
 
+frontend health
+  mode http
+  bind 127.0.0.1:32087
+  http-request return status 200 if { src 127.0.0.0/8 }
+
 backend rabbit_backends
     # side effect of roundrobin is connection should be evenly distributed
     # thus rabbit queue leader replica shall be also evenly distributed
