@@ -26,7 +26,11 @@ services:
       timeout: 2s
       retries: 2
       interval: 10s
-
+    ports:
+      - target: 15672
+        published: 15672
+        protocol: tcp
+        mode: host
     networks:
       - rabbit
     configs:
@@ -95,6 +99,8 @@ services:
 
   subscriber:
     image: python:3.11
+    deploy:
+      replicas: 0
     command: sh -c "pip install pika && python /app/sub.py"
     environment:
       - RABBIT_HOSTS=rabbit_loadbalancer
@@ -107,6 +113,8 @@ services:
 
   publisher:
     image: python:3.11
+    deploy:
+      replicas: 0
     command: sh -c "pip install pika && python /app/pub.py"
     environment:
       - RABBIT_HOSTS=rabbit_loadbalancer

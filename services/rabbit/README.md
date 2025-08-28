@@ -1,6 +1,10 @@
+## Starting a cluster
+
+Make sure all nodes have joined the cluster before using it. Otherwise, number of replicas in quorum queues might be affected. Say, you have a cluster of 3 nodes. You connect to cluster before the 3rd node join it. Your quorum queue would end up with only 2 replicas and will be broken once, 1 node (of 2 nodes holding the replicas of the queue) goes down.
+
 ## Updating rabbitmq.conf / advanced.config (zero-downtime)
 
-rabbitmq.conf and advanced.config changes take effect after a node restart. This can be performed with zero-downtime when RabbitMQ is clustered (have multiple nodes). This can be achieved by stopping and starting rabbitmq nodes one by one
+We do not support this automated. But manually this can be achieved in case needed. `rabbitmq.conf` and `advanced.config` changes take effect after a node restart. This can be performed with zero-downtime when RabbitMQ is clustered (have multiple nodes). This can be achieved by stopping and starting rabbitmq nodes one by one
 * `docker exec -it <container-id> bash`
 * (inside container) `rabbitmqctl stop_app` and wait some time until node is stopped (can be seen in management ui)
 * (inside container) `rabbitmqctl start_app`

@@ -1,6 +1,5 @@
 import logging
 import os
-import random
 import time
 
 import pika
@@ -11,8 +10,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 host = os.environ["RABBIT_HOSTS"].strip()
-credentials = pika.PlainCredentials(os.environ["RABBIT_USER"], os.environ["RABBIT_PASS"])
-parameters = pika.ConnectionParameters(host=host, port=5672, credentials=credentials, client_properties={"connection_name": "publisher"})
+credentials = pika.PlainCredentials(
+    os.environ["RABBIT_USER"], os.environ["RABBIT_PASS"]
+)
+parameters = pika.ConnectionParameters(
+    host=host,
+    port=5672,
+    credentials=credentials,
+    client_properties={"connection_name": "publisher"},
+)
 
 while True:
     connection = pika.BlockingConnection(parameters)
@@ -38,4 +44,4 @@ while True:
         logger.error(
             "Verbindung zum RabbitMQ Broker wurde geschlossen. Versuche erneut zu verbinden..."
         )
-        time.sleep(5)
+        time.sleep(1)
