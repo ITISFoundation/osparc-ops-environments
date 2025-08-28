@@ -7,7 +7,7 @@ services:
       # https://discourse.haproxy.org/t/haproxy-high-availability-configuration/11983
       replicas: ${RABBIT_LB_REPLICAS}
       # necessary to preserve client ip
-      # otherwise we see overlay network lb ip
+      # otherwise we see overlay rabbit network lb ip
       # (rabbitmq management dashboard connection section)
       endpoint_mode: dnsrr
     # healthcheck: https://github.com/haproxy/haproxy/issues/3091
@@ -27,6 +27,14 @@ services:
       placement:
         constraints:
           - node.labels.rabbit0{{ ix }} == true
+      resources:
+        # https://www.rabbitmq.com/docs/production-checklist#minimum-hardware
+        limits:
+          cpus: "4.0"
+          memory: "4G"
+        reservations:
+          cpus: "1.0"
+          memory: "1G"
     environment:
       # https://www.rabbitmq.com/docs/configure#supported-environment-variables
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
