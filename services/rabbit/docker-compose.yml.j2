@@ -10,6 +10,16 @@ services:
       # otherwise we see overlay rabbit network lb ip
       # (rabbitmq management dashboard connection section)
       endpoint_mode: dnsrr
+      resources:
+        limits:
+          # https://help.hcl-software.com/digital-experience/dx-95-doc-archive/CF203/platform/kubernetes/haproxy-migration/haproxy-configuration.html
+          cpus: "1"
+          memory: "2G"
+        # according to local observations and link below
+        # https://github.com/haproxytech/helm-charts/blob/haproxy-1.24.0/haproxy/values.yaml#L403
+        reservations:
+          cpus: "0.1"
+          memory: "128M"
     # healthcheck: https://github.com/haproxy/haproxy/issues/3091
     networks:
       - rabbit
