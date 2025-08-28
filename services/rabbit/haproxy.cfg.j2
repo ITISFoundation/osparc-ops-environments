@@ -39,6 +39,11 @@ frontend rabbit_dashboard
     default_backend rabbit_dashboard_backends
 
 backend rabbit_backends
+    # side effect of roundrobin is connection should be evenly distributed
+    # thus rabbit queue leader replica shall be also evenly distributed
+    # (https://www.rabbitmq.com/docs/4.0/clustering#replica-placement)
+    # if algorithm  below is changed, consider adjusting rabbit configuration
+    # as stated in documentation link above
     balance roundrobin
 
     # init-addrs libc,none - start even if there aren’t any backend servers running
