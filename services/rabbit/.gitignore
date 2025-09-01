@@ -1,4 +1,5 @@
 docker-compose.yml
+docker-compose*.yaml
 !erlang.cookie.secret.template
 rabbitmq.conf
 haproxy.cfg

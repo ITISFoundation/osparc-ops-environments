@@ -4,7 +4,7 @@ Make sure all nodes have joined the cluster before using it. Otherwise, number o
 
 ## Updating rabbitmq.conf / advanced.config (zero-downtime)
 
-We do not support this automated. But manually this can be achieved in case needed. `rabbitmq.conf` and `advanced.config` changes take effect after a node restart. This can be performed with zero-downtime when RabbitMQ is clustered (have multiple nodes). This can be achieved by stopping and starting rabbitmq nodes one by one
+We do not support this automated (except starting from scratch with empty volumes). But manually this can be achieved in case needed. `rabbitmq.conf` and `advanced.config` changes take effect after a node restart. This can be performed with zero-downtime when RabbitMQ is clustered (have multiple nodes). This can be achieved by stopping and starting rabbitmq nodes one by one
 * `docker exec -it <container-id> bash`
 * (inside container) `rabbitmqctl stop_app` and wait some time until node is stopped (can be seen in management ui)
 * (inside container) `rabbitmqctl start_app`

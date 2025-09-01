@@ -2,7 +2,7 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # common-services.Makefile should be included first as common.Makefile
-#relies on STACK_NAME var which is defined in common-services.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up
@@ -36,3 +36,20 @@ haproxy.cfg: haproxy.cfg.j2 .env venv
 
 docker-compose.yml: docker-compose.yml.j2 .env rabbitmq.conf erlang.cookie.secret haproxy.cfg venv $(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
+
+#
+# Deleting volumes (data)
+#
+
+TEMP_COMPOSE_OPERATOR := .stack.${STACK_NAME}.operator.yaml
+STACK_NAME_OPERATOR := ${STACK_NAME}-operator
+
+docker-compose.operator.yaml: docker-compose.operator.yaml.j2 .env
+	@$(call jinja, $<, .env, $@)
+
+${TEMP_COMPOSE_OPERATOR}: docker-compose.operator.yaml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
+
+destroy-cluster-with-data: ${TEMP_COMPOSE_OPERATOR} .env down
+	@docker stack rm ${STACK_NAME_OPERATOR}
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE_OPERATOR} ${STACK_NAME_OPERATOR}
