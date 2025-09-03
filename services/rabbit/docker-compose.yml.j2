@@ -4,6 +4,11 @@ services:
   loadbalancer:
     image: haproxy:3.2
     deploy:
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 30s
+        failure_action: rollback
       # https://discourse.haproxy.org/t/haproxy-high-availability-configuration/11983
       replicas: ${RABBIT_LB_REPLICAS}
       # necessary to preserve client ip
@@ -26,11 +31,6 @@ services:
       timeout: 2s
       retries: 2
       interval: 10s
-    ports:
-      - target: 15672
-        published: 15672
-        protocol: tcp
-        mode: host
     networks:
       - rabbit
     configs:
@@ -100,7 +100,7 @@ services:
   subscriber:
     image: python:3.11
     deploy:
-      replicas: 0
+      replicas: 1
     command: sh -c "pip install pika && python /app/sub.py"
     environment:
       - RABBIT_HOSTS=rabbit_loadbalancer
@@ -114,7 +114,7 @@ services:
   publisher:
     image: python:3.11
     deploy:
-      replicas: 0
+      replicas: 1
     command: sh -c "pip install pika && python /app/pub.py"
     environment:
       - RABBIT_HOSTS=rabbit_loadbalancer
