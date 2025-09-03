@@ -117,6 +117,25 @@ services:
           memory: "600M"
     extra_hosts: []
 
+  api-worker:
+    deploy:
+      replicas: ${SIMCORE_API_WORKER_REPLICAS}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: "256M"
+        limits: # Wait for MB to estimate real numbers
+          cpus: "1.0"
+          memory: "500M"
+
   catalog:
     networks:
       - monitored
