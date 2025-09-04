@@ -27,9 +27,3 @@ Not supported at the moment.
 2. (Inside container) execute `rabbitmq-upgrade drain`
 
 Source: https://www.rabbitmq.com/docs/upgrade#maintenance-mode
-
-## Rotating erlang cookie (zero-downtime)
-
-In our case, a full stop of rabbit cluster is required (it means downtime). Nodes shall be started from scratch with a new erlang cookie. If zero-downtime update is an absolute must, blue-green deployments is a way to go according to core developers (see sources)
-
-Source: https://github.com/rabbitmq/rabbitmq-server/discussions/14391

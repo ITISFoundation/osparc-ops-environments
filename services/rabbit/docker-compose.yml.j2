@@ -149,5 +149,6 @@ configs:
 secrets:
   rabbit_erlang_cookie:
     # no rolling update since it requires full cluster restart
+    # see https://github.com/rabbitmq/rabbitmq-server/discussions/14391
     name: rabbit_erlang_cookie
     file: ./configs/erlang.cookie.secret

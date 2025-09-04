@@ -81,14 +81,11 @@ TIMEOUT = 2m
 delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE} guard-optional-TIMEOUT guard-optional-bool-FORCE_CONFIRM
 delete-volumes:  ## Delete rabbit data volumes
 	@$(call confirm_action,Forever delete all rabbit data?,deleteforever,${FORCE_CONFIRM})
-
 	## avoid accumulating tasks https://github.com/moby/moby/issues/45443
 	@docker stack rm --detach=false ${CLEAN_VOLUMES_STACK_NAME}
-
 	## use --detach=false to wait until all jobs complete successfully
 	@timeout ${TIMEOUT}	\
 	docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${CLEAN_VOLUMES_TEMP_COMPOSE} ${CLEAN_VOLUMES_STACK_NAME}
-
 	## cleaning up
 	@docker stack rm ${CLEAN_VOLUMES_STACK_NAME}
 
