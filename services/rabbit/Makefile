@@ -83,5 +83,5 @@ down: guard-optional-bool-FORCE_CONFIRM  ## Stop rabbit cluster
 	@$(call confirm_action,Are you sure you want to stop the Rabbit cluster?,yes,${FORCE_CONFIRM})
 	@docker stack rm ${STACK_NAME}
 
-destroy-cluster-with-data: down delete-volumes  ## destroy rabbit cluster with data
+destroy-cluster-with-data: down delete-volumes  ## Destroy rabbit cluster with data
 	@echo "Cluster has been destroyed. Data has been deleted"

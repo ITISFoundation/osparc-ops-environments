@@ -68,4 +68,3 @@ backend rabbit_dashboard_backends
     server rabbit0{{ ix }} rabbit_rabbit0{{ ix }}:{{ RABBIT_MANAGEMENT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
 {%- endfor %}
 # keep new line in the end to avoid "Missing LF on last line" error
-# random comment
