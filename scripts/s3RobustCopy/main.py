@@ -1,3 +1,19 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "boto3==1.24.38",
+#   "typer==0.6.1",
+#   "hurry.filesize==0.9",
+#   "pandas==1.4.3",
+#   "numpy==1.26.4",
+#   "retry==0.9.2",
+#   "pycryptodome==3.19.1",
+#   "pip-tools",
+#   "debugpy==1.8.16"
+# ]
+# ///
+#
 # pylint: disable=invalid-name,consider-using-in,consider-using-with,expression-not-assigned
 import atexit
 import os
@@ -18,11 +34,20 @@ from pathlib import Path
 # 2.)
 # Imports
 import boto3
-import pandas as pd
 import typer
-from Crypto.Cipher import AES
 from hurry.filesize import size
 from retry import retry
+
+if os.getenv("DEBUG"):
+    import debugpy
+
+    debugpy.listen(("0.0.0.0", int(os.getenv("DEBUG_PORT", "5678"))))
+    print(
+        f"Waiting for debugger to attach on port {os.getenv('DEBUG_PORT', '5678')}..."
+    )
+    debugpy.wait_for_client()
+    print("Debugger attached.")
+
 
 # Ignore certificate warnings in output
 warnings.filterwarnings(
@@ -93,9 +118,6 @@ def copyOrDownloadFile(
     dest_s3=None,
     dest_bucket=None,
     no_overwrite=False,
-    encrypt=False,
-    decrypt=False,
-    cypherKey=None,
 ):  # pylint: disable=too-many-arguments,too-many-branches,too-many-statements
     if dest_s3 is None:
         useDestination_ = False
@@ -143,31 +165,11 @@ def copyOrDownloadFile(
                             sourcebucketname,
                             key,
                         ):
-                            # print("Skipping ",str(key))
+                            print("Skipping ", str(key), "as i was identical")
                             listOfSkipped.add(key)
                             return 0
             src_bucket.download_file(key, downloadFilename)
-            if cypherKey is not None:
-                assert not (encrypt and decrypt)
-                if encrypt:
-                    file_in = open(downloadFilename, "rb").read()
-                    cipher = AES.new(cypherKey, AES.MODE_EAX)
-                    ciphertext, tag = cipher.encrypt_and_digest(file_in)
-                    #
-                    file_out = open(downloadFilename, "wb")
-                    [
-                        file_out.write(x) for x in (cipher.nonce, tag, ciphertext)
-                    ]  # pylint: disable=expression-not-assigned
-                    file_out.close()
-                elif decrypt:
-                    file_in = open(downloadFilename, "rb")
-                    nonce, tag, ciphertext = (file_in.read(x) for x in (16, 16, -1))
-                    cipher = AES.new(cypherKey, AES.MODE_EAX, nonce)
-                    binaryDataDecrypted = cipher.decrypt_and_verify(ciphertext, tag)
-                    file_out = open(downloadFilename, "wb")
-                    file_out.write(binaryDataDecrypted)
-                    file_out.close()
-            # print("Copying: ", str(key))
+
             #
             # If we copy to remote bucket
             if downloadfolderlocal == "." and useDestination_:
@@ -186,7 +188,9 @@ def copyOrDownloadFile(
             print("Failed for ", str(key))
             return 1
     else:
-        # print("Skipping ",str(key))
+        print(
+            "Skipping ", str(key), " as it was already present on the local filesystem."
+        )
         listOfSkipped_.add(key)
         return 0
 
@@ -209,34 +213,18 @@ def main(
     sourcebucketaccess: str,
     sourcebucketsecret: str,
     sourceendpointurl: str,
-    downloadfolderlocal: str = "",
-    destinationbucketregion: str = "us-east-1",
-    sourcebucketregion: str = "us-east-1",
-    destinationbucketname: str = "",
-    destinationbucketaccess: str = "",
-    destinationbucketsecret: str = "",
-    destinationendpointurl: str = "",
-    files: str = "",
-    filemetadatacsv: str = "",
-    projectscsv: str = "",
-    userscsv: str = "",
+    downloadfolderlocal: str,
+    destinationbucketregion: str,
+    sourcebucketregion: str,
+    destinationbucketname: str,
+    destinationbucketaccess: str,
+    destinationbucketsecret: str,
+    destinationendpointurl: str,
+    files: str,
     nooverwrites: bool = typer.Option(False, "--nooverwrites"),
-    encryption: bool = typer.Option(False, "--encryption"),
-    decryption: bool = typer.Option(False, "--decryption"),
-    password: str = "",
 ):  # pylint: disable=too-many-arguments,too-many-branches,too-many-statements
     if nooverwrites:
         print("CONFIG: WILL NOT OVERWRITE ANY FILES.")
-    if (encryption or decryption) and password != "":
-        cypherKey = generateCypherKeyFromPassword(password, "")
-        if encryption:
-            print("ENCRYPTING FILES DURING COPY")
-        elif decryption:
-            print("DECRYPTING FILES DURING COPY")
-    else:
-        cypherKey = None
-
-    #
     #
     # Check if we download or copy.
     # If useDestination is True, we copy, else we download
@@ -258,29 +246,25 @@ def main(
             destinationbucketname = sourcebucketname
 
     # Prepare file logging
-    if files == "":
+    def saveFiles():
+        print("Program done. Writing results to file...")
+        with open("filesCopied.txt", "w") as f:
+            for item in list(listOfSuccess):
+                f.write("%s\n" % item)
+        with open("filesFailed.txt", "w") as f:
+            for item in list(listOfFailed):
+                f.write("%s\n" % item)
+        with open("filesFailedWithException.txt", "w") as f:
+            for item in list(listOfFailedWithExceptions):
+                f.write(str(item[0]) + ": " + str(item[1]) + "\n")
+        with open("filesSkipped.txt", "w") as f:
+            for item in list(listOfSkipped):
+                f.write("%s\n" % item)
+        with open("filesOriginal.txt", "w") as f:
+            for item in list(listOfFailed) + list(listOfSkipped) + list(listOfSuccess):
+                f.write("%s\n" % item)
 
-        def saveFiles():
-            print("Program done. Writing results to file...")
-            with open("filesCopied.txt", "w") as f:
-                for item in list(listOfSuccess):
-                    f.write("%s\n" % item)
-            with open("filesFailed.txt", "w") as f:
-                for item in list(listOfFailed):
-                    f.write("%s\n" % item)
-            with open("filesFailedWithException.txt", "w") as f:
-                for item in list(listOfFailedWithExceptions):
-                    f.write(str(item[0]) + ": " + str(item[1]) + "\n")
-            with open("filesSkipped.txt", "w") as f:
-                for item in list(listOfSkipped):
-                    f.write("%s\n" % item)
-            with open("filesOriginal.txt", "w") as f:
-                for item in (
-                    list(listOfFailed) + list(listOfSkipped) + list(listOfSuccess)
-                ):
-                    f.write("%s\n" % item)
-
-        atexit.register(saveFiles)
+    atexit.register(saveFiles)
 
     # Configure source bucket
     # via
@@ -322,8 +306,10 @@ def main(
         print("Destination Local: ", downloadfolderlocal)
         if os.path.isdir(downloadfolderlocal):
             if os.listdir(downloadfolderlocal):
-                print("Target Backup Directory is not empty!")
-                answer = input("Do you want to overwrite? [y/N]")
+                print("Local Backup Directory is not empty!")
+                answer = input(
+                    "Do you want to risk overwriting local files during the copying? [y/N]"
+                )
                 if answer != "y" and answer != "Y":
                     sys.exit(0)
         else:
@@ -340,7 +326,10 @@ def main(
 
     print("Starting...")
     startTime = time.time()
+    allObjectsDestinationBucket = None
     if files == "":  # Consider all files in source bucket
+        print("Fetching all objects from source bucket.")
+        print("This might take some time...")
         allObjectsSourceBucket = src_bucket.objects.all()
         if (
             downloadfolderlocal == "" or downloadfolderlocal == "."
@@ -388,9 +377,6 @@ def main(
                         dest_s3=dest_s3,
                         dest_bucket=dest_bucket,
                         no_overwrite=nooverwrites,
-                        cypherKey=cypherKey,
-                        encrypt=encryption,
-                        decrypt=decryption,
                     )
         else:  # We download to local folder
             print("Processing filenames...")
@@ -415,13 +401,16 @@ def main(
                         src_s3,
                         destinationbucketname,
                         no_overwrite=nooverwrites,
-                        cypherKey=cypherKey,
-                        encrypt=encryption,
-                        decrypt=decryption,
                     )
     else:  # We only consider certain files as specified in an inputfile, given by cmd option --files. Files already present in the destination are skipped without checks.
         with open(files, "r+") as inFiles:
             linesAreRead = inFiles.readlines()
+            print(f"Only copying specified files in file {files}.")
+            print(f"File {files} has {len(linesAreRead)} lines.")
+            if nooverwrites and not allObjectsDestinationBucket:
+                print("Processing source bucket keys...")
+                print("This might take a while...")
+                allObjectsDestinationBucket = dest_bucket.objects.all()
             with typer.progressbar(linesAreRead) as progress:
                 for oneFile in progress:
                     oneFile = oneFile.strip("\n")
@@ -441,12 +430,10 @@ def main(
                             sourcebucketname,
                             src_s3,
                             destinationbucketname,
+                            allObjectsDestinationBucket=allObjectsDestinationBucket,
                             dest_s3=dest_s3,
                             dest_bucket=dest_bucket,
                             no_overwrite=nooverwrites,
-                            cypherKey=cypherKey,
-                            encrypt=encryption,
-                            decrypt=decryption,
                         )
                     else:
                         copyOrDownloadFile(
@@ -459,58 +446,20 @@ def main(
                             sourcebucketname,
                             src_s3,
                             no_overwrite=nooverwrites,
-                            cypherKey=cypherKey,
-                            encrypt=encryption,
-                            decrypt=decryption,
                         )
-    #
-    # If provided, read oSparc postgrs export csv files to resolve
-    # user%project associated with a corrupt file
-    if filemetadatacsv != "" and projectscsv != "":
-        print("Trying to match corrupted files with their DB owner and projects.")
-        filemetadata = pd.read_csv(filemetadatacsv)
-        projectsTable = pd.read_csv(projectscsv)
-        if userscsv != "":
-            userstable = pd.read_csv(userscsv)
-    elif filemetadatacsv != "" or projectscsv != "":
-        print(
-            "Missing one argument for matching corrupted files with their DB owner, either filemetadatacsv or projectscsv."
-        )
-    # After copy/DL: Print some info about the failed files
-    print("####################")
-    print("Failed files with exception:")
-    for item in listOfFailedWithExceptions:
-        print(str(item[0]) + ": " + str(item[1]))
-        targetObj = src_s3.Object(sourcebucketname, str(item[0]))
-        targetObj.load()
-        print("Filesize: ", str(size(targetObj.content_length)))
-        print("Last modified: ", str(targetObj.last_modified))
-        # If we have the oSparc Postgres files, we can provide more details
-        # about the files which we couldnt download
-        if filemetadatacsv != "" and projectscsv != "":
-            selection = filemetadata.loc[filemetadata["file_uuid"].isin([str(item[0])])]
-            currentItem = selection.iloc[0]
-            userID = currentItem.user_id
-            userName = currentItem.user_name
-            if str(userName) == "nan" and userscsv != "":
-                selectionUser = userstable.loc[userstable["id"].isin([userID])]
-                if len(selectionUser) == 1:
-                    userName = str(selectionUser.iloc[0].email)
-            print("User ID: ", str(userID), " User: ", str(userName))
-            projectID = currentItem.project_id  # 1af7c5cc-d827-11eb-9a92-02420a004c15
-            project_name = currentItem.project_name
-            print("Project ID: ", str(projectID), " ProjectName: ", str(project_name))
-            selectionProj = projectsTable.loc[projectsTable["uuid"].isin([projectID])]
-            if str(project_name) == "nan" and len(selectionProj) == 0:
-                print("PROJECT NOT FOUND in projects PG table.")
-            elif str(project_name) == "nan":
-                project_name = (
-                    str(selectionProj["name"]).split("\n")[0].split("    ")[1]
-                )
 
-        print("--------")
+    # After copy/DL: Print some info about the failed files
+    if len(listOfFailedWithExceptions) > 0:
+        print("####################")
+        print("Failed files with exception:")
+        for item in listOfFailedWithExceptions:
+            print(str(item[0]) + ": " + str(item[1]))
+            targetObj = src_s3.Object(sourcebucketname, str(item[0]))
+            targetObj.load()
+            print("Filesize: ", str(size(targetObj.content_length)))
+            print("Last modified: ", str(targetObj.last_modified))
+            print("--------")
     print("####################")
-    print("Failed files")
     for i in listOfFailed:
         print(i)
     if files == "":
