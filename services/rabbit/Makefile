@@ -59,7 +59,8 @@ ${CLEAN_VOLUMES_TEMP_COMPOSE}: docker-compose.clean-volumes.yaml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 TIMEOUT = 2m
-delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE}
+delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE} guard-optional-bool-FORCE_CONFIRM
+	@$(call confirm_action,Forever delete all rabbit data?,yes,$(FORCE_CONFIRM))
 	## avoid accumulating tasks https://github.com/moby/moby/issues/45443
 	@docker stack rm --detach=false ${CLEAN_VOLUMES_STACK_NAME}
 	## use --detach=false to wait until all jobs complete successfully
@@ -70,6 +71,10 @@ delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE}
 #
 # Destroy cluster with data (to start fresh new)
 #
+
+down: guard-optional-bool-FORCE_CONFIRM
+	@$(call confirm_action,Are you sure you want to stop the RabbitMQ cluster?,yes,$(FORCE_CONFIRM))
+	@docker stack rm ${STACK_NAME}
 
 destroy-cluster-with-data: down delete-volumes
 	@echo "Cluster has been destroyed. Data has been deleted"
