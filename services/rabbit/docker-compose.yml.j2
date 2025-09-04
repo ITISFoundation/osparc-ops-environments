@@ -55,6 +55,8 @@ services:
         reservations:
           cpus: "1.0"
           memory: "1G"
+      update_config:
+        order: "stop-first"
     environment:
       # https://www.rabbitmq.com/docs/configure#supported-environment-variables
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}

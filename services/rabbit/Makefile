@@ -9,9 +9,20 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Running cluster
 #
 
+STACK_IS_RUNNING := $(shell docker stack ls --format '{{.Name}}' | grep -q "^$(STACK_NAME)$$" && echo true || echo false)
+
 .PHONY: up
-up: ${TEMP_COMPOSE} prune-docker-stack-configs prune-docker-stack-secrets ## Deploy rabbit
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+up: ${TEMP_COMPOSE} \
+	prune-docker-stack-configs \
+	prune-docker-stack-secrets \
+	guard-optional-bool-FORCE
+up: ## Deploy rabbit
+	@if [ "$(STACK_IS_RUNNING)" = "false" ] || [ "$(FORCE)" = "true" ] ; then \
+		docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}; \
+	else \
+		echo "Stack $(STACK_NAME) is already running. To avoid unexpected behavior, skipping deploy"; \
+		echo "Check README to learn more about updates. To enforce deploy, use 'FORCE=true'"; \
+	fi
 
 up-aws: up
 
@@ -55,6 +66,8 @@ configs/haproxy.cfg: configs/haproxy.cfg.j2 .env venv
 # Deleting volumes (data)
 #
 
+### May be needed to start cluster fresh new to enforce new configuration
+
 CLEAN_VOLUMES_TEMP_COMPOSE := .stack.${STACK_NAME}.clean-volumes.yaml
 CLEAN_VOLUMES_STACK_NAME := ${STACK_NAME}-clean-volumes
 
@@ -67,12 +80,16 @@ ${CLEAN_VOLUMES_TEMP_COMPOSE}: docker-compose.clean-volumes.yaml .env
 TIMEOUT = 2m
 delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE} guard-optional-TIMEOUT guard-optional-bool-FORCE_CONFIRM
 delete-volumes:  ## Delete rabbit data volumes
-	@$(call confirm_action,Forever delete all rabbit data?,yes,${FORCE_CONFIRM})
+	@$(call confirm_action,Forever delete all rabbit data?,deleteforever,${FORCE_CONFIRM})
+
 	## avoid accumulating tasks https://github.com/moby/moby/issues/45443
 	@docker stack rm --detach=false ${CLEAN_VOLUMES_STACK_NAME}
+
 	## use --detach=false to wait until all jobs complete successfully
 	@timeout ${TIMEOUT}	\
 	docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${CLEAN_VOLUMES_TEMP_COMPOSE} ${CLEAN_VOLUMES_STACK_NAME}
+
+	## cleaning up
 	@docker stack rm ${CLEAN_VOLUMES_STACK_NAME}
 
 #
@@ -80,7 +97,7 @@ delete-volumes:  ## Delete rabbit data volumes
 #
 
 down: guard-optional-bool-FORCE_CONFIRM  ## Stop rabbit cluster
-	@$(call confirm_action,Are you sure you want to stop the Rabbit cluster?,yes,${FORCE_CONFIRM})
+	@$(call confirm_action,Are you sure you want to stop the Rabbit cluster?,stopcluster,${FORCE_CONFIRM})
 	@docker stack rm ${STACK_NAME}
 
 destroy-cluster-with-data: down delete-volumes  ## Destroy rabbit cluster with data

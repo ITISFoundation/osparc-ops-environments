@@ -2,7 +2,7 @@
 
 services:
 
-{% for ix in NODE_IXS %}
+{%- for ix in NODE_IXS %}
   clean_rabbit0{{ ix }}_volume:
     image: docker:25.0.3-cli
     volumes:
