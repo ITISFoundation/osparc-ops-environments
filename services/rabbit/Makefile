@@ -26,6 +26,15 @@ up-public: up
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
+docker-compose.yml: docker-compose.yml.j2 \
+					.env \
+					configs/rabbitmq.conf \
+					configs/erlang.cookie.secret \
+					configs/haproxy.cfg \
+					venv \
+					$(VENV_BIN)/j2
+	@$(call jinja, $<, .env, $@)
+
 #
 # Config / Secret files
 #
@@ -40,15 +49,6 @@ configs/rabbitmq.conf: configs/rabbitmq.conf.j2 .env venv
 
 configs/haproxy.cfg: configs/haproxy.cfg.j2 .env venv
 	# generate $@
-	@$(call jinja, $<, .env, $@)
-
-docker-compose.yml: docker-compose.yml.j2 \
-					.env \
-					configs/rabbitmq.conf \
-					configs/erlang.cookie.secret \
-					configs/haproxy.cfg \
-					venv \
-					$(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
 
 #
