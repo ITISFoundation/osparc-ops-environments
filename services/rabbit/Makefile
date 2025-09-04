@@ -34,7 +34,7 @@ configs/erlang.cookie.secret: configs/erlang.cookie.secret.template .env
 	@set -a; source .env; set +a; \
 	envsubst < $< > $@
 
-configs/rabbit.conf: configs/rabbit.conf.j2 .env venv
+configs/rabbitmq.conf: configs/rabbitmq.conf.j2 .env venv
 	# generate $@
 	@$(call jinja, $<, .env, $@)
 
@@ -44,7 +44,7 @@ configs/haproxy.cfg: configs/haproxy.cfg.j2 .env venv
 
 docker-compose.yml: docker-compose.yml.j2 \
 					.env \
-					configs/rabbit.conf \
+					configs/rabbitmq.conf \
 					configs/erlang.cookie.secret \
 					configs/haproxy.cfg \
 					venv \

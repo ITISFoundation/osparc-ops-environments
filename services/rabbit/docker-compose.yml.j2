@@ -72,8 +72,8 @@ services:
         uid: "999"
         gid: "999"
     configs:
-      - source: rabbit.conf
-        target: /etc/rabbitmq/rabbit.conf
+      - source: rabbitmq.conf
+        target: /etc/rabbitmq/rabbitmq.conf
         mode: 0600
         uid: "999"
         gid: "999"
@@ -137,9 +137,9 @@ networks:
     external: true
 
 configs:
-  rabbit.conf:
+  rabbitmq.conf:
     # no rolling update since it requires full cluster restart
-    file: ./configs/rabbit.conf
+    file: ./configs/rabbitmq.conf
   haproxy.cfg:
     file: ./configs/haproxy.cfg
     name: rabbit_haproxy_conf_{{ "./configs/haproxy.cfg" | sha256file | substring(0,10) }}
