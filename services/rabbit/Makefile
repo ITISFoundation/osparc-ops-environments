@@ -10,7 +10,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 #
 
 .PHONY: up
-up: ${TEMP_COMPOSE} prune-docker-stack-configs prune-docker-stack-secrets ## Deploys metabase stack
+up: ${TEMP_COMPOSE} prune-docker-stack-configs prune-docker-stack-secrets ## Deploy rabbit
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 up-aws: up
@@ -30,19 +30,25 @@ ${TEMP_COMPOSE}: docker-compose.yml .env
 # Config / Secret files
 #
 
-erlang.cookie.secret: erlang.cookie.secret.template .env
+configs/erlang.cookie.secret: configs/erlang.cookie.secret.template .env
 	@set -a; source .env; set +a; \
 	envsubst < $< > $@
 
-rabbitmq.conf: rabbitmq.conf.j2 .env venv
+configs/rabbit.conf: configs/rabbit.conf.j2 .env venv
 	# generate $@
 	@$(call jinja, $<, .env, $@)
 
-haproxy.cfg: haproxy.cfg.j2 .env venv
+configs/haproxy.cfg: configs/haproxy.cfg.j2 .env venv
 	# generate $@
 	@$(call jinja, $<, .env, $@)
 
-docker-compose.yml: docker-compose.yml.j2 .env rabbitmq.conf erlang.cookie.secret haproxy.cfg venv $(VENV_BIN)/j2
+docker-compose.yml: docker-compose.yml.j2 \
+					.env \
+					configs/rabbit.conf \
+					configs/erlang.cookie.secret \
+					configs/haproxy.cfg \
+					venv \
+					$(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
 
 #
@@ -60,6 +66,7 @@ ${CLEAN_VOLUMES_TEMP_COMPOSE}: docker-compose.clean-volumes.yaml .env
 
 TIMEOUT = 2m
 delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE} guard-optional-TIMEOUT guard-optional-bool-FORCE_CONFIRM
+delete-volumes:  ## Delete rabbit data volumes
 	@$(call confirm_action,Forever delete all rabbit data?,yes,${FORCE_CONFIRM})
 	## avoid accumulating tasks https://github.com/moby/moby/issues/45443
 	@docker stack rm --detach=false ${CLEAN_VOLUMES_STACK_NAME}
@@ -72,9 +79,9 @@ delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE} guard-optional-TIMEOUT guard-optio
 # Destroy cluster with data (to start fresh new)
 #
 
-down: guard-optional-bool-FORCE_CONFIRM
-	@$(call confirm_action,Are you sure you want to stop the RabbitMQ cluster?,yes,${FORCE_CONFIRM})
+down: guard-optional-bool-FORCE_CONFIRM  ## Stop rabbit cluster
+	@$(call confirm_action,Are you sure you want to stop the Rabbit cluster?,yes,${FORCE_CONFIRM})
 	@docker stack rm ${STACK_NAME}
 
-destroy-cluster-with-data: down delete-volumes
+destroy-cluster-with-data: down delete-volumes  ## destroy rabbit cluster with data
 	@echo "Cluster has been destroyed. Data has been deleted"
