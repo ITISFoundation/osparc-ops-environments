@@ -31,7 +31,7 @@ services:
         target: /app/delete_rabbit_docker_volume_on_node.sh
         mode: 0755
     environment:
-      VOLUME: ${STACK_NAME}0{{ ix }}_data
+      VOLUME: rabbit0{{ ix }}_data
       TIMEOUT_MINUTES: 1
       INTERVAL_SECONDS: 10
     entrypoint: ["/app/delete_rabbit_docker_volume_on_node.sh"]
@@ -40,4 +40,4 @@ services:
 configs:
   delete_rabbit_docker_volume_on_node_script:
     file: ./scripts/delete_rabbit_docker_volume_on_node.sh
-    name: ${STACK_NAME}_delete_rabbit_docker_volume_on_node_script_{{ "./scripts/delete_rabbit_docker_volume_on_node.sh" | sha256file | substring(0,10) }}
+    name: rabbit_delete_rabbit_docker_volume_on_node_script_{{ "./scripts/delete_rabbit_docker_volume_on_node.sh" | sha256file | substring(0,10) }}

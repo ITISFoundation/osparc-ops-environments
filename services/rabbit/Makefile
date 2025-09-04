@@ -60,7 +60,7 @@ ${CLEAN_VOLUMES_TEMP_COMPOSE}: docker-compose.clean-volumes.yaml .env
 
 TIMEOUT = 2m
 delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE}
-	## avoid accumulating tasks (in case they fail). Always start fresh new
+	## avoid accumulating tasks https://github.com/moby/moby/issues/45443
 	@docker stack rm --detach=false ${CLEAN_VOLUMES_STACK_NAME}
 	## use --detach=false to wait until all jobs complete successfully
 	@timeout ${TIMEOUT} \

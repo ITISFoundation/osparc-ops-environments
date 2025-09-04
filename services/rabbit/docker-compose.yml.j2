@@ -128,7 +128,7 @@ services:
 volumes:
 {% for ix in NODE_IXS %}
   rabbit0{{ ix }}_data:
-    name: ${STACK_NAME}0{{ ix }}_data
+    name: rabbit0{{ ix }}_data
 {%- endfor %}
 
 networks:
@@ -142,10 +142,10 @@ configs:
     file: ./rabbitmq.conf
   haproxy.cfg:
     file: ./haproxy.cfg
-    name: ${STACK_NAME}_haproxy_conf_{{ "./haproxy.cfg" | sha256file | substring(0,10) }}
+    name: rabbit_haproxy_conf_{{ "./haproxy.cfg" | sha256file | substring(0,10) }}
 
 secrets:
   rabbit_erlang_cookie:
     # no rolling update since it requires full cluster restart
-    name: ${STACK_NAME}_erlang_cookie
+    name: rabbit_erlang_cookie
     file: ./erlang.cookie.secret
