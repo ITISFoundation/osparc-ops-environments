@@ -2,6 +2,19 @@
 
 Make sure all nodes have joined the cluster before using it. Otherwise, number of replicas in quorum queues might be affected. Say, you have a cluster of 3 nodes. You connect to cluster before the 3rd node join it. Your quorum queue would end up with only 2 replicas and will be broken once, 1 node (of 2 nodes holding the replicas of the queue) goes down.
 
+## Updating a cluster
+
+When `docker stack deploy` is executed against a running cluster and all (docker services) rabbit nodes restart at the same time, the cluster breaks (read https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA/m/ZAyRDhRfCQAJ) and may only recover itself after 5 minutes timeous (not sure). Restarting nodes manually (docker service update --force) fixes cluster.
+
+mnesia errors after all rabbit nodes (docker services) restart:
+* https://stackoverflow.com/questions/60407082/rabbit-mq-error-while-waiting-for-mnesia-tables
+
+official documentation mentionening restart scenarios
+* https://www.rabbitmq.com/docs/clustering#restarting-schema-sync
+
+all (3) cluster nodes go down simultaneosuly, cluster is broken:
+* https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA
+
 ## Updating rabbitmq.conf / advanced.config (zero-downtime)
 
 We do not support this automated (except starting from scratch with empty volumes). But manually this can be achieved in case needed. `rabbitmq.conf` and `advanced.config` changes take effect after a node restart. This can be performed with zero-downtime when RabbitMQ is clustered (have multiple nodes). This can be achieved by stopping and starting rabbitmq nodes one by one
