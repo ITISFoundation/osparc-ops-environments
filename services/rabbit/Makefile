@@ -6,38 +6,17 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 #
-# Running cluster
+# Operations
 #
 
-STACK_IS_RUNNING := $(shell docker stack ls --format '{{.Name}}' | grep -q "^$(STACK_NAME)$$" && echo true || echo false)
+include ${REPO_BASE_DIR}/services/rabbit/.operations.Makefile
 
-.PHONY: up
-up: ${TEMP_COMPOSE} \
-	prune-docker-stack-configs \
-	prune-docker-stack-secrets \
-	guard-optional-bool-FORCE
-up: ## Deploy rabbit
-	@if [ "$(STACK_IS_RUNNING)" = "false" ] || [ "$(FORCE)" = "true" ] ; then \
-		docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}; \
-	else \
-		echo "Stack $(STACK_NAME) is already running. To avoid unexpected behavior, skipping deploy"; \
-		echo "Check README to learn more about updates. To enforce deploy, use 'FORCE=true'"; \
-	fi
+#
+# Docker compose files
+#
 
-up-aws: up
-
-up-master: up
-
-up-dalco: up
-
-up-local: up
-
-up-public: up
-
-${TEMP_COMPOSE}: docker-compose.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
-
-docker-compose.yml: docker-compose.yml.j2 \
+### Load Balancer
+docker-compose.loadbalancer.yml: docker-compose.loadbalancer.yml.j2 \
 					.env \
 					configs/rabbitmq.conf \
 					configs/erlang.cookie.secret \
@@ -45,6 +24,22 @@ docker-compose.yml: docker-compose.yml.j2 \
 					venv \
 					$(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
+
+### Node
+
+node0%.env: template.node0x.env
+	@set -o allexport; . $(REPO_CONFIG_LOCATION); set +o allexport; \
+	export NODE_INDEX=$*; \
+	envsubst < $< > $@
+
+docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
+					node0%.env \
+					configs/rabbitmq.conf \
+					configs/erlang.cookie.secret \
+					configs/haproxy.cfg \
+					venv \
+					$(VENV_BIN)/j2
+	@$(call jinja, $<, node0$*.env, $@)
 
 #
 # Config / Secret files
@@ -61,41 +56,3 @@ configs/rabbitmq.conf: configs/rabbitmq.conf.j2 .env venv
 configs/haproxy.cfg: configs/haproxy.cfg.j2 .env venv
 	# generate $@
 	@$(call jinja, $<, .env, $@)
-
-#
-# Deleting volumes (data)
-#
-
-### May be needed to start cluster fresh new to enforce new configuration
-
-CLEAN_VOLUMES_TEMP_COMPOSE := .stack.${STACK_NAME}.clean-volumes.yaml
-CLEAN_VOLUMES_STACK_NAME := ${STACK_NAME}-clean-volumes
-
-docker-compose.clean-volumes.yaml: docker-compose.clean-volumes.yaml.j2 .env
-	@$(call jinja, $<, .env, $@)
-
-${CLEAN_VOLUMES_TEMP_COMPOSE}: docker-compose.clean-volumes.yaml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
-
-TIMEOUT = 2m
-delete-volumes: ${CLEAN_VOLUMES_TEMP_COMPOSE} guard-optional-TIMEOUT guard-optional-bool-FORCE_CONFIRM
-delete-volumes:  ## Delete rabbit data volumes
-	@$(call confirm_action,Forever delete all rabbit data?,deleteforever,${FORCE_CONFIRM})
-	## avoid accumulating tasks https://github.com/moby/moby/issues/45443
-	@docker stack rm --detach=false ${CLEAN_VOLUMES_STACK_NAME}
-	## use --detach=false to wait until all jobs complete successfully
-	@timeout ${TIMEOUT}	\
-	docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${CLEAN_VOLUMES_TEMP_COMPOSE} ${CLEAN_VOLUMES_STACK_NAME}
-	## cleaning up
-	@docker stack rm ${CLEAN_VOLUMES_STACK_NAME}
-
-#
-# Destroy cluster with data (to start fresh new)
-#
-
-down: guard-optional-bool-FORCE_CONFIRM  ## Stop rabbit cluster
-	@$(call confirm_action,Are you sure you want to stop the Rabbit cluster?,stopcluster,${FORCE_CONFIRM})
-	@docker stack rm ${STACK_NAME}
-
-destroy-cluster-with-data: down delete-volumes  ## Destroy rabbit cluster with data
-	@echo "Cluster has been destroyed. Data has been deleted"

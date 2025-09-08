@@ -1,44 +1,5 @@
-{% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
-
 services:
-  loadbalancer:
-    image: haproxy:3.2
-    deploy:
-      update_config:
-        order: start-first
-        parallelism: 1
-        delay: 30s
-        failure_action: rollback
-      # https://discourse.haproxy.org/t/haproxy-high-availability-configuration/11983
-      replicas: ${RABBIT_LB_REPLICAS}
-      # necessary to preserve client ip
-      # otherwise we see overlay rabbit network lb ip
-      # (rabbitmq management dashboard connection section)
-      endpoint_mode: dnsrr
-      resources:
-        limits:
-          # https://help.hcl-software.com/digital-experience/dx-95-doc-archive/CF203/platform/kubernetes/haproxy-migration/haproxy-configuration.html
-          cpus: "1"
-          memory: "2G"
-        # according to local observations and link below
-        # https://github.com/haproxytech/helm-charts/blob/haproxy-1.24.0/haproxy/values.yaml#L403
-        reservations:
-          cpus: "0.1"
-          memory: "128M"
-    healthcheck: # https://stackoverflow.com/a/76513320/12124525
-      test: bash -c 'echo "" > /dev/tcp/127.0.0.1/32087 || exit 1'
-      start_period: 5s
-      timeout: 2s
-      retries: 2
-      interval: 10s
-    networks:
-      - rabbit
-    configs:
-      - source: haproxy.cfg
-        target: /usr/local/etc/haproxy/haproxy.cfg
-
-{% for ix in NODE_IXS %}
-  rabbit0{{ ix }}:
+  rabbit0{{ NODE_INDEX }}:
     image: itisfoundation/rabbitmq:4.1.2-management
     init: true
     # https://docs.docker.com/reference/cli/docker/service/create/#create-services-using-templates
@@ -46,7 +7,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.rabbit0{{ ix }} == true
+          - node.labels.rabbit0{{ NODE_INDEX }} == true
       resources:
         # https://www.rabbitmq.com/docs/production-checklist#minimum-hardware
         limits:
@@ -80,7 +41,7 @@ services:
         uid: "999"
         gid: "999"
     volumes:
-      - rabbit0{{ ix }}_data:/var/lib/rabbitmq
+      - rabbit0{{ NODE_INDEX }}_data:/var/lib/rabbitmq
     # TODO: sync with existing rabbit attached networks
     networks:
       - rabbit
@@ -97,41 +58,10 @@ services:
       retries: 2
       start_period: 30s
       start_interval: 10s
-{% endfor %}
-
-  subscriber:
-    image: python:3.11
-    deploy:
-      replicas: 1
-    command: sh -c "pip install pika && python /app/sub.py"
-    environment:
-      - RABBIT_HOSTS=rabbit_loadbalancer
-      - RABBIT_USER=${RABBIT_USER}
-      - RABBIT_PASS=${RABBIT_PASSWORD}
-    networks:
-      - rabbit
-    volumes:
-      - ./test/sub.py:/app/sub.py
-
-  publisher:
-    image: python:3.11
-    deploy:
-      replicas: 1
-    command: sh -c "pip install pika && python /app/pub.py"
-    environment:
-      - RABBIT_HOSTS=rabbit_loadbalancer
-      - RABBIT_USER=${RABBIT_USER}
-      - RABBIT_PASS=${RABBIT_PASSWORD}
-    networks:
-      - rabbit
-    volumes:
-      - ./test/pub.py:/app/pub.py
 
 volumes:
-{% for ix in NODE_IXS %}
-  rabbit0{{ ix }}_data:
-    name: rabbit0{{ ix }}_data
-{%- endfor %}
+  rabbit0{{ NODE_INDEX }}_data:
+    name: rabbit0{{ NODE_INDEX }}_data
 
 networks:
   rabbit:
