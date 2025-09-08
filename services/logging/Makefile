@@ -7,11 +7,24 @@ STACK_NAME = $(notdir $(shell pwd))
 TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
+define create-s3-bucket
+	# ensure bucket is available in S3...
+	set -o allexport; \
+	source .env; \
+	echo Creating bucket "$${S3_BUCKET_NAME_LOKI}";\
+	export S3_ACCESS_KEY=$${S3_ACCESS_KEY_LOKI}; \
+	export S3_SECRET_KEY=$${S3_SECRET_KEY_LOKI}; \
+	export STORAGE_DOMAIN=$${STORAGE_DOMAIN}; \
+	${REPO_BASE_DIR}/scripts/create-s3-bucket.bash "$${S3_BUCKET_NAME_LOKI}" && \
+	set +o allexport; \
+	# bucket is available in S3
+endef
+
 # TARGETS --------------------------------------------------
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploys graylog stack
+up: .init .env ${TEMP_COMPOSE}  ## Deploys logging stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 	$(MAKE) configure
 
@@ -43,6 +56,7 @@ up-master: .init .env ${TEMP_COMPOSE}-master
 
 .PHONY: up-local ## Deploys graylog stack for local deployment
 up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local cluster
+	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 	$(MAKE) configure
 

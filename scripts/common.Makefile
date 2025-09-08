@@ -285,6 +285,12 @@ guard-%:
 guard-optional-%:
 	@:
 
+guard-optional-bool-%:
+	@if [ "${${*}}" != "true" ] && [ "${${*}}" != "false" ] && [ "${${*}}" != "" ]; then \
+		echo "Argument '${*}' must be 'true', 'false', or empty"; \
+		exit 1; \
+	fi;
+
 # Gracefully use defaults and potentially overwrite them, via https://stackoverflow.com/a/49804748
 %:  %-default
 	@ true
@@ -385,3 +391,27 @@ $(WAIT_FOR_IT):  ## installs wait4x utility for WAIT_FOR_IT functionality
 	@mv /tmp/wait4x/wait4x $@
 	@rm -rf /tmp/wait4x
 	@$@ version
+
+# Arguments
+# 1 - message to show (e.g. Are you sure?)
+# 2 - input to confirm action (e.g. yes)
+# 3 - force confirm (e.g. true)
+#
+# Examples
+# $(call confirm_action) -- use with default messages
+# $(call confirm_action,Do you want to delete all files?) -- overwrite confirm message
+# $(call confirm_action,,,$(CI)) -- ignore in CI (CI := true)
+# echo before; $(call confirm_action); echo after -- chain in bash
+define confirm_action
+	CONFIRM_MSG="$(if $(1),$(1),Are you sure?)"; \
+	CONFIRM_KEY="$(if $(2),$(2),yes)"; \
+	SKIP_CHECK="$(if $(3),$(3),false)"; \
+	if [ "$$SKIP_CHECK" != true ]; then \
+		echo "$$CONFIRM_MSG"; \
+		read -p "Type '$$CONFIRM_KEY' to confirm: " USER_INPUT; \
+		if [ "$$USER_INPUT" != "$$CONFIRM_KEY" ]; then \
+			echo "CONFIRM_KEY does not match. Aborted."; \
+			exit 1; \
+		fi; \
+	fi
+endef
