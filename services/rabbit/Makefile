@@ -25,13 +25,18 @@ docker-compose.loadbalancer.yml: docker-compose.loadbalancer.yml.j2 \
 					$(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
 
+.stack.loadbalancer.yml: docker-compose.loadbalancer.yml .env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
+
 ### Node
 
+.PRECIOUS: node0%.env
 node0%.env: template.node0x.env
 	@set -o allexport; . $(REPO_CONFIG_LOCATION); set +o allexport; \
 	export NODE_INDEX=$*; \
 	envsubst < $< > $@
 
+.PRECIOUS: docker-compose.node0%.yml
 docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
 					node0%.env \
 					configs/rabbitmq.conf \
@@ -40,6 +45,10 @@ docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
 					venv \
 					$(VENV_BIN)/j2
 	@$(call jinja, $<, node0$*.env, $@)
+
+.PRECIOUS: .stack.node0%.yml
+.stack.node0%.yml: docker-compose.node0%.yml node0%.env
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e node0$*.env $< > $@
 
 #
 # Config / Secret files

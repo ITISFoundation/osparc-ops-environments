@@ -53,7 +53,7 @@ backend rabbit_backends
 
     # init-addrs libc,none - start even if there aren’t any backend servers running
 {% for ix in NODE_IXS %}
-    server rabbit0{{ ix }} rabbit_rabbit0{{ ix }}:{{ RABBIT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
+    server rabbit0{{ ix }} rabbit-node0{{ ix }}_rabbit0{{ ix }}:{{ RABBIT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
 {%- endfor %}
 
 backend rabbit_dashboard_backends
@@ -65,6 +65,6 @@ backend rabbit_dashboard_backends
     http-request add-header X-Forwarded-Proto https if { ssl_fc }
 
 {% for ix in NODE_IXS %}
-    server rabbit0{{ ix }} rabbit_rabbit0{{ ix }}:{{ RABBIT_MANAGEMENT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
+    server rabbit0{{ ix }} rabbit-node0{{ ix }}_rabbit0{{ ix }}:{{ RABBIT_MANAGEMENT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
 {%- endfor %}
 # keep new line in the end to avoid "Missing LF on last line" error

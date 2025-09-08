@@ -4,7 +4,7 @@
 cluster_formation.peer_discovery_backend = classic_config
 
 {% for ix in NODE_IXS %}
-cluster_formation.classic_config.nodes.{{ ix }} = rabbit@rabbit_rabbit0{{ ix }}
+cluster_formation.classic_config.nodes.{{ ix }} = rabbit@rabbit-node0{{ ix }}_rabbit0{{ ix }}
 {%- endfor %}
 
 ## Sets the initial quorum queue replica count for newly declared quorum queues.

@@ -41,7 +41,7 @@ services:
       replicas: 1
     command: sh -c "pip install pika && python /app/sub.py"
     environment:
-      - RABBIT_HOSTS=rabbit_loadbalancer
+      - RABBIT_HOSTS=rabbit-loadbalancer_loadbalancer
       - RABBIT_USER=${RABBIT_USER}
       - RABBIT_PASS=${RABBIT_PASSWORD}
     networks:
@@ -55,7 +55,7 @@ services:
       replicas: 1
     command: sh -c "pip install pika && python /app/pub.py"
     environment:
-      - RABBIT_HOSTS=rabbit_loadbalancer
+      - RABBIT_HOSTS=rabbit-loadbalancer_loadbalancer
       - RABBIT_USER=${RABBIT_USER}
       - RABBIT_PASS=${RABBIT_PASSWORD}
     networks:
