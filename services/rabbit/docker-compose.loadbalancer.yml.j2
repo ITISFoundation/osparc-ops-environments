@@ -29,6 +29,11 @@ services:
       timeout: 2s
       retries: 2
       interval: 10s
+    ports:
+      - target: 15672
+        published: 15672
+        protocol: tcp
+        mode: host
     networks:
       - rabbit
     configs:

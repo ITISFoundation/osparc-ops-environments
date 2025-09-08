@@ -59,14 +59,19 @@ start-all-nodes: .env
 	$(MAKE) .start-all-nodes NODE_COUNT=$$RABBIT_CLUSTER_NODE_COUNT
 
 update-all-nodes:
-	@$(error Updating all nodes at the same time may break cluster. Update one node at a time)
+	@$(error Updating all nodes at the same time may break the cluster \
+	as it may restart (i.e. stop) all nodes at the same time. \
+	Update one node at a time)
 
 stop-all-nodes:
-	@$(error Stopping all nodes at the same time may break cluster.)
+	@$(error Stopping all nodes at the same time breaks the cluster. \
+	Read more at https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA/m/ZAyRDhRfCQAJ)
 
 #
 # Rabbit Node level
 #
+
+# TODO: validate node index is within boundaries
 
 start-node0%: .stack.node0%.yml
 	@STACK_NAME=$(call create_rabbit_node_name,$*); \
