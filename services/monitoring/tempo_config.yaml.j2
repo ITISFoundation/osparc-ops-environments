@@ -21,6 +21,12 @@ compactor:
 # and via https://github.com/ITISFoundation/osparc-ops-environments/issues/1086
 metrics_generator:
   processor:
+    span_metrics:
+      dimensions:
+        - service
+        - span_kind
+        - status_code
+        # Intentionally exclude span_name to prevent high cardinality
     local_blocks:
       filter_server_spans: false
       flush_to_storage: true
@@ -55,4 +61,4 @@ querier:
 overrides:
   defaults:
     metrics_generator:
-      processors: ['service-graphs', 'span-metrics', 'local-blocks']
+      processors: ['service-graphs', 'local-blocks']
