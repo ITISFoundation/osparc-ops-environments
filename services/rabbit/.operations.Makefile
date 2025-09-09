@@ -26,9 +26,11 @@ guard-positive-single-digit-integer-NODE_COUNT: guard-NODE_COUNT
 
 up: start-cluster
 
+down: stop-cluster
+
 start-cluster: start-all-nodes start-loadbalancer
 
-down:
+update-cluster stop-cluster:
 	@$(error This operation may break cluster. Perform it per component)
 
 #
