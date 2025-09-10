@@ -51,7 +51,6 @@ services:
   graylog:
     image: graylog/graylog:6.0.5
     init: true
-    # user: "1000:1001"
     configs:
     - source: graylog_config
       target: /files/osparc-custom-content-pack-v2.json
@@ -76,7 +75,7 @@ services:
         aliases:
           - graylog
     ports:
-    - 12201:12201/udp
+    - 12200:12201/udp
     - 12202:12202/udp
     deploy:
       replicas: 1
@@ -100,20 +99,18 @@ services:
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
-  fluentd:
-    image: itisfoundation/fluentd:v1.16.9-1.0
+  fluentbit:
+    image: cr.fluentbit.io/fluent/fluent-bit:4.0.9
     configs:
-      - source: fluentd_config
-        target: /fluentd/etc/fluent.conf
+      - source: fluentbit_config
+        target: /fluent-bit/etc/fluent-bit.conf
     environment:
       - GRAYLOG_HOST=graylog
       - GRAYLOG_PORT=12201
-      - LOKI_URL=http://loki:3100
-      - FLUENTD_HOSTNAME={% raw %}{{.Node.Hostname}}{% endraw %}
+      - LOKI_HOST=loki
     ports:
-      - "24224:24224/tcp"
+      - "12201:12201/udp"
     deploy:
-      #mode: global  # Run on all nodes
       restart_policy:
         condition: on-failure
       resources:
@@ -127,15 +124,19 @@ services:
         parallelism: 1
         delay: 10s
         order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${PUBLIC_NETWORK}
+        - traefik.http.services.fluentbit.loadbalancer.server.port=2020
+        - traefik.http.routers.fluentbit.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/fluentbit`)
+        - traefik.http.routers.fluentbit.entrypoints=https
+        - traefik.http.routers.fluentbit.tls=true
+        - traefik.http.middlewares.fluentbit_replace_regex.replacepathregex.regex=^/fluentbit/?(.*)$$
+        - traefik.http.middlewares.fluentbit_replace_regex.replacepathregex.replacement=/$${1}
+        - traefik.http.routers.fluentbit.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, fluentbit_replace_regex
     networks:
       - monitoring
       - graylog
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:24220/api/plugins"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   loki:
     image: grafana/loki:3.5.4
@@ -196,9 +197,9 @@ configs:
   graylog_config:
     name: ${STACK_NAME}_graylog_config_{{ "./data/contentpacks/osparc-custom-content-pack-v2.json" | sha256file | substring(0,10) }}
     file: ./data/contentpacks/osparc-custom-content-pack-v2.json
-  fluentd_config:
-    name: ${STACK_NAME}_fluentd_config_{{ "./fluentd/fluent.conf" | sha256file | substring(0,10) }}
-    file: ./fluentd/fluent.conf
+  fluentbit_config:
+    name: ${STACK_NAME}_fluentbit_config_{{ "./fluentbit/fluentbit.conf" | sha256file | substring(0,10) }}
+    file: ./fluentbit/fluentbit.conf
   loki_config:
     name: ${STACK_NAME}_loki_config_{{ "./loki.yaml" | sha256file | substring(0,10) }}
     file: ./loki.yaml

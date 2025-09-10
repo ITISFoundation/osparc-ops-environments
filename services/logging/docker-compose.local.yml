@@ -14,7 +14,7 @@ services:
       placement:
         constraints: []
 
-  fluentd:
+  fluentbit:
     deploy:
       placement:
         constraints: []
