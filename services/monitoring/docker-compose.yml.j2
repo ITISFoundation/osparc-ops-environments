@@ -301,7 +301,7 @@ services:
       - prometheus-port=9400
 
   pgsql-query-exporter:
-    image: ghcr.io/albertodonato/query-exporter:sha-a1d908e
+    image: ghcr.io/albertodonato/query-exporter:sha-685d8ed
     volumes: []
     dns:
       - 8.8.8.8
@@ -311,6 +311,9 @@ services:
     networks:
       - monitored
       - public
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
     extra_hosts: []
     deploy:
       labels:
@@ -326,6 +329,13 @@ services:
         reservations:
           memory: 64M
           cpus: "0.1"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "timeout 3 bash -c '</dev/tcp/$POSTGRES_HOST/$POSTGRES_PORT'"]
+      timeout: 5s
+      retries: 3
+      interval: 10s
+      start_period: 40s
+
   postgres-exporter:
     image: bitnami/postgres-exporter:0.17.1
     networks:
