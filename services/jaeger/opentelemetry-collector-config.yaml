@@ -34,7 +34,7 @@ processors:
         - attributes["http.route"] == "/health"
         - attributes["http.target"] == "/socket.io/"
         - attributes["url.path"] == "/socket.io/"
-        - attributes["server.address"] == "monitoring.osparc-master.speag.com"
+        - IsMatch(attributes["server.address"], "^monitoring..*"
         - attributes["net.peer.name"] == "/var/run/docker.sock"
         - attributes["http.route"] == "healthcheck_readiness_probe"
         - attributes["http.route"] == "healthcheck_liveness_probe"
