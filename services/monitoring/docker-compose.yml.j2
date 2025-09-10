@@ -372,7 +372,7 @@ services:
           memory: 32M
           cpus: "0.1"
   tempo:
-    image: grafana/tempo:2.7.2
+    image: grafana/tempo:2.8.2
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
     configs:
       - source: tempo_config
@@ -393,8 +393,8 @@ services:
         - traefik.http.routers.tempo.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, tempo_replace_regex
       resources:
         limits:
-          memory: 2000M
-          cpus: "2.0"
+          memory: 4G
+          cpus: "5.0"
 
 configs:
   alertmanager_config:
