@@ -24,7 +24,7 @@ service:
 processors:
   batch:
     timeout: 5s
-    send_batch_size: 8192
+    send_batch_size: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
   probabilistic_sampler:
     sampling_percentage: ${TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE}
   filter/drop_healthcheck:
