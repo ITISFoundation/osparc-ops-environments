@@ -138,7 +138,7 @@ services:
       start_period: 40s
 
   loki:
-    image: grafana/loki:3.5.0
+    image: grafana/loki:3.5.4
     configs:
       - source: loki_config
         target: /etc/loki/loki.yaml
@@ -160,8 +160,8 @@ services:
         delay: 5s
       resources:
         limits:
-          cpus: '1.0'
-          memory: 2G
+          cpus: '2.0'
+          memory: 4G
         reservations:
           cpus: '0.5'
           memory: 1G
