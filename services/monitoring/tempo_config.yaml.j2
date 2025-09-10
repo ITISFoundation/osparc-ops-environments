@@ -12,9 +12,9 @@ distributor:
   log_discarded_spans:
     enabled: true
     include_all_attributes: false
-#ingester:
-#  max_block_duration: 5m               # cut the headblock when this much time passes. this should probably be left alone normally
-
+ingester:
+  max_block_duration: 5m               # cut the headblock when this much time passes. this should probably be left alone normally
+  trace_idle_period: 301s
 compactor:
   compaction:
     block_retention: 96h             # overall Tempo trace retention.
@@ -59,7 +59,7 @@ storage:
 querier:
   frontend_worker:
     frontend_address: 0.0.0.0:9095
-
+stream_over_http_enabled: true
 overrides:
   defaults:
     metrics_generator:

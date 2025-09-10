@@ -1,8 +1,10 @@
 auth_enabled: false
 
 server:
+  log_level: info
   http_listen_port: 3100
-
+  grpc_server_max_recv_msg_size: 16777216  # 16MB (increase from 4MB default)
+  grpc_server_max_send_msg_size: 16777216  # 16MB
 common:
   path_prefix: /tmp/loki  # Required for internal directories
 
@@ -29,16 +31,30 @@ storage_config:
     active_index_directory: /tmp/loki/tsdb-index   # Local cache for index metadata
     cache_location: /tmp/loki/tsdb-cache          # Local cache for tsdb
   aws:
-    s3: s3://${S3_BUCKET_NAME_LOKI}
+    bucketnames: ${S3_BUCKET_NAME_LOKI}
     region: ${S3_REGION_LOKI}
     access_key_id: ${S3_ACCESS_KEY_LOKI}
     secret_access_key: ${S3_SECRET_KEY_LOKI}
-    s3forcepathstyle: ${S3_FORCE_PATH_STYLE_LOKI}     # Set to true if using MinIO or S3-compatible API; optional for AWS
-    endpoint: ${S3_ENDPOINT_LOKI} # Optional; use for non-default endpoints
+    endpoint: ${S3_ENDPOINT_LOKI}
+    s3forcepathstyle: true
 
 compactor:
   working_directory: /tmp/loki/compactor
   retention_enabled: false
 
 limits_config:
+  reject_old_samples: true
+  reject_old_samples_max_age: 4h
+  max_cache_freshness_per_query: 10m
+  split_queries_by_interval: 15m
+  # for big logs tune
+  per_stream_rate_limit: 512M
+  per_stream_rate_limit_burst: 1024M
+  cardinality_limit: 200000
+  ingestion_burst_size_mb: 1000
+  ingestion_rate_mb: 10000
+  max_entries_limit_per_query: 1000000
+  max_label_value_length: 20480
+  max_label_name_length: 10240
+  max_label_names_per_series: 300
   retention_period: ${LOKI_RETENTION_PERIOD}  # must be >= 24h and multiple of index period (24h)

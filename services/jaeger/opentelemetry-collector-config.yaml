@@ -24,13 +24,18 @@ service:
 processors:
   batch:
     timeout: 5s
-    send_batch_size: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
+    send_batch_size: 8192
   probabilistic_sampler:
     sampling_percentage: ${TRACING_OPENTELEMETRY_COLLECTOR_SAMPLING_PERCENTAGE}
   filter/drop_healthcheck:
     error_mode: ignore
     traces:
       span:
+        - attributes["http.route"] == "/health"
+        - attributes["http.target"] == "/socket.io/"
+        - attributes["url.path"] == "/socket.io/"
+        - attributes["server.address"] == "monitoring.osparc-master.speag.com"
+        - attributes["net.peer.name"] == "/var/run/docker.sock"
         - attributes["http.route"] == "healthcheck_readiness_probe"
         - attributes["http.route"] == "healthcheck_liveness_probe"
         - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true

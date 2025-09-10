@@ -372,7 +372,7 @@ services:
           memory: 32M
           cpus: "0.1"
   tempo:
-    image: grafana/tempo:2.7.2
+    image: grafana/tempo:2.8.2
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
     configs:
       - source: tempo_config
