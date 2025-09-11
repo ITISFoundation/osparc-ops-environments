@@ -36,6 +36,9 @@ validate-node-ix0%: .env
 # Cluster level
 #
 
+### Note: up operation is called by CI automatically
+###       it must NOT deploy stacks if they are already running
+###       to avoid breaking existing cluster (stopping all nodes at once)
 up: start-cluster
 
 down: stop-cluster
@@ -79,6 +82,7 @@ update-all-nodes:
 
 stop-all-nodes:
 	@$(error Stopping all nodes at the same time breaks the cluster. \
+	Update one node at a time. \
 	Read more at https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA/m/ZAyRDhRfCQAJ)
 
 #
