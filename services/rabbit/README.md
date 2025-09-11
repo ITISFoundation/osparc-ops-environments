@@ -4,8 +4,15 @@ Make sure all nodes have joined the cluster before using it. Otherwise, number o
 
 ## Updating a cluster
 
-When `docker stack deploy` is executed against a running cluster and all (docker services) rabbit nodes restart at the same time, the cluster breaks (read https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA/m/ZAyRDhRfCQAJ) and may only recover itself after 5 minutes timeous (not sure). Restarting nodes manually (docker service update --force) fixes cluster.
+Perform update one node at a time. Never update all nodes at the same time (this may break cluster)! Follow instructions from official documentation https://www.rabbitmq.com/docs/upgrade#rolling-upgrade.
 
+## Graceful shutdown
+
+Normally when you shut down a RabbitMQ cluster altogether, the first node you restart should be the last one to go down, since it may have seen things happen that other nodes did not.
+
+If all Nodes were shutdown simultaneously, use force_boot (https://www.rabbitmq.com/docs/man/rabbitmqctl.8#force_boot)
+
+#### Community discussions
 mnesia errors after all rabbit nodes (docker services) restart:
 * https://stackoverflow.com/questions/60407082/rabbit-mq-error-while-waiting-for-mnesia-tables
 
