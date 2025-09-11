@@ -20,6 +20,18 @@ guard-positive-single-digit-integer-NODE_COUNT: guard-NODE_COUNT
 		exit 1; \
 	fi
 
+validate-node-ix0%: .env
+	@if ! echo "$*" | grep --quiet --extended-regexp '^[0-9]+$$'; then \
+		echo "Node index $* must be a positive integer"; \
+		exit 1; \
+	fi
+
+	@set -o allexport; . $<; set +o allexport; \
+	if [ "$*" -lt 1 ] || [ "$*" -gt "$$RABBIT_CLUSTER_NODE_COUNT" ]; then \
+		echo "Node index $* is out of range 1..$$RABBIT_CLUSTER_NODE_COUNT"; \
+		exit 1; \
+	fi
+
 #
 # Cluster level
 #
@@ -73,19 +85,17 @@ stop-all-nodes:
 # Rabbit Node level
 #
 
-# TODO: validate node index is within boundaries
-
-start-node0%: .stack.node0%.yml
+start-node0%: validate-node-ix0% .stack.node0%.yml
 	@STACK_NAME=$(call create_rabbit_node_name,$*); \
 	if docker stack ls --format '{{.Name}}' | grep --silent "$$STACK_NAME"; then \
 		echo "Rabbit Node $* is already running, skipping"; \
 	else \
 		echo "Starting Rabbit Node $* ..."; \
-		docker stack deploy --with-registry-auth --prune --compose-file $< $(call create_rabbit_node_name,$*); \
+		docker stack deploy --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_rabbit_node_name,$*); \
 	fi
 
-update-node0%: .stack.node0%.yml
-	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file $< $(call create_rabbit_node_name,$*)
+update-node0%: validate-node-ix0% .stack.node0%.yml
+	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_rabbit_node_name,$*)
 
-stop-node0%: .stack.node0%.yml
+stop-node0%: validate-node-ix0%
 	@docker stack rm --detach=false $(call create_rabbit_node_name,$*)
