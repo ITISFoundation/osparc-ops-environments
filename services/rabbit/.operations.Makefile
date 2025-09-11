@@ -14,7 +14,7 @@ define create_node_stack_name
 rabbit-node0$(1)
 endef
 
-guard-positive-single-digit-integer-NODE_COUNT: guard-NODE_COUNT
+validate-NODE_COUNT: guard-NODE_COUNT
 	@if ! echo "$(NODE_COUNT)" | grep --quiet --extended-regexp '^[1-9]$$'; then \
 		echo NODE_COUNT must be a positive single digit integer; \
 		exit 1; \
@@ -61,7 +61,7 @@ stop-loadbalancer:
 # Rabbit all Nodes together
 #
 
-.start-all-nodes: guard-positive-single-digit-integer-NODE_COUNT
+.start-all-nodes: validate-NODE_COUNT
 	@i=1; \
 	while [ $$i -le $(NODE_COUNT) ]; do \
 		$(MAKE) start-node0$$i; \
