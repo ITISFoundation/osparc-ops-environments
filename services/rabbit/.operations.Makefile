@@ -10,7 +10,7 @@ MAKEFLAGS += --no-print-directory
 # Helpers
 #
 
-define create_rabbit_node_name
+define create_node_stack_name
 rabbit-node0$(1)
 endef
 
@@ -86,16 +86,16 @@ stop-all-nodes:
 #
 
 start-node0%: validate-node-ix0% .stack.node0%.yml
-	@STACK_NAME=$(call create_rabbit_node_name,$*); \
+	@STACK_NAME=$(call create_node_stack_name,$*); \
 	if docker stack ls --format '{{.Name}}' | grep --silent "$$STACK_NAME"; then \
 		echo "Rabbit Node $* is already running, skipping"; \
 	else \
 		echo "Starting Rabbit Node $* ..."; \
-		docker stack deploy --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_rabbit_node_name,$*); \
+		docker stack deploy --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_node_stack_name,$*); \
 	fi
 
 update-node0%: validate-node-ix0% .stack.node0%.yml
-	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_rabbit_node_name,$*)
+	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_node_stack_name,$*)
 
 stop-node0%: validate-node-ix0%
-	@docker stack rm --detach=false $(call create_rabbit_node_name,$*)
+	@docker stack rm --detach=false $(call create_node_stack_name,$*)
