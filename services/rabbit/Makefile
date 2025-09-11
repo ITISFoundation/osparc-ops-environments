@@ -31,10 +31,10 @@ docker-compose.loadbalancer.yml: docker-compose.loadbalancer.yml.j2 \
 ### Node
 
 .PRECIOUS: node0%.env
-node0%.env: template.node0x.env
+node0%.env: template.env
 	@set -o allexport; . $(REPO_CONFIG_LOCATION); set +o allexport; \
-	export NODE_INDEX=$*; \
-	envsubst < $< > $@
+	envsubst < $< > $@; \
+	echo NODE_INDEX=$* >> $@
 
 .PRECIOUS: docker-compose.node0%.yml
 docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
