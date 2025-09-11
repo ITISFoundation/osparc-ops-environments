@@ -72,9 +72,6 @@ configs:
   rabbitmq.conf:
     # no rolling update since it requires full cluster restart
     file: ./configs/rabbitmq.conf
-  haproxy.cfg:
-    file: ./configs/haproxy.cfg
-    name: rabbit_haproxy_conf_{{ "./configs/haproxy.cfg" | sha256file | substring(0,10) }}
 
 secrets:
   rabbit_erlang_cookie:

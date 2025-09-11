@@ -43,7 +43,7 @@ down: stop-cluster
 start-cluster: start-all-nodes start-loadbalancer
 
 update-cluster stop-cluster:
-	@$(error This operation may break cluster. Perform it per component)
+	@$(error This operation may break cluster. Check README for details.)
 
 #
 # Load Balancer
