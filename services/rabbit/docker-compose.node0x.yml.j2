@@ -51,7 +51,7 @@ services:
       # https://www.rabbitmq.com/docs/clustering#restarting-readiness-probes
       # we must have a healthcheck that does not require node to be fully booted (i.e. joined a cluster)
       # because it creates a deadlock: docker swarm will not route to the node until it is healthy
-      # node is not healthy until it is part of a cluster (other node can talk to it)
+      # node is not healthy until it is part of a cluster (other nodes can talk to it)
       test: rabbitmq-diagnostics ping
       interval: 60s
       timeout: 10s

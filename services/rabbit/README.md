@@ -8,7 +8,7 @@ Perform update one node at a time. Never update all nodes at the same time (this
 
 ## Graceful shutdown
 
-Shutdown nodes one by one gracefully. Wait until the nodes is stopped and leaves the cluster. Then remove next node. When starting cluster, start nodes **in the reverse order**! For example, if you shutdown node01, then node02 and lastly node03, first start node03 then node02 and finally node03.
+Shutdown nodes one by one gracefully. Wait until the nodes is stopped and leaves the cluster. Then remove next node. When starting cluster, start nodes **in the reverse order**! For example, if you shutdown node01, then node02 and lastly node03, first start node03 then node02 and finally node01.
 
 If all Nodes were shutdown simultaneously, then you will see mnesia tables errors in node's logs. Restarting node solves the issue . Documentation also mentions force_boot CLI command in this case (see https://www.rabbitmq.com/docs/man/rabbitmqctl.8#force_boot)
 
