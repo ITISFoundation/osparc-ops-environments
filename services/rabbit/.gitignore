@@ -1,0 +1,6 @@
+*.yml
+*.env
+!template*.env
+!erlang.cookie.secret.template
+rabbitmq.conf
+haproxy.cfg
