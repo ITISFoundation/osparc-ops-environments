@@ -51,7 +51,6 @@ services:
   graylog:
     image: graylog/graylog:6.0.5
     init: true
-    # user: "1000:1001"
     configs:
     - source: graylog_config
       target: /files/osparc-custom-content-pack-v2.json
@@ -76,7 +75,7 @@ services:
         aliases:
           - graylog
     ports:
-    - 12201:12201/udp
+    - 12200:12201/udp
     - 12202:12202/udp
     deploy:
       replicas: 1
@@ -100,42 +99,29 @@ services:
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
-  fluentd:
-    image: itisfoundation/fluentd:v1.16.9-1.0
-    configs:
-      - source: fluentd_config
-        target: /fluentd/etc/fluent.conf
-    environment:
-      - GRAYLOG_HOST=graylog
-      - GRAYLOG_PORT=12201
-      - LOKI_URL=http://loki:3100
-      - FLUENTD_HOSTNAME={% raw %}{{.Node.Hostname}}{% endraw %}
+  vector:
+    image: timberio/vector:0.49.X-debian
     ports:
-      - "24224:24224/tcp"
+      - "12201:12201/udp"  # GELF input
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - VECTOR_CONFIG=/etc/vector/vector.yaml
+      - VECTOR_LOG=info
+    configs:
+      - source: vector_config
+        target: /etc/vector/vector.yaml
     deploy:
-      #mode: global  # Run on all nodes
-      restart_policy:
-        condition: on-failure
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
+          cpus: "1.0"
           memory: 512M
-      update_config:
-        parallelism: 1
-        delay: 10s
-        order: start-first
+        reservations:
+          memory: 256M
+      labels: []
     networks:
       - monitoring
       - graylog
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:24220/api/plugins"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   loki:
     image: grafana/loki:3.5.4
@@ -196,9 +182,9 @@ configs:
   graylog_config:
     name: ${STACK_NAME}_graylog_config_{{ "./data/contentpacks/osparc-custom-content-pack-v2.json" | sha256file | substring(0,10) }}
     file: ./data/contentpacks/osparc-custom-content-pack-v2.json
-  fluentd_config:
-    name: ${STACK_NAME}_fluentd_config_{{ "./fluentd/fluent.conf" | sha256file | substring(0,10) }}
-    file: ./fluentd/fluent.conf
+  vector_config:
+    name: ${STACK_NAME}_vector_config_{{ "./vector.yaml" | sha256file | substring(0,10) }}
+    file: ./vector.yaml
   loki_config:
     name: ${STACK_NAME}_loki_config_{{ "./loki.yaml" | sha256file | substring(0,10) }}
     file: ./loki.yaml
