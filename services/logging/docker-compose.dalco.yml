@@ -17,7 +17,7 @@ services:
         constraints:
           - node.labels.logging==true
 
-  fluentbit:
+  vector:
     deploy:
       placement:
         constraints:
