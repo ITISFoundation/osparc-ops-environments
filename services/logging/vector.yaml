@@ -9,6 +9,10 @@ sources:
     mode: udp
     decoding:
       codec: gelf
+    framing:
+      method: chunked_gelf
+      # Auto-detect compression (gzip, zlib, or uncompressed)
+      decompression: Auto
 
 transforms:
   # Process and enrich the logs
