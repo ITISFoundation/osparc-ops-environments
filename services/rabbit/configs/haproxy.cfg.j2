@@ -1,0 +1,64 @@
+{% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
+
+global
+    log stdout format raw local0
+
+# haproxy by default resolves server hostname only once
+# this breaks if container restarts. By using resolvers
+# we tell haproxy to re-resolve the hostname (so container
+# restarts are handled properly)
+resolvers dockerdns
+    nameserver dns1 127.0.0.11:53
+    resolve_retries 3
+    timeout resolve 1s
+    timeout retry   1s
+    hold other      10s
+    hold refused    10s
+    hold nx         10s
+    hold timeout    10s
+    hold valid      10s
+    hold obsolete   10s
+
+defaults
+    log global
+    mode tcp
+    option tcplog
+
+    timeout connect 5s
+    timeout client 30s
+    timeout server 30s
+
+frontend rabbit
+    bind *:{{ RABBIT_PORT }}
+    default_backend rabbit_backends
+
+frontend rabbit_dashboard
+    bind *:{{ RABBIT_MANAGEMENT_PORT }}
+    default_backend rabbit_dashboard_backends
+
+frontend health
+  mode http
+  bind 127.0.0.1:32087
+  http-request return status 200 if { src 127.0.0.0/8 }
+
+backend rabbit_backends
+    # side effect of roundrobin is connection should be evenly distributed
+    # thus rabbit queue leader replica shall be also evenly distributed
+    # (https://www.rabbitmq.com/docs/4.0/clustering#replica-placement)
+    # if algorithm  below is changed, consider adjusting rabbit configuration
+    # as stated in documentation link above
+    balance roundrobin
+
+    # init-addrs libc,none - start even if there aren’t any backend servers running
+{% for ix in NODE_IXS %}
+    server rabbit0{{ ix }} rabbit-node0{{ ix }}_rabbit0{{ ix }}:{{ RABBIT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3 send-proxy
+{%- endfor %}
+
+backend rabbit_dashboard_backends
+    mode http
+    balance roundrobin
+
+{% for ix in NODE_IXS %}
+    server rabbit0{{ ix }} rabbit-node0{{ ix }}_rabbit0{{ ix }}:{{ RABBIT_MANAGEMENT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
+{%- endfor %}
+# keep new line in the end to avoid "Missing LF on last line" error
