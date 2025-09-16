@@ -42,10 +42,8 @@ services:
         gid: "999"
     volumes:
       - rabbit0{{ NODE_INDEX }}_data:/var/lib/rabbitmq
-    # TODO: sync with existing rabbit attached networks
     networks:
       - rabbit
-    # TODO: consider another healthcheck (e.g. check kubernetes operator)
     healthcheck:
       # see https://hub.docker.com/_/rabbitmq#healthlivenessreadiness-checking
       # https://www.rabbitmq.com/docs/clustering#restarting-readiness-probes
