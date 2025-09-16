@@ -10,17 +10,13 @@ Perform update one node at a time. Never update all nodes at the same time (this
 
 Shutdown nodes one by one gracefully. Wait until the nodes is stopped and leaves the cluster. Then remove next node. When starting cluster, start nodes **in the reverse order**! For example, if you shutdown node01, then node02 and lastly node03, first start node03 then node02 and finally node01.
 
-If all Nodes were shutdown simultaneously, then you will see mnesia tables errors in node's logs. Restarting node solves the issue . Documentation also mentions force_boot CLI command in this case (see https://www.rabbitmq.com/docs/man/rabbitmqctl.8#force_boot)
+If all Nodes were shutdown simultaneously, then you will see mnesia tables errors in node's logs. Restarting node solves the issue. Documentation also mentions force_boot CLI command in this case (see https://www.rabbitmq.com/docs/man/rabbitmqctl.8#force_boot)
 
-#### Community discussions
-mnesia errors after all rabbit nodes (docker services) restart:
-* https://stackoverflow.com/questions/60407082/rabbit-mq-error-while-waiting-for-mnesia-tables
+## How to add / remove nodes
 
-official documentation mentionening restart scenarios
-* https://www.rabbitmq.com/docs/clustering#restarting-schema-sync
+The only supported way, is to completely shutdown the cluster (docker stack and most likely rabbit node volumes) and start brand new.
 
-all (3) cluster nodes go down simultaneosuly, cluster is broken:
-* https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA
+With manual effort this can be done on the running cluster, by adding 1 more rabbit node manually (as a separate docker stack or new service) and manually executing rabbitmqctl commands (some hints can be found here https://www.rabbitmq.com/docs/clustering#creating)
 
 ## Updating rabbitmq.conf / advanced.config (zero-downtime)
 
@@ -31,19 +27,23 @@ We do not support this automated (except starting from scratch with empty volume
 
 Source: https://www.rabbitmq.com/docs/next/configure#config-changes-effects
 
-## How to add / remove nodes
-
-The only supported way, is to completely shutdown the cluster (docker stack and most likely rabbit node volumes) and start brand new.
-
-With manual effort this can be done on the running cluster, by adding 1 more rabbit node manually (as a separate docker stack or new service) and manually executing rabbitmqctl commands (some hints can be found here https://www.rabbitmq.com/docs/clustering#creating)
-
-## Autoscaling
-
-Not supported at the moment.
-
 ## Enable node Maintenance mode
 
 1. Get inside container's shell (`docker exec -it <container-id> bash`)
 2. (Inside container) execute `rabbitmq-upgrade drain`
 
 Source: https://www.rabbitmq.com/docs/upgrade#maintenance-mode
+
+#### Troubleshooting
+mnesia errors after all rabbit nodes (docker services) restart:
+* https://stackoverflow.com/questions/60407082/rabbit-mq-error-while-waiting-for-mnesia-tables
+
+official documentation mentioning restart scenarios
+* https://www.rabbitmq.com/docs/clustering#restarting-schema-sync
+
+all (3) cluster nodes go down simultaneosuly, cluster is broken:
+* https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA
+
+## Autoscaling
+
+Not supported at the moment.
