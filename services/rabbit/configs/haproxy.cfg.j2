@@ -2,8 +2,6 @@
 
 global
     log stdout format raw local0
-    maxconn 4096
-    pidfile /tmp/haproxy.pid
 
 # haproxy by default resolves server hostname only once
 # this breaks if container restarts. By using resolvers
