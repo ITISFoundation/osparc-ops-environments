@@ -21,8 +21,8 @@ validate-NODE_COUNT: guard-NODE_COUNT
 	fi
 
 validate-node-ix0%: .env
-	@if ! echo "$*" | grep --quiet --extended-regexp '^[0-9]+$$'; then \
-		echo "Node index $* must be a positive integer"; \
+	@if ! echo "$*" | grep --quiet --extended-regexp '^[1-9]$$'; then \
+		echo "Node index $* must be a positive single digit integer"; \
 		exit 1; \
 	fi
 
