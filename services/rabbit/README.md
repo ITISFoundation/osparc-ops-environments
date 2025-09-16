@@ -34,7 +34,7 @@ Source: https://www.rabbitmq.com/docs/next/configure#config-changes-effects
 
 Source: https://www.rabbitmq.com/docs/upgrade#maintenance-mode
 
-#### Troubleshooting
+## Troubleshooting
 mnesia errors after all rabbit nodes (docker services) restart:
 * https://stackoverflow.com/questions/60407082/rabbit-mq-error-while-waiting-for-mnesia-tables
 
