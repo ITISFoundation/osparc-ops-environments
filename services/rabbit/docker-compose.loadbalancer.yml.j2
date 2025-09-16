@@ -29,44 +29,11 @@ services:
       timeout: 2s
       retries: 2
       interval: 10s
-    ports:
-      - target: 15672
-        published: 15672
-        protocol: tcp
-        mode: host
     networks:
       - rabbit
     configs:
       - source: haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg
-
-  subscriber:
-    image: python:3.11
-    deploy:
-      replicas: 1
-    command: sh -c "pip install pika && python /app/sub.py"
-    environment:
-      - RABBIT_HOSTS=rabbit-loadbalancer_loadbalancer
-      - RABBIT_USER=${RABBIT_USER}
-      - RABBIT_PASS=${RABBIT_PASSWORD}
-    networks:
-      - rabbit
-    volumes:
-      - ./test/sub.py:/app/sub.py
-
-  publisher:
-    image: python:3.11
-    deploy:
-      replicas: 1
-    command: sh -c "pip install pika && python /app/pub.py"
-    environment:
-      - RABBIT_HOSTS=rabbit-loadbalancer_loadbalancer
-      - RABBIT_USER=${RABBIT_USER}
-      - RABBIT_PASS=${RABBIT_PASSWORD}
-    networks:
-      - rabbit
-    volumes:
-      - ./test/pub.py:/app/pub.py
 
 networks:
   rabbit:
