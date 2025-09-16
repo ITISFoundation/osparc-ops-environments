@@ -58,10 +58,6 @@ backend rabbit_dashboard_backends
     mode http
     balance roundrobin
 
-    option forwardfor
-    http-request set-header X-Forwarded-Port %[dst_port]
-    http-request add-header X-Forwarded-Proto https if { ssl_fc }
-
 {% for ix in NODE_IXS %}
     server rabbit0{{ ix }} rabbit-node0{{ ix }}_rabbit0{{ ix }}:{{ RABBIT_MANAGEMENT_PORT }} check resolvers dockerdns init-addr libc,none inter 5s rise 2 fall 3
 {%- endfor %}
