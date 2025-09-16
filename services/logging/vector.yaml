@@ -1,0 +1,98 @@
+# Vector configuration to replace Fluent Bit
+# Ingests GELF logs from Docker daemon and forwards to Loki and Graylog
+
+sources:
+  # Receive GELF messages from Docker containers via UDP
+  docker_gelf:
+    type: socket
+    address: "0.0.0.0:12201"
+    mode: udp
+    decoding:
+      codec: gelf
+    framing:
+      method: chunked_gelf
+      # Auto-detect compression (gzip, zlib, or uncompressed)
+      decompression: Auto
+
+transforms:
+  # Process and enrich the logs
+  process_logs:
+    type: remap
+    inputs: ["docker_gelf"]
+    source: |
+      if !exists(.host) {
+        .host = get_hostname!()
+      }
+
+      # Map short_message to message for Loki compatibility
+      if exists(.short_message) {
+        .message = .short_message
+      }
+
+      # Handle container name - GELF uses _container_name (with underscore prefix)
+      if exists(._container_name) {
+        .container_name = ._container_name
+      } else {
+        .container_name = "unknown"
+      }
+
+      # Handle container ID
+      if exists(._container_id) {
+        .container_id = ._container_id
+      } else {
+        .container_id = "unknown"
+      }
+
+      # Handle image name
+      if exists(._image_name) {
+        .image_name = ._image_name
+      } else {
+        .image_name = "unknown"
+      }
+
+      # Add processing metadata
+      .processed_by = "vector"
+
+sinks:
+  # Send to Loki
+  loki:
+    type: loki
+    inputs: ["process_logs"]
+    endpoint: "http://loki:3100"
+    encoding:
+      codec: json
+    labels:
+      job: "docker"
+      source: "vector"
+      # Simple field references - defaults are set in transform above
+      host: "{{ host }}"
+      container_name: "{{ container_name }}"
+    # Remove label fields from the log line to avoid duplication
+    remove_label_fields: true
+    healthcheck:
+      enabled: true
+
+  # Send to Graylog via GELF over UDP (not TCP with framing)
+  graylog:
+    type: socket
+    inputs: ["process_logs"]
+    address: "logging_graylog:12201"
+    mode: udp
+    encoding:
+      codec: gelf
+    healthcheck:
+      enabled: true
+
+  # Temporary: Output to console for debugging
+  #console_debug:
+  #  type: console
+  #  inputs: ["process_logs"]
+  #  encoding:
+  #    codec: json
+
+# Global configuration
+api:
+  enabled: true
+  address: "0.0.0.0:8686"
+
+data_dir: "/var/lib/vector"

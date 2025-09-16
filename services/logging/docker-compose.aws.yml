@@ -15,7 +15,7 @@ services:
         constraints:
           - node.labels.logging==true
 
-  fluentd:
+  vector:
     deploy:
       placement:
         constraints:

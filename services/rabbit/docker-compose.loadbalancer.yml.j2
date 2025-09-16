@@ -1,0 +1,46 @@
+services:
+  loadbalancer:
+    image: haproxy:3.2
+    deploy:
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 30s
+        failure_action: rollback
+      # https://discourse.haproxy.org/t/haproxy-high-availability-configuration/11983
+      replicas: ${RABBIT_LB_REPLICAS}
+      # necessary to preserve client ip
+      # otherwise we see overlay rabbit network lb ip
+      # (rabbitmq management dashboard connection section)
+      endpoint_mode: dnsrr
+      resources:
+        limits:
+          # https://help.hcl-software.com/digital-experience/dx-95-doc-archive/CF203/platform/kubernetes/haproxy-migration/haproxy-configuration.html
+          cpus: "1"
+          memory: "2G"
+        # according to local observations and link below
+        # https://github.com/haproxytech/helm-charts/blob/haproxy-1.24.0/haproxy/values.yaml#L403
+        reservations:
+          cpus: "0.1"
+          memory: "128M"
+    healthcheck: # https://stackoverflow.com/a/76513320/12124525
+      test: bash -c 'echo "" > /dev/tcp/127.0.0.1/32087 || exit 1'
+      start_period: 5s
+      timeout: 2s
+      retries: 2
+      interval: 10s
+    networks:
+      - rabbit
+    configs:
+      - source: haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+
+networks:
+  rabbit:
+    name: ${RABBIT_NETWORK}
+    external: true
+
+configs:
+  haproxy.cfg:
+    file: ./configs/haproxy.cfg
+    name: rabbit_haproxy_conf_{{ "./configs/haproxy.cfg" | sha256file | substring(0,10) }}
