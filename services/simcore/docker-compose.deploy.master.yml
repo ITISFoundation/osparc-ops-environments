@@ -1,10 +1,58 @@
 services:
+  agent:
+    networks:
+      - rabbit
+    volumes:
+      - /docker/volumes/:/docker/volumes/
+
+  api-server:
+    networks:
+      - rabbit
+
+  api-worker:
+    networks:
+      - rabbit
+
   autoscaling:
     deploy:
       replicas: 0
-  agent:
-    volumes:
-      - /docker/volumes/:/docker/volumes/
+
+  catalog:
+    networks:
+      - rabbit
+
+  clusters-keeper:
+    deploy:
+      replicas: 0
+
+  dask-scheduler:
+    networks:
+      - rabbit
+
+  dask-sidecar:
+    networks:
+      - rabbit
+    environment:
+      - SIDECAR_LOGLEVEL=INFO
+
+  director-v2:
+    networks:
+      - rabbit
+
+  dynamic-schdlr:
+    networks:
+      - rabbit
+
+  notifications:
+    networks:
+      - rabbit
+
+  payments:
+    networks:
+      - rabbit
+    deploy:
+      replicas: 1
+
   postgres:
     labels:
       - "pgbackup.enable=true"
@@ -12,9 +60,63 @@ services:
       placement:
         constraints:
           - node.labels.postgres==true
-  dask-sidecar:
-    environment:
-      - SIDECAR_LOGLEVEL=INFO
+
+  resource-usage-tracker:
+    networks:
+      - rabbit
+
+  sto-worker:
+    networks:
+      - rabbit
+
+  sto-worker-cpu-bound:
+    networks:
+      - rabbit
+
+  storage:
+    networks:
+      - rabbit
+
+  wb-api-server:
+    networks:
+      - rabbit
+    deploy:
+      replicas: 3
+
+  wb-db-event-listener:
+    networks:
+      - rabbit
+
+  wb-garbage-collector:
+    networks:
+      - rabbit
+
+  webserver:
+    networks:
+      - rabbit
+    deploy:
+      replicas: 3
+
+  redis:
+    networks:
+      - public
+    deploy:
+      labels:
+        - traefik.enable=true
+        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
+        - traefik.swarm.network=${SWARM_STACK_NAME}_default
+        - "traefik.tcp.routers.${SWARM_STACK_NAME}_redis.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.entrypoints=redis
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.tls=false
+        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.service=${SWARM_STACK_NAME}_redis
+        - traefik.tcp.services.${SWARM_STACK_NAME}_redis.loadbalancer.server.port=${REDIS_PORT}
+
+  rabbit:
+    # rabbit is already exposed via ops traefik
+    # adding one more route to this configuration
+    deploy:
+      replicas: 0  # use standalone (cluster) rabbit stack
+
   traefik:
     command:
       - "--api=true"
@@ -71,43 +173,7 @@ services:
         - traefik.tcp.services.${SWARM_STACK_NAME}_redisRoute.loadbalancer.server.port=${REDIS_EXTERNAL_PORT}
         - "traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.rule=HostSNI(`*`)"
 
-  clusters-keeper:
-    deploy:
-      replicas: 0
-
-  payments:
-    deploy:
-      replicas: 1
-
-  webserver:
-    deploy:
-      replicas: 3
-
-  wb-api-server:
-    deploy:
-      replicas: 3
-
-  redis:
-    networks:
-      - public
-    deploy:
-      labels:
-        - traefik.enable=true
-        - io.simcore.zone=${TRAEFIK_SIMCORE_ZONE}
-        - traefik.swarm.network=${SWARM_STACK_NAME}_default
-        - "traefik.tcp.routers.${SWARM_STACK_NAME}_redis.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.entrypoints=redis
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.tls=false
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_redis.service=${SWARM_STACK_NAME}_redis
-        - traefik.tcp.services.${SWARM_STACK_NAME}_redis.loadbalancer.server.port=${REDIS_PORT}
-
+networks:
   rabbit:
-    # rabbit is already exposed via ops traefik
-    # adding one more route to this configuration
-    deploy:
-      labels:
-        - "traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.entrypoints=rabbitmq
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.tls=false
-        - traefik.tcp.routers.${SWARM_STACK_NAME}_rabbitmq.service=${SWARM_STACK_NAME}_rabbitmq
-        - traefik.tcp.services.${SWARM_STACK_NAME}_rabbitmq.loadbalancer.server.port=${RABBIT_PORT}
+    name: ${RABBIT_NETWORK}
+    external: true
