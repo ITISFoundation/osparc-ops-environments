@@ -48,6 +48,7 @@ services:
       interval: 10s
     networks:
       - rabbit
+      - public
     configs:
       - source: haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg
