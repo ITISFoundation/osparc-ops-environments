@@ -114,6 +114,7 @@ repos:
         always_run: true
         language: script
         files: '^(.*)\/services\/simcore/(docker-compose.*\.y([a])?ml)$'
+        require_serial: true
       - id: no-env-vars-exported-in-critical-pipeline-files
         name: no-env-vars-exported-in-critical-pipeline-files
         description: no-env-vars-exported-in-critical-pipeline-files
