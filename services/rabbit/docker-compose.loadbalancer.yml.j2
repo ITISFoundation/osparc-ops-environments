@@ -32,8 +32,8 @@ services:
         - traefik.http.routers.rabbit_dashboard.tls=true
         - traefik.http.middlewares.rabbit_dashboard_replace_regex.replacepathregex.regex=^/rabbit/(.*)$$
         - traefik.http.middlewares.rabbit_dashboard_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.rabbit_dashboard.middlewares=rabbit_dashboard_replace_regex@swarm, ops_gzip@swarm, ops_whitelist_private_ips@swarm
-        - traefik.tcp.routers.rabbit.rule=Host(`${RABBIT_HOST}`)
+        - traefik.http.routers.rabbit_dashboard.middlewares=rabbit_dashboard_replace_regex@swarm, ops_gzip@swarm
+        - traefik.tcp.routers.rabbit.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)
         - traefik.tcp.routers.rabbit.entrypoints=rabbitmq
         - traefik.tcp.routers.rabbit.tls=false
         - traefik.tcp.routers.rabbit.service=rabbit

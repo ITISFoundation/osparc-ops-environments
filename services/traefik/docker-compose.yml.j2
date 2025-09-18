@@ -109,8 +109,6 @@ services:
         - traefik.http.middlewares.ops_gzip.compress=true
         # ip whitelisting
         - traefik.http.middlewares.ops_whitelist_ips.ipallowlist.sourcerange=${TRAEFIK_IPWHITELIST_SOURCERANGE}
-        # ip whitelisting: only private ips
-        - traefik.http.middlewares.ops_whitelist_private_ips.ipallowlist.sourcerange=10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
         # traefik UI
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.rule=Host(`${MONITORING_DOMAIN}`) &&
