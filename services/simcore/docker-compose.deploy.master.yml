@@ -1,55 +1,21 @@
 services:
   agent:
-    networks:
-      - rabbit
     volumes:
       - /docker/volumes/:/docker/volumes/
-
-  api-server:
-    networks:
-      - rabbit
-
-  api-worker:
-    networks:
-      - rabbit
 
   autoscaling:
     deploy:
       replicas: 0
 
-  catalog:
-    networks:
-      - rabbit
-
   clusters-keeper:
     deploy:
       replicas: 0
 
-  dask-scheduler:
-    networks:
-      - rabbit
-
   dask-sidecar:
-    networks:
-      - rabbit
     environment:
       - SIDECAR_LOGLEVEL=INFO
 
-  director-v2:
-    networks:
-      - rabbit
-
-  dynamic-schdlr:
-    networks:
-      - rabbit
-
-  notifications:
-    networks:
-      - rabbit
-
   payments:
-    networks:
-      - rabbit
     deploy:
       replicas: 1
 
@@ -61,39 +27,11 @@ services:
         constraints:
           - node.labels.postgres==true
 
-  resource-usage-tracker:
-    networks:
-      - rabbit
-
-  sto-worker:
-    networks:
-      - rabbit
-
-  sto-worker-cpu-bound:
-    networks:
-      - rabbit
-
-  storage:
-    networks:
-      - rabbit
-
   wb-api-server:
-    networks:
-      - rabbit
     deploy:
       replicas: 3
 
-  wb-db-event-listener:
-    networks:
-      - rabbit
-
-  wb-garbage-collector:
-    networks:
-      - rabbit
-
   webserver:
-    networks:
-      - rabbit
     deploy:
       replicas: 3
 
@@ -172,8 +110,3 @@ services:
         - traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.service=${SWARM_STACK_NAME}_redisRoute
         - traefik.tcp.services.${SWARM_STACK_NAME}_redisRoute.loadbalancer.server.port=${REDIS_EXTERNAL_PORT}
         - "traefik.tcp.routers.${SWARM_STACK_NAME}_redisRoute.rule=HostSNI(`*`)"
-
-networks:
-  rabbit:
-    name: ${RABBIT_NETWORK}
-    external: true
