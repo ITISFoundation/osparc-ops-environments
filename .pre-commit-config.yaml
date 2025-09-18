@@ -122,6 +122,7 @@ repos:
         always_run: true
         language: script
         files: '^(.*\/Makefile.*)|(.*\.deploy_everything_locally.bash)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
+        require_serial: true
       - id: helm-update-dependencies
         name: Helm Dependency Update
         description: Make sure all Chart.lock files are up-to-date
