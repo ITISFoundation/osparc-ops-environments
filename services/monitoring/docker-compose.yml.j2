@@ -337,7 +337,7 @@ services:
       start_period: 40s
 
   postgres-exporter:
-    image: bitnami/postgres-exporter:0.17.1
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.1
     networks:
       - monitored
     environment:
