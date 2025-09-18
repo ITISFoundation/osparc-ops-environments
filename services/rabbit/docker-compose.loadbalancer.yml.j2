@@ -32,14 +32,12 @@ services:
         - traefik.http.routers.rabbit_dashboard.tls=true
         - traefik.http.middlewares.rabbit_dashboard_replace_regex.replacepathregex.regex=^/rabbit/(.*)$$
         - traefik.http.middlewares.rabbit_dashboard_replace_regex.replacepathregex.replacement=/$${1}
-        - traefik.http.routers.rabbit_dashboard.middlewares=rabbit_dashboard_replace_regex@swarm, ops_gzip@swarm
-        {%- if RABBIT_EXPOSE_INTERNALLY|lower == "true" %}
-        - traefik.tcp.routers.rabbit.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)
+        - traefik.http.routers.rabbit_dashboard.middlewares=rabbit_dashboard_replace_regex@swarm, ops_gzip@swarm, ops_whitelist_private_ips@swarm
+        - traefik.tcp.routers.rabbit.rule=Host(`${RABBIT_HOST}`)
         - traefik.tcp.routers.rabbit.entrypoints=rabbitmq
         - traefik.tcp.routers.rabbit.tls=false
         - traefik.tcp.routers.rabbit.service=rabbit
         - traefik.tcp.services.rabbit.loadbalancer.server.port=${RABBIT_PORT}
-        {%- endif %}
     healthcheck: # https://stackoverflow.com/a/76513320/12124525
       test: bash -c 'echo "" > /dev/tcp/127.0.0.1/32087 || exit 1'
       start_period: 5s
