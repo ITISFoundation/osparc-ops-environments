@@ -4,11 +4,12 @@ cert-manager:
     apiVersion: v1
     kind: Secret
     metadata:
-      name: rfc2136-credentials
+      name: acme-auth-secrets
       namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
     type: Opaque
-    data:
-      tsig-secret-key: {{ requiredEnv "RFC2136_TSIG_SECRET" | b64enc }}  # Base64 encoded Secret Access Key
+    stringData:
+      acmedns.json: |
+        {}
   - |
     apiVersion: cert-manager.io/v1
     kind: ClusterIssuer
@@ -27,10 +28,8 @@ cert-manager:
           name: cert-manager-acme-private-key
         solvers:
           - dns01:
-              rfc2136:
-                  nameserver:  {{ requiredEnv "RFC2136_NAMESERVER" }}
-                  tsigKeyName: {{ requiredEnv "RFC2136_TSIG_KEY" }}
-                  tsigAlgorithm: {{ requiredEnv "RFC2136_TSIG_ALGORITHM_CERT_MANAGER" }}
-                  tsigSecretSecretRef:
-                      name: rfc2136-credentials
-                      key: tsig-secret-key
+            acmeDNS:
+              accountSecretRef:
+                name: acme-auth-secrets
+                key: acmedns.json
+              host: auth.example.com
