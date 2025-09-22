@@ -39,7 +39,7 @@ validate-node-ix0%: .env
 ### Note: up operation is called by CI automatically
 ###       it must NOT deploy stacks if they are already running
 ###       to avoid breaking existing cluster (stopping all nodes at once)
-up: start-cluster
+up up-master up-dalco up-aws up-local up-public: start-cluster
 
 down: stop-cluster
 
