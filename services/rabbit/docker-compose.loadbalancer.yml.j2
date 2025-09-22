@@ -2,6 +2,11 @@ services:
   loadbalancer:
     image: haproxy:3.2
     deploy:
+      placement:
+        constraints:
+          - node.labels.ops == true
+        preferences:
+          - spread: node.id
       update_config:
         order: start-first
         parallelism: 1
