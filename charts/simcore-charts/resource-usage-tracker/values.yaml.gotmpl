@@ -154,6 +154,6 @@ env:
     sensitive: true
 
 networkPolicyEgressPorts:
-  rabbit: {{ requiredEnv "RABBIT_EXTERNAL_PORT" }}
+  rabbit: {{ requiredEnv "RABBIT_PORT" }}
   redis: {{ requiredEnv "REDIS_EXTERNAL_PORT" }}
   postgres: {{ requiredEnv "POSTGRES_EXTERNAL_PORT" }}
