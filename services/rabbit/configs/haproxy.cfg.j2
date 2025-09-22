@@ -25,8 +25,9 @@ defaults
     option tcplog
 
     timeout connect 5s
-    timeout client 30s
-    timeout server 30s
+    # must be kept bigger than rabbitmq heartbeat (default 60) https://www.rabbitmq.com/docs/heartbeats
+    timeout client 120s
+    timeout server 120s
 
 frontend rabbit
     bind *:{{ RABBIT_PORT }}

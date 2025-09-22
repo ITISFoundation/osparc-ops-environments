@@ -24,8 +24,8 @@ services:
         mode: host
       {% endif %}
       {% if OPS_TRAEFIK_EXPOSE_RABBITMQ|lower == "true" %}
-      - target: 5672
-        published: 5672
+      - target: ${RABBIT_PORT}
+        published: ${RABBIT_PORT}
         mode: host
       {% endif %}
       {% if OPS_TRAEFIK_EXPOSE_REDIS|lower == "true" %}
