@@ -18,6 +18,9 @@ services:
           memory: "1G"
       update_config:
         order: "stop-first"
+      labels:
+        - prometheus-job=rabbit
+        - prometheus-port=15692
     environment:
       # https://www.rabbitmq.com/docs/configure#supported-environment-variables
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
@@ -44,6 +47,7 @@ services:
       - rabbit0{{ NODE_INDEX }}_data:/var/lib/rabbitmq
     networks:
       - rabbit
+      - monitored
     healthcheck:
       # see https://hub.docker.com/_/rabbitmq#healthlivenessreadiness-checking
       # https://www.rabbitmq.com/docs/clustering#restarting-readiness-probes
@@ -64,6 +68,9 @@ volumes:
 networks:
   rabbit:
     name: ${RABBIT_NETWORK}
+    external: true
+  monitored:
+    name: ${MONITORED_NETWORK}
     external: true
 
 configs:
