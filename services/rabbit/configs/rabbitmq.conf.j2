@@ -7,6 +7,12 @@ cluster_formation.peer_discovery_backend = classic_config
 cluster_formation.classic_config.nodes.{{ ix }} = rabbit@rabbit-node0{{ ix }}_rabbit0{{ ix }}
 {%- endfor %}
 
+# explicitly set cluster name so that all nodes share the same name
+# see https://github.com/rabbitmq/rabbitmq-server/discussions/11355
+# and https://groups.google.com/g/rabbitmq-users/c/A8v8XSmnCnA/m/4ZpoTtEWAQAJ
+# important for grafana dashboard to work properly
+cluster_name={{ RABBIT_CLUSTER_NAME }}
+
 ## Sets the initial quorum queue replica count for newly declared quorum queues.
 ## This value can be overridden using the 'x-quorum-initial-group-size' queue argument
 ## at declaration time.
