@@ -8,8 +8,9 @@ cert-manager:
       namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
     type: Opaque
     stringData:
+{{ $configDir := requiredEnv "CONFIG_DIR" }}
       acmedns.json: |
-        {}
+{{ readFile (printf "%s/lego-acme-accounts/acme-dns-accounts.json" $configDir) | indent 8 }} # Relative to helmfile.yaml
   - |
     apiVersion: cert-manager.io/v1
     kind: ClusterIssuer
