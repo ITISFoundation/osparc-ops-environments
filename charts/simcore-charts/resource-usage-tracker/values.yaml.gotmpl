@@ -120,12 +120,12 @@ env:
     value: {{ requiredEnv "RESOURCE_USAGE_TRACKER_PROMETHEUS_PASSWORD" }}
     sensitive: true
   - name: RABBIT_HOST
-    value: {{ requiredEnv "RABBIT_EXTERNAL_HOST" }}
+    value: {{ requiredEnv "RABBIT_HOST" }}
   - name: RABBIT_PASSWORD
     value: {{ requiredEnv "RABBIT_PASSWORD" }}
     sensitive: true
   - name: RABBIT_PORT
-    value: {{ requiredEnv "RABBIT_EXTERNAL_PORT" }}
+    value: {{ requiredEnv "RABBIT_PORT" }}
   - name: RABBIT_SECURE
     value: {{ requiredEnv "RABBIT_SECURE" }}
   - name: RABBIT_USER
@@ -154,6 +154,6 @@ env:
     sensitive: true
 
 networkPolicyEgressPorts:
-  rabbit: {{ requiredEnv "RABBIT_EXTERNAL_PORT" }}
+  rabbit: {{ requiredEnv "RABBIT_PORT" }}
   redis: {{ requiredEnv "REDIS_EXTERNAL_PORT" }}
   postgres: {{ requiredEnv "POSTGRES_EXTERNAL_PORT" }}

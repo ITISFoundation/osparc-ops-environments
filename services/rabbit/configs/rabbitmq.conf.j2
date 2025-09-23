@@ -1,0 +1,25 @@
+{% set NODE_IXS = range(1, (RABBIT_CLUSTER_NODE_COUNT | int) + 1) -%}
+
+# https://www.rabbitmq.com/docs/cluster-formation#peer-discovery-configuring-mechanism
+cluster_formation.peer_discovery_backend = classic_config
+
+{% for ix in NODE_IXS %}
+cluster_formation.classic_config.nodes.{{ ix }} = rabbit@rabbit-node0{{ ix }}_rabbit0{{ ix }}
+{%- endfor %}
+
+# explicitly set cluster name so that all nodes share the same name
+# see https://github.com/rabbitmq/rabbitmq-server/discussions/11355
+# and https://groups.google.com/g/rabbitmq-users/c/A8v8XSmnCnA/m/4ZpoTtEWAQAJ
+# important for grafana dashboard to work properly
+cluster_name={{ RABBIT_CLUSTER_NAME }}
+
+## Sets the initial quorum queue replica count for newly declared quorum queues.
+## This value can be overridden using the 'x-quorum-initial-group-size' queue argument
+## at declaration time.
+# https://www.rabbitmq.com/docs/quorum-queues#quorum-requirements
+quorum_queue.initial_cluster_size = {{ RABBIT_QUORUM_QUEUE_DEFAULT_REPLICA_COUNT }}
+
+# Extract proper client ip when behind a proxy (e.g. haproxy)
+# https://www.rabbitmq.com/docs/networking#proxy-protocol
+# WARNING: this forces clients to use a proxy (direct access to nodes does not work)
+proxy_protocol = true

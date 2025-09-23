@@ -92,7 +92,6 @@ scrape_configs:
       - names:
           - "tasks.production_rabbit"
           - "tasks.staging_rabbit"
-          - "tasks.master_rabbit"
         type: "A"
         port: 15692
       - names:
