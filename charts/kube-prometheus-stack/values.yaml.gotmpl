@@ -1,0 +1,97 @@
+alertmanager:
+  enabled: false
+
+defaultRules:
+  create: false
+
+grafana:
+  enabled: false
+
+kubeApiServer:
+  enabled: false
+
+kubelet:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+coreDns:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeDns:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+nodeExporter:
+  enabled: true
+
+thanosRuler:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+
+  networkPolicy: &networkPolicy
+    enabled: true
+    flavor: Kubernetes
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 0.1
+      memory: 256Mi
+
+  nodeSelector:
+    ops: "true"
+
+prometheus:
+  enabled: true
+
+  networkPolicy: *networkPolicy
+
+  # enable once needed (object storage)
+  thanosService:
+    enabled: false
+
+  ingress:
+    enabled: true
+    annotations:
+        namespace: "{{ .Release.Namespace }}"
+        cert-manager.io/cluster-issuer: "cert-issuer"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+    tls:
+      - secretName: monitoring-tls
+        hosts:
+          - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+    hosts:
+      - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+    paths:
+      - /prometheus &pathprefix
+    pathType: Prefix
+
+  prometheusSpec:
+    routePrefix: *pathprefix
+
+    retention: 90d
+
+    retentionSize: 100GiB
+
+    scrape_interval: 15s
+
+    nodeSelector:
+      ops: "true"
