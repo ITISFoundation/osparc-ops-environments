@@ -10,8 +10,9 @@ grafana:
 kubeApiServer:
   enabled: false
 
+# container metrics (cpu / memory)
 kubelet:
-  enabled: false
+  enabled: true
 
 kubeControllerManager:
   enabled: false
@@ -37,15 +38,18 @@ kubeStateMetrics:
 nodeExporter:
   enabled: true
 
+prometheus-node-exporter:
+  namespaceOverride: "{{ .Release.Namespace }}-privileged"
+
 thanosRuler:
   enabled: false
 
 prometheusOperator:
   enabled: true
 
-  networkPolicy: &networkPolicy
+  networkPolicy:
     enabled: true
-    flavor: Kubernetes
+    flavor: kubernetes
 
   resources:
     limits:
@@ -61,14 +65,45 @@ prometheusOperator:
 prometheus:
   enabled: true
 
-  networkPolicy: *networkPolicy
+  networkPolicy:
+    enabled: true
+    flavor: kubernetes
 
-  # enable once needed (object storage)
+    ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+        ports:
+          # TODO: removed hardcode
+          - port: 9090
+            protocol: TCP
+    egress:
+      - ports:
+          # generic port for metrics
+          - port: 9100
+            protocol: TCP
+      - ports:
+          # prometheus operator
+          # TODO: removed hardcode
+          - port: 10250
+            protocol: TCP
+      - ports:
+          # kube api server
+          # TODO: removed hardcode
+          - port: 6443
+            protocol: TCP
+
+  # enable once object storage needed
   thanosService:
     enabled: false
 
   ingress:
     enabled: true
+    ingressClassName: ""
     annotations:
         namespace: "{{ .Release.Namespace }}"
         cert-manager.io/cluster-issuer: "cert-issuer"
@@ -81,10 +116,13 @@ prometheus:
     hosts:
       - {{ requiredEnv "K8S_MONITORING_FQDN" }}
     paths:
-      - /prometheus &pathprefix
+      - &pathprefix /prometheus
     pathType: Prefix
 
   prometheusSpec:
+    # no high availability in favor of resource savings
+    replicas: 1
+
     routePrefix: *pathprefix
 
     retention: 90d
@@ -95,3 +133,18 @@ prometheus:
 
     nodeSelector:
       ops: "true"
+
+    # without this not all service monitors are picked up
+    # when enabled chart applies default `matchLabels` but we
+    # don't want this. So we disable it
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1
+      limits:
+        memory: 4Gi
+        cpu: 2
+
+  # TODO: add persistent storage
