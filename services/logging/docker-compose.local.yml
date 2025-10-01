@@ -14,7 +14,7 @@ services:
       placement:
         constraints: []
 
-  fluentd:
+  vector:
     deploy:
       placement:
         constraints: []

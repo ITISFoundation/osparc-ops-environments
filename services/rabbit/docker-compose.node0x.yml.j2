@@ -1,0 +1,85 @@
+services:
+  rabbit0{{ NODE_INDEX }}:
+    image: itisfoundation/rabbitmq:4.1.2-management
+    init: true
+    # https://docs.docker.com/reference/cli/docker/service/create/#create-services-using-templates
+    hostname: {% raw %}"{{.Service.Name}}"{% endraw %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rabbit0{{ NODE_INDEX }} == true
+      resources:
+        # https://www.rabbitmq.com/docs/production-checklist#minimum-hardware
+        limits:
+          cpus: "4.0"
+          memory: "4G"
+        reservations:
+          cpus: "1.0"
+          memory: "1G"
+      update_config:
+        order: "stop-first"
+      labels:
+        - prometheus-job=rabbit
+        - prometheus-port=15692
+    environment:
+      # https://www.rabbitmq.com/docs/configure#supported-environment-variables
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
+      RABBITMQ_NODENAME: {% raw %}"rabbit@{{.Service.Name}}"{% endraw %}
+      RABBITMQ_NODE_PORT: ${RABBIT_PORT}
+    # https://docs.docker.com/reference/compose-file/services/#long-syntax-5
+    # https://hub.docker.com/_/rabbitmq#erlang-cookie
+    secrets:
+      # https://github.com/docker-library/rabbitmq/issues/279
+      - source: rabbit_erlang_cookie
+        target: /var/lib/rabbitmq/.erlang.cookie
+        mode: 0600
+        # as long as "default" user is used (no user explicitly specified)
+        uid: "999"
+        gid: "999"
+    configs:
+      - source: rabbitmq.conf
+        target: /etc/rabbitmq/rabbitmq.conf
+        mode: 0600
+        uid: "999"
+        gid: "999"
+    volumes:
+      - rabbit0{{ NODE_INDEX }}_data:/var/lib/rabbitmq
+    networks:
+      - rabbit
+      - monitored
+    healthcheck:
+      # see https://hub.docker.com/_/rabbitmq#healthlivenessreadiness-checking
+      # https://www.rabbitmq.com/docs/clustering#restarting-readiness-probes
+      # we must have a healthcheck that does not require node to be fully booted (i.e. joined a cluster)
+      # because it creates a deadlock: docker swarm will not route to the node until it is healthy
+      # node is not healthy until it is part of a cluster (other nodes can talk to it)
+      test: rabbitmq-diagnostics ping
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 30s
+      start_interval: 10s
+
+volumes:
+  rabbit0{{ NODE_INDEX }}_data:
+    name: rabbit0{{ NODE_INDEX }}_data
+
+networks:
+  rabbit:
+    name: ${RABBIT_NETWORK}
+    external: true
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
+
+configs:
+  rabbitmq.conf:
+    # no rolling update since it requires full cluster restart
+    file: ./configs/rabbitmq.conf
+
+secrets:
+  rabbit_erlang_cookie:
+    # no rolling update since it requires full cluster restart
+    # see https://github.com/rabbitmq/rabbitmq-server/discussions/14391
+    file: ./configs/erlang.cookie.secret
