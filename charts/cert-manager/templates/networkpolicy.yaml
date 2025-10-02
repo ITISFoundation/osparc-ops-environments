@@ -31,7 +31,7 @@ spec:
           - 172.16.0.0/12
           - 192.168.0.0/16
         ports:
-          - 6443
+          - {{ .Values.kubeApiServerPort }}
     # 6. TCP: cert-manager (controller) -> DNS API endpoints (for ACME DNS01)
     - action: Allow
       protocol: TCP

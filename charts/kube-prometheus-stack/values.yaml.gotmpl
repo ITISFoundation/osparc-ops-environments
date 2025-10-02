@@ -62,8 +62,14 @@ prometheusOperator:
   nodeSelector:
     ops: "true"
 
+  tls:
+    internalPort: &prometheusOperatorInternalPort 10250
+
 prometheus:
   enabled: true
+
+  service:
+    port: &prometheusServicePort 9090
 
   networkPolicy:
     enabled: true
@@ -78,8 +84,7 @@ prometheus:
             matchLabels:
               app.kubernetes.io/name: traefik
         ports:
-          # TODO: removed hardcode
-          - port: 9090
+          - port: *prometheusServicePort
             protocol: TCP
     egress:
       - ports:
@@ -88,13 +93,11 @@ prometheus:
             protocol: TCP
       - ports:
           # prometheus operator
-          # TODO: removed hardcode
-          - port: 10250
+          - port: *prometheusOperatorInternalPort
             protocol: TCP
       - ports:
           # kube api server
-          # TODO: removed hardcode
-          - port: 6443
+          - port: {{ .Values.kubeApiServerPort }}
             protocol: TCP
 
   # enable once object storage needed

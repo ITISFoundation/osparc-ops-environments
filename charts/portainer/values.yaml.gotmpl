@@ -1,5 +1,7 @@
 servicePort: &servicePort 9000
 
+kubeApiServerPort: {{ .Values.kubeApiServerPort }}
+
 portainer:
   replicaCount: 1
 
