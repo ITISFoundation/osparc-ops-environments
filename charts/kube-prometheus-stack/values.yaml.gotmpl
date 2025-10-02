@@ -147,4 +147,6 @@ prometheus:
         memory: 4Gi
         cpu: 2
 
-  # TODO: add persistent storage
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
