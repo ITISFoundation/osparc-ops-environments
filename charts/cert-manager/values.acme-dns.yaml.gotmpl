@@ -1,10 +1,12 @@
 cert-manager:
+  extraArgs:
+    - --max-concurrent-challenges=2
   extraObjects:
   - |
     apiVersion: v1
     kind: Secret
     metadata:
-      name: acme-auth-secrets
+      name: acme-dns-secret
       namespace: {{ .Release.Namespace }}  # secret must be in same namespace as Cert Manager deployment
     type: Opaque
     stringData:
@@ -29,8 +31,8 @@ cert-manager:
           name: cert-manager-acme-private-key
         solvers:
           - dns01:
-            acmeDNS:
-              accountSecretRef:
-                name: acme-auth-secrets
-                key: acmedns.json
-              host: auth.example.com
+              acmeDNS:
+                accountSecretRef:
+                  name: acme-dns-secret
+                  key: acmedns.json
+                host: {{ requiredEnv "ACME_DNS_API_BASE" }}
