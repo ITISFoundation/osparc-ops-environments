@@ -4,7 +4,7 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 include $(REPO_CONFIG_LOCATION)
 
-CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
+export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
 .PHONY: .check-helmfile-installed

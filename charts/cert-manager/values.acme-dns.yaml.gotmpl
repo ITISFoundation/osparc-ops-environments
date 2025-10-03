@@ -1,6 +1,5 @@
 cert-manager:
-  extraArgs:
-    - --max-concurrent-challenges=2
+  maxConcurrentChallenges: 2
   extraObjects:
   - |
     apiVersion: v1
