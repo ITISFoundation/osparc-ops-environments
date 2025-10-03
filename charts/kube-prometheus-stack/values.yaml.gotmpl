@@ -1,0 +1,155 @@
+alertmanager:
+  enabled: false
+
+defaultRules:
+  create: false
+
+grafana:
+  enabled: false
+
+kubeApiServer:
+  enabled: false
+
+# container metrics (cpu / memory)
+kubelet:
+  enabled: true
+
+kubeControllerManager:
+  enabled: false
+
+coreDns:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeDns:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+nodeExporter:
+  enabled: true
+
+prometheus-node-exporter:
+  namespaceOverride: "{{ .Release.Namespace }}-privileged"
+
+thanosRuler:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+
+  networkPolicy:
+    enabled: true
+    flavor: kubernetes
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 0.1
+      memory: 256Mi
+
+  nodeSelector:
+    ops: "true"
+
+  tls:
+    internalPort: &prometheusOperatorInternalPort 10250
+
+prometheus:
+  enabled: true
+
+  service:
+    port: &prometheusServicePort 9090
+
+  networkPolicy:
+    enabled: true
+    flavor: kubernetes
+
+    ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+        ports:
+          - port: *prometheusServicePort
+            protocol: TCP
+    egress:
+      - ports:
+          # generic port for metrics
+          - port: 9100
+            protocol: TCP
+      - ports:
+          # prometheus operator
+          - port: *prometheusOperatorInternalPort
+            protocol: TCP
+      - ports:
+          # kube api server
+          - port: {{ .Values.kubeApiServerPort }}
+            protocol: TCP
+
+  # enable once object storage needed
+  thanosService:
+    enabled: false
+
+  ingress:
+    enabled: true
+    ingressClassName: ""
+    annotations:
+        namespace: "{{ .Release.Namespace }}"
+        cert-manager.io/cluster-issuer: "cert-issuer"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+    tls:
+      - secretName: monitoring-tls
+        hosts:
+          - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+    hosts:
+      - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+    paths:
+      - &pathprefix /prometheus
+    pathType: Prefix
+
+  prometheusSpec:
+    # no high availability in favor of resource savings
+    replicas: 1
+
+    routePrefix: *pathprefix
+
+    retention: 90d
+
+    retentionSize: 100GiB
+
+    scrape_interval: 15s
+
+    nodeSelector:
+      ops: "true"
+
+    # without this not all service monitors are picked up
+    # when enabled chart applies default `matchLabels` but we
+    # don't want this. So we disable it
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1
+      limits:
+        memory: 4Gi
+        cpu: 2
+
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain

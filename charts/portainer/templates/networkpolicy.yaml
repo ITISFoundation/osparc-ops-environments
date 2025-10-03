@@ -13,7 +13,7 @@ spec:
       # connect to the Kubernetes API server
       destination:
         ports:
-          - 6443
+          - {{ .Values.kubeApiServerPort }}
         nets:
           - 10.0.0.0/8
           - 172.16.0.0/12
