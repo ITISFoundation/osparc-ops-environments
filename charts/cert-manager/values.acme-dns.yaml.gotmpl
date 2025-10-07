@@ -1,4 +1,10 @@
 cert-manager:
+  extraArgs:
+  - --dns01-recursive-nameservers="8.8.8.8:53"
+  - --dns01-recursive-nameservers-only
+  startupapicheck:
+    enabled: false
+  skipDNSResolutionCheck: true
   maxConcurrentChallenges: 2
   extraObjects:
   - |
@@ -11,17 +17,13 @@ cert-manager:
     stringData:
 {{ $configDir := requiredEnv "CONFIG_DIR" }}
       acmedns.json: |
-{{ readFile (printf "%s/lego-acme-accounts/acme-dns-accounts.json" $configDir) | indent 8 }} # Relative to helmfile.yaml
+{{ readFile (printf "%s/lego-acme-accounts/acme-dns-accounts.json" $configDir) | indent 8 }}
   - |
     apiVersion: cert-manager.io/v1
     kind: ClusterIssuer
     metadata:
       name: cert-issuer
       namespace: {{ .Release.Namespace }}
-      annotations:
-        # ClusterIssuer depends on cert-manager CRDs. We need to wait for them to be installed before creating the ClusterIssuer
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
     spec:
       acme:
         email: {{ requiredEnv "OSPARC_DEVOPS_MAIL_ADRESS" }}
@@ -30,6 +32,7 @@ cert-manager:
           name: cert-manager-acme-private-key
         solvers:
           - dns01:
+              cnameStrategy: Follow
               acmeDNS:
                 accountSecretRef:
                   name: acme-dns-secret
