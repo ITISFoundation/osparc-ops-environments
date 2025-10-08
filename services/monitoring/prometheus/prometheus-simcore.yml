@@ -58,7 +58,7 @@ scrape_configs:
           - "tasks.staging_director"
           - "tasks.master_director"
         type: "A"
-        port: 8080
+        port: 8000
       - names:
           - "tasks.production_director-v2"
           - "tasks.staging_director-v2"
@@ -66,9 +66,9 @@ scrape_configs:
         type: "A"
         port: 8000
       - names:
-          - "tasks.production_dynamic-scheduler"
-          - "tasks.staging_dynamic-scheduler"
-          - "tasks.master_dynamic-scheduler"
+          - "tasks.production_dynamic-schdlr"
+          - "tasks.staging_dynamic-schdlr"
+          - "tasks.master_dynamic-schdlr"
         type: "A"
         port: 8000
       - names:
@@ -92,7 +92,6 @@ scrape_configs:
       - names:
           - "tasks.production_rabbit"
           - "tasks.staging_rabbit"
-          - "task.master_rabbit"
         type: "A"
         port: 15692
       - names:
@@ -111,6 +110,18 @@ scrape_configs:
           - "tasks.production_webserver"
           - "tasks.staging_webserver"
           - "tasks.master_webserver"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_wb-auth"
+          - "tasks.staging_wb-auth"
+          - "tasks.master_wb-auth"
+        type: "A"
+        port: 8080
+      - names:
+          - "tasks.production_wb-api-server"
+          - "tasks.staging_wb-api-server"
+          - "tasks.master_wb-api-server"
         type: "A"
         port: 8080
       - names:
