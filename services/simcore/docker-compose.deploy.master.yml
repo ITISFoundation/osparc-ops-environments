@@ -92,6 +92,7 @@ services:
       - "--tracing.serviceName=simcore-traefik"
       - "--tracing.otlp.http.endpoint=http://otel-collector:4318/v1/traces"
       - "--tracing.addinternals=false"
+      - "--tracing.sampleRate=${TRACING_OPENTELEMETRY_SAMPLING_PROBABILITY}"
     deploy:
       resources:
         limits:
