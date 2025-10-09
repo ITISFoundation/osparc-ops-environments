@@ -31,7 +31,7 @@ up-local: .init .env ${TEMP_COMPOSE}-local ${DOCKER_STACK_DEPLOY_COMMON_DEPENDEN
 
 # Helpers -------------------------------------------------
 
-docker-compose.yml: .env .api_env.secret
+docker-compose.yml: .env .api_env.secret venv
 	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
 	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;
