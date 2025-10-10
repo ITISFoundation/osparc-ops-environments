@@ -17,7 +17,7 @@ service:
     traces:
       receivers: [otlp]
       exporters: [otlphttp,otlp]
-      processors: [batch,probabilistic_sampler,filter/drop_healthcheck]
+      processors: [batch,filter/drop_healthcheck]
   telemetry:
     logs:
       level: ${TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL}
