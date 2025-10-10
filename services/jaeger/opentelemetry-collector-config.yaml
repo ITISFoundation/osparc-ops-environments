@@ -32,9 +32,11 @@ processors:
         - attributes["http.route"] == "/health"
         - attributes["http.target"] == "/socket.io/"
         - attributes["url.path"] == "/socket.io/"
+        - attributes["server.address"] == "/var/run/docker.sock"
         - IsMatch(attributes["server.address"], "^monitoring..*")
         - attributes["net.peer.name"] == "/var/run/docker.sock"
         - attributes["http.route"] == "healthcheck_readiness_probe"
         - attributes["http.route"] == "healthcheck_liveness_probe"
         - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
         - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
+        - IsMatch(attributes["db.statement"], "^SCAN[\s?]*$") and attributes["db.system"] == "redis"
