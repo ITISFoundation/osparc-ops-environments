@@ -39,4 +39,4 @@ processors:
         - attributes["http.route"] == "healthcheck_liveness_probe"
         - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
         - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
-        - IsMatch(attributes["db.statement"], "^SCAN[\s?]*$") and attributes["db.system"] == "redis"
+        - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"
