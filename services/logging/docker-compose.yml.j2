@@ -18,7 +18,7 @@ services:
           memory: 300M
           cpus: "0.1"
     networks:
-      graylog:
+      logging:
         aliases:
           - mongo # needed because of graylog configuration
 
@@ -46,7 +46,7 @@ services:
           memory: 1G
           cpus: "0.1"
     networks:
-      graylog:
+      logging:
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:6.0.5
@@ -71,12 +71,18 @@ services:
     networks:
       public:
       monitoring:
-      graylog:
+      logging:
         aliases:
           - graylog
     ports:
-    - 12203:12201/udp
-    - 12202:12202/udp
+      - target: 12201
+        published: 12203
+        protocol: udp
+        mode: host
+      - target: 12202
+        published: 12202
+        protocol: udp
+        mode: host
     deploy:
       replicas: 1
       restart_policy:
@@ -102,7 +108,10 @@ services:
   vector:
     image: timberio/vector:0.50.X-debian
     ports:
-      - "12201:12201/udp"  # GELF input
+      - target: 12201
+        published: 12201
+        protocol: udp
+        mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -121,12 +130,16 @@ services:
         reservations:
           memory: 256M
       labels: []
-    networks: []
+    networks:
+      logging:
 
   loki:
     image: grafana/loki:3.5.7
     ports:
-      - "12204:3100/udp"  # GELF input
+      - target: 3100
+        published: 12204
+        protocol: tcp
+        mode: host
     configs:
       - source: loki_config
         target: /etc/loki/loki.yaml
@@ -142,7 +155,7 @@ services:
     deploy:
       placement:
         constraints: []
-      replicas: 0
+      replicas: 1
       restart_policy:
         condition: any
         delay: 5s
@@ -173,7 +186,7 @@ volumes:
   graylog_journal:
 
 networks:
-  graylog:
+  logging:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
