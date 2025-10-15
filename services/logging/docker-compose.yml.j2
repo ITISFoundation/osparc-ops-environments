@@ -75,7 +75,7 @@ services:
         aliases:
           - graylog
     ports:
-    - 12201:12201/udp
+    - 12203:12201/udp
     - 12202:12202/udp
     deploy:
       replicas: 1
@@ -100,19 +100,20 @@ services:
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
   vector:
-    image: timberio/vector:0.49.X-debian
+    image: timberio/vector:0.50.X-debian
     ports:
-      - "12200:12201/udp"  # GELF input
+      - "12201:12203/udp"  # GELF input
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - VECTOR_CONFIG=/etc/vector/vector.yaml
       - VECTOR_LOG=info
+      - VECTOR_LOG_DESTINATION=${VECTOR_LOG_DESTINATION}
     configs:
       - source: vector_config
         target: /etc/vector/vector.yaml
     deploy:
-      replicas: 0
+      replicas: 1
       resources:
         limits:
           cpus: "1.0"
@@ -120,12 +121,12 @@ services:
         reservations:
           memory: 256M
       labels: []
-    networks:
-      - monitoring
-      - graylog
+    networks: []
 
   loki:
-    image: grafana/loki:3.5.4
+    image: grafana/loki:3.5.7
+    ports:
+      - "12204:3100/udp"  # GELF input
     configs:
       - source: loki_config
         target: /etc/loki/loki.yaml

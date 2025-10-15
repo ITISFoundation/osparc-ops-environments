@@ -58,7 +58,7 @@ sinks:
   loki:
     type: loki
     inputs: ["process_logs"]
-    endpoint: "http://loki:3100"
+    endpoint: "http://${VECTOR_LOG_DESTINATION:?err}:12204"
     encoding:
       codec: json
     labels:
@@ -76,7 +76,7 @@ sinks:
   graylog:
     type: socket
     inputs: ["process_logs"]
-    address: "logging_graylog:12201"
+    address: "${VECTOR_LOG_DESTINATION:?err}:12203"
     mode: udp
     encoding:
       codec: gelf
