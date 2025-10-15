@@ -102,7 +102,7 @@ services:
   vector:
     image: timberio/vector:0.50.X-debian
     ports:
-      - "12201:12203/udp"  # GELF input
+      - "12201:12201/udp"  # GELF input
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
