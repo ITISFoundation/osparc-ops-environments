@@ -123,8 +123,19 @@ prometheus:
     pathType: Prefix
 
   prometheusSpec:
-    # no high availability in favor of resource savings
+    # Use 2+ for HA
     replicas: 1
+
+    # Done for HA
+    # Needs to differentiate prometheus instances with the same setup
+    # https://github.com/prometheus-operator/prometheus-operator/blob/v0.85.0/Documentation/platform/high-availability.md#prometheus
+    # External Labels do not show up metrics. See https://github.com/prometheus-operator/prometheus-operator/issues/2918#issuecomment-567009499
+    replicaExternalLabelName: "prometheus_replica"
+
+    # Done for HA
+    # Enforce replicas running on different nodes
+    # Otherwise it does not make sense from HA perspective
+    podAntiAffinity: "hard"
 
     routePrefix: *pathprefix
 
@@ -132,14 +143,14 @@ prometheus:
 
     retentionSize: 100GiB
 
-    scrape_interval: 15s
+    scrapeInterval: 30s
+    scrapeTimeout: 10s
 
     nodeSelector:
       ops: "true"
 
-    # without this not all service monitors are picked up
-    # when enabled chart applies default `matchLabels` but we
-    # don't want this. So we disable it
+    # https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-77.12.0/charts/kube-prometheus-stack/README.md#prometheusioscrape
+    podMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
 
     resources:
