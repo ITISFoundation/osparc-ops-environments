@@ -102,9 +102,6 @@ extraObjects:
       traefik.ingress.kubernetes.io/router.middlewares: {{.Release.Namespace}}-traefik-basic-auth@kubernetescrd # namespace + middleware name
       traefik.ingress.kubernetes.io/router.tls: "true"
   spec:
-    tls:
-    - hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
     rules:
     - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
       http:
