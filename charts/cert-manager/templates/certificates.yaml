@@ -4,6 +4,7 @@ kind: Certificate
 metadata:
   name: {{ .certName }}
 spec:
+  # https://github.com/emberstack/kubernetes-reflector?tab=readme-ov-file#cert-manager-support
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
