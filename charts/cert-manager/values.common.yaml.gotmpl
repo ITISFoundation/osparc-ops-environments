@@ -1,3 +1,9 @@
+certificates:
+  - certName: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}
+    secretName: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}-tls
+    dnsNames:
+      - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+
 cert-manager:
   crds:
     enabled: true
