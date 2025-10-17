@@ -1,3 +1,8 @@
+certificates:
+  - fqdn: {{ requiredEnv "MACHINE_FQDN" }}
+    dnsNames:
+      - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+
 cert-manager:
   crds:
     enabled: true
