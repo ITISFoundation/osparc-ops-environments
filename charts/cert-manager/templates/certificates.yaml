@@ -11,6 +11,8 @@ spec:
       reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "traefik"
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
       reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "traefik"
+  duration: 2160h # 90 days
+  renewBefore: 720h # 30 days
   secretName: {{ .secretName }}
   dnsNames:
 {{- range .dnsNames }}
