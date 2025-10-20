@@ -26,10 +26,11 @@ spec:
     # IP from https://github.com/kubernetes-sigs/kubespray/blob/v2.24.1/roles/kubespray-defaults/defaults/main/main.yml#L108
     - action: Allow
       protocol: UDP
-      nets:
-        - 169.254.25.10/32
-      ports:
-        - 53
+      destination:
+        nets:
+          - 169.254.25.10/32
+        ports:
+          - 53
     - action: Allow
       protocol: TCP
       destination:
@@ -38,7 +39,8 @@ spec:
           - 53
     - action: Allow
       protocol: TCP
-      nets:
-        - 169.254.25.10/32
-      ports:
-        - 53
+      destination:
+        nets:
+          - 169.254.25.10/32
+        ports:
+          - 53
