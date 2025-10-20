@@ -1,5 +1,4 @@
-# Vector configuration to replace Fluent Bit
-# Ingests GELF logs from Docker daemon and forwards to Loki and Graylog
+# Ingests GELF logs from Docker daemon and forwards to Loki and Graylog (both over TCP)
 
 sources:
   # Receive GELF messages from Docker containers via UDP
@@ -20,10 +19,7 @@ transforms:
     type: remap
     inputs: ["docker_gelf"]
     source: |
-      if !exists(.host) {
-        .host = get_hostname!()
-      }
-
+      # Make sure to retain .host from the GELF message (originating host), do not overwrite
       # Map short_message to message for Loki compatibility
       if exists(.short_message) {
         .message = .short_message
@@ -54,7 +50,7 @@ transforms:
       .processed_by = "vector"
 
 sinks:
-  # Send to Loki
+  # Send to Loki over TCP
   loki:
     type: loki
     inputs: ["process_logs"]
@@ -64,7 +60,7 @@ sinks:
     labels:
       job: "docker"
       source: "vector"
-      # Simple field references - defaults are set in transform above
+      # Pass through the GELF 'host' field from the original log event
       host: "{{ host }}"
       container_name: "{{ container_name }}"
     # Remove label fields from the log line to avoid duplication
@@ -72,12 +68,12 @@ sinks:
     healthcheck:
       enabled: true
 
-  # Send to Graylog via GELF over UDP (not TCP with framing)
+  # Send to Graylog via GELF over TCP
   graylog:
     type: socket
     inputs: ["process_logs"]
     address: "${VECTOR_LOG_DESTINATION:?err}:12203"
-    mode: udp
+    mode: tcp
     encoding:
       codec: gelf
     healthcheck:
