@@ -111,7 +111,7 @@ services:
       - target: 12201
         published: 12201
         protocol: udp
-        mode: host
+        mode: ingress
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
