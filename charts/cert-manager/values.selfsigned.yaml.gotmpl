@@ -23,12 +23,6 @@ cert-manager:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"
     spec:
-      secretTemplate:
-        annotations:
-          reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-          reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: ""  # Control destination namespaces: emptystring means all
-          reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true" # Auto create reflection for matching namespaces
-          reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "" # Control auto-reflection namespaces
       isCA: true
       commonName: local-ca
       subject:
