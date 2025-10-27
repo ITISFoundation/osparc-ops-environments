@@ -85,10 +85,6 @@ sinks:
       host: "{{ host }}"
       container_name: "{{ container_name }}"
       service_name: "{{ service_name }}"
-      log_oec: "{{ log_oec }}"
-      log_trace_id: "{{ log_trace_id }}"
-      log_span_id: "{{ log_span_id }}"
-      log_msg: "{{ log_msg }}"
       # Override level label with extracted log_level from structured logs. This ensures correct color coding in Loki/Grafana
       level: "{{ log_level }}"
 
