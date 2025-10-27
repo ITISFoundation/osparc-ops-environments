@@ -58,11 +58,9 @@ ingress:
     className: ""
     annotations:
       namespace: {{ .Release.Namespace }}
-      cert-manager.io/cluster-issuer: "cert-issuer"
+      traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd,traefik-longhorn-strip-prefix@kubernetescrd  # namespace + middleware name
-    tls: true
-    tlsSecret: monitoring-tls
     host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
     path: /longhorn
     pathType: Prefix

@@ -52,12 +52,8 @@ ingress:
   className: ""
   annotations:
     namespace: {{ .Release.Namespace }}
-    cert-manager.io/cluster-issuer: "cert-issuer"
+    traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-  tls:
-    - hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      secretName: monitoring-tls
   hosts:
     - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
       paths:

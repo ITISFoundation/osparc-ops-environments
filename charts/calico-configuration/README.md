@@ -15,6 +15,7 @@ if calico version 3.30+ is installed
 
 if calico version <= 3.29
 * create network policy with action log (read more https://docs.tigera.io/calico/latest/network-policy/policy-rules/log-rules)
+* WARNING: these logs are shown in journalctl **of the node where restricted workload (POD / Container) is running**
   ```yaml
   apiVersion: projectcalico.org/v3
   kind: NetworkPolicy
