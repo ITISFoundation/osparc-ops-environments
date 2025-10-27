@@ -45,12 +45,8 @@ transforms:
         .container_name = ._container_name
 
         # Extract Docker service name from container name (everything before first dot)
-        service_parts = split(.container_name, ".")
-        if length(service_parts) > 0 {
-          .service_name = service_parts[0]
-        } else {
-          .service_name = .container_name
-        }
+        match = parse_regex!(.container_name, r'^(?P<service_name>[^.]+)')
+        .service_name = match.service_name
       } else {
         .container_name = "unknown"
         .service_name = "unknown"
