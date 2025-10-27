@@ -43,7 +43,7 @@ transforms:
       # Handle container name - GELF uses _container_name (with underscore prefix)
       if exists(._container_name) {
         .container_name = ._container_name
-        
+
         # Extract Docker service name from container name (everything before first dot)
         service_parts = split(.container_name, ".")
         if length(service_parts) > 0 {
