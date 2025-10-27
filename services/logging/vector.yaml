@@ -78,6 +78,7 @@ sinks:
     encoding:
       codec: json
     labels:
+      source: "vector"
       host: "{{ host }}"
       container_name: "{{ container_name }}"
       service_name: "{{ service_name }}"
