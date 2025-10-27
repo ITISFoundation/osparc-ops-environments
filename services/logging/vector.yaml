@@ -25,11 +25,35 @@ transforms:
         .message = .short_message
       }
 
+      # Extract structured log fields from message using regex pattern
+      if exists(.message) {
+        parsed_fields, err = parse_regex(.message, r'log_level=(?P<log_level>[^|]*) \| log_timestamp=(?P<log_timestamp>[^|]*) \| log_source=(?P<log_source>[^|]*) \| log_uid=(?P<log_uid>[^|]*) \| log_oec=(?P<log_oec>[^|]*) \| log_trace_id=(?P<log_trace_id>[^|]*) \| log_span_id=(?P<log_span_id>[^|]*) \| log_msg=(?P<log_msg>.*)$')
+        if err == null {
+          .log_level = parsed_fields.log_level
+          .log_timestamp = parsed_fields.log_timestamp
+          .log_source = parsed_fields.log_source
+          .log_uid = parsed_fields.log_uid
+          .log_oec = parsed_fields.log_oec
+          .log_trace_id = parsed_fields.log_trace_id
+          .log_span_id = parsed_fields.log_span_id
+          .log_msg = parsed_fields.log_msg
+        }
+      }
+
       # Handle container name - GELF uses _container_name (with underscore prefix)
       if exists(._container_name) {
         .container_name = ._container_name
+        
+        # Extract Docker service name from container name (everything before first dot)
+        service_parts = split(.container_name, ".")
+        if length(service_parts) > 0 {
+          .service_name = service_parts[0]
+        } else {
+          .service_name = .container_name
+        }
       } else {
         .container_name = "unknown"
+        .service_name = "unknown"
       }
 
       # Handle container ID
@@ -58,11 +82,16 @@ sinks:
     encoding:
       codec: json
     labels:
-      job: "docker"
-      source: "vector"
-      # Pass through the GELF 'host' field from the original log event
       host: "{{ host }}"
       container_name: "{{ container_name }}"
+      service_name: "{{ service_name }}"
+      log_oec: "{{ log_oec }}"
+      log_trace_id: "{{ log_trace_id }}"
+      log_span_id: "{{ log_span_id }}"
+      log_msg: "{{ log_msg }}"
+      # Override level label with extracted log_level from structured logs. This ensures correct color coding in Loki/Grafana
+      level: "{{ log_level }}"
+
     # Remove label fields from the log line to avoid duplication
     remove_label_fields: true
     healthcheck:
