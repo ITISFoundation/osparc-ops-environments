@@ -85,8 +85,6 @@ sinks:
       # Override level label with extracted log_level from structured logs. This ensures correct color coding in Loki/Grafana
       level: "{{ log_level }}"
 
-    # Remove label fields from the log line to avoid duplication
-    remove_label_fields: true
     healthcheck:
       enabled: true
 
