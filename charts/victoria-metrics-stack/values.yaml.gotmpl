@@ -1,0 +1,50 @@
+victoria-metrics-single:
+  enabled: true
+
+  server:
+    replicaCount: 2
+
+    service:
+      servicePort: 8428
+
+    mode: statefulSet
+
+    # avoid name to long (>63 char) error
+    fullnameOverride: vm-server
+
+    podSecurityContext: &restrictedPodSecurityContext
+      enabled: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      privileged: false
+
+    securityContext: &restrictedSecurityContext
+      enabled: true
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+
+victoria-metrics-agent:
+  enabled: true
+  fullnameOverride: vm-agent
+
+  config:
+    global:
+      scrape_interval: 20s
+
+  service:
+    enabled: true
+    servicePort: 8429
+
+  remoteWrite:
+    - url: "http://vm-server-0.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
+    - url: "http://vm-server-1.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
+
+  podSecurityContext: *restrictedPodSecurityContext
+  securityContext: *restrictedSecurityContext
+
+
+victoria-metrics-auth:

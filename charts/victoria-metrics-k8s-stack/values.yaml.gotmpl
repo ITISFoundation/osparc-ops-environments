@@ -1,0 +1,83 @@
+vmsingle:
+  # values documented here https://docs.victoriametrics.com/operator/api/#vmsingle
+  spec:
+    replicaCount: 2
+    port: "8428"  # must be string or field validation fails
+    useStrictSecurity: true
+
+    # podSecurityContext: &restrictedPodSecurityContext
+    #   enabled: true
+    #   runAsNonRoot: true
+    #   runAsUser: 1000
+    #   privileged: false
+
+    securityContext: &restrictedSecurityContext
+      enabled: true
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "kubernetes.io/hostname"
+        whenUnsatisfiable: DoNotSchedule
+        # hardcoded due to https://github.com/VictoriaMetrics/helm-charts/issues/2219
+        labelSelector:
+          matchLabels:
+            app: server
+            app.kubernetes.io/instance: victoria-metrics
+            app.kubernetes.io/name: victoria-metrics-k8s-stack
+# we manage operator and crds in separate chart
+# it is easier to delete victoria metrics charts
+# separately this way
+victoria-metrics-operator:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+vmagent:
+  enabled: false
+
+vmalert:
+  enabled: false
+
+grafana:
+  enabled: false
+
+prometheus-node-exporter:
+  enabled: false
+
+kube-state-metrics:
+  enabled: false
+
+kubelet:
+  enabled: false
+
+kubeApiServer:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+coreDns:
+  # -- Enabled CoreDNS metrics scraping
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  # -- Enable KubeScheduler metrics scraping
+  enabled: false
+
+defaultDashboards:
+  # -- Enable custom dashboards installation
+  enabled: false
+
+defaultRules:
+  # -- Enable custom alerting rules installation
+  create: false

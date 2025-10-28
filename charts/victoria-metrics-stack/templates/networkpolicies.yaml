@@ -1,0 +1,40 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vm-server-network-policy
+spec:
+  selector: >-
+    app.kubernetes.io/name == "victoria-metrics-single"
+    && app.kubernetes.io/instance == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "victoria-metrics-single" "server" "service" "servicePort" }}
+
+---
+
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vm-agent-network-policy
+spec:
+  selector: >-
+    app.kubernetes.io/name == "victoria-metrics-agent"
+    && app.kubernetes.io/instance == "{{ .Release.Name }}"
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "victoria-metrics-single" "server" "service" "servicePort" }}

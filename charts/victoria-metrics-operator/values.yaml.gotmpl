@@ -1,0 +1,8 @@
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
+admissionWebhooks:
+  certManager:
+    # avoid new cert generation on every helm run
+    enabled: true
