@@ -11,8 +11,14 @@ include $(REPO_CONFIG_LOCATION)
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
+# Example of usage:
+# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector app=adminer'
 HELMFILE_EXTRA_ARGS ?=
 HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
+
+#
+# Targets
+#
 
 .PHONY: .check-helmfile-installed
 .check-helmfile-installed: ## Checks if helmfile is installed
