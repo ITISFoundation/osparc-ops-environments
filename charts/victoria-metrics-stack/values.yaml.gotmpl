@@ -48,3 +48,39 @@ victoria-metrics-agent:
 
 
 victoria-metrics-auth:
+  enabled: true
+  fullnameOverride: vm-auth
+
+  service:
+    servicePort: 8427
+
+  ingress:
+    enabled: true
+    annotations:
+      namespace: {{ .Release.Namespace }}
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-metrics-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    hosts:
+      - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        path:
+          - /metrics
+        port: http
+
+  podSecurityContext: *restrictedPodSecurityContext
+  securityContext: *restrictedSecurityContext
+
+  resources:
+    limits:
+      cpu: 0.5
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  config:
+    unauthorized_user:
+      url_prefix:
+        - "http://vm-server-0.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/"
+        - "http://vm-server-1.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/"
+      load_balancing_policy: first_available
