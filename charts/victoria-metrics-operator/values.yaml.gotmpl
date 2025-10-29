@@ -6,3 +6,20 @@ admissionWebhooks:
   certManager:
     # avoid new cert generation on every helm run
     enabled: true
+
+extraObjects:
+- apiVersion: projectcalico.org/v3
+  kind: NetworkPolicy
+  metadata:
+    name: victoria-metrics-operator-network-policy
+  spec:
+    egress:
+      - action: Allow
+        protocol: TCP
+        destination:
+          nets:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+          ports:
+            - 6443
