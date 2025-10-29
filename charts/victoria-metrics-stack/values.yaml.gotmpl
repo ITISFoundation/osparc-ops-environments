@@ -46,6 +46,13 @@ victoria-metrics-agent:
   podSecurityContext: *restrictedPodSecurityContext
   securityContext: *restrictedSecurityContext
 
+  resources:
+    limits:
+      cpu: 2
+      memory: 1Gi
+    requests:
+      cpu: 0.5
+      memory: 256Mi
 
 victoria-metrics-auth:
   enabled: true
