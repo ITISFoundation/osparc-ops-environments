@@ -1,0 +1,20 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vm-auth-network-policy
+spec:
+  selector: >-
+    app.kubernetes.io/name == "victoria-metrics-auth"
+    && app.kubernetes.io/instance == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "victoria-metrics-auth" "service" "servicePort" }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "victoria-metrics-single" "server" "service" "servicePort" }}
