@@ -10,11 +10,12 @@ vmsingle:
         app.kubernetes.io/name: vmsingle
         app.kubernetes.io/part-of: {{ .Release.Name }}
 
+    # does not work in 1-node clusters
+    # https://github.com/kubernetes/kubernetes/issues/105072
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: "kubernetes.io/hostname"
         whenUnsatisfiable: DoNotSchedule
-        # hardcoded due to https://github.com/VictoriaMetrics/helm-charts/issues/2219
         labelSelector:
           matchLabels:
             app.kubernetes.io/name: vmsingle
