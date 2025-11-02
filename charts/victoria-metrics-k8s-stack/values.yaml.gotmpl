@@ -1,7 +1,7 @@
 vmsingle:
   # values documented here https://docs.victoriametrics.com/operator/api/#vmsingle
   spec:
-    replicaCount: 2
+    replicaCount: 1
     port: "8428"  # must be string or field validation fails
     useStrictSecurity: true
 
@@ -11,14 +11,14 @@ vmsingle:
     #   runAsUser: 1000
     #   privileged: false
 
-    securityContext: &restrictedSecurityContext
-      enabled: true
-      capabilities:
-        drop: ["ALL"]
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      seccompProfile:
-        type: RuntimeDefault
+    # securityContext: &restrictedSecurityContext
+    #   enabled: true
+    #   capabilities:
+    #     drop: ["ALL"]
+    #   readOnlyRootFilesystem: true
+    #   allowPrivilegeEscalation: false
+    #   seccompProfile:
+    #     type: RuntimeDefault
 
     topologySpreadConstraints:
       - maxSkew: 1
@@ -30,6 +30,7 @@ vmsingle:
             app: server
             app.kubernetes.io/instance: victoria-metrics
             app.kubernetes.io/name: victoria-metrics-k8s-stack
+
 # we manage operator and crds in separate chart
 # it is easier to delete victoria metrics charts
 # separately this way

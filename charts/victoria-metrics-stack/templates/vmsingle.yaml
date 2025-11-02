@@ -1,0 +1,17 @@
+{{ range $i, $e := until ( .Values.vmsingle.instanceCount | int ) }}
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+  name: vmsingle-{{ $i }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: vmsingle
+    app.kubernetes.io/instance: vmsingle-{{ $i }}
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: {{ $.Release.Name }}
+    app.kubernetes.io/version: {{ $.Values.vmsingle.spec.image.tag }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+spec: {{ toYaml $.Values.vmsingle.spec | nindent 2 }}
+---
+{{- end }}

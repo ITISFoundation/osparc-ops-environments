@@ -24,17 +24,17 @@ version: 0.0.1
 appVersion: "1.128.0"
 
 dependencies:
-  - name: victoria-metrics-single
-    version: 0.25.2
-    repository: &victoria-metrics-repo "https://victoriametrics.github.io/helm-charts/"
+  - name: victoria-metrics-k8s-stack
+    version: 0.62.0
+    repository: "https://victoriametrics.github.io/helm-charts/"
     condition: victoria-metrics-single.enabled
 
-  - name: victoria-metrics-auth
-    version: 0.19.7
-    repository: *victoria-metrics-repo
-    condition: victoria-metrics-auth.enabled
+#   - name: victoria-metrics-auth
+#     version: 0.19.7
+#     repository: *victoria-metrics-repo
+#     condition: victoria-metrics-auth.enabled
 
-  - name: victoria-metrics-agent
-    version: 0.26.2
-    repository: *victoria-metrics-repo
-    condition: victoria-metrics-agent.enabled
+#   - name: victoria-metrics-agent
+#     version: 0.26.2
+#     repository: *victoria-metrics-repo
+#     condition: victoria-metrics-agent.enabled

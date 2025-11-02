@@ -1,96 +1,77 @@
-victoria-metrics-single:
-  enabled: true
+vmsingle:
+  instanceCount: 2  # number of separate / independent vmsingle servers`
+  spec: # values documented here https://docs.victoriametrics.com/operator/api/#vmsingle
+    image:
+      tag: v1.128.0
+    port: "8428"  # must be string or field validation fails
+    useStrictSecurity: true
+    podMetadata:
+      labels:
+        app.kubernetes.io/name: vmsingle
+        app.kubernetes.io/part-of: {{ .Release.Name }}
 
-  server:
-    replicaCount: 2
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "kubernetes.io/hostname"
+        whenUnsatisfiable: DoNotSchedule
+        # hardcoded due to https://github.com/VictoriaMetrics/helm-charts/issues/2219
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: vmsingle
+            app.kubernetes.io/part-of: {{ .Release.Name }}
 
-    service:
-      servicePort: 8428
+victoria-metrics-k8s-stack:
+  vmsingle:
+    enabled: false
 
-    mode: statefulSet
+  # we manage operator and crds in separate chart
+  # it is easier to delete victoria metrics charts
+  # separately this way
+  victoria-metrics-operator:
+    enabled: false
 
-    # avoid name to long (>63 char) error
-    fullnameOverride: vm-server
+  alertmanager:
+    enabled: false
 
-    podSecurityContext: &restrictedPodSecurityContext
-      enabled: true
-      runAsNonRoot: true
-      runAsUser: 1000
-      privileged: false
+  vmagent:
+    enabled: false
 
-    securityContext: &restrictedSecurityContext
-      enabled: true
-      capabilities:
-        drop: ["ALL"]
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      seccompProfile:
-        type: RuntimeDefault
+  vmalert:
+    enabled: false
 
-victoria-metrics-agent:
-  enabled: true
-  fullnameOverride: vm-agent
+  grafana:
+    enabled: false
 
-  config:
-    global:
-      scrape_interval: 20s
+  prometheus-node-exporter:
+    enabled: false
 
-  service:
-    enabled: true
-    servicePort: 8429
+  kube-state-metrics:
+    enabled: false
 
-  remoteWrite:
-    - url: "http://vm-server-0.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
-    - url: "http://vm-server-1.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
+  kubelet:
+    enabled: false
 
-  podSecurityContext: *restrictedPodSecurityContext
-  securityContext: *restrictedSecurityContext
+  kubeApiServer:
+    enabled: false
 
-  resources:
-    limits:
-      cpu: 2
-      memory: 1Gi
-    requests:
-      cpu: 0.5
-      memory: 256Mi
+  kubeControllerManager:
+    enabled: false
 
-victoria-metrics-auth:
-  enabled: true
-  fullnameOverride: vm-auth
+  coreDns:
+    # -- Enabled CoreDNS metrics scraping
+    enabled: false
 
-  service:
-    servicePort: 8427
+  kubeEtcd:
+    enabled: false
 
-  ingress:
-    enabled: true
-    annotations:
-      namespace: {{ .Release.Namespace }}
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      traefik.ingress.kubernetes.io/router.middlewares: >-
-        traefik-metrics-path-append-slash@kubernetescrd,
-        traefik-metrics-strip-prefix@kubernetescrd,
-        traefik-traefik-basic-auth@kubernetescrd
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    hosts:
-      - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
-        path:
-          - /metrics
-        port: http
+  kubeScheduler:
+    # -- Enable KubeScheduler metrics scraping
+    enabled: false
 
-  podSecurityContext: *restrictedPodSecurityContext
-  securityContext: *restrictedSecurityContext
+  defaultDashboards:
+    # -- Enable custom dashboards installation
+    enabled: false
 
-  resources:
-    limits:
-      cpu: 0.5
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-  config:
-    unauthorized_user:
-      url_prefix:
-        - "http://vm-server-0.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/"
-        - "http://vm-server-1.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/"
-      load_balancing_policy: first_available
+  defaultRules:
+    # -- Enable custom alerting rules installation
+    create: false
