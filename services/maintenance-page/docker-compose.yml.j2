@@ -21,9 +21,12 @@ services:
       - public
       - monitored
     deploy:
+      replicas: 2
       placement:
         constraints:
           - node.labels.ops==true
+        preferences:
+          - spread: node.labels.ops
       labels:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
@@ -46,9 +49,12 @@ services:
       - public
       - monitored
     deploy:
+      replicas: 2
       placement:
         constraints:
           - node.labels.ops==true
+        preferences:
+          - spread: node.labels.ops
       labels:
           - traefik.enable=true
           - traefik.swarm.network=${PUBLIC_NETWORK}
