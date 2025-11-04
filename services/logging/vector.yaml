@@ -59,7 +59,8 @@ transforms:
         .container_name = "unknown"
         .service_name = "unknown"
       }
-
+      .log_service = .service_name
+      
       # Handle container ID
       if exists(._container_id) {
         .container_id = ._container_id
@@ -106,6 +107,7 @@ sinks:
       codec: gelf
     healthcheck:
       enabled: true
+
 
   # Temporary: Output to console for debugging
   #console_debug:
