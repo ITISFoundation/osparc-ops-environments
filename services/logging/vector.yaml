@@ -60,7 +60,7 @@ transforms:
         .service_name = "unknown"
       }
       .log_service = .service_name
-      
+
       # Handle container ID
       if exists(._container_id) {
         .container_id = ._container_id
