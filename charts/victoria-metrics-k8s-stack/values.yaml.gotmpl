@@ -1,35 +1,27 @@
 vmsingle:
-  # values documented here https://docs.victoriametrics.com/operator/api/#vmsingle
+  enabled: false
+
+vmcluster:
+  enabled: true
+  # spec doc: https://docs.victoriametrics.com/operator/api/#vmclusterspec
   spec:
-    replicaCount: 1
-    port: "8428"  # must be string or field validation fails
     useStrictSecurity: true
+    replicationFactor: 2
+    retentionPeriod: "3" # 3 month
 
-    # podSecurityContext: &restrictedPodSecurityContext
-    #   enabled: true
-    #   runAsNonRoot: true
-    #   runAsUser: 1000
-    #   privileged: false
+    vmstorage:
+      replicaCount: 2
+      vmInsertPort: &vmInsertPort "8400" # shall I configure this also in vminsert?
+      vmSelectPort: &vmSelectPort "8401" # shall I configure this also in vmselect?
 
-    # securityContext: &restrictedSecurityContext
-    #   enabled: true
-    #   capabilities:
-    #     drop: ["ALL"]
-    #   readOnlyRootFilesystem: true
-    #   allowPrivilegeEscalation: false
-    #   seccompProfile:
-    #     type: RuntimeDefault
+    vmselect:
+      replicaCount: 2
+      port: "8481"
 
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: "kubernetes.io/hostname"
-        whenUnsatisfiable: DoNotSchedule
-        # hardcoded due to https://github.com/VictoriaMetrics/helm-charts/issues/2219
-        labelSelector:
-          matchLabels:
-            app: server
-            app.kubernetes.io/instance: victoria-metrics
-            app.kubernetes.io/name: victoria-metrics-k8s-stack
+    vminsert:
+      replicaCount: 2
+      port: "8480"
+
 
 # we manage operator and crds in separate chart
 # it is easier to delete victoria metrics charts
@@ -82,3 +74,66 @@ defaultDashboards:
 defaultRules:
   # -- Enable custom alerting rules installation
   create: false
+
+extraObjects:
+- apiVersion: projectcalico.org/v3
+  kind: NetworkPolicy
+  metadata:
+    name: vmselect-network-policy
+  spec:
+    selector: >-
+      app.kubernetes.io/name == "vmselect"
+      && app.kubernetes.io/instance == "{{ .Release.Name }}"
+    egress:
+      - action: Allow
+        protocol: TCP
+        destination:
+          selector: >-
+            app.kubernetes.io/name == "vmstorage"
+            && app.kubernetes.io/instance == "{{ .Release.Name }}"
+          ports:
+            - 8401
+- apiVersion: projectcalico.org/v3
+  kind: NetworkPolicy
+  metadata:
+    name: vminsert-network-policy
+  spec:
+    selector: >-
+      app.kubernetes.io/name == "vminsert"
+      && app.kubernetes.io/instance == "{{ .Release.Name }}"
+    egress:
+      - action: Allow
+        protocol: TCP
+        destination:
+          selector: >-
+            app.kubernetes.io/name == "vmstorage"
+            && app.kubernetes.io/instance == "{{ .Release.Name }}"
+          ports:
+            - 8400
+- apiVersion: projectcalico.org/v3
+  kind: NetworkPolicy
+  metadata:
+    name: vmstorage-network-policy
+  spec:
+    selector: >-
+      app.kubernetes.io/name == "vmstorage"
+      && app.kubernetes.io/instance == "{{ .Release.Name }}"
+    ingress:
+      - action: Allow
+        protocol: TCP
+        source:
+          selector: >-
+            app.kubernetes.io/name == "vminsert"
+            && app.kubernetes.io/instance == "{{ .Release.Name }}"
+          destination:
+            ports:
+              - 8400
+      - action: Allow
+        protocol: TCP
+        source:
+          selector: >-
+            app.kubernetes.io/name == "vmselect"
+            && app.kubernetes.io/instance == "{{ .Release.Name }}"
+          destination:
+            ports:
+              - 8401

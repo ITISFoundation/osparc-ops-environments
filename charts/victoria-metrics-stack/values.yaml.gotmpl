@@ -35,7 +35,24 @@ victoria-metrics-k8s-stack:
     enabled: false
 
   vmagent:
+    enabled: true
+    spec:
+      port: "8429"
+      podMetadata:
+        labels:
+          app.kubernetes.io/name: vmagent
+          app.kubernetes.io/part-of: {{ .Release.Name }}
+      additionalRemoteWrites:
+        - url: "http://vm-server-0.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
+
+  vmauth:
     enabled: false
+    spec:
+      port: "8427"
+      podMetadata:
+        labels:
+          app.kubernetes.io/name: vmauth
+          app.kubernetes.io/part-of: {{ .Release.Name }}
 
   vmalert:
     enabled: false

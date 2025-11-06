@@ -1,11 +1,11 @@
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: vm-agent-network-policy
+  name: vmagent-network-policy
 spec:
   selector: >-
-    app.kubernetes.io/name == "victoria-metrics-agent"
-    && app.kubernetes.io/instance == "{{ .Release.Name }}"
+    app.kubernetes.io/name == "vmagent"
+    && app.kubernetes.io/part-of == "{{ .Release.Name }}"
   egress:
     - action: Allow
       protocol: TCP
@@ -20,4 +20,4 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - {{ index .Values "victoria-metrics-single" "server" "service" "servicePort" }}
+          - {{ index .Values "victoria-metrics-k8s-stack" "vmagent" "spec" "port" }}

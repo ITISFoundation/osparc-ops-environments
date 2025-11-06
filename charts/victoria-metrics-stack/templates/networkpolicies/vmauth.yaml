@@ -1,0 +1,20 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-network-policy
+spec:
+  selector: >-
+    app.kubernetes.io/name == "vmauth"
+    && app.kubernetes.io/part-of == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "victoria-metrics-k8s-stack" "vmauth" "spec" "port" }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "victoria-metrics-k8s-stack" "vmsingle" "spec" "port" }}
