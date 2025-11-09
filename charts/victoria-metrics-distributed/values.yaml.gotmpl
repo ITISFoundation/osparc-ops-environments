@@ -18,14 +18,14 @@ vmdistributed:
         podMetadata:
           labels: &vmAgentCommonLabels
             app: vmagent
-            app.kubernetes.io/part-of: {{ .Release.Name }}
+            part-of: {{ .Release.Name }}
     vmsingle:
       spec:
         port: "8428"
         podMetadata:
           labels:
             app: vmsingle
-            app.kubernetes.io/part-of: {{ .Release.Name }}
+            part-of: {{ .Release.Name }}
 
   zoneTpl:
     common:
@@ -64,6 +64,13 @@ vmdistributed:
       vmauth:
         spec:
           useStrictSecurity: true
+          ingress:
+            host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+            annotations:
+              namespace: {{ .Release.Namespace }}
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
 
   victoria-metrics-k8s-stack:
     enabled: true
@@ -119,29 +126,3 @@ vmdistributed:
 
     defaultRules:
       create: false
-
-    extraObjects:
-    - |
-      apiVersion: projectcalico.org/v3
-      kind: NetworkPolicy
-      metadata:
-        name: vmagent-network-policy
-      spec:
-        selector: >-
-          app.kubernetes.io/name == "vmagent"
-          && app.kubernetes.io/part-of == "{{ .Release.Name }}"
-        egress:
-          - action: Allow
-            protocol: TCP
-            destination:
-              nets:
-                - 10.0.0.0/8
-                - 172.16.0.0/12
-                - 192.168.0.0/16
-              ports:
-                - 6443
-          - action: Allow
-            protocol: TCP
-            destination:
-              ports:
-                - {{`{{ .Values.global.vmSinglePort }}`}}

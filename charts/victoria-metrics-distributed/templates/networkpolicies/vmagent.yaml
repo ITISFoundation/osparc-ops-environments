@@ -18,4 +18,6 @@ spec:
       protocol: TCP
       destination:
         ports:
+          - {{ .Values.vmdistributed.common.vmauth.spec.port }}
+          - {{ .Values.vmdistributed.common.vmsingle.spec.port }}
           - {{ .Values.vmdistributed.common.vmagent.spec.port }}
