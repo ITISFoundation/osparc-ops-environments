@@ -1,0 +1,147 @@
+global:
+  vmSinglePort: "8428"
+
+vmdistributed:
+  fullnameOverride: "vm-distributed"
+
+  common:
+    vmauth:
+      spec:
+        port: "8427"
+        podMetadata:
+          labels:
+            app: vmauth
+            part-of: {{ .Release.Name }}
+    vmagent:
+      spec:
+        port: &vmAgentPort "8429"
+        podMetadata:
+          labels: &vmAgentCommonLabels
+            app: vmagent
+            app.kubernetes.io/part-of: {{ .Release.Name }}
+    vmsingle:
+      spec:
+        port: "8428"
+        podMetadata:
+          labels:
+            app: vmsingle
+            app.kubernetes.io/part-of: {{ .Release.Name }}
+
+  zoneTpl:
+    common:
+      spec:
+        nodeSelector:
+          ops: "true"
+        useStrictSecurity: true
+    vmcluster:
+      enabled: false
+    vmsingle:
+      enabled: true
+
+  availabilityZones:
+    - name: default
+
+  extra:
+    # it scrapes metrics and write to global write LB
+    # which is an entry point for vm distributed cluster
+    vmagent:
+      enabled: true
+      name: vmagent-scraper
+      spec:
+        useStrictSecurity: true
+        port: *vmAgentPort
+        podMetadata:
+          labels: *vmAgentCommonLabels
+
+  write:
+    global:
+      vmauth:
+        spec:
+          useStrictSecurity: true
+
+  read:
+    global:
+      vmauth:
+        spec:
+          useStrictSecurity: true
+
+  victoria-metrics-k8s-stack:
+    enabled: true
+
+    victoria-metrics-operator:
+      enabled: false
+
+    vmagent:
+      enabled: false
+
+    vmsingle:
+      enabled: false
+
+    vmcluster:
+      enabled: false
+
+    alertmanager:
+      enabled: false
+
+    vmalert:
+      enabled: false
+
+    grafana:
+      enabled: false
+
+    prometheus-node-exporter:
+      enabled: false
+
+    kube-state-metrics:
+      enabled: false
+
+    kubelet:
+      enabled: false
+
+    kubeApiServer:
+      enabled: false
+
+    kubeControllerManager:
+      enabled: false
+
+    coreDns:
+      enabled: false
+
+    kubeEtcd:
+      enabled: false
+
+    kubeScheduler:
+      enabled: false
+
+    defaultDashboards:
+      # -- Enable custom dashboards installation
+      enabled: false
+
+    defaultRules:
+      create: false
+
+    extraObjects:
+    - |
+      apiVersion: projectcalico.org/v3
+      kind: NetworkPolicy
+      metadata:
+        name: vmagent-network-policy
+      spec:
+        selector: >-
+          app.kubernetes.io/name == "vmagent"
+          && app.kubernetes.io/part-of == "{{ .Release.Name }}"
+        egress:
+          - action: Allow
+            protocol: TCP
+            destination:
+              nets:
+                - 10.0.0.0/8
+                - 172.16.0.0/12
+                - 192.168.0.0/16
+              ports:
+                - 6443
+          - action: Allow
+            protocol: TCP
+            destination:
+              ports:
+                - {{`{{ .Values.global.vmSinglePort }}`}}

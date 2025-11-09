@@ -1,0 +1,15 @@
+# namespace with defined pod security standard
+# inspired from https://aro-labs.com/pod-security-standards/
+# official doc: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+#
+# Warning: if pod / container does not meet enforced standards, it will not be deployed (silently)
+# execute `kubectl -n <namespace> events` to see errors (e.g.)
+#   Error creating: pods "xyz" is forbidden: violates PodSecurity "baseline:latest": privileged
+#   container "xyz" must not set securityContext.privileged to true
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: victoria-metrics-distributed
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

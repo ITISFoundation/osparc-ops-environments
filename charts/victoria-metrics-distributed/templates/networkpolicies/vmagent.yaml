@@ -3,9 +3,7 @@ kind: NetworkPolicy
 metadata:
   name: vmagent-network-policy
 spec:
-  selector: >-
-    app.kubernetes.io/name == "vmagent"
-    && app.kubernetes.io/part-of == "{{ .Release.Name }}"
+  selector: app == "vmagent" && part-of == "{{ .Release.Name }}"
   egress:
     - action: Allow
       protocol: TCP
@@ -20,4 +18,4 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - {{ .Values.vmSingleServerCommon.service.servicePort }}
+          - {{ .Values.vmdistributed.common.vmagent.spec.port }}

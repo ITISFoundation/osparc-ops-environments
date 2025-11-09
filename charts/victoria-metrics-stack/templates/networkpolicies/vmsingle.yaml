@@ -4,11 +4,10 @@ metadata:
   name: vmsingle-network-policy
 spec:
   selector: >-
-    app.kubernetes.io/name == "vmsingle"
-    && app.kubernetes.io/part-of == "{{ .Release.Name }}"
+    app.kubernetes.io/name in {"{{ .Values.vmsingle1.server.fullnameOverride }}", "{{ .Values.vmsingle2.server.fullnameOverride }}"}
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
-          - {{ index .Values "victoria-metrics-k8s-stack" "vmsingle" "spec" "port" }}
+          - {{ .Values.vmSingleServerCommon.service.servicePort }}

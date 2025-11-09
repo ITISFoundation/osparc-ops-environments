@@ -1,25 +1,33 @@
-vmsingle:
-  instanceCount: 2  # number of separate / independent vmsingle servers`
-  spec: # values documented here https://docs.victoriametrics.com/operator/api/#vmsingle
-    image:
-      tag: v1.128.0
-    port: "8428"  # must be string or field validation fails
-    useStrictSecurity: true
-    podMetadata:
-      labels:
-        app.kubernetes.io/name: vmsingle
-        app.kubernetes.io/part-of: {{ .Release.Name }}
+vmSingleServerCommon: &vmSingleServerCommon
+    replicaCount: 1
+    service:
+      servicePort: 8428
+    podSecurityContext: &restrictedPodSecurityContext
+      enabled: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      privileged: false
+    securityContext: &restrictedSecurityContext
+      enabled: true
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
-    # does not work in 1-node clusters
-    # https://github.com/kubernetes/kubernetes/issues/105072
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: "kubernetes.io/hostname"
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: vmsingle
-            app.kubernetes.io/part-of: {{ .Release.Name }}
+vmsingle1:
+  enabled: true
+  server:
+    << : *vmSingleServerCommon
+    # avoid name to long (>63 char) error
+    fullnameOverride: vmsingle1
+
+vmsingle2:
+  enabled: false
+  server:
+    << : *vmSingleServerCommon
+    fullnameOverride: vmsingle2
 
 victoria-metrics-k8s-stack:
   vmsingle:
@@ -38,12 +46,8 @@ victoria-metrics-k8s-stack:
     enabled: true
     spec:
       port: "8429"
-      podMetadata:
-        labels:
-          app.kubernetes.io/name: vmagent
-          app.kubernetes.io/part-of: {{ .Release.Name }}
       additionalRemoteWrites:
-        - url: "http://vm-server-0.vm-server.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
+        - url: "http://vmsingle1.{{ .Release.Namespace }}.svc.cluster.local:8428/api/v1/write"
 
   vmauth:
     enabled: false

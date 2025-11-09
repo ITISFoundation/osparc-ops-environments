@@ -1,5 +1,5 @@
 apiVersion: v2
-name: victoria-metrics-stack
+name: victoria-metrics-distributed
 description: A Helm chart for Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -15,7 +15,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.0.1
+version: &vmDistributedChartVersion 0.23.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -24,22 +24,12 @@ version: 0.0.1
 appVersion: "1.128.0"
 
 dependencies:
-  - name: victoria-metrics-k8s-stack
-    version: 0.62.0
+  - name: victoria-metrics-distributed
+    version: *vmDistributedChartVersion
+    # avoid '-' for simplicite (see link below)
+    # https://stackoverflow.com/questions/63853679/helm-templating-doesnt-let-me-use-dash-in-names
+    alias: vmdistributed
     repository: "https://victoriametrics.github.io/helm-charts/"
-    condition: victoria-metrics-single.enabled
-
-  - name: victoria-metrics-single
-    version: &vmSingleChartVersion 0.25.4
-    repository: "https://victoriametrics.github.io/helm-charts/"
-    condition: vmsingle1.enabled
-    alias: vmsingle1
-
-  - name: victoria-metrics-single
-    version: *vmSingleChartVersion
-    repository: "https://victoriametrics.github.io/helm-charts/"
-    condition: vmsingle2.enabled
-    alias: vmsingle2
 
 #   - name: victoria-metrics-auth
 #     version: 0.19.7

@@ -3,18 +3,17 @@ kind: NetworkPolicy
 metadata:
   name: vmauth-network-policy
 spec:
-  selector: >-
-    app.kubernetes.io/name == "vmauth"
-    && app.kubernetes.io/part-of == "{{ .Release.Name }}"
+  selector: app == "vmauth" && part-of == "{{ .Release.Name }}"
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
-          - {{ index .Values "victoria-metrics-k8s-stack" "vmauth" "spec" "port" }}
+          - {{ .Values.vmdistributed.common.vmauth.spec.port }}
   egress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
-          - {{ .Values.vmSingleServerCommon.service.servicePort }}
+          - {{ .Values.vmdistributed.common.vmagent.spec.port }}
+          - {{ .Values.vmdistributed.common.vmsingle.spec.port }}
