@@ -323,7 +323,7 @@ $(VENV_DIR): $(UV)
 	@if [ ! -d $@ ]; then \
 		$< venv $@; \
 		VIRTUAL_ENV=$@ $< pip install --upgrade pip wheel setuptools; \
-		VIRTUAL_ENV=$@ $< pip install jinja2 j2cli[yaml] typer; \
+		VIRTUAL_ENV=$@ $< pip install jinjanator typer; \
 		$(VENV_BIN)/pre-commit install > /dev/null 2>&1; \
 		$(UV) self update || true; \
 	fi
