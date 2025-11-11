@@ -93,7 +93,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_api-server.middlewares=${SWARM_STACK_NAME}_gzip@swarm
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.service=${SWARM_STACK_NAME}_api-server
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.rule=PathPrefix(`/dev/`) || PathPrefix(`/doc/`) || PathPrefix(`/doc`)
-        - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.entrypoints=simcore_api
+        - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.entrypoints=simcoreapi
         - traefik.http.routers.${SWARM_STACK_NAME}_apiserver_swagger.priority=6
       update_config:
         parallelism: 2
