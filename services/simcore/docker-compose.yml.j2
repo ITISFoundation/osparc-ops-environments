@@ -805,6 +805,10 @@ services:
     networks:
       - monitored
       - public
+    environment:
+      TRAEFIK_LOG_LEVEL: ${SIMCORE_TRAEFIK_LOGLEVEL}
+      TRAEFIK_TRACING_SERVICENAME: "simcore-traefik"
+      TRAEFIK_TRACING_OTLP_HTTP_ENDPOINT: "http://otel-collector:4318/v1/traces"
     deploy:
       replicas: 2
       labels:
