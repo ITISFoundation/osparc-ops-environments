@@ -19,3 +19,11 @@ cert-manager:
   replicaCount: 1
   webhook:
     replicaCount: 1
+
+  startupapicheck:
+    enabled: true
+
+    jobAnnotations:
+      # Explicitly set hook weight to have explicit reference.
+      # Needed to properly install cert-manager resources first time
+       helm.sh/hook-weight: "1"

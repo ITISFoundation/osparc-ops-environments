@@ -78,14 +78,6 @@ docker-compose.yml: docker-compose.yml.j2 venv .env assets/dask-certificates
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.deploy.local.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.local.yml")' > ${TEMP_COMPOSE}
 
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.deploy.letsencrypt.http.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.letsencrypt.http.yml")' > ${TEMP_COMPOSE}
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.deploy.letsencrypt.dns.yml
-	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.letsencrypt.dns.yml")' > ${TEMP_COMPOSE}
-
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.deploy.aws.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.aws.yml")' > ${TEMP_COMPOSE}
@@ -95,11 +87,11 @@ ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.deploy.dalco.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.dalco.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-public
-${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.deploy.public.yml docker-compose.deploy.letsencrypt.dns.yml
+${TEMP_COMPOSE}-public: docker-compose.yml docker-compose.deploy.public.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.public.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml docker-compose.deploy.letsencrypt.dns.yml
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml
 	@cat docker-compose.yml | $(_yq) '. *+ load("docker-compose.deploy.master.yml")' > ${TEMP_COMPOSE}
 
 .PHONY: .env
