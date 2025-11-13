@@ -59,7 +59,7 @@ resource "grafana_data_source" "loki" {
       {
         datasourceUid = "tempo"
         matcherType   = "label"
-        matcherRegex  = "log_trace_id"
+        matcherRegex  = "^log_trace_id$"
         name          = "TraceID"
         url           = "$${__value.raw}"
       }
