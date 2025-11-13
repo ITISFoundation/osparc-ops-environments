@@ -33,6 +33,18 @@ resource "grafana_data_source" "tempo" {
   basic_auth_enabled = false
   is_default         = false
   uid                = "delr011tpeupsc"
+
+  json_data_encoded = jsonencode({
+    tracesToLogsV2 = {
+      datasourceUid      = grafana_data_source.loki.uid
+      spanStartTimeShift = "-5m"
+      spanEndTimeShift   = "5m"
+      filterByTraceID    = false
+      filterBySpanID     = false
+      customQuery        = true
+      query              = "{source=\"vector\"} | json | log_trace_id = `$${__span.traceId}` | log_span_id = `$${__span.spanId}` | line_format `{{.log_msg}}`"
+    }
+  })
 }
 
 resource "grafana_data_source" "loki" {
