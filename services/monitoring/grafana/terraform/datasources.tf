@@ -53,6 +53,18 @@ resource "grafana_data_source" "loki" {
   url                = "http://loki:3100"
   basic_auth_enabled = false
   is_default         = false
+
+  json_data_encoded = jsonencode({
+    derivedFields = [
+      {
+        datasourceUid = "tempo"
+        matcherType   = "label"
+        matcherRegex  = "log_trace_id"
+        name          = "TraceID"
+        url           = "$${__value.raw}"
+      }
+    ]
+  })
 }
 resource "grafana_data_source" "cloudwatch" {
   # This resource is only created if the AWS Deployments
