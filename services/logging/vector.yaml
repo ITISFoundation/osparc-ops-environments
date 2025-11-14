@@ -90,7 +90,7 @@ transforms:
       }
 
       # Add processing metadata
-      .processed_by = "vector-dev"
+      .processed_by = "vector"
 
 sinks:
   # Send to Loki over TCP
