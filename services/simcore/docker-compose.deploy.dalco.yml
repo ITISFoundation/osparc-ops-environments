@@ -43,3 +43,6 @@ services:
     payments:
         deploy:
             replicas: 0
+    rabbit:
+        deploy:
+            replicas: 0  # use standalone (cluster) rabbit stack
