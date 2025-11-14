@@ -29,6 +29,8 @@ transforms:
       if exists(.message) {
         # python service logs
         parsed_fields, err = parse_regex(.message, r'log_level=(?P<log_level>[^|]*) \| log_timestamp=(?P<log_timestamp>[^|]*) \| log_source=(?P<log_source>[^|]*) \| log_uid=(?P<log_uid>[^|]*) \| log_oec=(?P<log_oec>[^|]*) \| log_trace_id=(?P<log_trace_id>[^|]*) \| log_span_id=(?P<log_span_id>[^|]*) \| log_msg=(?P<log_msg>.*)$')
+        # traefik logs
+        traefik_fields, traefik_err = parse_regex(.message, r'time="(?P<log_timestamp>[^"]*)" level=(?P<log_level>\w+) msg="(?P<log_msg>.*)"')
         if err == null {
           .log_level = parsed_fields.log_level
           .log_timestamp = parsed_fields.log_timestamp
@@ -38,14 +40,26 @@ transforms:
           .log_trace_id = parsed_fields.log_trace_id
           .log_span_id = parsed_fields.log_span_id
           .log_msg = parsed_fields.log_msg
-        }
-        # traefik logs
-        traefik_fields, traefik_err = parse_regex(.message, r'time="(?P<log_timestamp>[^"]*)" level=(?P<log_level>\w+) msg="(?P<log_msg>.*)"')
-        if traefik_err == null {
+        } else if traefik_err == null {
           .log_timestamp = traefik_fields.log_timestamp
           .log_level = traefik_fields.log_level
           .log_msg = traefik_fields.log_msg
+        } else {
+          .log_msg = .message
         }
+
+        log_msg_processed = replace!(.log_msg, "\\n", "
+        ")
+        if log_msg_processed != null {
+          .log_msg = log_msg_processed
+        }
+      }
+
+      # ensure level is set for Grafana/Loki to color the log correctly
+      if exists(.log_level){
+        .level = .log_level
+      } else {
+        .level = "UNKNOWN"
       }
 
       # Handle container name - GELF uses _container_name (with underscore prefix)
@@ -76,7 +90,7 @@ transforms:
       }
 
       # Add processing metadata
-      .processed_by = "vector"
+      .processed_by = "vector-dev"
 
 sinks:
   # Send to Loki over TCP
@@ -91,8 +105,6 @@ sinks:
       host: "{{ host }}"
       container_name: "{{ container_name }}"
       service_name: "{{ service_name }}"
-      # Override level label with extracted log_level from structured logs. This ensures correct color coding in Loki/Grafana
-      level: "{{ log_level }}"
 
     healthcheck:
       enabled: true
