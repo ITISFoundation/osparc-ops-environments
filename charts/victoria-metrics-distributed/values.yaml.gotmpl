@@ -116,16 +116,34 @@ vmdistributed:
 
     # Exporter for machine metrics
     prometheus-node-exporter:
-      enabled: false
+      enabled: true
       namespaceOverride: "{{ .Release.Namespace }}-privileged"
       vmScrape:
         spec:
+          # chart templates do not set it properly when namespace is overriden
           namespaceSelector:
             matchNames: ["{{ .Release.Namespace }}-privileged"]
 
     # cluster metrics about the state of the objects
     kube-state-metrics:
-      enabled: false
+      enabled: true
+      networkPolicy:
+        enabled: true
+        flavor: kubernetes # calico understand kubernetes network policy
+        egress:
+        - to:
+          - ipBlock:
+              cidr: 10.0.0.0/8
+          - ipBlock:
+              cidr: 172.16.0.0/12
+          - ipBlock:
+              cidr: 192.168.0.0/16
+          ports:
+          - protocol: TCP
+            port: 6443
+      podLabels:
+        app: kube-state-metrics
+        part-of: {{ .Release.Name }}
 
     # container metrics (cpu / memory)
     kubelet:
