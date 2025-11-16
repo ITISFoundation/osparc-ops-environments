@@ -65,7 +65,7 @@ vmdistributed:
         spec:
           useStrictSecurity: true
           ingress:
-            host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+            host: {{ requiredEnv "K8S_METRICS_FQDN" }}
             annotations:
               namespace: {{ .Release.Namespace }}
               traefik.ingress.kubernetes.io/router.tls: "true"

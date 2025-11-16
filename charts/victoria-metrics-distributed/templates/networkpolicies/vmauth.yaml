@@ -26,3 +26,4 @@ spec:
         ports:
           - {{ .Values.vmdistributed.common.vmagent.spec.port }}
           - {{ .Values.vmdistributed.common.vmsingle.spec.port }}
+          - {{ .Values.vmdistributed.common.vmauth.spec.port }}

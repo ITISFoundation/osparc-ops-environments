@@ -4,6 +4,12 @@ metadata:
   name: vmagent-network-policy
 spec:
   selector: app == "vmagent" && part-of == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmdistributed.common.vmagent.spec.port }}
   egress:
     - action: Allow
       protocol: TCP
