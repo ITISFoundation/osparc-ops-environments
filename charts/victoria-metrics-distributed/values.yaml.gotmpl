@@ -124,7 +124,7 @@ vmdistributed:
           namespaceSelector:
             matchNames: ["{{ .Release.Namespace }}-privileged"]
 
-    # cluster metrics about the state of the objects
+    # cluster metrics about the state of the objects (pods, deploymentsets, ...)
     kube-state-metrics:
       enabled: true
       networkPolicy:
@@ -147,7 +147,7 @@ vmdistributed:
 
     # container metrics (cpu / memory)
     kubelet:
-      enabled: false
+      enabled: true
 
     kubeApiServer:
       enabled: false
