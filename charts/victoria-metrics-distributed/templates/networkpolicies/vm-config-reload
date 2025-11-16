@@ -2,6 +2,7 @@ apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   # allow config reload for all workloads in the release
+  # config reload needs to access the k8s api server
   name: vm-config-reload
 spec:
   selector: part-of == "{{ .Release.Name }}"
