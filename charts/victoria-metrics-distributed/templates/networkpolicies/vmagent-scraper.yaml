@@ -1,0 +1,8 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmagent-scraper-network-policy
+spec:
+  selector: app == "vmagent-scraper" && part-of == "{{ .Release.Name }}"
+  egress:
+    - action: Allow

@@ -1,0 +1,18 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-global-write-network-policy
+spec:
+  selector: app == "vmauth-global-write" && part-of == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmdistributed.common.vmauth.spec.port }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmdistributed.common.vmagent.spec.port }}

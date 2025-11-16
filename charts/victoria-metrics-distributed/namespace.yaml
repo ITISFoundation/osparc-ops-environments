@@ -13,3 +13,12 @@ metadata:
   name: victoria-metrics-distributed
   labels:
     pod-security.kubernetes.io/enforce: restricted
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: victoria-metrics-distributed-privileged
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

@@ -10,14 +10,12 @@ vmdistributed:
         port: "8427"
         podMetadata:
           labels:
-            app: vmauth
             part-of: {{ .Release.Name }}
     vmagent:
       spec:
         port: &vmAgentPort "8429"
         podMetadata:
-          labels: &vmAgentCommonLabels
-            app: vmagent
+          labels:
             part-of: {{ .Release.Name }}
     vmsingle:
       spec:
@@ -37,6 +35,18 @@ vmdistributed:
       enabled: false
     vmsingle:
       enabled: true
+    read:
+      vmauth:
+        spec:
+          podMetadata:
+            labels:
+              app: vmauth-zone
+    vmagent:
+      spec:
+        podMetadata:
+            labels:
+              app: vmagent-zone
+
 
   availabilityZones:
     - name: default
@@ -51,19 +61,27 @@ vmdistributed:
         useStrictSecurity: true
         port: *vmAgentPort
         podMetadata:
-          labels: *vmAgentCommonLabels
+          labels:
+            app: "vmagent-scraper"
+            part-of: {{ .Release.Name }}
 
   write:
     global:
       vmauth:
         spec:
           useStrictSecurity: true
+          podMetadata:
+            labels:
+              app: vmauth-global-write
 
   read:
     global:
       vmauth:
         spec:
           useStrictSecurity: true
+          podMetadata:
+            labels:
+              app: vmauth-global-read
           ingress:
             host: {{ requiredEnv "K8S_METRICS_FQDN" }}
             annotations:
@@ -96,12 +114,20 @@ vmdistributed:
     grafana:
       enabled: false
 
+    # Exporter for machine metrics
     prometheus-node-exporter:
       enabled: false
+      namespaceOverride: "{{ .Release.Namespace }}-privileged"
+      vmScrape:
+        spec:
+          namespaceSelector:
+            matchNames: ["{{ .Release.Namespace }}-privileged"]
 
+    # cluster metrics about the state of the objects
     kube-state-metrics:
       enabled: false
 
+    # container metrics (cpu / memory)
     kubelet:
       enabled: false
 

@@ -1,0 +1,18 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-zone-network-policy
+spec:
+  selector: app == "vmauth-zone" && part-of == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmdistributed.common.vmauth.spec.port }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmdistributed.common.vmsingle.spec.port }}
