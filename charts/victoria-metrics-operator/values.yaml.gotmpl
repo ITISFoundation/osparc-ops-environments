@@ -1,5 +1,9 @@
 operator:
-  disable_prometheus_converter: true
+  # converts prometheus-operator objects into victoria-metrics-operator ones
+  disable_prometheus_converter: false
+  # Enables ownership reference for converted prometheus-operator objects, it will
+  # remove corresponding victoria-metrics objects in case of deletion prometheus one.
+  enable_converter_ownership: true
 
 securityContext:
   seccompProfile:
