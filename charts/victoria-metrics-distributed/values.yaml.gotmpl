@@ -5,6 +5,14 @@ vmdistributed:
     vmauth:
       spec:
         port: "8427"
+        resources:
+          # rounded defaults from Operator
+          requests:
+            memory: "100Mi"
+            cpu: "0.1"
+          limits:
+            memory: "300Mi"
+            cpu: "0.5"
         podMetadata:
           labels:
             # common label for all components of the release (except vmagent extra)
@@ -14,8 +22,17 @@ vmdistributed:
             # See https://github.com/VictoriaMetrics/helm-charts/issues/2545#issuecomment-3496376407
             part-of: {{ .Release.Name }}
     vmagent:
+      # https://docs.victoriametrics.com/operator/api/#vmagentspec
       spec:
         port: &vmAgentPort "8429"
+        resources: &vmAgentResources
+          # rounded defaults from Operator
+          requests:
+            memory: "256Mi"
+            cpu: "0.1"
+          limits:
+            memory: "512Mi"
+            cpu: "0.5"
         podMetadata:
           labels:
             part-of: {{ .Release.Name }}
@@ -28,6 +45,14 @@ vmdistributed:
           resources:
             requests:
               storage: 50Gi
+        resources:
+          # rounded defaults from Operator
+          requests:
+            memory: "500Mi"
+            cpu: "0.1"
+          limits:
+            memory: "1.5Gi"
+            cpu: "1.5"
         podMetadata:
           labels:
             app: vmsingle
@@ -55,6 +80,7 @@ vmdistributed:
               app: vmauth-zone
     vmagent:
       spec:
+        # TODO: configure buffering https://github.com/VictoriaMetrics/helm-charts/issues/2565
         podMetadata:
             labels:
               app: vmagent-zone
@@ -73,6 +99,7 @@ vmdistributed:
       spec:
         useStrictSecurity: true
         port: *vmAgentPort
+        resources: *vmAgentResources
         podMetadata:
           labels:
             app: "vmagent-scraper"
@@ -131,6 +158,14 @@ vmdistributed:
     prometheus-node-exporter:
       enabled: true
       namespaceOverride: "{{ .Release.Namespace }}-privileged"
+      resources:
+        # draft values. adjust if needed
+        limits:
+          cpu: 0.2
+          memory: 128Mi
+        requests:
+          cpu: 0.1
+          memory: 64Mi
       vmScrape:
         spec:
           # chart templates do not set it properly when namespace is overriden
@@ -140,6 +175,14 @@ vmdistributed:
     # cluster metrics about the state of the objects (pods, deploymentsets, ...)
     kube-state-metrics:
       enabled: true
+      resources:
+        # draft values. adjust if needed
+        limits:
+          cpu: 0.5
+          memory: 512Mi
+        requests:
+          cpu: 0.1
+          memory: 128Mi
       networkPolicy:
         enabled: true
         flavor: kubernetes # calico understand kubernetes network policy
