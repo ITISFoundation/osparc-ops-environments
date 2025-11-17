@@ -20,8 +20,14 @@ vmdistributed:
           labels:
             part-of: {{ .Release.Name }}
     vmsingle:
+      # https://docs.victoriametrics.com/operator/api/#vmsinglespec
       spec:
         port: "8428"
+        removePvcAfterDelete: false
+        storage:
+          resources:
+            requests:
+              storage: 50Gi
         podMetadata:
           labels:
             app: vmsingle
@@ -37,6 +43,10 @@ vmdistributed:
       enabled: false
     vmsingle:
       enabled: true
+      spec:
+        # Ideally it should be defined in common spec. But in original chart
+        # values it is defined in zoneTpl. So, common spec is overriden.
+        retentionPeriod: "180d" # ~3 months
     read:
       vmauth:
         spec:
@@ -48,7 +58,6 @@ vmdistributed:
         podMetadata:
             labels:
               app: vmagent-zone
-
 
   availabilityZones:
     - name: default
