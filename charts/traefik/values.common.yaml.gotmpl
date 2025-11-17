@@ -133,27 +133,6 @@ extraObjects:
         - 172.16.0.0/12
         - 192.168.0.0/16
 
-- apiVersion: traefik.io/v1alpha1
-  kind: Middleware
-  metadata:
-    name: metrics-strip-prefix
-    namespace: {{.Release.Namespace}}
-  spec:
-    stripPrefix:
-      prefixes:
-      - /metrics
-
-  # a (href) links do not work properly without trailing slash
-- apiVersion: traefik.io/v1alpha1
-  kind: Middleware
-  metadata:
-    name: metrics-path-append-slash
-    namespace: {{ .Release.Namespace }}
-  spec:
-    redirectRegex:
-      regex: "^(https?://[^/]+/metrics)$"
-      replacement: "${1}/"
-
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
