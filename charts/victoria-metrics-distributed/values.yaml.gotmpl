@@ -7,6 +7,11 @@ vmdistributed:
         port: "8427"
         podMetadata:
           labels:
+            # common label for all components of the release (except vmagent extra)
+            # we use these labels in network policies. We do not use official convention
+            # "app.kubernetes.io/part-of" as VM Operator does not support override of some of
+            # official labels (e.g. app.kubernetes.io/name). So we use a shorter version.
+            # See https://github.com/VictoriaMetrics/helm-charts/issues/2545#issuecomment-3496376407
             part-of: {{ .Release.Name }}
     vmagent:
       spec:
@@ -51,6 +56,8 @@ vmdistributed:
   extra:
     # it scrapes metrics and write to global write LB
     # which is an entry point for vm distributed cluster
+    # it is considered to be outside of "stack". So, common
+    # settings are not applied to it.
     vmagent:
       enabled: true
       name: vmagent-scraper
@@ -85,7 +92,7 @@ vmdistributed:
               namespace: {{ .Release.Namespace }}
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
-
+              traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd
 
   victoria-metrics-k8s-stack:
     enabled: true
