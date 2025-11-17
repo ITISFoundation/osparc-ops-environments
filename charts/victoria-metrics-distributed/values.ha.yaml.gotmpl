@@ -1,0 +1,10 @@
+vmdistributed:
+  availabilityZones:
+    - name: {{ requiredEnv "CLUSTER_ZONE_1" }}
+    - name: {{ requiredEnv "CLUSTER_ZONE_2" }}
+
+  zoneTpl:
+    common:
+      spec:
+        nodeSelector:
+          topology.kubernetes.io/zone: '{{`{{ .zone.name }}`}}'
