@@ -27,3 +27,6 @@ proxy_protocol = true
 # Set the default queue type to quorum to benefit from RabbitMQ Cluster
 # (to be highly available by default). This does not enforce queue type though
 default_queue_type = quorum
+
+# https://www.rabbitmq.com/docs/logging#log-levels
+log.default.level = {{ RABBIT_LOG_LEVEL }}
