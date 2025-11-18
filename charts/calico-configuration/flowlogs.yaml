@@ -1,3 +1,4 @@
+# https://docs.tigera.io/calico/3.30/observability/enable-whisker
 apiVersion: operator.tigera.io/v1
 kind: Goldmane
 metadata:
