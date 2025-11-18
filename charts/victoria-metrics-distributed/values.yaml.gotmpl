@@ -80,7 +80,9 @@ vmdistributed:
               app: vmauth-zone
     vmagent:
       spec:
-        # TODO: configure buffering https://github.com/VictoriaMetrics/helm-charts/issues/2565
+        remoteWriteSettings:
+          #  The maximum disk usage for the buffer
+          maxDiskUsagePerURL: "10GiB"
         podMetadata:
             labels:
               app: vmagent-zone
