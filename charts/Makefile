@@ -52,6 +52,11 @@ helmfile-diff: .check-helmfile-installed helmfile.yaml ## Shows the differences 
 	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml diff
 
+.PHONY: helmfile-delete
+helmfile-delete: .check-helmfile-installed helmfile.yaml ## Deletes the helmfile configuration
+	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
+	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml delete
+
 .PHONY: up
 up: helmfile-apply ## Start the stack
 
