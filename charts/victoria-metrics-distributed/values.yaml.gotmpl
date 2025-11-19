@@ -4,6 +4,8 @@ vmdistributed:
   common:
     vmauth:
       spec:
+        nodeSelector: &opsNodeSelector
+          ops: "true"
         port: "8427"
         resources:
           # rounded defaults from Operator
@@ -24,6 +26,7 @@ vmdistributed:
     vmagent:
       # https://docs.victoriametrics.com/operator/api/#vmagentspec
       spec:
+        nodeSelector: *opsNodeSelector
         port: &vmAgentPort "8429"
         resources: &vmAgentResources
           # rounded defaults from Operator
@@ -39,6 +42,7 @@ vmdistributed:
     vmsingle:
       # https://docs.victoriametrics.com/operator/api/#vmsinglespec
       spec:
+        nodeSelector: *opsNodeSelector
         port: "8428"
         removePvcAfterDelete: false
         storage:
@@ -61,8 +65,6 @@ vmdistributed:
   zoneTpl:
     common:
       spec:
-        nodeSelector:
-          ops: "true"
         useStrictSecurity: true
     vmcluster:
       enabled: false
@@ -100,6 +102,7 @@ vmdistributed:
       enabled: true
       name: vmagent-scraper
       spec:
+        nodeSelector: *opsNodeSelector
         useStrictSecurity: true
         port: *vmAgentPort
         resources: *vmAgentResources
@@ -163,6 +166,7 @@ vmdistributed:
     prometheus-node-exporter:
       enabled: true
       namespaceOverride: "{{ .Release.Namespace }}-privileged"
+
       resources:
         # draft values. adjust if needed
         limits:
@@ -180,6 +184,7 @@ vmdistributed:
     # cluster metrics about the state of the objects (pods, deploymentsets, ...)
     kube-state-metrics:
       enabled: true
+      nodeSelector: *opsNodeSelector
       resources:
         # draft values. adjust if needed
         limits:
