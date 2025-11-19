@@ -1,8 +1,10 @@
 operator:
   # converts prometheus-operator objects into victoria-metrics-operator ones
+  # https://docs.victoriametrics.com/operator/integrations/prometheus/#objects-conversion
   disable_prometheus_converter: false
   # Enables ownership reference for converted prometheus-operator objects, it will
   # remove corresponding victoria-metrics objects in case of deletion prometheus one.
+  # https://docs.victoriametrics.com/operator/integrations/prometheus/#deletion-synchronization
   enable_converter_ownership: true
 
 securityContext:
