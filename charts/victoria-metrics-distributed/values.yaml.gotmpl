@@ -136,7 +136,9 @@ vmdistributed:
               namespace: {{ .Release.Namespace }}
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
-              traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd
+              traefik.ingress.kubernetes.io/router.middlewares: >-
+                traefik-traefik-basic-auth@kubernetescrd,
+                traefik-metrics-redirect-slash-to-vmui@kubernetescrd
 
   victoria-metrics-k8s-stack:
     enabled: true
