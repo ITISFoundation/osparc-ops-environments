@@ -26,3 +26,5 @@ configure-local-hosts: $(REPO_CONFIG_LOCATION) ## Adds local hosts entries for t
 	grep -q "127.0.0.1 $$K8S_MONITORING_FQDN" /etc/hosts || echo "127.0.0.1 $$K8S_MONITORING_FQDN" | sudo tee -a /etc/hosts
 	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	grep -q "127.0.0.1 $$K8S_PRIVATE_FQDN" /etc/hosts || echo "127.0.0.1 $$K8S_PRIVATE_FQDN" | sudo tee -a /etc/hosts
+	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
+	grep -q "127.0.0.1 $$K8S_METRICS_FQDN" /etc/hosts || echo "127.0.0.1 $$K8S_METRICS_FQDN" | sudo tee -a /etc/hosts

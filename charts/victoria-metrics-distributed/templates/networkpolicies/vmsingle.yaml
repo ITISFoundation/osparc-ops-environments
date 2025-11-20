@@ -1,0 +1,12 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmsingle-network-policy
+spec:
+  selector: app == "vmsingle" && part-of == "{{ .Release.Name }}"
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmdistributed.common.vmsingle.spec.port }}
