@@ -140,6 +140,10 @@ vmdistributed:
                 traefik-traefik-basic-auth@kubernetescrd,
                 traefik-metrics-redirect-slash-to-vmui@kubernetescrd
 
+  # if enabled, some urls may need to be updated (e.g. automatic redirect middleware)
+  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-distributed#how-to-use-multitenancy
+  enableMultitenancy: false
+
   victoria-metrics-k8s-stack:
     enabled: true
 
