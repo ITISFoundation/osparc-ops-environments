@@ -56,43 +56,9 @@ services:
       replicas: 0  # use standalone (cluster) rabbit stack
 
   traefik:
-    command:
-      - "--api=true"
-      - "--api.dashboard=true"
-      - "--ping=true"
-      - "--entryPoints.ping.address=:9082"
-      - "--ping.entryPoint=ping"
-      - "--log.level=${SIMCORE_TRAEFIK_LOGLEVEL}"
-      - "--accesslog=false"
-      - "--metrics.prometheus=true"
-      - "--metrics.prometheus.addEntryPointsLabels=true"
-      - "--metrics.prometheus.addServicesLabels=true"
-      - "--entryPoints.metrics.address=:8082"
-      - "--metrics.prometheus.entryPoint=metrics"
-      - "--entryPoints.http.address=:80"
-      - "--entryPoints.http.forwardedHeaders.insecure"
-      - "--entryPoints.http.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.http.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.postgres.address=:5432"
-      - "--entryPoints.redis.address=:${REDIS_EXTERNAL_PORT}"
-      - "--entryPoints.simcore_api.address=:10081"
-      - "--entryPoints.simcore_api.forwardedHeaders.insecure"
-      - "--entryPoints.simcore_api.transport.respondingTimeouts.idleTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.simcore_api.transport.respondingTimeouts.writeTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.simcore_api.transport.respondingTimeouts.readTimeout=21600s" #6h, for https://github.com/traefik/traefik/issues/10805
-      - "--entryPoints.traefik_monitor.address=:8080"
-      - "--entryPoints.traefik_monitor.forwardedHeaders.insecure"
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.network=${SWARM_STACK_NAME}_default"
-      # https://github.com/traefik/traefik/issues/7886
-      - "--providers.swarm.refreshSeconds=1"
-      - "--providers.swarm.exposedByDefault=false"
-      - "--providers.swarm.constraints=Label(`io.simcore.zone`, `${TRAEFIK_SIMCORE_ZONE}`)"
-      - "--tracing.serviceName=simcore-traefik"
-      - "--tracing.otlp.http.endpoint=http://otel-collector:4318/v1/traces"
-      - "--tracing.addinternals=false"
-      - "--tracing.sampleRate=${TRACING_OPENTELEMETRY_SAMPLING_PROBABILITY}"
+    environment:
+        TRAEFIK_ENTRYPOINTS_POSTGRES_ADDRESS: ":5432"
+        TRAEFIK_ENTRYPOINTS_REDIS_ADDRESS: ":${REDIS_EXTERNAL_PORT}"
     deploy:
       resources:
         limits:
