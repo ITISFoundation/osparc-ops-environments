@@ -1,0 +1,106 @@
+# https://github.com/grafana/helm-charts/blob/grafana-10.1.5/charts/grafana/values.yaml
+networkPolicy:
+  enabled: true
+  # allow ingress from outside
+  allowExternal: true
+  ingress:
+    enabled: true
+  egress:
+    enabled: true
+    ports:
+      - port: 8427 # global read vmauth port of vm distributed
+      - port: 443 # install plugins from outside
+      - port: 6443 # sidecars talk to k8s api server
+
+persistence:
+  enabled: true
+  type: statefulset
+  size: 10Gi
+
+# copied from grafana docker (swarm) service
+resources:
+  limits:
+    cpu: 1
+    memory: 256Mi
+  requests:
+    cpu: 0.1
+    memory: 128Mi
+
+nodeSelector:
+  ops: "true"
+
+podLabels: &extraPodLabels
+  app: grafana
+  instance: {{ .Release.Name }}
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels: *extraPodLabels
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  hosts:
+    - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+  path: /grafana/
+
+admin:
+  existingSecret: &adminSecretName {{ .Release.Name }}-grafana-basic-auth
+  userKey: admin-user
+  passwordKey: admin-password
+
+assertNoLeakedSecrets: true
+
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: *adminSecretName
+      labels: *extraPodLabels
+    type: Opaque
+    stringData:
+      admin-user: {{ requiredEnv "SERVICES_USER" }}
+      admin-password: {{ requiredEnv "SERVICES_PASSWORD" }}
+
+initChownData:
+  # run as root. does not align with restricted pod security context
+  enabled: false
+
+grafana.ini:
+  server:
+    # https://stackoverflow.com/a/69766805/12124525
+    # https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md#example-ingress-with-path
+    root_url: https://{{ requiredEnv "K8S_MONITORING_FQDN" }}/grafana/
+    serve_from_sub_path: true
+  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#log
+  log:
+    # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#level
+    level: {{ requiredEnv "GRAFANA_LOG_LEVEL" | lower }}
+
+sidecar:
+  resources:
+    limits:
+      cpu: 0.5
+      memory: 256Mi
+    requests:
+      cpu: 0.1
+      memory: 32Mi
+  dashboards:
+    enabled: false
+    label: grafana_dashboard
+    labelValue: "true"
+
+  datasources:
+    enabled: true
+    label: {{ .Values.grafanaDatasourceLabel }}
+    labelValue: {{ .Values.grafanaDatasourceLabelValue }}
+    logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
+    searchNamespace: ALL
+
+plugins:
+  - victoriametrics-metrics-datasource
