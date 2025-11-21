@@ -1,5 +1,16 @@
+grafanaDatasourceLabel: {{ .Values.grafanaDatasourceLabel }}
+grafanaDatasourceLabelValue: {{ .Values.grafanaDatasourceLabelValue }}
+grafanaVictoriaMetricsDatasourceUid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}
+grafanaVictoriaMetricsDatasourceType: {{ .Values.grafanaVictoriaMetricsDatasourceType }}
+grafanaDashboardLabel: {{ .Values.grafanaDashboardLabel }}
+grafanaDashboardLabelValue: {{ .Values.grafanaDashboardLabelValue }}
+
 vmdistributed:
   fullnameOverride: "vm-distributed"
+
+  global:
+    cluster:
+      domain: cluster.local.
 
   common:
     vmauth:
@@ -77,12 +88,14 @@ vmdistributed:
         retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
     read:
       vmauth:
+        name: '{{`read-{{ .zone.name }}-zone`}}'
         spec:
           podMetadata:
             labels:
               app: vmauth-zone
     vmagent:
       spec:
+        name: '{{`write-{{ .zone.name }}-zone`}}'
         remoteWriteSettings:
           #  The maximum disk usage for the buffer
           maxDiskUsagePerURL: "10GiB"
@@ -100,7 +113,7 @@ vmdistributed:
     # settings are not applied to it.
     vmagent:
       enabled: true
-      name: vmagent-scraper
+      name: scraper
       spec:
         nodeSelector: *opsNodeSelector
         useStrictSecurity: true
@@ -114,6 +127,7 @@ vmdistributed:
   write:
     global:
       vmauth:
+        name: "global-write"
         spec:
           useStrictSecurity: true
           podMetadata:
@@ -123,6 +137,7 @@ vmdistributed:
   read:
     global:
       vmauth:
+        name: "global-read"
         spec:
           useStrictSecurity: true
           podMetadata:
@@ -133,7 +148,6 @@ vmdistributed:
           ingress:
             host: {{ requiredEnv "K8S_METRICS_FQDN" }}
             annotations:
-              namespace: {{ .Release.Namespace }}
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
               traefik.ingress.kubernetes.io/router.middlewares: >-
