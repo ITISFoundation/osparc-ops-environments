@@ -53,6 +53,7 @@ resource "grafana_data_source" "loki" {
   url                = "http://loki:3100"
   basic_auth_enabled = false
   is_default         = false
+  uid                = "eevd4kpcuqiv4d"
 
   json_data_encoded = jsonencode({
     derivedFields = [
