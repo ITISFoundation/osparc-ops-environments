@@ -91,9 +91,15 @@ sidecar:
       cpu: 0.1
       memory: 32Mi
   dashboards:
-    enabled: false
-    label: grafana_dashboard
-    labelValue: "true"
+    enabled: true
+    label: {{ .Values.grafanaDashboardLabel }}
+    labelValue: {{ .Values.grafanaDashboardLabelValue }}
+    logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
+    searchNamespace: ALL
+    folderAnnotation: "dashboard_folder"
+    provider:
+      # nested folders are not supported https://github.com/grafana/grafana/issues/107158
+      foldersFromFilesStructure: true
 
   datasources:
     enabled: true
@@ -103,4 +109,4 @@ sidecar:
     searchNamespace: ALL
 
 plugins:
-  - victoriametrics-metrics-datasource
+  - {{ .Values.grafanaVictoriaMetricsDatasourceType }}

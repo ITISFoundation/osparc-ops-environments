@@ -4,6 +4,7 @@ kind: Secret
 metadata:
   name: victoria-metrics-datasource
   labels:
+    # special label to be picked up by the grafana sidecar
     {{ .Values.grafanaDatasourceLabel }}: {{ .Values.grafanaDatasourceLabelValue }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: {{ .Values.vmdistributed.fullnameOverride | default .Chart.Name }}
@@ -15,7 +16,7 @@ stringData:
     datasources:
       - name: VictoriaMetrics
         # this plugin needs to be installed in grafana beforehand
-        type: victoriametrics-metrics-datasource
+        type: {{ .Values.grafanaVictoriaMetricsDatasourceType }}
         access: proxy
         # https://docs.victoriametrics.com/helm/victoria-metrics-distributed/#how-to-query-data
         # vmauth CR creates a service named vmauth-<vmauth-name> in the same namespace

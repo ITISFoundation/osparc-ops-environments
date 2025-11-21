@@ -1,0 +1,26 @@
+
+{{ $globalScope := . }}
+{{- range $dashboardFile, $_ := .Files.Glob  "files/dashboards/**.json" -}}
+{{ with $globalScope }}
+
+
+{{- $dashboardBase := base $dashboardFile }}
+{{- $dashboardName := (trimSuffix (ext $dashboardBase) $dashboardBase) -}}
+{{- $dashboardFolder := dir (trimPrefix "files/dashboards/" $dashboardFile) -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ $dashboardName }}-grafana-dashboard
+  labels:
+    # TODO: add reusable common labels
+    {{ .Values.grafanaDashboardLabel }}: {{ .Values.grafanaDashboardLabelValue }}
+  annotations:
+    # nested folders are not supported https://github.com/grafana/grafana/issues/107158
+    dashboard_folder: "{{ $dashboardFolder }}"
+data:
+  {{ $dashboardName }}.json: | {{ tpl (.Files.Get $dashboardFile) . | nindent 4 }}
+
+{{- end }}
+{{- end }}
