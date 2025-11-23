@@ -39,7 +39,7 @@
       }
     ]
   },
-  "description": "Kubernetes Nodes for node exporter 0.16+ (via Prometheus)\r\n",
+  "description": "Maintainer: YH. Original: https://grafana.com/grafana/dashboards/8171-kubernetes-nodes/",
   "editable": true,
   "gnetId": 8171,
   "graphTooltip": 0,
@@ -895,7 +895,7 @@
   "style": "dark",
   "tags": [
     "nodes",
-    "prometheus"
+    "cluster"
   ],
   "templating": {
     "list": [
@@ -954,7 +954,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Kubernetes Nodes",
+  "title": "Nodes overview",
   "uid": "AUMN5x0mk",
   "version": 3
 }

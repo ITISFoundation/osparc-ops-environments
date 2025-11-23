@@ -41,5 +41,12 @@ stringData:
         type: postgres
         ...
 ```
-
+kubectl -n grafana logs grafana-0 --container grafana-sc-dashboard
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-datasources
+
+## Troubleshooting
+
+#### Import dashboard / datasource does not work
+* Make sure the corresponding `configmap` / `secret` exists
+* Check logs of corresponding container in grafana pod
+  - e.g. `kubectl -n grafana logs grafana-0 --container grafana-sc-dashboard`

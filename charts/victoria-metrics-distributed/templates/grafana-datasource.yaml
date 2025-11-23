@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: victoria-metrics-datasource
+  name: victoria-metrics-grafana-datasource
   labels:
     # special label to be picked up by the grafana sidecar
     {{ .Values.grafanaDatasourceLabel }}: {{ .Values.grafanaDatasourceLabelValue }}
