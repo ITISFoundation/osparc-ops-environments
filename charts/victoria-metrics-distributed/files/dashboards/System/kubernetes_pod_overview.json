@@ -2,16 +2,10 @@
   "__inputs": [],
   "__requires": [
     {
-      "type": "panel",
-      "id": "gauge",
-      "name": "Gauge",
-      "version": ""
-    },
-    {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "6.5.2"
+      "version": "7.3.3"
     },
     {
       "type": "panel",
@@ -23,19 +17,7 @@
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "1.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "text",
-      "name": "Text",
-      "version": ""
+      "version": "2.22.1"
     }
   ],
   "annotations": {
@@ -51,664 +33,101 @@
       }
     ]
   },
-  "description": "Maintainer: YH. Original: https://grafana.com/grafana/dashboards/11594-detailed-pods-resources/",
+  "description": "Maintainer: YH. Original: https://grafana.com/grafana/dashboards/13498-kubernetes-pods-monitoring-via-prometheus/",
   "editable": true,
-  "gnetId": 11594,
-  "graphTooltip": 0,
+  "gnetId": 13498,
+  "graphTooltip": 1,
   "id": null,
-  "iteration": 1580115634366,
+  "iteration": 1606840400808,
   "links": [],
   "panels": [
     {
-      "datasource": null,
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
+      },
+      "editable": true,
+      "error": false,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "grid": {},
       "gridPos": {
-        "h": 1,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 86,
-      "title": "Namespace Global Usage",
-      "type": "row"
-    },
-    {
-      "content": "\n## CPU Usage\n\n\n\n",
-      "datasource": null,
-      "gridPos": {
-        "h": 2,
-        "w": 4,
-        "x": 0,
-        "y": 1
-      },
-      "id": 72,
-      "mode": "markdown",
-      "options": {},
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 2,
-      "description": "",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 4,
-        "y": 1
-      },
       "hiddenSeries": false,
-      "id": 34,
-      "interval": "5m",
+      "id": 1,
+      "isNew": true,
       "legend": {
         "alignAsTable": true,
         "avg": true,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": true,
-        "min": true,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
         "values": true
       },
       "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "connected",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
+      "paceLength": 10,
       "percentage": false,
-      "pointradius": 2,
+      "pluginVersion": "7.3.3",
+      "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",container!=\"monitoring-daemon\"}[5m]))",
-          "instant": false,
-          "legendFormat": "${namespace} CPU Usage (Nb of CPUs)",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 2,
-          "format": "short",
-          "label": "CPUs",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "content": "\n## Memory Usage\n\n\n\n",
-      "datasource": null,
-      "gridPos": {
-        "h": 2,
-        "w": 4,
-        "x": 12,
-        "y": 1
-      },
-      "id": 74,
-      "mode": "markdown",
-      "options": {},
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 2,
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 16,
-        "y": 1
-      },
-      "hiddenSeries": false,
-      "id": 36,
-      "interval": "5m",
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": false,
-        "max": true,
-        "min": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": true,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\",container_name=\"\"})",
-          "legendFormat": "${namespace} Memory Usage",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(container_memory_cache{namespace=\"$namespace\",container=\"\"})",
-          "legendFormat": "${namespace} Cache Usage",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 2,
-          "format": "bytes",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": null,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "cacheTimeout": null,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "description": "Percent of limits CPU usage ",
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 0,
-        "y": 3
-      },
-      "id": 9,
-      "interval": "",
-      "links": [],
-      "options": {
-        "fieldOptions": {
-          "calcs": [
-            "last"
-          ],
-          "defaults": {
-            "mappings": [
-              {
-                "id": 0,
-                "op": "=",
-                "text": "N/A",
-                "type": 1,
-                "value": "null"
-              }
-            ],
-            "max": 100,
-            "min": 0,
-            "nullValueMode": "connected",
-            "thresholds": [
-              {
-                "color": "light-green",
-                "value": null
-              },
-              {
-                "color": "light-orange",
-                "value": 70
-              },
-              {
-                "color": "light-red",
-                "value": 90
-              }
-            ],
-            "title": "Limits CPU Usage",
-            "unit": "percent"
-          },
-          "override": {},
-          "values": false
-        },
-        "orientation": "horizontal",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "6.5.2",
-      "targets": [
-        {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",container!=\"monitoring-daemon\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\", resource=\"cpu\"}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "Limits CPU Usage",
-          "refId": "A"
-        },
-        {
-          "expr": "",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "Limits",
-          "refId": "B"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "",
-      "transparent": true,
-      "type": "gauge"
-    },
-    {
-      "cacheTimeout": null,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "description": "Percent of limits memory usage",
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 12,
-        "y": 3
-      },
-      "id": 25,
-      "links": [],
-      "options": {
-        "fieldOptions": {
-          "calcs": [
-            "last"
-          ],
-          "defaults": {
-            "mappings": [
-              {
-                "id": 0,
-                "op": "=",
-                "text": "N/A",
-                "type": 1,
-                "value": "null"
-              }
-            ],
-            "max": 100,
-            "min": 0,
-            "nullValueMode": "connected",
-            "thresholds": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ],
-            "title": "Limits Mem Usage",
-            "unit": "percent"
-          },
-          "override": {},
-          "values": false
-        },
-        "orientation": "horizontal",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "6.5.2",
-      "targets": [
-        {
-          "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\",container=\"\"}) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\", resource=\"memory\"}) * 100",
-          "instant": false,
+          "expr": "sum by(container) (container_memory_usage_bytes{pod=\"$pod\", container=~\"$container\", container!=\"POD\"})",
+          "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "{{`{{namespace}}`}}",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "",
-      "transparent": true,
-      "type": "gauge"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 3,
-      "format": "short",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 4,
-        "x": 0,
-        "y": 9
-      },
-      "id": 92,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+          "legendFormat": "Current: {{`{{ container }}`}}",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 10
         },
         {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "pluginVersion": "6.5.2",
-      "postfix": " Cores",
-      "postfixFontSize": "80%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true,
-        "ymax": null,
-        "ymin": 0
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",container!=\"monitoring-daemon\"}[5m]))",
-          "instant": false,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "",
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "",
-      "transparent": true,
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 2,
-      "format": "bytes",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 4,
-        "x": 12,
-        "y": 9
-      },
-      "id": 38,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true,
-        "ymax": null,
-        "ymin": 0
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\",container=\"\"})",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\",container=\"\"})",
-          "hide": true,
-          "refId": "B"
-        }
-      ],
-      "thresholds": "",
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "",
-      "transparent": true,
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [],
-      "valueName": "avg"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 2,
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 11
-      },
-      "hiddenSeries": false,
-      "id": 78,
-      "interval": "5m",
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": false,
-        "hideEmpty": true,
-        "hideZero": true,
-        "max": true,
-        "min": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum (rate (container_network_receive_bytes_total{namespace=\"${namespace}\"}[5m]))",
-          "legendFormat": "Bytes recieves",
-          "refId": "A"
-        },
-        {
-          "expr": "- sum (rate (container_network_transmit_bytes_total{namespace=\"${namespace}\"}[5m]))",
-          "legendFormat": "Bytes sents",
-          "refId": "B"
+          "expr": "kube_pod_container_resource_requests_memory_bytes{pod=\"$pod\", container=~\"$container\"}",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requested: {{`{{ container }}`}}",
+          "metric": "kube_pod_container_resource_requests_memory_bytes",
+          "refId": "B",
+          "step": 20
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Network I/O /5min",
+      "title": "Memory Usage",
       "tooltip": {
+        "msResolution": true,
         "shared": true,
         "sort": 0,
-        "value_type": "individual"
+        "value_type": "cumulative"
       },
       "type": "graph",
       "xaxis": {
@@ -720,7 +139,7 @@
       },
       "yaxes": [
         {
-          "format": "decbytes",
+          "format": "bytes",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -750,306 +169,73 @@
         "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
-      "decimals": 2,
+      "editable": true,
+      "error": false,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
+      "grid": {},
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 11
-      },
-      "hiddenSeries": false,
-      "id": 79,
-      "interval": "5m",
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": true,
-        "min": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum (rate (container_network_receive_errors_total{namespace=\"${namespace}\"}[5m]))",
-          "legendFormat": "Errors recives",
-          "refId": "A"
-        },
-        {
-          "expr": "sum (rate (container_network_transmit_errors_total{namespace=\"${namespace}\"}[5m]))",
-          "legendFormat": "Errors Sents",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Network Nb of Errors /5min",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 2,
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 11
-      },
-      "hiddenSeries": false,
-      "id": 80,
-      "interval": "5m",
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": false,
-        "hideEmpty": true,
-        "hideZero": true,
-        "max": true,
-        "min": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum (rate (container_network_receive_packets_total{namespace=\"${namespace}\"}[5m]))",
-          "legendFormat": "Bytes recieves",
-          "refId": "A"
-        },
-        {
-          "expr": "- sum (rate (container_network_transmit_packets_total{namespace=\"${namespace}\"}[5m]))",
-          "legendFormat": "Bytes sents",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Network Nb of Packets /(5mins)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
+        "h": 7,
         "w": 24,
         "x": 0,
-        "y": 19
-      },
-      "id": 30,
-      "panels": [],
-      "repeat": "container",
-      "title": "$namespace - $container resource usage",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "decimals": 3,
-      "description": "",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 13,
-        "w": 12,
-        "x": 0,
-        "y": 20
+        "y": 7
       },
       "hiddenSeries": false,
       "id": 2,
-      "interval": "5m",
+      "isNew": true,
       "legend": {
         "alignAsTable": true,
         "avg": true,
-        "current": false,
-        "max": true,
-        "min": true,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
         "values": true
       },
       "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "connected",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
+      "paceLength": 10,
       "percentage": false,
-      "pointradius": 2,
+      "pluginVersion": "7.3.3",
+      "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "podname",
-      "repeatDirection": "v",
-      "seriesOverrides": [
-        {
-          "alias": "Limits",
-          "color": "#FF7383",
-          "dashes": true,
-          "lines": false
-        },
-        {
-          "alias": "Requests",
-          "color": "#FFB357",
-          "dashes": true,
-          "lines": false
-        }
-      ],
+      "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container_name=\"$container\",pod_name=\"$podname\"}[5m])",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{`{{pod_name}}`}}",
-          "refId": "A"
-        },
-        {
-          "expr": "avg(kube_pod_container_resource_limits{namespace=\"$namespace\",container=\"$container\",resource=\"cpu\",pod=\"$podname\"})",
-          "hide": false,
-          "legendFormat": "Limits",
-          "refId": "B"
-        },
-        {
-          "expr": "avg(kube_pod_container_resource_requests{namespace=\"$namespace\",container=\"$container\",resource=\"cpu\",pod=\"$podname\"})",
-          "hide": false,
-          "legendFormat": "Requests",
-          "refId": "C"
+          "expr": "sum by (container)( rate(container_cpu_usage_seconds_total{image!=\"\",container!=\"POD\",pod=\"$pod\"}[1m] ) )",
+          "intervalFactor": 2,
+          "legendFormat": "{{`{{ container }}`}}",
+          "refId": "A",
+          "step": 30
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "${podname} - cpu usage, requests and limits",
+      "title": "CPU Usage",
       "tooltip": {
+        "msResolution": true,
         "shared": true,
         "sort": 0,
-        "value_type": "individual"
+        "value_type": "cumulative"
       },
       "type": "graph",
       "xaxis": {
@@ -1061,12 +247,11 @@
       },
       "yaxes": [
         {
-          "decimals": 3,
           "format": "short",
-          "label": "CPU",
+          "label": null,
           "logBase": 1,
           "max": null,
-          "min": "0",
+          "min": null,
           "show": true
         },
         {
@@ -1092,87 +277,73 @@
         "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
-      "decimals": 2,
-      "description": "",
+      "editable": true,
+      "error": false,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
+      "grid": {},
       "gridPos": {
-        "h": 13,
-        "w": 12,
-        "x": 12,
-        "y": 20
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 14
       },
       "hiddenSeries": false,
-      "id": 28,
-      "interval": "5m",
+      "id": 3,
+      "isNew": true,
       "legend": {
         "alignAsTable": true,
         "avg": true,
-        "current": false,
-        "max": true,
-        "min": true,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
         "values": true
       },
       "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "connected",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
+      "paceLength": 10,
       "percentage": false,
-      "pointradius": 2,
+      "pluginVersion": "7.3.3",
+      "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "podname",
-      "repeatDirection": "v",
-      "seriesOverrides": [
-        {
-          "alias": "Limits",
-          "color": "#FF7383",
-          "dashes": true,
-          "lines": false
-        },
-        {
-          "alias": "Request",
-          "color": "#FFB357",
-          "dashes": true,
-          "lines": false
-        }
-      ],
+      "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "container_memory_working_set_bytes{namespace=\"$namespace\",container_name=\"$container\",pod_name=\"$podname\"}",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{`{{pod_name}}`}}",
-          "refId": "A"
-        },
-        {
-          "expr": "avg(kube_pod_container_resource_limits{namespace=\"$namespace\",container=\"$container\",resource=\"memory\",pod=\"$podname\"})",
-          "legendFormat": "Limits",
-          "refId": "B"
-        },
-        {
-          "expr": "avg(kube_pod_container_resource_requests{namespace=\"$namespace\",container=\"$container\",resource=\"memory\",pod=\"$podname\"})",
-          "legendFormat": "Request",
-          "refId": "C"
+          "expr": "sort_desc(sum by (pod) (rate (container_network_receive_bytes_total{pod=\"$pod\"}[1m]) ))",
+          "intervalFactor": 2,
+          "legendFormat": "{{`{{ pod }}`}}",
+          "refId": "A",
+          "step": 30
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "$podname - memory requests and limits",
+      "title": "Network I/O",
       "tooltip": {
+        "msResolution": true,
         "shared": true,
         "sort": 0,
-        "value_type": "individual"
+        "value_type": "cumulative"
       },
       "type": "graph",
       "xaxis": {
@@ -1184,12 +355,11 @@
       },
       "yaxes": [
         {
-          "decimals": 2,
           "format": "bytes",
-          "label": "Memory",
+          "label": null,
           "logBase": 1,
           "max": null,
-          "min": "0",
+          "min": null,
           "show": true
         },
         {
@@ -1207,8 +377,7 @@
       }
     }
   ],
-  "refresh": "5m",
-  "schemaVersion": 21,
+  "schemaVersion": 26,
   "style": "dark",
   "tags": [
     "cluster",
@@ -1217,24 +386,25 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {},
         "datasource": {
         "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
-        "definition": "label_values(kube_namespace_labels,namespace)",
+        "definition": "",
+        "error": null,
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Namespace",
         "multi": false,
         "name": "namespace",
         "options": [],
-        "query": "label_values(kube_namespace_labels,namespace)",
+        "query": "label_values(kube_pod_info, namespace)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
+        "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -1248,43 +418,45 @@
         "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
-        "definition": "label_values(kube_pod_container_info{namespace=\"$namespace\"},container)",
+        "definition": "",
+        "error": null,
         "hide": 0,
         "includeAll": false,
+        "label": "Pod",
+        "multi": false,
+        "name": "pod",
+        "options": [],
+        "query": "label_values(kube_pod_info{namespace=~\"$namespace\"}, pod)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": {
+        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
+      },
+        "definition": "label_values(kube_pod_container_info{namespace=~\"$namespace\", pod=~\"$pod\"}, container)",
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
         "label": "Container",
         "multi": false,
         "name": "container",
         "options": [],
-        "query": "label_values(kube_pod_container_info{namespace=\"$namespace\"},container)",
+        "query": "label_values(kube_pod_container_info{namespace=~\"$namespace\", pod=~\"$pod\"}, container)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-        "definition": "label_values(kube_pod_container_info{namespace=\"$namespace\",container=\"$container\"},pod)",
-        "hide": 2,
-        "includeAll": true,
-        "label": "Pod Name",
-        "multi": false,
-        "name": "podname",
-        "options": [],
-        "query": "label_values(kube_pod_container_info{namespace=\"$namespace\",container=\"$container\"},pod)",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
+        "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -1294,7 +466,7 @@
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -1309,10 +481,21 @@
       "1h",
       "2h",
       "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
     ]
   },
   "timezone": "browser",
-  "title": "Pods overview",
-  "uid": "9HC9STfWz",
-  "version": 2
+  "title": "Pods Overview",
+  "uid": "q2rvxZ7Wcmmcmz",
+  "version": 1
 }
