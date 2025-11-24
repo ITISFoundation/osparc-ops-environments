@@ -57,6 +57,11 @@ helmfile-delete: .check-helmfile-installed helmfile.yaml ## Deletes the helmfile
 	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml delete
 
+.PHONY: helmfile-template
+helmfile-template: .check-helmfile-installed helmfile.yaml ## Renders the helmfile templates
+	@set -a; source $(REPO_CONFIG_LOCATION); set +a; \
+	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml template
+
 .PHONY: up
 up: helmfile-apply ## Start the stack
 
