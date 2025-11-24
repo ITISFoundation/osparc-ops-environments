@@ -41,7 +41,7 @@ stringData:
     apiVersion: 1
     datasources:
       - name: VictoriaMetrics
-        type: {{ .Values.grafanaVictoriaMetricsDatasourceType }} # <--- global value to be reused in dashboards
+        type: victoriametrics-metrics-datasource
         uid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }} # <--- global value to be reused in dashboards
         ...
 ```
