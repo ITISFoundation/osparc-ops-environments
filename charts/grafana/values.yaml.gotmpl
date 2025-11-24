@@ -14,7 +14,8 @@ networkPolicy:
 
 persistence:
   enabled: true
-  type: statefulset
+  # YH statefulset is not properly supported. The state is not syncronized between replicas.
+  type: pvc
   size: 10Gi
 
 # copied from grafana docker (swarm) service
