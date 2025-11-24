@@ -177,13 +177,3 @@ extraObjects:
       # redirect to default UI (use default tenant 0)
       # https://docs.victoriametrics.com/helm/victoria-metrics-distributed/#how-to-use-multitenancy
       replacement: "${1}/select/0/vmui/"
-
-- apiVersion: traefik.io/v1alpha1
-  kind: Middleware
-  metadata:
-    name: grafana-append-slash
-    namespace: {{ .Release.Namespace }}
-  spec:
-    redirectRegex:
-      regex: "^(https?://[^/]+/grafana)$"
-      replacement: "${1}/"
