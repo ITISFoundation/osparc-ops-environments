@@ -16,8 +16,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ $dashboardName }}-grafana-dashboard
   labels:
-    # TODO: add reusable common labels
+    # special label to be picked up by the grafana sidecar
     grafana_dashboard: true_string
+    # TODO: add reusable common labels
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
   annotations:
     dashboard_folder: "{{ $dashboardFolder }}"
 data:
