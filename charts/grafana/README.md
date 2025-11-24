@@ -2,7 +2,10 @@
 
 Create a Kubernetes config map with a special labels. It can be in any namespace (double check searchNamespace in dashboard sidecar container of grafana).
 
-Important: do not harcode (used) datasource uid and type. Take these values from variables.
+Important:
+* Do not harcode datasource uid and type.
+* Take these values from variables and use `{{}}` variable substitution
+* Properly escape all occurances (that are not meant to be resolved) of `{{` in json file, otherwise helm templating would fail (use "{{\`{{...}}\`}}"`)
 
 Example
 ```yaml
@@ -14,7 +17,7 @@ metadata:
     grafana_dashboard: "1" # <--- special label. Take key and value from values
 data:
   k8s-dashboard.json: |-
-  [...]
+    [...]
 ```
 
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-dashboards
@@ -37,16 +40,19 @@ stringData:
   pg-db.yaml: |-
     apiVersion: 1
     datasources:
-      - name: My pg db datasource
-        type: postgres
+      - name: VictoriaMetrics
+        type: {{ .Values.grafanaVictoriaMetricsDatasourceType }} # <--- global value to be reused in dashboards
+        uid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }} # <--- global value to be reused in dashboards
         ...
 ```
 kubectl -n grafana logs grafana-0 --container grafana-sc-dashboard
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-datasources
 
+## How to edit dashboard
+
 ## Troubleshooting
 
-#### Import dashboard / datasource does not work
+Import dashboard / datasource does not work
 * Make sure the corresponding `configmap` / `secret` exists
 * Check logs of corresponding container in grafana pod
   - e.g. `kubectl -n grafana logs grafana-0 --container grafana-sc-dashboard`

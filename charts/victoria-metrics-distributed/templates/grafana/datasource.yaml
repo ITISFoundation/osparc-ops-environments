@@ -5,7 +5,7 @@ metadata:
   name: victoria-metrics-grafana-datasource
   labels:
     # special label to be picked up by the grafana sidecar
-    {{ .Values.grafanaDatasourceLabel }}: {{ .Values.grafanaDatasourceLabelValue }}
+    grafana_datasource: true_string
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: {{ .Values.vmdistributed.fullnameOverride | default .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -16,11 +16,11 @@ stringData:
     datasources:
       - name: VictoriaMetrics
         # this plugin needs to be installed in grafana beforehand
-        type: {{ .Values.grafanaVictoriaMetricsDatasourceType }}
+        type: victoriametrics-metrics-datasource
+        uid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}
         access: proxy
         # https://docs.victoriametrics.com/helm/victoria-metrics-distributed/#how-to-query-data
         # vmauth CR creates a service named vmauth-<vmauth-name> in the same namespace
         url: http://vmauth-{{ .Values.vmdistributed.read.global.vmauth.name }}.{{ .Release.Namespace }}.svc.{{ .Values.vmdistributed.global.cluster.dnsDomain }}:{{ .Values.vmdistributed.common.vmauth.spec.port }}/select/0/prometheus/
         isDefault: true
         editable: true
-        uid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}

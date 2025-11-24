@@ -17,9 +17,8 @@ metadata:
   name: {{ $dashboardName }}-grafana-dashboard
   labels:
     # TODO: add reusable common labels
-    {{ .Values.grafanaDashboardLabel }}: {{ .Values.grafanaDashboardLabelValue }}
+    grafana_dashboard: true_string
   annotations:
-    # nested folders are not supported <https://github.com/grafana/grafana/issues/107158
     dashboard_folder: "{{ $dashboardFolder }}"
 data:
   dashboard.json: | {{ tpl (.Files.Get $dashboardFilePath) . | nindent 4 }}

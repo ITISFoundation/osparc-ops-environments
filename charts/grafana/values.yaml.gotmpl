@@ -92,19 +92,20 @@ sidecar:
       memory: 32Mi
   dashboards:
     enabled: true
-    label: {{ .Values.grafanaDashboardLabel }}
-    labelValue: {{ .Values.grafanaDashboardLabelValue }}
+    label: grafana_dashboard
+    labelValue: true_string
     logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
     searchNamespace: ALL
     folderAnnotation: "dashboard_folder"
     provider:
       # nested folders are not supported https://github.com/grafana/grafana/issues/107158
       foldersFromFilesStructure: true
-
+      allowUiUpdates: false
+      disableDelete: false
   datasources:
     enabled: true
-    label: {{ .Values.grafanaDatasourceLabel }}
-    labelValue: {{ .Values.grafanaDatasourceLabelValue }}
+    label: grafana_datasource
+    labelValue: true_string
     logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
     searchNamespace: ALL
 
