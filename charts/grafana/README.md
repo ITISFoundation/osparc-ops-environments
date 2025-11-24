@@ -49,6 +49,10 @@ kubectl -n grafana logs grafana-0 --container grafana-sc-dashboard
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-datasources
 
 ## How to edit dashboard
+* Make changes in UI
+* Copy dashboard json
+* Adjust dashboard (remove hardcoded datasource uid)
+* Commit changes
 
 ## Troubleshooting
 

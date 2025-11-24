@@ -10,7 +10,7 @@ networkPolicy:
     ports:
       - port: 8427 # global read vmauth port of vm distributed
       - port: 443 # install plugins from outside
-      - port: 6443 # sidecars talk to k8s api server
+      - port: 6443 # sidecars talk to k8s api server (monitor resources to be imported)
 
 persistence:
   enabled: true
@@ -69,6 +69,7 @@ extraObjects:
 
 initChownData:
   # run as root. does not align with restricted pod security context
+  # since we use sidecar pattern it does not seem to be needed
   enabled: false
 
 grafana.ini:
