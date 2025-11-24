@@ -47,7 +47,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
       "editable": true,
@@ -166,7 +166,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
       "editable": true,
@@ -274,7 +274,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
       "editable": true,
@@ -389,7 +389,7 @@
         "allValue": ".*",
         "current": {},
         "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
         "definition": "",
@@ -415,7 +415,7 @@
         "allValue": null,
         "current": {},
         "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
         "definition": "",
@@ -441,7 +441,7 @@
         "allValue": ".*",
         "current": {},
         "datasource": {
-        "type": "{{ .Values.grafanaVictoriaMetricsDatasourceType}}",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
         "definition": "label_values(kube_pod_container_info{namespace=~\"$namespace\", pod=~\"$pod\"}, container)",
