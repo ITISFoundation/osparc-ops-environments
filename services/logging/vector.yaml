@@ -55,11 +55,6 @@ transforms:
       # Add processing metadata
       .processed_by = "vector"
 
-  process_logs_loki:
-    type: "remap"
-    inputs: ["process_logs_base"]
-    source: |
-
       # Extract structured log fields from message using regex pattern
       if exists(.message) {
         # python service logs
@@ -89,6 +84,11 @@ transforms:
           .log_msg = log_msg_processed
         }
       }
+
+  process_logs_loki:
+    type: "remap"
+    inputs: ["process_logs_base"]
+    source: |
 
       # ensure level field is set for Grafana Loki
       if exists(.log_level){
