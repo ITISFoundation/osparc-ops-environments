@@ -45,6 +45,7 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-grafana-append-slash@kubernetescrd"
   hosts:
     - {{ requiredEnv "K8S_MONITORING_FQDN" }}
   path: /grafana/
