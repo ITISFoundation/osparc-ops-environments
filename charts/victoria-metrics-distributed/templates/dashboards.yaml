@@ -1,9 +1,8 @@
-
-{{ $globalScope := . }}
+{{- $globalScope := . -}}
 {{- range $dashboardFilePath, $_ := .Files.Glob  "files/dashboards/**.json" -}}
-{{ with $globalScope }}
+{{- with $globalScope -}}
 
-{{- $dashboardFileName := base $dashboardFilePath }}
+{{- $dashboardFileName := base $dashboardFilePath -}}
 {{- $dashboardName := (trimSuffix (ext $dashboardFileName) $dashboardFileName) | replace "_" "-" -}}
 {{- $dashboardFolder := dir (trimPrefix "files/dashboards/" $dashboardFilePath) -}}
 
@@ -11,7 +10,6 @@
 {{- fail (printf "nested folders are not supported for dashboards (see https://github.com/grafana/grafana/issues/107158): %s" (trimPrefix "files/dashboards/" $dashboardFilePath)) -}}
 {{- end -}}
 
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -24,7 +22,8 @@ metadata:
     # nested folders are not supported <https://github.com/grafana/grafana/issues/107158
     dashboard_folder: "{{ $dashboardFolder }}"
 data:
-  {{ $dashboardName }}.json: | {{ tpl (.Files.Get $dashboardFilePath) . | nindent 4 }}
+  dashboard.json: | {{ tpl (.Files.Get $dashboardFilePath) . | nindent 4 }}
+---
 
 {{- end }}
 {{- end }}
