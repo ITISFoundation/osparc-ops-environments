@@ -56,6 +56,7 @@
         "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
+      "description": "See query explanation at https://stackoverflow.com/a/66263640/12124525",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -110,7 +111,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Idle CPU",
+      "title": "CPU Usage (per core)",
       "tooltip": {
         "msResolution": false,
         "shared": true,
@@ -128,7 +129,6 @@
       "yaxes": [
         {
           "format": "percent",
-          "label": "cpu usage",
           "logBase": 1,
           "max": 100,
           "min": 0,
