@@ -29,5 +29,6 @@ data:
   dashboard.json: | {{ tpl (.Files.Get $dashboardFilePath) . | nindent 4 }}
 ---
 
-{{- end }}
-{{- end }}
+# Avoid strippint whitespaces (aka `{{- end }}`) due to https://github.com/helm/helm/issues/10149#issuecomment-929205040
+{{ end }}
+{{ end }}
