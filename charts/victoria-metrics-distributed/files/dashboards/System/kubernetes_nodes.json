@@ -273,98 +273,98 @@
         "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
-      "editable": true,
-      "error": false,
       "fill": 1,
-      "grid": {
-        "threshold1Color": "rgba(216, 200, 27, 0.27)",
-        "threshold2Color": "rgba(234, 112, 112, 0.22)"
-      },
       "gridPos": {
-        "h": 7,
-        "w": 18,
-        "x": 0,
-        "y": 7
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 1
       },
-      "id": 4,
-      "isNew": false,
+      "id": 6,
       "legend": {
-        "alignAsTable": false,
         "avg": false,
         "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
         "max": false,
         "min": false,
-        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
       },
       "lines": true,
-      "linewidth": 2,
+      "linewidth": 1,
       "links": [],
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "node_memory_SwapFree{instance=\"172.17.0.1:9100\",job=\"prometheus\"}",
-          "yaxis": 2
+          "alias": "Total",
+          "color": "#508642"
+        },
+        {
+          "alias": "Available",
+          "color": "#447ebc"
+        },
+        {
+          "alias": "Used",
+          "color": "#f9934e"
         }
       ],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_memory_MemTotal_bytes{instance=\"$server\"} - node_memory_MemFree_bytes{instance=\"$server\"} - node_memory_Buffers_bytes{instance=\"$server\"} - node_memory_Cached_bytes{instance=\"$server\"}",
+          "expr": "sum(node_memory_MemTotal_bytes{instance=\"$server\"})",
           "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "memory used",
-          "metric": "",
-          "refId": "C",
-          "step": 10
+          "intervalFactor": 1,
+          "legendFormat": "Total",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(node_memory_MemAvailable_bytes{instance=\"$server\"})",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Available",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(node_memory_MemTotal_bytes{instance=\"$server\"})-sum(node_memory_MemAvailable_bytes{instance=\"$server\"})",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Used",
+          "refId": "C"
         },
         {
           "expr": "node_memory_Buffers_bytes{instance=\"$server\"}",
           "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "memory buffers",
-          "metric": "",
-          "refId": "E",
-          "step": 10
+          "intervalFactor": 1,
+          "legendFormat": "buffers",
+          "refId": "D"
         },
         {
           "expr": "node_memory_Cached_bytes{instance=\"$server\"}",
           "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "memory cached",
-          "metric": "",
-          "refId": "F",
-          "step": 10
+          "intervalFactor": 1,
+          "legendFormat": "cached",
+          "refId": "E"
         },
         {
           "expr": "node_memory_MemFree_bytes{instance=\"$server\"}",
           "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "memory free",
-          "metric": "",
-          "refId": "D",
-          "step": 10
+          "intervalFactor": 1,
+          "legendFormat": "free",
+          "refId": "F"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
       "title": "Memory Usage",
+      "description": "See definitions at https://man7.org/linux/man-pages/man1/free.1.html",
       "tooltip": {
-        "msResolution": false,
         "shared": true,
         "sort": 0,
         "value_type": "individual"
@@ -379,14 +379,19 @@
       },
       "yaxes": [
         {
-          "format": "bytes",
+          "format": "decbytes",
+          "label": null,
           "logBase": 1,
-          "min": "0",
+          "max": null,
+          "min": null,
           "show": true
         },
         {
           "format": "short",
+          "label": null,
           "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
         }
       ],
@@ -461,7 +466,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "((node_memory_MemTotal_bytes{instance=\"$server\"} - node_memory_MemFree_bytes{instance=\"$server\"}  - node_memory_Buffers_bytes{instance=\"$server\"} - node_memory_Cached_bytes{instance=\"$server\"}) / node_memory_MemTotal_bytes{instance=\"$server\"}) * 100",
+          "expr": "((node_memory_MemTotal_bytes{instance=\"$server\"} - node_memory_MemAvailable_bytes{instance=\"$server\"}) / node_memory_MemTotal_bytes{instance=\"$server\"}) * 100",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A",
@@ -470,7 +475,7 @@
         }
       ],
       "thresholds": "80, 90",
-      "title": "Memory Usage",
+      "title": "Memory Utilization",
       "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
