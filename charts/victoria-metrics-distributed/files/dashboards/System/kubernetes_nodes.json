@@ -277,17 +277,21 @@
       "error": false,
       "fill": 1,
       "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 1
+        "h": 7,
+        "w": 18,
+        "x": 0,
+        "y": 7
       },
-      "id": 6,
+      "id": 4,
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
@@ -309,21 +313,21 @@
           "expr": "sum(node_memory_MemTotal_bytes{instance=\"$server\"})",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Total",
+          "legendFormat": "total",
           "refId": "A"
         },
         {
           "expr": "sum(node_memory_MemAvailable_bytes{instance=\"$server\"})",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Available",
+          "legendFormat": "available",
           "refId": "B"
         },
         {
           "expr": "sum(node_memory_MemTotal_bytes{instance=\"$server\"})-sum(node_memory_MemAvailable_bytes{instance=\"$server\"})",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Used",
+          "legendFormat": "used",
           "refId": "C"
         },
         {
@@ -354,6 +358,7 @@
       "title": "Memory Usage",
       "description": "See definitions at https://man7.org/linux/man-pages/man1/free.1.html",
       "tooltip": {
+        "msResolution": false,
         "shared": true,
         "sort": 0,
         "value_type": "individual"
@@ -369,18 +374,13 @@
       "yaxes": [
         {
           "format": "decbytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
@@ -413,8 +413,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 18,
-        "x": 0,
+        "w": 6,
+        "x": 18,
         "y": 7
       },
       "hideTimeOverride": false,
