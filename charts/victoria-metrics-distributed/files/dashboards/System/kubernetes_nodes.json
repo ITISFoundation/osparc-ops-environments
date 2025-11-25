@@ -525,7 +525,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_filesystem_avail_bytes{fstype!=\"tmpfs\"}",
+          "expr": "node_filesystem_avail_bytes{fstype!=\"tmpfs\",instance=\"$server\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{`{{ mountpoint}}`}} available",
@@ -533,7 +533,7 @@
           "target": ""
         },
         {
-          "expr": "node_filesystem_size_bytes{fstype!=\"tmpfs\"}",
+          "expr": "node_filesystem_size_bytes{fstype!=\"tmpfs\",instance=\"$server\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{`{{ mountpoint}}`}} size",
