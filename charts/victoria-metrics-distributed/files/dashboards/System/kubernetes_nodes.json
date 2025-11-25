@@ -273,6 +273,8 @@
         "type": "victoriametrics-metrics-datasource",
         "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
       },
+      "editable": true,
+      "error": false,
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -291,29 +293,16 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "Total",
-          "color": "#508642"
-        },
-        {
-          "alias": "Available",
-          "color": "#447ebc"
-        },
-        {
-          "alias": "Used",
-          "color": "#f9934e"
-        }
-      ],
+      "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
@@ -424,8 +413,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 6,
-        "x": 18,
+        "w": 18,
+        "x": 0,
         "y": 7
       },
       "hideTimeOverride": false,
@@ -444,7 +433,7 @@
         }
       ],
       "maxDataPoints": 100,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "nullText": null,
       "postfix": "",
       "postfixFontSize": "50%",
