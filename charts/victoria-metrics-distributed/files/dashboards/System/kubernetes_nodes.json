@@ -218,12 +218,21 @@
           "refId": "C",
           "step": 20,
           "target": ""
+        },
+        {
+          "expr": "count(node_cpu_seconds_total{mode=\"idle\", instance=\"$server\"}) without (cpu,mode)",
+          "intervalFactor": 4,
+          "legendFormat": "Total CPU",
+          "refId": "D",
+          "step": 20,
+          "target": ""
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "System Load",
+      "title": "System Load (Load Average)",
+      "description": "Read more about load average at https://en.wikipedia.org/wiki/Load_(computing)#Interpretation",
       "tooltip": {
         "msResolution": false,
         "shared": true,
