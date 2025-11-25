@@ -489,13 +489,10 @@
       "editable": true,
       "error": false,
       "fill": 1,
-      "grid": {
-        "threshold1Color": "rgba(216, 200, 27, 0.27)",
-        "threshold2Color": "rgba(234, 112, 112, 0.22)"
-      },
+      "grid": {},
       "gridPos": {
         "h": 7,
-        "w": 18,
+        "w": 24,
         "x": 0,
         "y": 14
       },
@@ -522,55 +519,32 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "read",
-          "yaxis": 1
-        },
-        {
-          "alias": "{instance=\"172.17.0.1:9100\"}",
-          "yaxis": 2
-        },
-        {
-          "alias": "io time",
-          "yaxis": 2
-        }
-      ],
+      "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (instance) (rate(node_nfsd_disk_bytes_read_total{instance=\"$server\"}[2m]))",
+          "expr": "node_filesystem_avail_bytes{fstype!=\"tmpfs\"}",
           "format": "time_series",
-          "hide": false,
-          "intervalFactor": 4,
-          "legendFormat": "read",
+          "intervalFactor": 2,
+          "legendFormat": "{{`{{ mountpoint}}`}} available",
           "refId": "A",
-          "step": 20,
           "target": ""
         },
         {
-          "expr": "sum by (instance) (rate(node_nfsd_disk_bytes_written_total{instance=\"$server\"}[2m]))",
+          "expr": "node_filesystem_size_bytes{fstype!=\"tmpfs\"}",
           "format": "time_series",
-          "intervalFactor": 4,
-          "legendFormat": "written",
+          "intervalFactor": 2,
+          "legendFormat": "{{`{{ mountpoint}}`}} size",
           "refId": "B",
-          "step": 20
-        },
-        {
-          "expr": "sum by (instance) (rate(node_disk_io_time_seconds_total{instance=\"$server\"}[2m]))",
-          "format": "time_series",
-          "intervalFactor": 4,
-          "legendFormat": "io time",
-          "refId": "C",
-          "step": 20
+          "target": ""
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Disk I/O",
+      "title": "Disk Space",
       "tooltip": {
         "msResolution": false,
         "shared": true,
@@ -601,94 +575,6 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "rgba(50, 172, 45, 0.97)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(245, 54, 54, 0.9)"
-      ],
-      "datasource": {
-        "type": "victoriametrics-metrics-datasource",
-        "uid": "{{ .Values.grafanaVictoriaMetricsDatasourceUid}}"
-      },
-      "editable": true,
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 18,
-        "y": 14
-      },
-      "hideTimeOverride": false,
-      "id": 7,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "(sum(node_filesystem_size_bytes{device!=\"rootfs\",instance=\"$server\"}) - sum(node_filesystem_free_bytes{device!=\"rootfs\",instance=\"$server\"})) / sum(node_filesystem_size_bytes{device!=\"rootfs\",instance=\"$server\"})",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "refId": "A",
-          "step": 60,
-          "target": ""
-        }
-      ],
-      "thresholds": "0.75, 0.9",
-      "title": "Disk Space Usage",
-      "transparent": false,
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
     },
     {
       "aliasColors": {},
