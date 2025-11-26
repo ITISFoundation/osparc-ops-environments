@@ -23,3 +23,11 @@ quorum_queue.initial_cluster_size = {{ RABBIT_QUORUM_QUEUE_DEFAULT_REPLICA_COUNT
 # https://www.rabbitmq.com/docs/networking#proxy-protocol
 # WARNING: this forces clients to use a proxy (direct access to nodes does not work)
 proxy_protocol = true
+
+# Set the default queue type to quorum to benefit from RabbitMQ Cluster
+# (to be highly available by default). This does not enforce queue type though
+# https://www.rabbitmq.com/docs/vhosts#default-queue-type
+default_queue_type = {{ RABBIT_DEFAULT_QUEUE_TYPE }}
+
+# https://www.rabbitmq.com/docs/logging#log-levels
+log.default.level = {{ RABBIT_LOG_LEVEL }}

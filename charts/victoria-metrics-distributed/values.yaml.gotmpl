@@ -1,0 +1,253 @@
+grafanaVictoriaMetricsDatasourceUid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}
+
+vmdistributed:
+  fullnameOverride: "vm-distributed"
+
+  global:
+    cluster:
+      domain: cluster.local.
+
+  common:
+    vmauth:
+      spec:
+        nodeSelector: &opsNodeSelector
+          ops: "true"
+        port: "8427"
+        resources:
+          # rounded defaults from Operator
+          requests:
+            memory: "100Mi"
+            cpu: "0.1"
+          limits:
+            memory: "300Mi"
+            cpu: "0.5"
+        podMetadata:
+          labels:
+            # common label for all components of the release (except vmagent extra)
+            # we use these labels in network policies. We do not use official convention
+            # "app.kubernetes.io/part-of" as VM Operator does not support override of some of
+            # official labels (e.g. app.kubernetes.io/name). So we use a shorter version.
+            # See https://github.com/VictoriaMetrics/helm-charts/issues/2545#issuecomment-3496376407
+            part-of: {{ .Release.Name }}
+    vmagent:
+      # https://docs.victoriametrics.com/operator/api/#vmagentspec
+      spec:
+        nodeSelector: *opsNodeSelector
+        port: &vmAgentPort "8429"
+        resources: &vmAgentResources
+          # rounded defaults from Operator
+          requests:
+            memory: "256Mi"
+            cpu: "0.1"
+          limits:
+            memory: "512Mi"
+            cpu: "0.5"
+        podMetadata:
+          labels:
+            part-of: {{ .Release.Name }}
+    vmsingle:
+      # https://docs.victoriametrics.com/operator/api/#vmsinglespec
+      spec:
+        nodeSelector: *opsNodeSelector
+        port: "8428"
+        removePvcAfterDelete: false
+        storage:
+          resources:
+            requests:
+              storage: 50Gi
+        resources:
+          # rounded defaults from Operator
+          requests:
+            memory: "500Mi"
+            cpu: "0.1"
+          limits:
+            memory: "1.5Gi"
+            cpu: "1.5"
+        podMetadata:
+          labels:
+            app: vmsingle
+            part-of: {{ .Release.Name }}
+
+  zoneTpl:
+    common:
+      spec:
+        useStrictSecurity: true
+    vmcluster:
+      enabled: false
+    vmsingle:
+      enabled: true
+      spec:
+        # Ideally it should be defined in common spec. But in original chart
+        # values it is defined in zoneTpl. So, common spec is overriden.
+        # https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#retention
+        retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
+    read:
+      vmauth:
+        name: '{{`read-{{ .zone.name }}-zone`}}'
+        spec:
+          podMetadata:
+            labels:
+              app: vmauth-zone
+    vmagent:
+      spec:
+        name: '{{`write-{{ .zone.name }}-zone`}}'
+        remoteWriteSettings:
+          #  The maximum disk usage for the buffer
+          maxDiskUsagePerURL: "10GiB"
+        podMetadata:
+            labels:
+              app: vmagent-zone
+
+  availabilityZones:
+    - name: default
+
+  extra:
+    # it scrapes metrics and write to global write LB
+    # which is an entry point for vm distributed cluster
+    # it is considered to be outside of "stack". So, common
+    # settings are not applied to it.
+    vmagent:
+      enabled: true
+      name: scraper
+      spec:
+        nodeSelector: *opsNodeSelector
+        useStrictSecurity: true
+        port: *vmAgentPort
+        resources: *vmAgentResources
+        podMetadata:
+          labels:
+            app: "vmagent-scraper"
+            part-of: {{ .Release.Name }}
+
+  write:
+    global:
+      vmauth:
+        name: "global-write"
+        spec:
+          useStrictSecurity: true
+          podMetadata:
+            labels:
+              app: vmauth-global-write
+
+  read:
+    global:
+      vmauth:
+        name: "global-read"
+        spec:
+          useStrictSecurity: true
+          podMetadata:
+            labels:
+              app: vmauth-global-read
+          # Use standard path approach with monitoring FQDN this is possbile.
+          # See https://github.com/VictoriaMetrics/operator/issues/1617
+          ingress:
+            host: {{ requiredEnv "K8S_METRICS_FQDN" }}
+            annotations:
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.middlewares: >-
+                traefik-traefik-basic-auth@kubernetescrd,
+                traefik-metrics-redirect-slash-to-vmui@kubernetescrd
+
+  # if enabled, some urls may need to be updated (e.g. automatic redirect middleware)
+  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-distributed#how-to-use-multitenancy
+  enableMultitenancy: false
+
+  victoria-metrics-k8s-stack:
+    enabled: true
+
+    victoria-metrics-operator:
+      enabled: false
+
+    vmagent:
+      enabled: false
+
+    vmsingle:
+      enabled: false
+
+    vmcluster:
+      enabled: false
+
+    alertmanager:
+      enabled: false
+
+    vmalert:
+      enabled: false
+
+    grafana:
+      enabled: false
+
+    # Exporter for machine metrics
+    prometheus-node-exporter:
+      enabled: true
+      namespaceOverride: "{{ .Release.Namespace }}-privileged"
+
+      resources:
+        # draft values. adjust if needed
+        limits:
+          cpu: 0.2
+          memory: 128Mi
+        requests:
+          cpu: 0.1
+          memory: 64Mi
+      vmScrape:
+        spec:
+          # chart templates do not set it properly when namespace is overriden
+          namespaceSelector:
+            matchNames: ["{{ .Release.Namespace }}-privileged"]
+
+    # cluster metrics about the state of the objects (pods, deploymentsets, ...)
+    kube-state-metrics:
+      enabled: true
+      nodeSelector: *opsNodeSelector
+      resources:
+        # draft values. adjust if needed
+        limits:
+          cpu: 0.5
+          memory: 512Mi
+        requests:
+          cpu: 0.1
+          memory: 128Mi
+      networkPolicy:
+        enabled: true
+        flavor: kubernetes # calico understand kubernetes network policy
+        egress:
+        - to:
+          - ipBlock:
+              cidr: 10.0.0.0/8
+          - ipBlock:
+              cidr: 172.16.0.0/12
+          - ipBlock:
+              cidr: 192.168.0.0/16
+          ports:
+          - protocol: TCP
+            port: 6443
+      podLabels:
+        app: kube-state-metrics
+        part-of: {{ .Release.Name }}
+
+    # container metrics (cpu / memory)
+    kubelet:
+      enabled: true
+
+    kubeApiServer:
+      enabled: false
+
+    kubeControllerManager:
+      enabled: false
+
+    coreDns:
+      enabled: false
+
+    kubeEtcd:
+      enabled: false
+
+    kubeScheduler:
+      enabled: false
+
+    defaultDashboards:
+      # -- Enable custom dashboards installation
+      enabled: false
+
+    defaultRules:
+      create: false

@@ -1,0 +1,34 @@
+{{- $globalScope := . -}}
+{{- range $dashboardFilePath, $_ := .Files.Glob  "files/dashboards/**.json" -}}
+{{- with $globalScope -}}
+
+{{- $dashboardFileName := base $dashboardFilePath -}}
+{{- $dashboardName := (trimSuffix (ext $dashboardFileName) $dashboardFileName) | replace "_" "-" -}}
+{{- $dashboardFolder := dir (trimPrefix "files/dashboards/" $dashboardFilePath) -}}
+
+{{- if ne $dashboardFolder (base $dashboardFolder) -}}
+{{- fail (printf "nested folders are not supported for dashboards (see https://github.com/grafana/grafana/issues/107158): %s" (trimPrefix "files/dashboards/" $dashboardFilePath)) -}}
+{{- end -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ $dashboardName }}-grafana-dashboard
+  labels:
+    # special label to be picked up by the grafana sidecar
+    grafana_dashboard: true_string
+    # TODO: add reusable common labels
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+  annotations:
+    dashboard_folder: "{{ $dashboardFolder }}"
+data:
+  dashboard.json: | {{ tpl (.Files.Get $dashboardFilePath) . | nindent 4 }}
+---
+
+# Avoid stripping whitespaces due to https://github.com/helm/helm/issues/10149#issuecomment-929205040
+{{ end }}
+{{ end }}

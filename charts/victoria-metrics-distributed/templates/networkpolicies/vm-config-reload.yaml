@@ -1,0 +1,18 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  # allow config reload for all workloads in the release
+  # config reload needs to access the k8s api server
+  name: vm-config-reload
+spec:
+  selector: part-of == "{{ .Release.Name }}"
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443

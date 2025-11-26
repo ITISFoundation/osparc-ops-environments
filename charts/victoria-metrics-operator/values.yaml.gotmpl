@@ -1,0 +1,53 @@
+# Values reference https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-operator-0.55.1/charts/victoria-metrics-operator/values.yaml
+
+operator:
+  # converts prometheus-operator objects into victoria-metrics-operator ones
+  # https://docs.victoriametrics.com/operator/integrations/prometheus/#objects-conversion
+  disable_prometheus_converter: false
+  # Enables ownership reference for converted prometheus-operator objects, it will
+  # remove corresponding victoria-metrics objects in case of deletion prometheus one.
+  # https://docs.victoriametrics.com/operator/integrations/prometheus/#deletion-synchronization
+  enable_converter_ownership: true
+
+nodeSelector:
+  ops: "true"
+
+service:
+  webhookPort: &webhookPort 9443
+
+podLabels:
+  app: victoria-metrics-operator
+  part-of: {{ .Release.Name }}
+
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
+admissionWebhooks:
+  certManager:
+    # avoid new cert generation on every helm run
+    enabled: true
+
+extraObjects:
+- apiVersion: projectcalico.org/v3
+  kind: NetworkPolicy
+  metadata:
+    name: victoria-metrics-operator-network-policy
+  spec:
+    selector: app == 'victoria-metrics-operator' && part-of == '{{ .Release.Name }}'
+    ingress:
+      - action: Allow
+        protocol: TCP
+        destination:
+          ports:
+            - *webhookPort
+    egress:
+      - action: Allow
+        protocol: TCP
+        destination:
+          nets:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+          ports:
+            - 6443
