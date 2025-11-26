@@ -123,13 +123,15 @@ services:
         target: /etc/vector/vector.yaml
     deploy:
       replicas: 1
+      labels:
+        - prometheus-job=vector
+        - prometheus-port=9598
       resources:
         limits:
           cpus: "1.0"
           memory: 512M
         reservations:
           memory: 256M
-      labels: []
     networks:
       logging:
 
@@ -153,6 +155,9 @@ services:
       - S3_ENDPOINT_LOKI=${S3_ENDPOINT_LOKI}
       - LOKI_RETENTION_PERIOD=${LOKI_RETENTION_PERIOD}
     deploy:
+      labels:
+        - prometheus-job=loki
+        - prometheus-port=3100
       placement:
         constraints: []
       replicas: 1

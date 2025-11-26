@@ -2,6 +2,9 @@
 
 sources:
   # Receive GELF messages from Docker containers via UDP
+  vector_metrics:
+    type: internal_metrics
+    scrape_interval_secs: 23
   docker_gelf:
     type: socket
     address: "0.0.0.0:12201"
