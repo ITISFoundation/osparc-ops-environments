@@ -118,7 +118,11 @@ sinks:
 
     healthcheck:
       enabled: true
-
+  prometheus_exporter:
+    type: prometheus_exporter
+    inputs:
+      - vector_metrics
+    address: "0.0.0.0:9598"
   # Send to Graylog via GELF over TCP
   graylog:
     type: socket
