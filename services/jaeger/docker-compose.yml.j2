@@ -41,6 +41,9 @@ services:
     command:
       - "--config=/etc/otel/config.yaml"
     deploy:
+      labels:
+        - prometheus-job=otel-collector
+        - prometheus-port=8888
       placement:
         constraints:
           - node.labels.ops==true

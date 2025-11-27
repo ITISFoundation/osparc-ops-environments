@@ -230,12 +230,11 @@ services:
       - monitored # needed to access postgres
       - public
     deploy:
-      #restart_policy:
-      #  condition: on-failure
       labels:
+        - prometheus-job=grafana
+        - prometheus-port=3000
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
-        # direct access through port
         - traefik.http.services.grafana.loadbalancer.server.port=3000
         - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
         - traefik.http.routers.grafana.entrypoints=https
@@ -391,6 +390,8 @@ services:
       - monitored
     deploy:
       labels:
+        - prometheus-job=tempo
+        - prometheus-port=3200
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.tempo.loadbalancer.server.port=9095

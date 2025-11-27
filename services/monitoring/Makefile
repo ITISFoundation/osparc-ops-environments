@@ -132,6 +132,16 @@ config.prometheus.simcore: ${REPO_CONFIG_LOCATION} venv
 	envsubst < prometheus/prometheus.yml > prometheus/prometheus.temp.yml; \
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
+.PHONY: config.prometheus.federation
+config.prometheus.federation: ${REPO_CONFIG_LOCATION} venv
+	@set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	set +o allexport; \
+	envsubst < prometheus/prometheus-federation.template.yml  > prometheus/prometheus-federation.yml
+
+.PHONY: prometheus/prometheus-federation.yml
+prometheus/prometheus-federation.yml: config.prometheus.federation
+
 .PHONY: config.prometheus.simcore.aws
 config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv
 	@set -o allexport; \
