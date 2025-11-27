@@ -1,8 +1,8 @@
 scrape_configs:
   # SIMCORE -------------------------------------------------------------------
   - job_name: "simcore"
-    scrape_interval: ${PROMETHEUS_SCRAPE_INTERVAL}
-    scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT}
+    scrape_interval: ${PROMETHEUS_SCRAPE_INTERVAL}s
+    scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT}s
     relabel_configs:
       - source_labels: [__meta_dns_name]
         separator: ;
