@@ -1,10 +1,12 @@
 global:
-  scrape_interval: 29s # Set the scrape interval to every 29 seconds. Default is every 1 minute.
-  evaluation_interval: 29s # Evaluate rules every 29 seconds. The default is every 1 minute.
+  scrape_interval: ${PROMETHEUS_SCRAPE_INTERVAL}
+  evaluation_interval: ${PROMETHEUS_SCRAPE_INTERVAL}
+  scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT}
 
 scrape_configs:
   - job_name: 'federate' # A job defines a series of targets and parameters describing how to scrape them.
-    scrape_interval: 29s # Overwrite the global scrape interval for this job, set to every 29 seconds.
+    scrape_interval: ${PROMETHEUS_SCRAPE_INTERVAL} # Overwrite the global scrape interval for this job,
+    scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT} # Overwrite the global scrape timeout for this job.
     honor_labels: true # Do not overwrite labels in scraped data.
     scheme: http
     metrics_path: '/federate' # Path to fetch the metrics from, '/federate' is for federation.

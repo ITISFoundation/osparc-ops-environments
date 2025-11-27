@@ -2,8 +2,8 @@ scrape_configs:
   - job_name: ceph-production
     honor_labels: true
     honor_timestamps: true
-    scrape_interval: 30s
-    scrape_timeout: 30s
+    scrape_interval: {{PROMETHEUS_SCRAPE_INTERVAL}}
+    scrape_timeout: {{PROMETHEUS_SCRAPE_TIMEOUT}}
     metrics_path: /metrics
     scheme: http
     static_configs:

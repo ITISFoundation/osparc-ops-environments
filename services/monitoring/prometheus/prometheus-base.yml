@@ -1,9 +1,9 @@
 #  global config
 #  DOLLAR SIGNS NEED TO BE EXCAPED (see https://stackoverflow.com/a/61259844/10198629)
 global:
-  scrape_interval: 15s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
-  # scrape_timeout global default would be (10s).
+  scrape_interval:  ${PROMETHEUS_SCRAPE_INTERVAL}
+  evaluation_interval: ${PROMETHEUS_SCRAPE_INTERVAL} # By default, scrape targets every 15 seconds.
+  scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT}
 
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
