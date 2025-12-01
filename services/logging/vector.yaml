@@ -48,6 +48,15 @@ transforms:
         .container_id = "unknown"
       }
 
+      # Remove the confusing Docker creation timestamp
+      if exists(._created) {
+        del(._created)
+      }
+      # Also handle the variant without underscore if it exists
+      if exists(.created) {
+        del(.created)
+      }
+
       # Handle image name
       if exists(._image_name) {
         .image_name = ._image_name
