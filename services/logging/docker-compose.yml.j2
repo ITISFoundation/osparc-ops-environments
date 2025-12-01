@@ -118,7 +118,7 @@ services:
       - VECTOR_CONFIG=/etc/vector/vector.yaml
       - VECTOR_LOG=info
       - VECTOR_LOG_DESTINATION=${VECTOR_LOG_DESTINATION}
-      - PROMETHEUS_SCRAPE_INTERVAL=${PROMETHEUS_SCRAPE_INTERVAL}
+      - PROMETHEUS_SCRAPE_INTERVAL_SECONDS=${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
     configs:
       - source: vector_config
         target: /etc/vector/vector.yaml

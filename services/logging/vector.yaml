@@ -4,7 +4,7 @@ sources:
   # Receive GELF messages from Docker containers via UDP
   vector_metrics:
     type: internal_metrics
-    scrape_interval_secs: ${PROMETHEUS_SCRAPE_INTERVAL}
+    scrape_interval_secs: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
   docker_gelf:
     type: socket
     address: "0.0.0.0:12201"
@@ -118,7 +118,7 @@ sinks:
 
     healthcheck:
       enabled: true
-  prometheus_exporter:
+  prometheus_exporter: # https://vector.dev/docs/administration/monitoring/#metrics
     type: prometheus_exporter
     inputs:
       - vector_metrics

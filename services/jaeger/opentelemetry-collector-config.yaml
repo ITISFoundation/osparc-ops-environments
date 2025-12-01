@@ -19,7 +19,7 @@ service:
       exporters: [otlphttp,otlp]
       processors: [batch,filter/drop_healthcheck]
   telemetry:
-    metrics:
+    metrics: # https://opentelemetry.io/docs/collector/internal-telemetry/#prometheus-endpoint-for-internal-metrics
       readers:
         - pull:
             exporter:
