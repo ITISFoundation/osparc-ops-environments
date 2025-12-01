@@ -29,7 +29,7 @@ main() {
     console "${REGISTRY_HOST}"
     console "${WWW_AUTHENTICATE}"
 
-    if [ "x${WWW_AUTHENTICATE}" != "x" ];then
+    if [ "${WWW_AUTHENTICATE}" != "" ];then
         # we need to get a token
         DOCKER_AUTH_TYPE=$(echo "${WWW_AUTHENTICATE}" | cut --delimiter=" " --fields=1)
         DETAILS=$(echo "${WWW_AUTHENTICATE}" | cut --delimiter=" " --fields=2-)
@@ -42,7 +42,7 @@ main() {
             SCOPE=$(echo "${DETAILS}" | cut --delimiter=',' --fields=3 | cut --delimiter="=" --fields=2 | tr --delete '"')
             if [ -v DOCKER_AUTH ];then
                 :
-            elif [[ "x${DOCKER_USERNAME}" != "x" && "x${DOCKER_PASSWORD}" != "x" ]];then
+             elif [[ "${DOCKER_USERNAME}" != "" && "${DOCKER_PASSWORD}" != "" ]];then
                 DOCKER_AUTH="${DOCKER_USERNAME}:${DOCKER_PASSWORD}"
             elif [ -e ~/.docker/config.json ];then
                 DOCKER_AUTH=$(jq -r ".[\"auths\"][\"${REGISTRY_HOST}\"][\"auth\"]" ~/.docker/config.json | base64 -d)
