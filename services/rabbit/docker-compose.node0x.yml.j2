@@ -1,6 +1,6 @@
 services:
   rabbit0{{ NODE_INDEX }}:
-    image: itisfoundation/rabbitmq:4.1.2-management
+    image: itisfoundation/rabbitmq:4.1.6-management
     init: true
     # https://docs.docker.com/reference/cli/docker/service/create/#create-services-using-templates
     hostname: {% raw %}"{{.Service.Name}}"{% endraw %}
