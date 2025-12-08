@@ -1099,6 +1099,27 @@ services:
           memory: 50M
           cpus: '0.1'
 
+  notifications-worker:
+    networks:
+      - monitored
+    deploy:
+      replicas: ${SIMCORE_NOTIFICATIONS_WORKER_REPLICAS}
+      placement:
+        constraints:
+          - node.labels.simcore==true
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: continue
+        delay: 10s
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+        reservations:
+          memory: 256M
+          cpus: '1'
+
   docker-api-proxy:
     networks:
       - monitored
