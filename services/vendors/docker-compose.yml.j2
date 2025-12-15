@@ -40,6 +40,8 @@ services:
 {%- raw %}
     hostname: "v-chat-backend-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
+    volumes:
+      - s4l-chatbot-chat-data:/app/chat_database:rw
     deploy:
       replicas: ${VENDOR_CHATBOT_BACKEND_REPLICAS}
       placement:
@@ -77,3 +79,5 @@ networks:
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
+volumes:
+  s4l-chatbot-chat-data:
