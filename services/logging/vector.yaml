@@ -101,7 +101,6 @@ transforms:
     type: "remap"
     inputs: ["process_logs_base"]
     source: |
-
       # ensure level field is set for Grafana Loki
       if exists(.log_level){
         .level = .log_level
