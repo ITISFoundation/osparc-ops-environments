@@ -106,7 +106,7 @@ transforms:
       if exists(.log_level){
         .level = .log_level
       } else {
-        .level = "UNKOWN"
+        .level = "UNKNOWN"
       }
 
 sinks:
