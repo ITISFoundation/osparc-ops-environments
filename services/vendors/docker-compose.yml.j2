@@ -69,8 +69,11 @@ services:
         - prometheus-port=${VENDOR_CHATBOT_BACKEND_PORT}
     networks:
       - public
-      - monitored_network
+      - monitored
 networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
