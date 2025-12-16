@@ -118,9 +118,11 @@ sinks:
       codec: json
     labels:
       source: "vector"
+      {%- raw %}
       host: "{{ host }}"
       container_name: "{{ container_name }}"
       service_name: "{{ service_name }}"
+      {%- endraw %}
 
     healthcheck:
       enabled: true
@@ -177,9 +179,11 @@ sinks:
         VL-Extra-Fields: source_type=docker_swarm_logs
         # ignore internal fields to save space (e.g. _command, _image_id, etc.)
         VL-Ignore-Fields: _*
+{%- if MACHINE_FQDN == "osparc.local" %}
     tls:
       verify_certificate: false
       verify_hostname: false
+{%- endif %}
 
   # Temporary: Output to console for debugging
   #console_debug:

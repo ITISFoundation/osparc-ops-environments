@@ -28,14 +28,6 @@ up: .init .env ${TEMP_COMPOSE}  ## Deploys logging stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 	$(MAKE) configure
 
-.PHONY: up-letsencrypt-http ## Deploys graylog stack using let's encrypt http challenge
-up-letsencrypt-http: .init .env ${TEMP_COMPOSE}-letsencrypt-http
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns ## Deploys graylog stack using let's encrypt dns challenge
-up-letsencrypt-dns: .init .env ${TEMP_COMPOSE}-letsencrypt-dns
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
-
 .PHONY: up-dalco ## Deploys graylog stack for Dalco Cluster
 up-dalco: .init .env ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
@@ -62,21 +54,29 @@ up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local c
 
 # Helpers -------------------------------------------------
 
-docker-compose.yml: docker-compose.yml.j2 venv .env
+.PHONY: .env
+.env: template.env $(REPO_CONFIG_LOCATION)
+	@set -o allexport; \
+	source $(REPO_CONFIG_LOCATION); \
+	GRAYLOG_ROOT_PASSWORD_SHA2=$$(echo -n "$${GRAYLOG_ROOT_PASSWORD}" | sha256sum | cut -d ' ' -f1);\
+	export GRAYLOG_ROOT_PASSWORD_SHA2;\
+	GRAYLOG_PASSWORD_SECRET=$$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16 ; echo '');\
+	export GRAYLOG_PASSWORD_SECRET;\
+	STACK_NAME=$(STACK_NAME); \
+	export STACK_NAME; \
+	set +o allexport; \
+	envsubst < $< > $@
+
+vector.yaml: vector.yaml.j2 .env $(VENV_BIN)/j2
+	@$(call jinja, $<, .env, $@)
+
+docker-compose.yml: docker-compose.yml.j2 vector.yaml venv .env
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml ## Deploys stack
 # Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http ## Deploys stack using let's encrypt http challenge
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns ## Deploys stack using let's encrypt dns challenge
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
@@ -95,20 +95,6 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 .PHONY: ${TEMP_COMPOSE}-aws ## Deploys stack on aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
-
-.PHONY: .env
-.env: template.env $(REPO_CONFIG_LOCATION)
-	@set -o allexport; \
-	source $(REPO_CONFIG_LOCATION); \
-	GRAYLOG_ROOT_PASSWORD_SHA2=$$(echo -n "$${GRAYLOG_ROOT_PASSWORD}" | sha256sum | cut -d ' ' -f1);\
-	export GRAYLOG_ROOT_PASSWORD_SHA2;\
-	GRAYLOG_PASSWORD_SECRET=$$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16 ; echo '');\
-	export GRAYLOG_PASSWORD_SECRET;\
-	STACK_NAME=$(STACK_NAME); \
-	export STACK_NAME; \
-	set +o allexport; \
-	envsubst < $< > $@
-
 
 .PHONY: configure
 configure: .env venv ## Test is Graylog is online and configure Graylog inputs
