@@ -1,15 +1,11 @@
-.DEFAULT_GOAL := help
-
-# Internal VARIABLES ------------------------------------------------
-
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
-SIMCORE_REPO_DIR ?= $(abspath $(REPO_BASE_DIR)/../osparc-simcore)
 
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=docker-compose.deploy.yml
-
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+SIMCORE_REPO_DIR ?= $(abspath $(REPO_BASE_DIR)/../osparc-simcore)
 
 $(SIMCORE_REPO_DIR):
 	$(error $@ repo not found. Please clone this repo manually)

@@ -1,16 +1,11 @@
-.DEFAULT_GOAL := help
-
-
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(shell pwd))
-IS_PORTAINER_SERVICE_RUNNING = $(shell docker service ls | grep portainer_portainer | wc -l | grep 1)
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# Makefile including function used by every services
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+IS_PORTAINER_SERVICE_RUNNING = $(shell docker service ls | grep portainer_portainer | wc -l | grep 1)
 
 .PHONY: up ## Deploys portainer stack
 up: .init .env secrets ${TEMP_COMPOSE}
