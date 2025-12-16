@@ -22,15 +22,6 @@ define create-s3-bucket
 	# bucket is available in S3
 endef
 
-# https://stackoverflow.com/a/13322549/12124525
-define get_host_private_ip
-	ifconfig \
-	| grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' \
-	| grep -Eo '([0-9]*\.){3}[0-9]*' \
-	| grep -v '127.0.0.1' \
-	| head --lines 1
-endef
-
 .PHONY: configure
 configure: .env venv ## Configure graylog
 	@cd scripts;\
