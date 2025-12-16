@@ -47,6 +47,7 @@ services:
           cpus: "0.1"
     networks:
       logging:
+
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:6.0.5
@@ -105,6 +106,7 @@ services:
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.replacement=/$${1}
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
+
   vector:
     image: timberio/vector:0.50.X-debian
     ports:
@@ -187,7 +189,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
 
 volumes:
   mongo_data:

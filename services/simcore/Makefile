@@ -43,12 +43,6 @@ up-local: prune-docker-stack-secrets
 .PHONY: compose-local
 compose-local: .env ${TEMP_COMPOSE}-local ## Create docker-compose.deploy for local deployment
 
-.PHONY: compose-letsencrypt-http
-compose-letsencrypt-http: .env ${TEMP_COMPOSE}-letsencrypt-http ## Create docker-compose.deploy for letsencrypt with http challenge deployment
-
-.PHONY: compose-letsencrypt-dns
-compose-letsencrypt-dns: .env ${TEMP_COMPOSE}-letsencrypt-dns ## Create docker-compose.deploy for letsencrypt with http dns deployment
-
 .PHONY: compose-dalco
 compose-dalco: .env ${TEMP_COMPOSE}-dalco ## Create docker-compose.deploy for Dalco cluster
 
