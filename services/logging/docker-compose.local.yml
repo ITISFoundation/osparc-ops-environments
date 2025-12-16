@@ -15,6 +15,8 @@ services:
         constraints: []
 
   vector:
+    extra_hosts:
+      - "${K8S_MONITORING_FQDN}:${HOST_PRIVATE_IP}"
     deploy:
       placement:
         constraints: []

@@ -1,11 +1,13 @@
-.DEFAULT_GOAL := help
-
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
+
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
+include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+#
+# Helpers
+#
 
 define create-s3-bucket
 	# ensure bucket is available in S3...
@@ -20,39 +22,28 @@ define create-s3-bucket
 	# bucket is available in S3
 endef
 
-# TARGETS --------------------------------------------------
-include ${REPO_BASE_DIR}/scripts/common.Makefile
+# https://stackoverflow.com/a/13322549/12124525
+define get_host_private_ip
+	ifconfig \
+	| grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' \
+	| grep -Eo '([0-9]*\.){3}[0-9]*' \
+	| grep -v '127.0.0.1' \
+	| head --lines 1
+endef
 
-.PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploys logging stack
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-	$(MAKE) configure
+.PHONY: configure
+configure: .env venv ## Configure graylog
+	@cd scripts;\
+	VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement requirements.txt > /dev/null 2>&1;\
+	set -o allexport; \
+	source ../$<;\
+	set +o allexport; \
+	envsubst < alerts.template.yaml > alerts.yaml;\
+	$(VENV_BIN)/python configure.py;
 
-.PHONY: up-dalco ## Deploys graylog stack for Dalco Cluster
-up-dalco: .init .env ${TEMP_COMPOSE}-dalco
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: up-public  ## Deploys graylog stack for public access Cluster
-up-public: up-dalco
-
-.PHONY: up-aws  ## Deploys graylog stack for aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploys graylog stack using let's encrypt
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: up-master ## Deploys graylog stack for master Cluster
-up-master: .init .env ${TEMP_COMPOSE}-master
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: up-local ## Deploys graylog stack for local deployment
-up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local cluster
-	@$(create-s3-bucket)
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
-	$(MAKE) configure
-
-# Helpers -------------------------------------------------
+#
+# Artifacts
+#
 
 .PHONY: .env
 .env: template.env $(REPO_CONFIG_LOCATION)
@@ -70,38 +61,65 @@ up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploys graylog stack for local c
 vector.yaml: vector.yaml.j2 .env $(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
 
-docker-compose.yml: docker-compose.yml.j2 vector.yaml venv .env
+docker-compose.yml: docker-compose.yml.j2 vector.yaml $(VENV_BIN)/j2 .env
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml ## Deploys stack
-# Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
+${TEMP_COMPOSE}: docker-compose.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
-.PHONY: ${TEMP_COMPOSE}-master .env ## Deploys stack on master deployment
-# Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
+.PHONY: ${TEMP_COMPOSE}-master .env
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
-.PHONY: ${TEMP_COMPOSE}-local ## Deploys stack on local deployment
-# Hacky workaround introduced by DK2021 via https://github.com/docker/compose/issues/7771
+.PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
+	@HOST_PRIVATE_IP=$(shell $(get_host_private_ip)); \
+	if [ -n "$$HOST_PRIVATE_IP" ]; then \
+		HOST_PRIVATE_IP=$$HOST_PRIVATE_IP \
+		${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@; \
+	else \
+		echo "Could not determine host private IP. Exiting."; \
+		exit 1; \
+	fi
 
-.PHONY: ${TEMP_COMPOSE}-aws ## Deploys stack on aws
+.PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
-.PHONY: configure
-configure: .env venv ## Test is Graylog is online and configure Graylog inputs
-	@cd scripts;\
-	VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement requirements.txt > /dev/null 2>&1;\
-	set -o allexport; \
-	source ../$<;\
-	set +o allexport; \
-	envsubst < alerts.template.yaml > alerts.yaml;\
-	$(VENV_BIN)/python configure.py;
+#
+# Deploy targets
+#
+
+.PHONY: up
+up: .init .env ${TEMP_COMPOSE}  ## Deploy logging stack
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: up-dalco
+up-dalco: .init .env ${TEMP_COMPOSE}-dalco ## Deploy logging stack for Dalco Cluster
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: up-public
+up-public: up-dalco ## Deploys logging stack for public access Cluster
+
+.PHONY: up-aws
+up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploy logging stack using let's encrypt
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: up-master
+up-master: .init .env ${TEMP_COMPOSE}-master ## Deploy logging stack for master Cluster
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: up-local
+up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploy logging stack for local cluster
+	@$(create-s3-bucket)
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
+	$(MAKE) configure
