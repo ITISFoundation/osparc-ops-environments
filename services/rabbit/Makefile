@@ -18,8 +18,6 @@ include ${REPO_BASE_DIR}/services/rabbit/.operations.Makefile
 ### Load Balancer
 docker-compose.loadbalancer.yml: docker-compose.loadbalancer.yml.j2 \
 					.env \
-					configs/rabbitmq.conf \
-					configs/erlang.cookie.secret \
 					configs/haproxy.cfg \
 					venv \
 					$(VENV_BIN)/j2
@@ -40,7 +38,6 @@ docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
 					node0%.env \
 					configs/rabbitmq.conf \
 					configs/erlang.cookie.secret \
-					configs/haproxy.cfg \
 					venv \
 					$(VENV_BIN)/j2
 	@$(call jinja, $<, node0$*.env, $@)
