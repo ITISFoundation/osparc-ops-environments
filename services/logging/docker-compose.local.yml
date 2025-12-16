@@ -17,7 +17,7 @@ services:
   vector:
     extra_hosts:
       # send any request to K8S_MONITORING_FQDN to host machine
-      # host-gateway is a special "feature" that allows accessing ost from within container
+      # host-gateway is a special "feature" that allows accessing host from within container
       # https://docs.docker.com/reference/cli/dockerd#configure-host-gateway-ip
       - "${K8S_MONITORING_FQDN}:host-gateway"
     deploy:
