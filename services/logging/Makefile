@@ -78,14 +78,7 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
 
 .PHONY: ${TEMP_COMPOSE}-local
 ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
-	@HOST_PRIVATE_IP=$(shell $(get_host_private_ip)); \
-	if [ -n "$$HOST_PRIVATE_IP" ]; then \
-		HOST_PRIVATE_IP=$$HOST_PRIVATE_IP \
-		${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@; \
-	else \
-		echo "Could not determine host private IP. Exiting."; \
-		exit 1; \
-	fi
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml

@@ -16,7 +16,7 @@ services:
 
   vector:
     extra_hosts:
-      - "${K8S_MONITORING_FQDN}:${HOST_PRIVATE_IP}"
+      - "${K8S_MONITORING_FQDN}:host-gateway" # https://docs.docker.com/reference/cli/dockerd#configure-host-gateway-ip
     deploy:
       placement:
         constraints: []
