@@ -119,6 +119,9 @@ services:
       - VECTOR_LOG=info
       - VECTOR_LOG_DESTINATION=${VECTOR_LOG_DESTINATION}
       - PROMETHEUS_SCRAPE_INTERVAL_SECONDS=${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
+      - K8S_MONITORING_FQDN=${K8S_MONITORING_FQDN}
+      - SERVICES_USER=${SERVICES_USER}
+      - SERVICES_PASSWORD=${SERVICES_PASSWORD}
     configs:
       - source: vector_config
         target: /etc/vector/vector.yaml
