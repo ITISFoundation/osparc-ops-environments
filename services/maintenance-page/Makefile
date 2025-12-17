@@ -5,24 +5,9 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up ## Deploys maintenance page stack
-up: .init .env ${TEMP_COMPOSE}
+.PHONY: up up-dalco up-local up-public up-aws up-master
+up up-dalco up-local up-public up-aws up-master: .init .env ${TEMP_COMPOSE} ## Deploy maintenance page stack
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-
-.PHONY: up-dalco ## Deploys maintenance page stack for Dalco Cluster
-up-dalco: up
-
-.PHONY: up-local ## Deploys maintenance page stack for local deployment
-up-local: up
-
-.PHONY: up-public ## Deploys maintenance page stack for public access
-up-public: up
-
-.PHONY: up-aws ## Deploys maintenance page stack for aws Cluster
-up-aws: up
-
-.PHONY: up-master ## Deploys maintenance page stack for Master Cluster
-up-master: up
 
 # Helpers -------------------------------------------------
 

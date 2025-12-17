@@ -4,7 +4,8 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # common-services.Makefile should be included first as common.Makefile
-# relies on STACK_NAME var which is defined in comm
+# relies on STACK_NAME var which is defined in common-services.Makefile
+include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up-local
 up-local: .init .create_secrets ${TEMP_COMPOSE}-local prune-docker-stack-configs ## Deploys the stack using provided certificates

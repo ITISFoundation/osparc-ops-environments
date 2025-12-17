@@ -52,4 +52,5 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 .api_env.secret: .env template.api_env ## resolves '.api_env.secret' using '.env'
-	@set -o allexport; source $<; set +o allexport; envsubst < $(word 2,$^) > $@
+	@set -o allexport; source $<; set +o allexport; \
+	envsubst < $(word 2,$^) > $@

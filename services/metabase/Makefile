@@ -5,19 +5,9 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up
-up: ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys metabase stack
+.PHONY: up up-aws up-master up-dalco up-local up-public ## Deploys metabase stack
+up up-aws up-master up-dalco up-local up-public: ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys metabase stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-
-up-aws: up
-
-up-master: up
-
-up-dalco: up
-
-up-local: up
-
-up-public: up
 
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@

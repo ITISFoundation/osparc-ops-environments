@@ -9,14 +9,6 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 up: .init .env ${TEMP_COMPOSE} filestash_config.json
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
-.PHONY: up-letsencrypt-http ## Deploys stack using let's encrypt http challenge
-up-letsencrypt-http: .init .env filestash_config.json ${TEMP_COMPOSE}-letsencrypt-http
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns ## Deploys stack using let's encrypt dns challenge
-up-letsencrypt-dns: .init .env filestash_config.json ${TEMP_COMPOSE}-letsencrypt-dns
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
-
 .PHONY: up-dalco ## Deploys stack for Dalco Cluster
 up-dalco: up
 
