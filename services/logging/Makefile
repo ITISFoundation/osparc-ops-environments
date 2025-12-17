@@ -56,23 +56,23 @@ docker-compose.yml: docker-compose.yml.j2 vector.yaml $(VENV_BIN)/j2 .env
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: .env docker-compose.yml
+${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: .env docker-compose.yml docker-compose.dalco.yml
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-master
-${TEMP_COMPOSE}-master: .env docker-compose.yml docker-compose.master.yml
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: .env docker-compose.yml docker-compose.local.yml
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: .env docker-compose.yml docker-compose.aws.yml
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
 #
