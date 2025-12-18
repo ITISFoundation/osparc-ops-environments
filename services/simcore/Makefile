@@ -5,6 +5,7 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+TEMP_COMPOSE=docker-compose.deploy.yml  # special case in simcore. This name is hardcoded in scripts used
 SIMCORE_REPO_DIR ?= $(abspath $(REPO_BASE_DIR)/../osparc-simcore)
 
 $(SIMCORE_REPO_DIR):
