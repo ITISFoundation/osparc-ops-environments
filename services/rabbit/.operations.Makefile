@@ -96,13 +96,15 @@ start-node0%: validate-node-ix0% .stack.node0%.yml  ## start rabbit cluster node
 		echo "Rabbit Node $* is already running, skipping"; \
 	else \
 		echo "Starting Rabbit Node $* ..."; \
-		docker stack deploy --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_node_stack_name,$*); \
+		docker stack deploy --with-registry-auth --prune --compose-file $(word 2,$^) $$STACK_NAME; \
 	fi
 
 update-nodeINDEX:  ## update rabbit cluster node <INDEX> (e.g. `make update-node01` to update node 1)
 update-node0%: validate-node-ix0% .stack.node0%.yml  ## update rabbit cluster node $*
-	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $(call create_node_stack_name,$*)
+	@STACK_NAME=$(call create_node_stack_name,$*); \
+	docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $$STACK_NAME
 
 stop-nodeINDEX:  ## stop rabbit cluster node <INDEX> (e.g. `make stop-node01` to stop node 1)
 stop-node0%: validate-node-ix0%  ## stop rabbit cluster node $*
-	@docker stack rm --detach=false $(call create_node_stack_name,$*)
+	@STACK_NAME=$(call create_node_stack_name,$*); \
+	docker stack rm --detach=false $$STACK_NAME

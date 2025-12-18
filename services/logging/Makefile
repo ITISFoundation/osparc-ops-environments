@@ -56,36 +56,38 @@ docker-compose.yml: docker-compose.yml.j2 vector.yaml $(VENV_BIN)/j2 .env
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}
-${TEMP_COMPOSE}: docker-compose.yml
+${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
-${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
+${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml > $@
 
-.PHONY: ${TEMP_COMPOSE}-master .env
-${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
+.PHONY: ${TEMP_COMPOSE}-master
+${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-local
-${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml
+${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
-${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
+${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
 
 #
 # Deploy targets
 #
 
+UP_COMMON_DEPENDENCIES = .init prune-docker-stack-configs
+
 .PHONY: up
-up: .init .env ${TEMP_COMPOSE}  ## Deploy logging stack
+up: ${TEMP_COMPOSE} ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 	$(MAKE) configure
 
 .PHONY: up-dalco
-up-dalco: .init .env ${TEMP_COMPOSE}-dalco ## Deploy logging stack for Dalco Cluster
+up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack for Dalco Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 	$(MAKE) configure
 
@@ -93,17 +95,17 @@ up-dalco: .init .env ${TEMP_COMPOSE}-dalco ## Deploy logging stack for Dalco Clu
 up-public: up-dalco ## Deploys logging stack for public access Cluster
 
 .PHONY: up-aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws  ## Deploy logging stack using let's encrypt
+up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack using let's encrypt
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) configure
 
 .PHONY: up-master
-up-master: .init .env ${TEMP_COMPOSE}-master ## Deploy logging stack for master Cluster
+up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack for master Cluster
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	$(MAKE) configure
 
 .PHONY: up-local
-up-local: .init .env ${TEMP_COMPOSE}-local  ## Deploy logging stack for local cluster
+up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack for local cluster
 	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 	$(MAKE) configure

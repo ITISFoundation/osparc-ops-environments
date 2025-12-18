@@ -1,12 +1,8 @@
-.DEFAULT_GOAL := help
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 define create-s3-bucket
@@ -40,11 +36,11 @@ up-dalco: .init ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys registry s
 up-aws: .init ${TEMP_COMPOSE}-aws prune-docker-stack-configs  ## Deploys registry on AWS
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-.PHONY: up-master ## Deploys registry on master cluster
-up-master: up-dalco
+.PHONY: up-master
+up-master: up-dalco ## Deploys registry on master cluster
 
-.PHONY: up-public ## Deploys registry on public cluster
-up-public: up-dalco
+.PHONY: up-public
+up-public: up-dalco ## Deploys registry on public cluster
 
 
 # Helpers -------------------------------------------------

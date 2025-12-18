@@ -1,11 +1,8 @@
-.DEFAULT_GOAL := help
+REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(CURDIR))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
-REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../..)
-
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 define create-s3-bucket
