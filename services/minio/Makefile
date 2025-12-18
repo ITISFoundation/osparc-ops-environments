@@ -1,15 +1,12 @@
-.DEFAULT_GOAL := help
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory.
-STACK_NAME = $(notdir $(shell pwd))
-DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
-DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+DOCKER_MINIO_ACCESS_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_secret_key 2>/dev/null)
+DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} minio_access_key 2>/dev/null)
 
 .PHONY: up
 up: .init .env ${TEMP_COMPOSE} .create-secrets
