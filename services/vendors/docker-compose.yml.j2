@@ -32,6 +32,8 @@ services:
         - traefik.http.routers.vendor_manual.middlewares=ops_gzip@swarm, authenticated_platform_user@swarm
     networks:
       - public
+
+{%- if VENDOR_CHATBOT_BACKEND_ENABLED == "true" %}
   chat-backend:
     image: ${VENDOR_CHATBOT_BACKEND_IMAGE}
     init: true
@@ -40,11 +42,17 @@ services:
 {%- raw %}
     hostname: "v-chat-backend-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
+    volumes:
+      - s4l-chatbot-chat-data:/app/chat_database:rw
     deploy:
-      replicas: ${VENDOR_CHATBOT_BACKEND_REPLICAS}
+      # this service cannot be run in multiple replicas
+      # as it contains sqlite database inside itself
+      # running multiple leads to running multiple independent
+      # databases which provides inconsistent results
+      replicas: 1
       placement:
         constraints:
-          - node.labels.simcore==true
+          - node.labels.chatbot==true
       resources:
         limits:
           cpus: "1.0"
@@ -70,6 +78,8 @@ services:
     networks:
       - public
       - monitored
+{%- endif %}
+
 networks:
   public:
     external: true
@@ -77,3 +87,8 @@ networks:
   monitored:
     name: ${MONITORED_NETWORK}
     external: true
+
+{%- if VENDOR_CHATBOT_BACKEND_ENABLED == "true" %}
+volumes:
+  s4l-chatbot-chat-data:
+{%- endif %}
