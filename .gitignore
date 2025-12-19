@@ -146,6 +146,7 @@ yq
 stack.yml
 stack_with_prefix.yml
 docker-compose.simcore.yml
+docker-compose.yml
 repo.config
 .temp
 .temp/**
