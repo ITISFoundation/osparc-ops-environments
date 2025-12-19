@@ -1,15 +1,12 @@
-.DEFAULT_GOAL := help
-
-# Internal VARIABLES ------------------------------------------------
-
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
-SIMCORE_REPO_DIR ?= $(abspath $(REPO_BASE_DIR)/../osparc-simcore)
 
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=docker-compose.deploy.yml
-
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+TEMP_COMPOSE=docker-compose.deploy.yml  # special case in simcore. This name is hardcoded in scripts used
+SIMCORE_REPO_DIR ?= $(abspath $(REPO_BASE_DIR)/../osparc-simcore)
 
 $(SIMCORE_REPO_DIR):
 	$(error $@ repo not found. Please clone this repo manually)
@@ -42,12 +39,6 @@ up-local: prune-docker-stack-secrets
 
 .PHONY: compose-local
 compose-local: .env ${TEMP_COMPOSE}-local ## Create docker-compose.deploy for local deployment
-
-.PHONY: compose-letsencrypt-http
-compose-letsencrypt-http: .env ${TEMP_COMPOSE}-letsencrypt-http ## Create docker-compose.deploy for letsencrypt with http challenge deployment
-
-.PHONY: compose-letsencrypt-dns
-compose-letsencrypt-dns: .env ${TEMP_COMPOSE}-letsencrypt-dns ## Create docker-compose.deploy for letsencrypt with http dns deployment
 
 .PHONY: compose-dalco
 compose-dalco: .env ${TEMP_COMPOSE}-dalco ## Create docker-compose.deploy for Dalco cluster
@@ -103,5 +94,6 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml
 	echo DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE=\''${DEPLOYMENT_FQDNS_TESTING_CAPTURE_TRAEFIK_RULE}'\' >> .env; \
 	echo DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE=\''${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE}'\' >> .env; \
 	echo DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS=\''${DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS}'\' >> .env; \
+	echo DEPLOYMENT_FQDNS_CAPTURE_STORAGE=\''${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}'\' >> .env; \
 	echo DOLLAR=\'$$\' >> .env; \
 	set +o allexport; \

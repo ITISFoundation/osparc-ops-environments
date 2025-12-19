@@ -1,27 +1,13 @@
-.DEFAULT_GOAL := help
-
-
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up ## Deploys stack
 up: .init .env ${TEMP_COMPOSE} filestash_config.json
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-
-.PHONY: up-letsencrypt-http ## Deploys stack using let's encrypt http challenge
-up-letsencrypt-http: .init .env filestash_config.json ${TEMP_COMPOSE}-letsencrypt-http
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns ## Deploys stack using let's encrypt dns challenge
-up-letsencrypt-dns: .init .env filestash_config.json ${TEMP_COMPOSE}-letsencrypt-dns
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
 
 .PHONY: up-dalco ## Deploys stack for Dalco Cluster
 up-dalco: up

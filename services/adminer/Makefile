@@ -1,13 +1,8 @@
-.DEFAULT_GOAL := help
-
-
-# Internal VARIABLES ------------------------------------------------
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(shell pwd))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
+# common-services.Makefile should be included first as common.Makefile
+# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up
@@ -47,14 +42,6 @@ up-public: up-dalco
 ${TEMP_COMPOSE}: docker-compose.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $<  > $@
 
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt-http.yml  > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
-
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.dalco.yml  > $@
@@ -62,7 +49,6 @@ ${TEMP_COMPOSE}-dalco: docker-compose.yml docker-compose.dalco.yml
 .PHONY: ${TEMP_COMPOSE}-master
 ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.master.yml
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.master.yml  > $@
-
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml
