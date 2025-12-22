@@ -49,7 +49,7 @@ Use `./local-k8s.Makefile` targets.
 
 ## FAQ
 
-#### helmfile apply fails. File cannot be rendered properly. How to debug?
+#### helmfile apply fails. Files cannot be rendered properly. How to debug?
 
 Use `helmfile-tempalate` target with `--debug` argument. Example:
 
