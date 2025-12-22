@@ -45,4 +45,16 @@ helmfile init
 
 ## Running k8s cluster locally
 
-Use `./local-k8s.Makefile` targets
+Use `./local-k8s.Makefile` targets.
+
+## FAQ
+
+#### helmfile apply fails. File cannot be rendered properly. How to debug?
+
+Use `helmfile-tempalate` target with `--debug` argument. Example:
+
+```bash
+make helmfile-template HELMFILE_EXTRA_ARGS='--selector app=victoria-logs --debug'
+```
+
+This will print generated files even if format is not valid. Having this text can help you identify what is wrong.
