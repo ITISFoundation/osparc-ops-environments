@@ -62,20 +62,19 @@ extraObjects:
       # are for public ingress while we need a private ingress
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: webinternal
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd
       {{`{{- $_ := set $ctx "extraLabels" $app.ingress.extraLabels }}`}}
       labels: {{`{{ include "vm.labels" $ctx | nindent 4 }}`}}
       {{`{{- $_ := unset $ctx "extraLabels" }}`}}
       # accessible within network infrastructure (VPC) only but not to public
-      name: victoria-logs-internal
+      name: victoria-logs-internal-log-ingestion
       namespace: {{`{{ include "vm.namespace" $ctx }}`}}
     spec:
-      # use kubernetes cluster default ingress
-      ingressClassName: ""
       rules:
         - host: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
           http:
             paths:
-              - path:
+              - path: /logs/insert/elasticsearch
                 pathType: Prefix
                 backend:
                   service:
