@@ -25,6 +25,17 @@ ports:
        permanent: true
   websecure:
     nodePort: 32443
+  webinternal:
+    nodePort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT" }}
+    port: 8001
+    expose:
+      default: true
+    exposedPort: 81
+    protocol: TCP
+    http3:
+      enabled: false
+    middlewares:
+      - {{.Release.Namespace}}-internal-ipallowlist@kubernetescrd
 
 nodeSelector:
   node-role.kubernetes.io/control-plane: "" # in some cases may require tolerations

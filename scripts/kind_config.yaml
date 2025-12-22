@@ -6,6 +6,8 @@ nodes:
     extraPortMappings:
       - containerPort: 32080
         hostPort: 80
+      - containerPort: 32081
+        hostPort: 81
       - containerPort: 32443
         hostPort: 443
       - containerPort: 32443
