@@ -16,11 +16,11 @@ server:
         namespace: "{{ .Release.Namespace }}"
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-append-slash@kubernetescrd,traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
     hosts:
       - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
         path:
-          - /logs
+          - /logs/select/vmui
         pathType: Prefix
 
   nodeSelector:
