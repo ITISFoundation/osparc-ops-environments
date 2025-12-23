@@ -42,6 +42,11 @@ helmfile-apply: .check-helmfile-installed helmfile.yaml ## Applies the helmfile 
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml apply
 
+.PHONY: helmfile-template
+helmfile-template: .check-helmfile-installed helmfile.yaml ## Applies the helmfile configuration
+	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
+	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml template
+
 .PHONY: helmfile-sync
 helmfile-sync: .check-helmfile-installed helmfile.yaml ## Syncs the helmfile configuration (use `helmfile-apply` to deploy the app)
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \

@@ -153,7 +153,7 @@ sinks:
       user: "${SERVICES_USER}"
       password: "${SERVICES_PASSWORD}"
     endpoints:
-    - https://${K8S_MONITORING_FQDN}/logs/insert/elasticsearch
+      - ${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}/logs/insert/elasticsearch
     api_version: v8
     compression: gzip
     healthcheck:
