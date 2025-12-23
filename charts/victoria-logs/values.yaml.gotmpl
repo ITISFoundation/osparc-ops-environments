@@ -20,7 +20,7 @@ server:
     hosts:
       - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
         path:
-          - /logs/select/vmui
+          - /logs/select/
         pathType: Prefix
 
   nodeSelector:
