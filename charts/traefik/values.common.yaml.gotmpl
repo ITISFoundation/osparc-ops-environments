@@ -26,14 +26,14 @@ ports:
   websecure:
     nodePort: 32443
   webinternal:
-    nodePort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT" }}
+    nodePort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT_NUMBER" }}
     port: 8001
     expose:
       default: true
     exposedPort: 81
     protocol: TCP
     tls:
-      enabled: {{ requiredEnv "KUBERNETES_WEBINTERNAL_TLS_ENABLED" }}
+      enabled: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT_TLS_ENABLED" }}
     middlewares:
       - {{.Release.Namespace}}-internal-ipallowlist@kubernetescrd
 
