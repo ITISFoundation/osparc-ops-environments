@@ -32,8 +32,8 @@ ports:
       default: true
     exposedPort: 81
     protocol: TCP
-    http3:
-      enabled: false
+    tls:
+      enabled: {{ requiredEnv "KUBERNETES_WEBINTERNAL_TLS_ENABLED" }}
     middlewares:
       - {{.Release.Namespace}}-internal-ipallowlist@kubernetescrd
 
