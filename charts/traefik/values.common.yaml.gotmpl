@@ -26,7 +26,7 @@ ports:
   websecure:
     nodePort: 32443
   webinternal:
-    nodePort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT_NUMBER" }}
+    nodePort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_TRAEFIK_NODE_PORT_NUMBER" }}
     port: 8001
     expose:
       default: true
