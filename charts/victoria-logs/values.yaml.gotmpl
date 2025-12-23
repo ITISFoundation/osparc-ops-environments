@@ -62,7 +62,7 @@ extraObjects:
       # are for public ingress while we need a private ingress
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: webinternal
-        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd
       {{`{{- $_ := set $ctx "extraLabels" $app.ingress.extraLabels }}`}}
       labels: {{`{{ include "vm.labels" $ctx | nindent 4 }}`}}
       {{`{{- $_ := unset $ctx "extraLabels" }}`}}
