@@ -46,20 +46,20 @@ simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts direc
 # Public / Exposed targets
 #
 
-.PHONY: helmfile-lint
-helmfile-lint: .helmfile-lint ## Lints apps
-
 .PHONY: helmfile-apply
 helmfile-apply: .helmfile-apply ## Deploy apps (if there are changes)
-
-.PHONY: helmfile-template
-helmfile-template: .helmfile-template ## Render apps's templates
-
-.PHONY: helmfile-sync
-helmfile-sync: .helmfile-sync ## Force deploy apps even if no changes (don't use unless you know what you are doing)
 
 .PHONY: helmfile-diff
 helmfile-diff: .helmfile-diff ## Show changes in apps's configuration
 
+.PHONY: helmfile-template
+helmfile-template: .helmfile-template ## Render apps's templates
+
+.PHONY: helmfile-lint
+helmfile-lint: .helmfile-lint ## Lint apps
+
+.PHONY: helmfile-sync
+helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unless you know why)
+
 .PHONY: helmfile-delete
-helmfile-delete: .helmfile-delete ## Deletes the helmfile configuration
+helmfile-delete: .helmfile-delete ## Delete the helmfile configuration
