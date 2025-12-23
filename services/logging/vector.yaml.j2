@@ -153,7 +153,7 @@ sinks:
       user: "${SERVICES_USER}"
       password: "${SERVICES_PASSWORD}"
     endpoints:
-    - https://${K8S_MONITORING_FQDN}/logs/insert/elasticsearch
+    - ${K8S_LOGS_INGESTION_INTERNAL_ENDPOINT}
     api_version: v8
     compression: gzip
     healthcheck:
