@@ -6,12 +6,30 @@ LOAD_BALANCER_STACK_NAME := rabbit-loadbalancer
 
 MAKEFLAGS += --no-print-directory
 
+NODE_STATE_CHANGE_WAIT_TIME ?= 20s
+
 #
 # Helpers
 #
 
 define create_node_stack_name
 rabbit-node0$(1)
+endef
+
+# start and stop order shall be reversed. So, if nodes are shutdown in order 3,2,1
+# they should be started in order 1,2,3 to ensure proper cluster formation.
+# Check README for details.
+define node_start_order_ixs
+$(shell seq 1 $(1))
+endef
+
+define node_stop_order_ixs
+$(shell seq $(1) -1 1)
+endef
+
+define wait_cluster_to_stabilize
+echo "Waiting $(1) for cluster to stabilize ..."; \
+sleep $(1)
 endef
 
 validate-NODE_COUNT: guard-NODE_COUNT
@@ -65,10 +83,8 @@ stop-loadbalancer:  ## stop rabbit cluster load balancer
 #
 
 .start-all-nodes: validate-NODE_COUNT
-	@i=1; \
-	while [ $$i -le $(NODE_COUNT) ]; do \
+	@for i in $(call node_start_order_ixs,$(NODE_COUNT)); do \
 		$(MAKE) start-node0$$i; \
-		i=$$((i + 1)); \
 	done
 
 start-all-nodes: .env  ## start all rabbit cluster nodes
@@ -76,35 +92,45 @@ start-all-nodes: .env  ## start all rabbit cluster nodes
 	$(MAKE) .start-all-nodes NODE_COUNT=$$RABBIT_CLUSTER_NODE_COUNT
 
 update-all-nodes:  ## update all rabbit cluster nodes
-	@$(error Updating all nodes at the same time may break the cluster \
-	as it may restart (i.e. stop) all nodes at the same time. \
-	Update one node at a time)
+	@$(error Not implemented. Updating all nodes at the same time may break the cluster. \
+	Update one node at a time. Check README for details.)
 
-stop-all-nodes:  ## stop all rabbit cluster nodes
-	@$(error Stopping all nodes at the same time breaks the cluster. \
-	Update one node at a time. \
-	Read more at https://groups.google.com/g/rabbitmq-users/c/owvanX2iSqA/m/ZAyRDhRfCQAJ)
+.stop-all-nodes: validate-NODE_COUNT
+	@for i in $(call node_stop_order_ixs,$(NODE_COUNT)); do \
+		$(MAKE) stop-node0$$i; \
+	done
+
+stop-all-nodes: .env  ## gracefully stop all rabbit cluster nodes
+	@source $<; \
+	$(MAKE) .stop-all-nodes NODE_COUNT=$$RABBIT_CLUSTER_NODE_COUNT
 
 #
 # Rabbit Node level
 #
 
 start-nodeINDEX:  ## start rabbit cluster node <INDEX> (e.g. `make start-node01` to start node 1)
-start-node0%: validate-node-ix0% .stack.node0%.yml  ## start rabbit cluster node $*
+start-node0%: validate-node-ix0% .stack.node0%.yml
 	@STACK_NAME=$(call create_node_stack_name,$*); \
 	if docker stack ls --format '{{.Name}}' | grep --silent "$$STACK_NAME"; then \
 		echo "Rabbit Node $* is already running, skipping"; \
 	else \
 		echo "Starting Rabbit Node $* ..."; \
 		docker stack deploy --with-registry-auth --prune --compose-file $(word 2,$^) $$STACK_NAME; \
+		$(call wait_cluster_to_stabilize,$(NODE_STATE_CHANGE_WAIT_TIME)); \
 	fi
 
 update-nodeINDEX:  ## update rabbit cluster node <INDEX> (e.g. `make update-node01` to update node 1)
-update-node0%: validate-node-ix0% .stack.node0%.yml  ## update rabbit cluster node $*
+update-node0%: validate-node-ix0% .stack.node0%.yml
 	@STACK_NAME=$(call create_node_stack_name,$*); \
 	docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $$STACK_NAME
 
 stop-nodeINDEX:  ## stop rabbit cluster node <INDEX> (e.g. `make stop-node01` to stop node 1)
-stop-node0%: validate-node-ix0%  ## stop rabbit cluster node $*
+stop-node0%: validate-node-ix0%
 	@STACK_NAME=$(call create_node_stack_name,$*); \
-	docker stack rm --detach=false $$STACK_NAME
+	if docker stack ls --format '{{.Name}}' | grep --silent "$$STACK_NAME"; then \
+		echo "Stopping Rabbit Node $* ..."; \
+		$(call wait_cluster_to_stabilize,$(NODE_STATE_CHANGE_WAIT_TIME)); \
+	else \
+		echo "Rabbit Node $* is not running, skipping"; \
+		exit 0; \
+	fi

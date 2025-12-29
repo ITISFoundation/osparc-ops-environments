@@ -30,7 +30,7 @@ docker-compose.loadbalancer.yml: docker-compose.loadbalancer.yml.j2 \
 
 .PRECIOUS: node0%.env
 node0%.env: .env
-	envsubst < $< > $@; \
+	@envsubst < $< > $@; \
 	echo NODE_INDEX=$* >> $@
 
 .PRECIOUS: docker-compose.node0%.yml
