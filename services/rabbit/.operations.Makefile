@@ -75,7 +75,9 @@ down: stop-cluster
 
 start-cluster: start-all-nodes start-loadbalancer ## start rabbit cluster (all nodes + load balancer)
 
-update-cluster: update-all-nodes update-loadbalancer  ## update rabbit cluster (all nodes + load balancer)
+update-cluster:
+	@$(error Not implemented. Sensitive operation that may require different sequence of steps. \
+	Check README for details.)
 
 stop-cluster: confirm-stop-cluster stop-loadbalancer stop-all-nodes
 stop-cluster: ## gracefully stop rabbit cluster (all nodes + load balancer)
