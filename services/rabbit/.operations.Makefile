@@ -87,11 +87,13 @@ stop-cluster: ## gracefully stop rabbit cluster (all nodes + load balancer)
 #
 
 start-loadbalancer: .stack.loadbalancer.yml prune-docker-stack-lb-configs ## start rabbit cluster load balancer
+	# Starting Loadbalancer
 	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file $< $(LOAD_BALANCER_STACK_NAME)
 
 update-loadbalancer: start-loadbalancer ## update rabbit cluster load balancer
 
 stop-loadbalancer:  ## stop rabbit cluster load balancer
+	# Stopping Loadbalancer
 	@docker stack rm $(LOAD_BALANCER_STACK_NAME)
 
 #
