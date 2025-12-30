@@ -196,7 +196,7 @@ help:
 .PHONY: down-default
 down-default: ## Removes the stack from the swarm
 	@echo "${STACK_NAME}"
-	@docker stack rm ${STACK_NAME}
+	@docker stack rm --detach=false ${STACK_NAME}
 
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
