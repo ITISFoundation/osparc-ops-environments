@@ -76,7 +76,7 @@ down: stop-cluster
 start-cluster: start-all-nodes start-loadbalancer ## start rabbit cluster (all nodes + load balancer)
 
 update-cluster:
-	@$(error This operation may break cluster. Check README for details.)
+	@$(error Not implemented. This operation may break cluster. Check README for details.)
 
 stop-cluster: confirm-stop-cluster stop-all-nodes stop-loadbalancer
 stop-cluster: ## gracefully stop rabbit cluster (all nodes + load balancer)
