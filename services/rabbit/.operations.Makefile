@@ -28,7 +28,7 @@ $(shell seq $(1) -1 1)
 endef
 
 define wait_cluster_to_stabilize
-echo "Waiting $(1) for cluster to stabilize ..."; \
+echo "Waiting $(1) for Rabbit cluster to stabilize ..."; \
 sleep $(1)
 endef
 
