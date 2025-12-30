@@ -77,7 +77,7 @@ start-cluster: start-all-nodes start-loadbalancer ## start rabbit cluster (all n
 
 update-cluster: update-all-nodes update-loadbalancer  ## update rabbit cluster (all nodes + load balancer)
 
-stop-cluster: confirm-stop-cluster stop-all-nodes stop-loadbalancer
+stop-cluster: confirm-stop-cluster stop-loadbalancer stop-all-nodes
 stop-cluster: ## gracefully stop rabbit cluster (all nodes + load balancer)
 
 #
