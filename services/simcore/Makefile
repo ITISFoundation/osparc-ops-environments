@@ -97,3 +97,8 @@ ${TEMP_COMPOSE}-master: docker-compose.yml docker-compose.deploy.master.yml
 	echo DEPLOYMENT_FQDNS_CAPTURE_STORAGE=\''${DEPLOYMENT_FQDNS_CAPTURE_STORAGE}'\' >> .env; \
 	echo DOLLAR=\'$$\' >> .env; \
 	set +o allexport; \
+
+down:
+	@# override default implementation as stack name is defined in the config file
+	@set -a && source $(REPO_CONFIG_LOCATION) && set +a && \
+	docker stack rm --detach=false $$SIMCORE_STACK_NAME
