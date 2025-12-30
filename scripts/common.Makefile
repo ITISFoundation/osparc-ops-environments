@@ -384,7 +384,7 @@ endef
 else
 
 define jinja
-	${VENV_BIN}/j2 --quiet --format=env $(1) $(2) -o $(3) \
+	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
 	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
 	--quiet
 endef
