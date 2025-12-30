@@ -377,14 +377,16 @@ ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 define jinja
 	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
 	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
-	--customize j2cli_customization.py
+	--customize j2cli_customization.py \
+	--quiet
 endef
 
 else
 
 define jinja
 	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
-	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
+	--quiet
 endef
 
 endif
