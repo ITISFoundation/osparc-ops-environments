@@ -71,7 +71,7 @@ prune-docker-stack-lb-configs:
 up up-master up-dalco up-aws up-local up-public: start-cluster
 
 down: stop-cluster
-	@: # empty instruction. Necessary to override default behavior
+	@: # empty instruction. Necessary to avoid executing default target.
 
 start-cluster: start-all-nodes start-loadbalancer ## start rabbit cluster (all nodes + load balancer)
 
