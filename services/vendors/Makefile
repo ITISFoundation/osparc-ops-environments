@@ -5,11 +5,32 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up up-dalco up-aws up-master up-public up-local
-up up-dalco up-aws up-master up-public up-local: ${TEMP_COMPOSE} .init  ## Deploy stack
+#
+# Targets
+#
+
+.PHONY: .up
+.up: ${TEMP_COMPOSE}
 	docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
 
-# Helpers -------------------------------------------------
+.PHONY: .up-aws
+.up-aws: .up
+
+.PHONY: .up-master
+.up-master: .up
+
+.PHONY: .up-public
+.up-public: .up
+
+.PHONY: .up-dalco
+.up-dalco: .up
+
+.PHONY: .up-local
+.up-local: .up
+
+#
+# Artifacts
+#
 
 .PHONY: docker-compose.yml
 docker-compose.yml: venv .env

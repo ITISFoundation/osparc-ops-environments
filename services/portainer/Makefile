@@ -7,33 +7,9 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 IS_PORTAINER_SERVICE_RUNNING = $(shell docker service ls | grep portainer_portainer | wc -l | grep 1)
 
-.PHONY: up ## Deploys portainer stack
-up: .init .env secrets ${TEMP_COMPOSE}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
-
-.PHONY: up-local ## Deploys portainer stack for local deployment
-up-local: .init .env secrets ${TEMP_COMPOSE} ${TEMP_COMPOSE}-local
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
-	@$(MAKE) configure-portainer-registry
-
-.PHONY: up-dalco ## Deploys portainer stack for Dalco Cluster
-up-dalco: .init .env secrets ${TEMP_COMPOSE}-dalco
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
-
-.PHONY: up-aws ## Deploys portainer stack for AWS
-up-aws: .init .env secrets ${TEMP_COMPOSE}-aws
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
-
-.PHONY: up-public ## Deploys portainer stack for public access Cluster
-up-public: up-dalco
-
-.PHONY: up-master ## Deploys portainer stack for master Cluster
-up-master: .init .env secrets ${TEMP_COMPOSE}-master
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
+#
+# Helpers
+#
 
 .PHONY: configure-portainer-registry
 configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add registry to Portainer
@@ -42,7 +18,36 @@ configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add regi
 	$(WAIT_FOR_IT) http $$PORTAINER_URL --timeout=120s --interval=5s --expect-status-code 200 && \
 	$(VENV_BIN)/python ./scripts/configure_portainer_registry.py
 
-# Helpers -------------------------------------------------
+#
+# Targets
+#
+
+.PHONY: .up-local
+.up-local: secrets ${TEMP_COMPOSE} ${TEMP_COMPOSE}-local
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
+	@$(MAKE) configure-portainer-registry
+
+.PHONY: .up-dalco
+.up-dalco: secrets ${TEMP_COMPOSE}-dalco
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+	@$(MAKE) --no-print-directory configure-portainer-registry
+
+.PHONY: up-aws
+up-aws: secrets ${TEMP_COMPOSE}-aws
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	@$(MAKE) --no-print-directory configure-portainer-registry
+
+.PHONY: .up-public
+.up-public: .up-dalco
+
+.PHONY: .up-master
+.up-master: secrets ${TEMP_COMPOSE}-master
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+	@$(MAKE) --no-print-directory configure-portainer-registry
+
+#
+# Artifacts
+#
 
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env

@@ -5,27 +5,21 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up ## Deploys stack
-up: .init .env ${TEMP_COMPOSE} filestash_config.json
+#
+# Targets
+#
+
+.PHONY: .up-dalco .up-master .up-public .up-local
+.up-dalco .up-master .up-public .up-local: ${TEMP_COMPOSE} filestash_config.json
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
-.PHONY: up-dalco ## Deploys stack for Dalco Cluster
-up-dalco: up
-
-.PHONY: up-aws ## Deploys stack on aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws filestash_config.json ## Deploys stack in aws
+.PHONY: .up-aws
+.up-aws: ${TEMP_COMPOSE}-aws filestash_config.json
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-.PHONY: up-master ## Deploys stack for master Cluster
-up-master: up
-
-.PHONY: up-public ## Deploys stack on public
-up-public: up
-
-.PHONY: up-local ## Deploys stack on local deployment
-up-local: up
-
-# Helpers -------------------------------------------------
+#
+# Artifacts
+#
 
 docker-compose.yml: docker-compose.yml.j2 venv .env filestash_config.json
 	@$(call jinja, $<, .env, $@)
@@ -33,14 +27,6 @@ docker-compose.yml: docker-compose.yml.j2 venv .env filestash_config.json
 .PHONY: ${TEMP_COMPOSE}
 ${TEMP_COMPOSE}: docker-compose.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.http.yml  > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env

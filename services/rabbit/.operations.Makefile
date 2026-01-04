@@ -68,7 +68,8 @@ prune-docker-stack-lb-configs:
 ### Note: up operation is called by CI automatically
 ###       it must NOT deploy stacks if they are already running
 ###       to avoid breaking existing cluster (stopping all nodes at once)
-up up-master up-dalco up-aws up-local up-public: start-cluster
+up: start-cluster
+	@: # empty instruction. Necessary to avoid executing default target.
 
 down: stop-cluster
 	@: # empty instruction. Necessary to avoid executing default target.

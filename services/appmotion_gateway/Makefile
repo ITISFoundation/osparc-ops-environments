@@ -5,30 +5,37 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 # relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
+#
+# Vars
+#
+
 DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES = .api_env.secret \
 										  prune-docker-stack-configs  \
 										  prune-docker-stack-secrets
 
-# TARGETS --------------------------------------------------
-include ${REPO_BASE_DIR}/scripts/common.Makefile
+#
+# Targets
+#
 
-.PHONY: up-aws ## Deploys stack on aws
-up-aws: .init .env ${TEMP_COMPOSE}-aws ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
+.PHONY: .up-aws
+.up-aws: .init .env ${TEMP_COMPOSE}-aws ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-.PHONY: up-master ## Deploys stack on master
-up-master: .init .env ${TEMP_COMPOSE}-master ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
+.PHONY: .up-master
+.up-master: .init .env ${TEMP_COMPOSE}-master ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
-.PHONY: up-dalco ## Deploys stack on dalco
-up-dalco: .init .env ${TEMP_COMPOSE}-dalco ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
+.PHONY: .up-dalco
+.up-dalco: .init .env ${TEMP_COMPOSE}-dalco ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
-.PHONY: up-local ## Deploys stack on local
-up-local: .init .env ${TEMP_COMPOSE}-local ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
+.PHONY: .up-local
+.up-local: .init .env ${TEMP_COMPOSE}-local ${DOCKER_STACK_DEPLOY_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-# Helpers -------------------------------------------------
+#
+# Artifacts
+#
 
 docker-compose.yml: .env .api_env.secret venv
 	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \

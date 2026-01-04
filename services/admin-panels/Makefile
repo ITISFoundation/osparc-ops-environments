@@ -21,46 +21,26 @@ docker-compose.yml: docker-compose.yml.j2 venv .data.json .env jupyter_server_co
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
 	@rm tmp.yml
 
-.PHONY: up
-up: .init ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploys jaeger stack
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-
-.PHONY: up-letsencrypt-http
-up-letsencrypt-http: .init ${TEMP_COMPOSE}-letsencrypt-http prune-docker-stack-configs ## Deploys jaeger stack using let's encrypt http challenge
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-http ${STACK_NAME}
-
-.PHONY: up-letsencrypt-dns
-up-letsencrypt-dns: .init ${TEMP_COMPOSE}-letsencrypt-dns prune-docker-stack-configs ## Deploys jaeger stack using let's encrypt dns challenge
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-letsencrypt-dns ${STACK_NAME}
-
-.PHONY: up-dalco ## Deploys jaeger stack for Dalco Cluster
-up-dalco: .init ${TEMP_COMPOSE}-dalco prune-docker-stack-configs
+.PHONY: .up-dalco
+.up-dalco: ${TEMP_COMPOSE}-dalco prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 
-.PHONY: up-aws
-up-aws: .init ${TEMP_COMPOSE}-aws prune-docker-stack-configs ## Deploys jaeger stack in aws
+.PHONY: .up-aws
+.up-aws: ${TEMP_COMPOSE}-aws prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 
-.PHONY: up-master
-up-master:  .init ${TEMP_COMPOSE}-master prune-docker-stack-configs
+.PHONY: .up-master
+.up-master:  ${TEMP_COMPOSE}-master prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 
-.PHONY: up-local
-up-local: up
+.PHONY: .up-local
+.up-local: ${TEMP_COMPOSE} prune-docker-stack-configs
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
-.PHONY: up-public
-up-public: up-dalco
+.PHONY: .up-public
+.up-public: .up-dalco
 
 # Helpers -------------------------------------------------
-
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-http
-${TEMP_COMPOSE}-letsencrypt-http: docker-compose.yml docker-compose.letsencrypt.http.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $<  docker-compose.letsencrypt.http.yml  > $@
-
-.PHONY: ${TEMP_COMPOSE}-letsencrypt-dns
-${TEMP_COMPOSE}-letsencrypt-dns: docker-compose.yml docker-compose.letsencrypt.dns.yml .env
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.letsencrypt.dns.yml  > $@
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml .env

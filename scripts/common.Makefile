@@ -193,11 +193,6 @@ help:
 	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo ""
 
-.PHONY: down-default
-down-default: ## Removes the stack from the swarm
-	@echo "${STACK_NAME}"
-	@docker stack rm --detach=false ${STACK_NAME}
-
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
 	-@docker swarm leave -f

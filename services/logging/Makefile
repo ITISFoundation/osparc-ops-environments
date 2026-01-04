@@ -79,33 +79,28 @@ ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 # Deploy targets
 #
 
-UP_COMMON_DEPENDENCIES = .init prune-docker-stack-configs
+UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
 
-.PHONY: up
-up: ${TEMP_COMPOSE} ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: up-dalco
-up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack for Dalco Cluster
+.PHONY: .up-dalco
+.up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 	$(MAKE) configure
 
-.PHONY: up-public
-up-public: up-dalco ## Deploys logging stack for public access Cluster
+.PHONY: .up-public
+.up-public: .up-dalco
 
-.PHONY: up-aws
-up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack using let's encrypt
+.PHONY: .up-aws
+.up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) configure
 
-.PHONY: up-master
-up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack for master Cluster
+.PHONY: .up-master
+.up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES}
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	$(MAKE) configure
 
-.PHONY: up-local
-up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES} ## Deploy logging stack for local cluster
+.PHONY: .up-local
+.up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES}
 	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 	$(MAKE) configure
