@@ -32,8 +32,8 @@ configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add regi
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 	@$(MAKE) --no-print-directory configure-portainer-registry
 
-.PHONY: up-aws
-up-aws: secrets ${TEMP_COMPOSE}-aws
+.PHONY: .up-aws
+.up-aws: secrets ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	@$(MAKE) --no-print-directory configure-portainer-registry
 

@@ -9,24 +9,9 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Targets
 #
 
-.PHONY: .up
-.up: ${TEMP_COMPOSE}
+.PHONY: up
+up: ${TEMP_COMPOSE}
 	docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
-
-.PHONY: .up-aws
-.up-aws: .up
-
-.PHONY: .up-master
-.up-master: .up
-
-.PHONY: .up-public
-.up-public: .up
-
-.PHONY: .up-dalco
-.up-dalco: .up
-
-.PHONY: .up-local
-.up-local: .up
 
 #
 # Artifacts

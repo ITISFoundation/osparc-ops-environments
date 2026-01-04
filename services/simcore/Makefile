@@ -56,6 +56,7 @@ down:
 #
 # Artifacts
 #
+
 $(SIMCORE_REPO_DIR):
 	$(error $@ repo not found. Please clone this repo manually)
 

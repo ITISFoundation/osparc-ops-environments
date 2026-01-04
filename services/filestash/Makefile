@@ -9,9 +9,21 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Targets
 #
 
-.PHONY: .up-dalco .up-master .up-public .up-local
-.up-dalco .up-master .up-public .up-local: ${TEMP_COMPOSE} filestash_config.json
+.PHONY: .up
+.up: ${TEMP_COMPOSE} filestash_config.json
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+
+.PHONY: .up-master
+.up-master: .up
+
+.PHONY: .up-public
+.up-public: .up
+
+.PHONY: .up-dalco
+.up-dalco: .up
+
+.PHONY: .up-local
+.up-local: .up
 
 .PHONY: .up-aws
 .up-aws: ${TEMP_COMPOSE}-aws filestash_config.json

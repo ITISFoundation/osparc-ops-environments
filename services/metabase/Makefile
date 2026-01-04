@@ -9,9 +9,24 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Targets
 #
 
-.PHONY: .up-aws .up-master .up-dalco .up-local .up-public
-.up-aws .up-master .up-dalco .up-local .up-public: ${TEMP_COMPOSE} prune-docker-stack-configs
+.PHONY: .up
+.up: ${TEMP_COMPOSE} prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+
+.PHONY: .up-master
+.up-master: .up
+
+.PHONY: .up-public
+.up-public: .up
+
+.PHONY: .up-dalco
+.up-dalco: .up
+
+.PHONY: .up-local
+.up-local: .up
+
+.PHONY: .up-aws
+.up-aws: .up
 
 #
 # Artifacts

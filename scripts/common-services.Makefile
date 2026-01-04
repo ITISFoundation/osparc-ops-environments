@@ -16,6 +16,6 @@ up-default: ## Deploy stack
 	$(MAKE) .up-$$OSPARC_DEPLOYMENT_TARGET
 
 .PHONY: down-default
-down-default: ## Removes stack
+down-default: ## Remove stack
 	@echo "${STACK_NAME}"
 	@docker stack rm --detach=false ${STACK_NAME}

@@ -12,9 +12,25 @@ DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 # Targets
 #
 
-.PHONY: .up-dalco .up-master .up-public .up-local
-.up-dalco .up-master .up-public .up-local: ${TEMP_COMPOSE} .create-secrets
+.PHONY: .up
+.up: ${TEMP_COMPOSE} .create-secrets
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} $(STACK_NAME)
+
+.PHONY: .up-master
+.up-master: .up
+
+.PHONY: .up-public
+.up-public: .up
+
+.PHONY: .up-dalco
+.up-dalco: .up
+
+.PHONY: .up-local
+.up-local: .up
+
+.PHONY: .up-aws
+.up-aws:
+	$(fail "Use native AWS S3 GUI")
 
 #
 # Artifacts
