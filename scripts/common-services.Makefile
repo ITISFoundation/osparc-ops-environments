@@ -11,11 +11,11 @@ MAKEFLAGS += --no-print-directory
 #
 
 .PHONY: up-default
-up-default: ## Deploy stack
+up-default: ## Deploy stack (usage: `make up`)
 	@set -a && source $(REPO_CONFIG_LOCATION) && set +a && \
 	$(MAKE) .up-$$OSPARC_DEPLOYMENT_TARGET
 
 .PHONY: down-default
-down-default: ## Remove stack
+down-default: ## Remove stack (usage: `make down`)
 	@echo "${STACK_NAME}"
 	@docker stack rm --detach=false ${STACK_NAME}
