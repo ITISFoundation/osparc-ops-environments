@@ -10,7 +10,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 #
 
 .PHONY: up
-up: ${TEMP_COMPOSE} prune-docker-stack-configs
+up: ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploy stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 #

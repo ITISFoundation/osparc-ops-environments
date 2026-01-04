@@ -6,7 +6,7 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 .PHONY: up
-up: ${TEMP_COMPOSE}
+up: ${TEMP_COMPOSE} ## Deploy stack
 	docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
 
 # Helpers -------------------------------------------------
