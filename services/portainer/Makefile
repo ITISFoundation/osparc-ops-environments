@@ -11,7 +11,7 @@ IS_PORTAINER_SERVICE_RUNNING = $(shell docker service ls | grep portainer_portai
 
 .PHONY: configure-portainer-registry
 configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add registry to Portainer
-	@$(MAKE) --no-print-directory install REQUIREMENTS_FILE=./scripts/requirements.txt
+	@$(MAKE) install REQUIREMENTS_FILE=./scripts/requirements.txt
 	@set -o allexport; source $(REPO_CONFIG_LOCATION); set +o allexport; \
 	$(WAIT_FOR_IT) http $$PORTAINER_URL --timeout=120s --interval=5s --expect-status-code 200 && \
 	$(VENV_BIN)/python ./scripts/configure_portainer_registry.py
@@ -28,12 +28,12 @@ configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add regi
 .PHONY: .up-dalco
 .up-dalco: secrets ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
+	@$(MAKE) configure-portainer-registry
 
 .PHONY: .up-aws
 .up-aws: secrets ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
+	@$(MAKE) configure-portainer-registry
 
 .PHONY: .up-public
 .up-public: .up-dalco
@@ -41,7 +41,7 @@ configure-portainer-registry: venv $(VENV_BIN)/python $(WAIT_FOR_IT) ## Add regi
 .PHONY: .up-master
 .up-master: secrets ${TEMP_COMPOSE}-master
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	@$(MAKE) --no-print-directory configure-portainer-registry
+	@$(MAKE) configure-portainer-registry
 
 #
 # Artifacts
