@@ -12,7 +12,7 @@ MAKEFLAGS += --no-print-directory
 
 .PHONY: up-default
 up-default: ## Deploy stack (usage: `make up`)
-	@# By default run up target with flavor (e.g. `.up-local`, .`up-aws`)
+	@# By default run .up target with flavor (e.g. `.up-local`, .`up-aws`)
 	@# If no flavor available, override by defining `up` target
 	@set -a && source $(REPO_CONFIG_LOCATION) && set +a && \
 	$(MAKE) .up-$$OSPARC_DEPLOYMENT_TARGET
