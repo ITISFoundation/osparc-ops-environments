@@ -3,21 +3,18 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-# Helpers --------------------------------------------------
+#
+# Helpers
+#
+
 define custom-jinja
 	@${VENV_BIN}/j2 --format=json $(1) $(2) -o $(3) \
 	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
 endef
 
-.PHONY: .data.json
-.data.json:
-	@$(_tree) -J ${PWD}/data | jq ".[0]" > .data.json
-
-.PHONY: docker-compose.yml
-docker-compose.yml: docker-compose.yml.j2 venv .data.json .env jupyter_server_config.py
-	$(call custom-jinja, $<, .data.json, tmp.yml)
-	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
-	@rm tmp.yml
+#
+# Targets
+#
 
 .PHONY: .up-dalco
 .up-dalco: ${TEMP_COMPOSE}-dalco prune-docker-stack-configs
@@ -38,7 +35,19 @@ docker-compose.yml: docker-compose.yml.j2 venv .data.json .env jupyter_server_co
 .PHONY: .up-public
 .up-public: .up-dalco
 
-# Helpers -------------------------------------------------
+#
+# Artifacts
+#
+
+.PHONY: .data.json
+.data.json:
+	@$(_tree) -J ${PWD}/data | jq ".[0]" > .data.json
+
+.PHONY: docker-compose.yml
+docker-compose.yml: docker-compose.yml.j2 venv .data.json .env jupyter_server_config.py
+	$(call custom-jinja, $<, .data.json, tmp.yml)
+	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash tmp.yml > $@
+	@rm tmp.yml
 
 .PHONY: ${TEMP_COMPOSE}-dalco
 ${TEMP_COMPOSE}-dalco: docker-compose.yml .env

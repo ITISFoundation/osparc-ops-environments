@@ -4,13 +4,13 @@ include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 #
-# Operations
+# Targets
 #
 
 include ${REPO_BASE_DIR}/services/rabbit/.operations.Makefile
 
 #
-# Docker compose files
+# Artifacts
 #
 
 ### Load Balancer
@@ -44,9 +44,7 @@ docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
 .stack.node0%.yml: docker-compose.node0%.yml node0%.env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e node0$*.env $< > $@
 
-#
-# Config / Secret files
-#
+### Config / Secret files
 
 configs/erlang.cookie.secret: configs/erlang.cookie.secret.template .env
 	@set -a; source .env; set +a; \

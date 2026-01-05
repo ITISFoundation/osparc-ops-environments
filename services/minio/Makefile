@@ -28,7 +28,7 @@ DOCKER_MINIO_SECRET_KEY = $(shell docker secret inspect --format {{.Spec.Name}} 
 
 .PHONY: .up-aws
 .up-aws:
-	$(fail "Use native AWS S3 GUI")
+	$(fail "Not implemented. Use native AWS S3 GUI")
 
 #
 # Artifacts

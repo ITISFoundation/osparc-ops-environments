@@ -31,6 +31,36 @@ configure: .env venv ## Configure graylog
 	$(VENV_BIN)/python configure.py;
 
 #
+# Deploy targets
+#
+
+UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
+
+.PHONY: .up-dalco
+.up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES}
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: .up-public
+.up-public: .up-dalco
+
+.PHONY: .up-aws
+.up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES}
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: .up-master
+.up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES}
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+	$(MAKE) configure
+
+.PHONY: .up-local
+.up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES}
+	@$(create-s3-bucket)
+	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
+	$(MAKE) configure
+
+#
 # Artifacts
 #
 
@@ -72,33 +102,3 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml .env
 .PHONY: ${TEMP_COMPOSE}-aws
 ${TEMP_COMPOSE}-aws: docker-compose.yml docker-compose.aws.yml .env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.aws.yml > $@
-
-#
-# Deploy targets
-#
-
-UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
-
-.PHONY: .up-dalco
-.up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: .up-public
-.up-public: .up-dalco
-
-.PHONY: .up-aws
-.up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: .up-master
-.up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	$(MAKE) configure
-
-.PHONY: .up-local
-.up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES}
-	@$(create-s3-bucket)
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
-	$(MAKE) configure
