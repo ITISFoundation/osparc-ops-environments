@@ -3,31 +3,46 @@
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common-services.Makefile
-# common-services.Makefile should be included first as common.Makefile
-# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up-local
-up-local: .init .create_secrets ${TEMP_COMPOSE}-local prune-docker-stack-configs ## Deploys the stack using provided certificates
+#
+# Helpers
+#
+
+.PHONY: .create_secrets
+.create_secrets: $(REPO_BASE_DIR)/certificates/domain.crt $(REPO_BASE_DIR)/certificates/domain.key $(REPO_BASE_DIR)/certificates/rootca.crt
+	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt $(REPO_BASE_DIR)/certificates/domain.crt; fi;
+	@if [[ ! $$(docker secret ls | grep -w domain.key) ]]; then docker secret create domain.key $(REPO_BASE_DIR)/certificates/domain.key; fi;
+	@if [[ ! $$(docker secret ls | grep -w rootca.crt) ]]; then if [ ! -f $(REPO_BASE_DIR)/certificates/rootca.crt ]; then cp $(REPO_BASE_DIR)/certificates/domain.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi; docker secret create rootca.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi;
+	@if [[ ! $$(docker secret ls | grep -w storageca.crt) ]]; then if [ ! -f $(REPO_BASE_DIR)/certificates/rootca.crt ]; then cp $(REPO_BASE_DIR)/certificates/domain.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi; docker secret create storageca.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi;
+
+#
+# Targets
+#
+
+.PHONY: .up-local
+.up-local: .create_secrets ${TEMP_COMPOSE}-local prune-docker-stack-configs
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 
-.PHONY: up-dalco
-up-dalco: .init ${TEMP_COMPOSE}-dalco prune-docker-stack-configs ## Deploys the stack on dalco cluster
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+.PHONY: .up-dalco
+.up-dalco: ${TEMP_COMPOSE}-dalco prune-docker-stack-configs
+	@docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
 
-.PHONY: up-public
-up-public: .init ${TEMP_COMPOSE}-public prune-docker-stack-configs ## Deploys the stack on dalco cluster
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
+.PHONY: .up-public
+.up-public: ${TEMP_COMPOSE}-public prune-docker-stack-configs
+	@docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
 
-.PHONY: up-aws
-up-aws: .init ${TEMP_COMPOSE}-aws prune-docker-stack-configs ## Deploys the stack aws
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+.PHONY: .up-aws
+.up-aws: ${TEMP_COMPOSE}-aws prune-docker-stack-configs
+	@docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
 
-.PHONY: up-master ## Deploys the stack on master
-up-master: .init ${TEMP_COMPOSE}-master prune-docker-stack-configs ## Deploys the stack on dalco cluster
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+.PHONY: .up-master
+.up-master: ${TEMP_COMPOSE}-master prune-docker-stack-configs
+	@docker stack deploy --with-registry-auth --prune --compose-file $< ${STACK_NAME}
 
-# Helpers -------------------------------------------------
+#
+# Artifacts
+#
 
 traefik_dynamic_config.yml:
 	$(eval CONFIG_DIR=$(shell dirname ${REPO_CONFIG_LOCATION}))
@@ -79,10 +94,3 @@ docker-compose.yml: traefik_dynamic_config.yml venv .env
 	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \
 	$(_yq) docker-compose.yml.unlinted > docker-compose.yml; \
 	rm docker-compose.yml.unlinted >/dev/null 2>&1;
-
-.PHONY: .create_secrets
-.create_secrets: $(REPO_BASE_DIR)/certificates/domain.crt $(REPO_BASE_DIR)/certificates/domain.key $(REPO_BASE_DIR)/certificates/rootca.crt
-	@if [[ ! $$(docker secret ls | grep -w domain.crt) ]]; then docker secret create domain.crt $(REPO_BASE_DIR)/certificates/domain.crt; fi;
-	@if [[ ! $$(docker secret ls | grep -w domain.key) ]]; then docker secret create domain.key $(REPO_BASE_DIR)/certificates/domain.key; fi;
-	@if [[ ! $$(docker secret ls | grep -w rootca.crt) ]]; then if [ ! -f $(REPO_BASE_DIR)/certificates/rootca.crt ]; then cp $(REPO_BASE_DIR)/certificates/domain.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi; docker secret create rootca.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi;
-	@if [[ ! $$(docker secret ls | grep -w storageca.crt) ]]; then if [ ! -f $(REPO_BASE_DIR)/certificates/rootca.crt ]; then cp $(REPO_BASE_DIR)/certificates/domain.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi; docker secret create storageca.crt $(REPO_BASE_DIR)/certificates/rootca.crt; fi;
