@@ -81,6 +81,7 @@ transforms:
           .log_oec = parsed_fields.log_oec
           .log_trace_id = parsed_fields.log_trace_id
           .log_span_id = parsed_fields.log_span_id
+          .log_trace_sampled = parsed_fields.log_trace_sampled
           .log_msg = parsed_fields.log_msg
         } else if traefik_err == null {
           .log_timestamp = traefik_fields.log_timestamp
