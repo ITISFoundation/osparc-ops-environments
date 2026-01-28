@@ -25,7 +25,7 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -73,7 +73,7 @@ services:
           cpus: "0.2"
   prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data_federation:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
