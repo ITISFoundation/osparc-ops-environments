@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   cadvisor-exporter:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor:v0.56.2
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -118,7 +118,7 @@ services:
           memory: 64M
           cpus: "0.2"
   node-exporter:
-    image: prom/node-exporter:v1.8.2
+    image: prom/node-exporter:v1.10.2
     volumes:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
@@ -176,7 +176,7 @@ services:
           cpus: "0.1"
 
   alertmanager:
-    image: prom/alertmanager:v0.27.0
+    image: prom/alertmanager:v0.30.1
     volumes:
       - alertmanager_data:/alertmanager
     command:
@@ -220,7 +220,7 @@ services:
           cpus: "0.1"
 
   grafana:
-    image: grafana/grafana-oss:12.0.0
+    image: grafana/grafana-oss:12.3.2
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
@@ -336,7 +336,7 @@ services:
       start_period: 40s
 
   postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.1
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.18.1
     networks:
       - monitored
     environment:
@@ -356,7 +356,7 @@ services:
           memory: 32M
           cpus: "0.1"
   redis-exporter:
-    image: oliver006/redis_exporter:v1.69.0-alpine
+    image: oliver006/redis_exporter:v1.80.2-alpine
     networks:
       - monitored
     environment:
@@ -381,7 +381,7 @@ services:
           memory: 32M
           cpus: "0.1"
   tempo:
-    image: grafana/tempo:2.8.2
+    image: grafana/tempo:2.10.0
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
     configs:
       - source: tempo_config
