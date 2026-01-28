@@ -70,7 +70,7 @@ transforms:
       # Extract structured log fields from message using regex pattern
       if exists(.message) {
         # python service logs
-        parsed_fields, err = parse_regex(.message, r'log_level=(?P<log_level>[^|]*) \| log_timestamp=(?P<log_timestamp>[^|]*) \| log_source=(?P<log_source>[^|]*) \| log_uid=(?P<log_uid>[^|]*) \| log_oec=(?P<log_oec>[^|]*) \| log_trace_id=(?P<log_trace_id>[^|]*) \| log_span_id=(?P<log_span_id>[^|]*) \| log_msg=(?P<log_msg>.*)$')
+        parsed_fields, err = parse_regex(.message, r'log_level=(?P<log_level>[^|]*) \| log_timestamp=(?P<log_timestamp>[^|]*) \| log_source=(?P<log_source>[^|]*) \| log_uid=(?P<log_uid>[^|]*) \| log_oec=(?P<log_oec>[^|]*) \| log_trace_id=(?P<log_trace_id>[^|]*) \| log_span_id=(?P<log_span_id>[^|]*) \| log_trace_sampled=(?P<log_trace_sampled>[^|]*) \| log_msg=(?P<log_msg>.*)$')
         # traefik logs
         traefik_fields, traefik_err = parse_regex(.message, r'time="(?P<log_timestamp>[^"]*)" level=(?P<log_level>\w+) msg="(?P<log_msg>.*)"')
         if err == null {
@@ -81,6 +81,7 @@ transforms:
           .log_oec = parsed_fields.log_oec
           .log_trace_id = parsed_fields.log_trace_id
           .log_span_id = parsed_fields.log_span_id
+          .log_trace_sampled = parsed_fields.log_trace_sampled
           .log_msg = parsed_fields.log_msg
         } else if traefik_err == null {
           .log_timestamp = traefik_fields.log_timestamp
@@ -101,15 +102,12 @@ transforms:
     type: "remap"
     inputs: ["process_logs_base"]
     source: |
-
       # ensure level field is set for Grafana Loki
       if exists(.log_level){
         .level = .log_level
       } else {
-        .level = "UNKOWN"
+        .level = "UNKNOWN"
       }
-
-
 
 sinks:
   # Send to Loki over TCP
@@ -121,10 +119,11 @@ sinks:
       codec: json
     labels:
       source: "vector"
+      {%- raw %}
       host: "{{ host }}"
       container_name: "{{ container_name }}"
       service_name: "{{ service_name }}"
-
+      {%- endraw %}
     healthcheck:
       enabled: true
   prometheus_exporter: # https://vector.dev/docs/administration/monitoring/#metrics
@@ -143,6 +142,50 @@ sinks:
     healthcheck:
       enabled: true
 
+{%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
+  # https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/
+  kubernetes-victoria-logs:
+    inputs:
+      - process_logs_base
+    # https://vector.dev/docs/reference/configuration/sinks/elasticsearch/
+    type: elasticsearch
+    auth:
+      strategy: basic
+      user: "${SERVICES_USER}"
+      password: "${SERVICES_PASSWORD}"
+    endpoints:
+      - ${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}/logs/insert/elasticsearch
+    api_version: v8
+    compression: gzip
+    healthcheck:
+      enabled: false
+    mode: bulk
+    request:
+      # https://docs.victoriametrics.com/victorialogs/data-ingestion/#http-headers
+      headers:
+        # https://docs.victoriametrics.com/victorialogs/#multitenancy
+        AccountID: "0"
+        ProjectID: "0"
+        # first non-empty field from the list is treated as log message
+        # WARNING: the message field with value is being renamed to `_msg`
+        # (original field key is dropped / not present in VictoriaLogs GUI)
+        VL-Msg-Field: log_msg,message
+        # log field names, which uniquely identify every log stream
+        VL-Stream-Fields: service_name,container_name,container_id
+        VL-Time-Field: timestamp
+        # WARNING: we overwrite source_type from `socket` to `docker_swarm_logs`
+        # This makes more sense to users of victoria logs. Users can use filters
+        # source_type="kubernetes_logs" (set automatically for kubernetes logs)
+        # or source_type="docker_swarm_logs"
+        VL-Extra-Fields: source_type=docker_swarm_logs
+        # ignore internal fields to save space (e.g. _command, _image_id, etc.)
+        VL-Ignore-Fields: _*
+    {%- if MACHINE_FQDN == "osparc.local" %}
+    tls:
+      verify_certificate: false
+      verify_hostname: false
+    {%- endif %}
+{%- endif %}
 
   # Temporary: Output to console for debugging
   #console_debug:

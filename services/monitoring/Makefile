@@ -1,12 +1,11 @@
-.DEFAULT_GOAL := help
+REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
-# STACK_NAME defaults to name of the current directory. Should not to be changed if you follow GitOps operating procedures.
-STACK_NAME = $(notdir $(CURDIR))
-TEMP_COMPOSE=.stack.${STACK_NAME}.yaml
-REPO_BASE_DIR := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../..)
-
-# TARGETS --------------------------------------------------
+include ${REPO_BASE_DIR}/scripts/common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+
+#
+# Helpers
+#
 
 define create-s3-bucket
 	# ensure bucket is available in S3...
@@ -19,37 +18,37 @@ define create-s3-bucket
 endef
 
 #
-# up targets
+# Targets
 #
 
-.PHONY: up-local
-up-local: ${TEMP_COMPOSE}-local ## Deploys or updates current stack "$(STACK_NAME)". If MONITORED_NETWORK is not specified, it will create an attachable network
+.PHONY: .up-local
+.up-local: ${TEMP_COMPOSE}-local
 	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
 	$(MAKE) grafana-import
 
-.PHONY: up-dalco
-up-dalco: ${TEMP_COMPOSE}-dalco ## Deploys monitoring stack for Dalco Cluster
+.PHONY: .up-dalco
+.up-dalco: ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 	$(MAKE) grafana-import
 
-.PHONY: up-public
-up-public: ${TEMP_COMPOSE}-public ## Deploys monitoring stack for Public Cluster
+.PHONY: .up-public
+.up-public: ${TEMP_COMPOSE}-public
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
 	$(MAKE) grafana-import
 
-.PHONY: up-aws
-up-aws: ${TEMP_COMPOSE}-aws   ## Deploys or updates current stack "$(STACK_NAME)" in AWS
+.PHONY: .up-aws
+.up-aws: ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) grafana-import
 
-.PHONY: up-master
-up-master: ${TEMP_COMPOSE}-master ## Deploys monitoring stack for Master Cluster
+.PHONY: .up-master
+.up-master: ${TEMP_COMPOSE}-master
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	$(MAKE) grafana-import
 
 #
-# docker compose targets
+# Artifacts (docker compose files)
 #
 
 COMMON_COMPOSE_DEPENDENCIES: .env venv
@@ -88,7 +87,7 @@ docker-compose.local.yml: docker-compose.local.yml.j2 config.prometheus.ceph.sim
 	@$(call jinja,$<,.env,$@)
 
 #
-# temp compose targets
+# Artifacts (temp compose files)
 #
 
 TEMP_COMPOSE_COMMON_DEPENDENCIES := docker-compose.yml .env
@@ -109,7 +108,7 @@ ${TEMP_COMPOSE}-local: docker-compose.yml docker-compose.local.yml $(TEMP_COMPOS
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e .env $< docker-compose.local.yml > $@
 
 #
-# artifacts targets
+# Artifacts (configuration files)
 #
 
 .PHONY: config.grafana.dashboards
@@ -180,7 +179,7 @@ tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env venv
 	$(call jinja, $<, .env, $@);
 
 #
-# grafana targets
+# Grafana-related targets
 #
 
 .PHONY: grafana/assets

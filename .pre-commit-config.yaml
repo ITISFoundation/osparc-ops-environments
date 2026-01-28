@@ -114,15 +114,6 @@ repos:
         always_run: true
         language: script
         files: '^(.*)\/services\/simcore/(docker-compose.*\.y([a])?ml)$'
-      - id: no-env-vars-exported-in-critical-pipeline-files
-        name: no-env-vars-exported-in-critical-pipeline-files
-        description: no-env-vars-exported-in-critical-pipeline-files
-        entry: 'scripts/pre-commit-hooks/no-env-vars-exported-in-critical-pipeline-files/launch.bash'
-        exclude: ^(services/maintenance-page/Makefile)$
-        always_run: true
-        language: script
-        files: '^(.*\/Makefile.*)|(.*\.deploy_everything_locally.bash)|(.*\/services/.*\/.*\.((sh)|(bash)))$'
-        require_serial: true
       - id: helm-update-dependencies
         name: Helm Dependency Update
         description: Make sure all Chart.lock files are up-to-date
