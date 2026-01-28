@@ -108,7 +108,7 @@ services:
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
 
   vector:
-    image: timberio/vector:0.50.X-debian
+    image: timberio/vector:0.53.X-debian
     ports:
       - target: 12201
         published: 12201
@@ -144,7 +144,7 @@ services:
       logging:
 
   loki:
-    image: grafana/loki:3.5.7
+    image: grafana/loki:3.6.4
     ports:
       - target: 3100
         published: 12204
