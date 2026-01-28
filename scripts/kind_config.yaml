@@ -4,8 +4,15 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
     extraPortMappings:
+      # web port
       - containerPort: 32080
         hostPort: 80
+      # webinternal port
+      # we use as is (no port remapping)
+      # Not a common port (like http) that expects 80/443
+      - containerPort: 32081
+        hostPort: 32081
+      # websecure port
       - containerPort: 32443
         hostPort: 443
       - containerPort: 32443

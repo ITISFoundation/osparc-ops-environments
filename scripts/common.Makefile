@@ -193,11 +193,6 @@ help:
 	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo ""
 
-.PHONY: down-default
-down-default: ## Removes the stack from the swarm
-	@echo "${STACK_NAME}"
-	@docker stack rm ${STACK_NAME}
-
 .PHONY: leave
 leave: ## Leaves swarm stopping all services in it
 	-@docker swarm leave -f
@@ -225,36 +220,6 @@ clean-default: .check_clean ## Cleans all outputs
 	$(if $(STACK_NAME),export STACK_NAME='$(STACK_NAME)';) \
 	set +o allexport; \
 	envsubst < $< > .env
-
-ifdef STACK_NAME
-
-.PHONY: prune-docker-stack-configs-default
-prune-docker-stack-configs-default: ## Clean all unused stack configs
-	@# Since the introduction of rolling docker config updates old
-	@# [docker config] versions are kept. This target removes them
-	@# https://github.com/docker/cli/issues/203
-	@#
-	@# This should be run before stack update in order to
-	@# keep previous config version for potential rollback
-	@#
-	@# This will not clean "external" configs. To achieve this extend
-	@# this target in related Makefiles.
-	@#
-	@# Long live Kubernetes ConfigMaps!
-
-	@for id in $$(docker config ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" --format '{{.ID}}'); do \
-	    docker config rm "$$id" >/dev/null 2>&1 || true; \
-	done
-
-.PHONY: prune-docker-stack-secrets-default
-prune-docker-stack-secrets-default: ## Clean all unused stack secrets
-	@# Same as for configs
-
-	@for id in $$(docker secret ls --filter "label=com.docker.stack.namespace=${STACK_NAME}" --format '{{.ID}}'); do \
-	    docker secret rm "$$id" >/dev/null 2>&1 || true; \
-	done
-
-endif
 
 # Helpers -------------------------------------------------
 .PHONY: .init
@@ -338,7 +303,7 @@ $(VENV_DIR): $(UV)
 	@if [ ! -d $@ ]; then \
 		$< venv $@; \
 		VIRTUAL_ENV=$@ $< pip install --upgrade pip wheel setuptools; \
-		VIRTUAL_ENV=$@ $< pip install jinjanator typer; \
+		VIRTUAL_ENV=$@ $< pip install jinjanator typer pre-commit; \
 		$(VENV_BIN)/pre-commit install > /dev/null 2>&1; \
 		$(UV) self update || true; \
 	fi
@@ -377,14 +342,16 @@ ifeq ($(shell test -f j2cli_customization.py && echo -n yes),yes)
 define jinja
 	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
 	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
-	--customize j2cli_customization.py
+	--customize j2cli_customization.py \
+	--quiet
 endef
 
 else
 
 define jinja
 	${VENV_BIN}/j2 --format=env $(1) $(2) -o $(3) \
-	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py
+	--filters $(REPO_BASE_DIR)/scripts/j2cli_global_filters.py \
+	--quiet
 endef
 
 endif

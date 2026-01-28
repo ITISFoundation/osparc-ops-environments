@@ -70,7 +70,7 @@ transforms:
       # Extract structured log fields from message using regex pattern
       if exists(.message) {
         # python service logs
-        parsed_fields, err = parse_regex(.message, r'log_level=(?P<log_level>[^|]*) \| log_timestamp=(?P<log_timestamp>[^|]*) \| log_source=(?P<log_source>[^|]*) \| log_uid=(?P<log_uid>[^|]*) \| log_oec=(?P<log_oec>[^|]*) \| log_trace_id=(?P<log_trace_id>[^|]*) \| log_span_id=(?P<log_span_id>[^|]*) \| log_msg=(?P<log_msg>.*)$')
+        parsed_fields, err = parse_regex(.message, r'log_level=(?P<log_level>[^|]*) \| log_timestamp=(?P<log_timestamp>[^|]*) \| log_source=(?P<log_source>[^|]*) \| log_uid=(?P<log_uid>[^|]*) \| log_oec=(?P<log_oec>[^|]*) \| log_trace_id=(?P<log_trace_id>[^|]*) \| log_span_id=(?P<log_span_id>[^|]*) \| log_trace_sampled=(?P<log_trace_sampled>[^|]*) \| log_msg=(?P<log_msg>.*)$')
         # traefik logs
         traefik_fields, traefik_err = parse_regex(.message, r'time="(?P<log_timestamp>[^"]*)" level=(?P<log_level>\w+) msg="(?P<log_msg>.*)"')
         if err == null {
@@ -81,6 +81,7 @@ transforms:
           .log_oec = parsed_fields.log_oec
           .log_trace_id = parsed_fields.log_trace_id
           .log_span_id = parsed_fields.log_span_id
+          .log_trace_sampled = parsed_fields.log_trace_sampled
           .log_msg = parsed_fields.log_msg
         } else if traefik_err == null {
           .log_timestamp = traefik_fields.log_timestamp
@@ -153,7 +154,7 @@ sinks:
       user: "${SERVICES_USER}"
       password: "${SERVICES_PASSWORD}"
     endpoints:
-    - https://${K8S_MONITORING_FQDN}/logs/insert/elasticsearch
+      - ${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}/logs/insert/elasticsearch
     api_version: v8
     compression: gzip
     healthcheck:

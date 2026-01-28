@@ -1,13 +1,19 @@
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common-services.Makefile
-# common-services.Makefile should be included first as common.Makefile
-# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-.PHONY: up up-dalco up-master up-public up-local up-aws
-up up-dalco up-master up-public up-local up-aws: .init ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploy redis commander stack
+#
+# Targets
+#
+
+.PHONY: up
+up: ${TEMP_COMPOSE} prune-docker-stack-configs ## Deploy stack
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE} ${STACK_NAME}
+
+#
+# Artifacts
+#
 
 docker-compose.yml: .env config.json
 	@$(call jinja, docker-compose.yml.j2, .env, docker-compose.yml.unlinted) && \

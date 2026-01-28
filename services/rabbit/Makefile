@@ -1,18 +1,16 @@
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common-services.Makefile
-# common-services.Makefile should be included first as common.Makefile
-# relies on STACK_NAME var which is defined in common-services.Makefile
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 #
-# Operations
+# Targets
 #
 
 include ${REPO_BASE_DIR}/services/rabbit/.operations.Makefile
 
 #
-# Docker compose files
+# Artifacts
 #
 
 ### Load Balancer
@@ -30,7 +28,7 @@ docker-compose.loadbalancer.yml: docker-compose.loadbalancer.yml.j2 \
 
 .PRECIOUS: node0%.env
 node0%.env: .env
-	envsubst < $< > $@; \
+	@envsubst < $< > $@; \
 	echo NODE_INDEX=$* >> $@
 
 .PRECIOUS: docker-compose.node0%.yml
@@ -46,9 +44,7 @@ docker-compose.node0%.yml: docker-compose.node0x.yml.j2 \
 .stack.node0%.yml: docker-compose.node0%.yml node0%.env
 	@${REPO_BASE_DIR}/scripts/docker-stack-config.bash -e node0$*.env $< > $@
 
-#
-# Config / Secret files
-#
+### Config / Secret files
 
 configs/erlang.cookie.secret: configs/erlang.cookie.secret.template .env
 	@set -a; source .env; set +a; \

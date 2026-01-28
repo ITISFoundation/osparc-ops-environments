@@ -16,11 +16,11 @@ server:
         namespace: "{{ .Release.Namespace }}"
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-append-slash@kubernetescrd,traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
     hosts:
       - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
         path:
-          - /logs
+          - /logs/select/
         pathType: Prefix
 
   nodeSelector:
@@ -46,3 +46,39 @@ server:
     requests:
       cpu: 500m
       memory: 512Mi
+
+extraObjects:
+  - |
+    # Extra objects can be templated. See https://github.com/VictoriaMetrics/helm-charts/pull/1903
+    # Escape expressions with curly braces and backticks to pass them to Helm
+    {{`{{- $app := .Values.server }}`}}
+    {{`{{- $ctx := dict "helm" . "appKey" "server" }}`}}
+    # explicitly define port on which server app is listening
+    {{`{{- $hostPort := dict "port" $app.service.targetPort}}`}}
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      # we do not reuse annotations from built-in ingress as they
+      # are for public ingress while we need a private ingress
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: webinternal
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd
+      {{`{{- $_ := set $ctx "extraLabels" $app.ingress.extraLabels }}`}}
+      labels: {{`{{ include "vm.labels" $ctx | nindent 4 }}`}}
+      {{`{{- $_ := unset $ctx "extraLabels" }}`}}
+      # accessible within network infrastructure (VPC) only but not to public
+      name: victoria-logs-internal-log-ingestion
+      namespace: {{`{{ include "vm.namespace" $ctx }}`}}
+    spec:
+      rules:
+        - host: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
+          http:
+            paths:
+              - path: /logs/insert/elasticsearch
+                pathType: Prefix
+                backend:
+                  service:
+                    # copied from built-in ingress to specify service
+                    name: {{`{{ include "vm.plain.fullname" $ctx }}`}}
+                    # copied from built-in ingress to specify port
+                    port: {{`{{ include "vm.ingress.port" $hostPort | nindent 18 }}`}}

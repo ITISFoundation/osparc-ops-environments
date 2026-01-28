@@ -108,7 +108,7 @@ services:
         - traefik.http.routers.graylog.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, graylog_replace_regex
 
   vector:
-    image: timberio/vector:0.50.X-debian
+    image: timberio/vector:0.53.X-debian
     ports:
       - target: 12201
         published: 12201
@@ -121,9 +121,11 @@ services:
       - VECTOR_LOG=info
       - VECTOR_LOG_DESTINATION=${VECTOR_LOG_DESTINATION}
       - PROMETHEUS_SCRAPE_INTERVAL_SECONDS=${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
-      - K8S_MONITORING_FQDN=${K8S_MONITORING_FQDN}
+      {%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
+      - LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT=${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}
       - SERVICES_USER=${SERVICES_USER}
       - SERVICES_PASSWORD=${SERVICES_PASSWORD}
+      {%- endif %}
     configs:
       - source: vector_config
         target: /etc/vector/vector.yaml
@@ -142,7 +144,7 @@ services:
       logging:
 
   loki:
-    image: grafana/loki:3.5.7
+    image: grafana/loki:3.6.4
     ports:
       - target: 3100
         published: 12204
