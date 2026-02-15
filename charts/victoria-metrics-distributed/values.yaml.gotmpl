@@ -138,10 +138,10 @@ vmdistributed:
           podMetadata:
             labels:
               app: vmauth-global-read
-          # Use standard path approach with monitoring FQDN this is possbile.
-          # See https://github.com/VictoriaMetrics/operator/issues/1617
           ingress:
-            host: {{ requiredEnv "K8S_METRICS_FQDN" }}
+            host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+            paths:
+            - /metrics
             annotations:
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
