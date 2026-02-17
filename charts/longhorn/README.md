@@ -85,4 +85,5 @@ Notes:
 ### How to uninstall / delete LG
 1. Uninstall helm chart (e.g., `helm -n longhorn uninstall longhorn`)
 2. Follow instructions from https://github.com/longhorn/longhorn/discussions/9167
+  * some steps may need to be repeated (e.g., cleaning up finalizers)
 3. Clean up disks (partitions if necessary)
