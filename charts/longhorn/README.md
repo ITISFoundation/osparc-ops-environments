@@ -81,3 +81,8 @@ Notes:
 2. Perform disks updates on the node
 3. Make sure LH didn't pick up wrongly configured disk in the meantime and remove the wrong disk if it did so
 4. Wait till LH automatically adds the disk to the Node
+
+### How to uninstall / delete LG
+1. Uninstall helm chart (e.g., `helm -n longhorn uninstall longhorn`)
+2. Follow instructions from https://github.com/longhorn/longhorn/discussions/9167
+3. Clean up disks (partitions if necessary)
