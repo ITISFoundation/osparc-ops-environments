@@ -73,6 +73,7 @@ services:
         - traefik.http.routers.vendor_chat_backend.tls=true
         - traefik.http.routers.vendor_chat_backend.rule=(PathPrefix(`/v1/`) && ({{ generate_vendors_traefik_rule(VENDOR_CHATBOT_PRODUCTS, VENDOR_CHATBOT_SUBDOMAIN_PREFIX) }}))
         - traefik.http.routers.vendor_chat_backend.middlewares=authenticated_platform_user@swarm
+        - traefik.http.routers.vendor_chat_backend.service=vendor_chat_backend
         - traefik.http.services.vendor_chat_curated.loadbalancer.server.port=${VENDOR_CHATBOT_BACKEND_PORT}
         - traefik.http.routers.vendor_chat_curated.entrypoints=https
         - traefik.http.routers.vendor_chat_curated.tls=true
