@@ -32,17 +32,14 @@ services:
                 - traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.service=${SWARM_STACK_NAME}_postgresRoute
                 - traefik.tcp.services.${SWARM_STACK_NAME}_postgresRoute.loadbalancer.server.port=5432
                 - "traefik.tcp.routers.${SWARM_STACK_NAME}_postgresRoute.rule=ClientIP(`195.176.8.0/24`) || ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)"
+
     wb-garbage-collector:
         hostname: "{{.Service.Name}}"
-    wb-api-server:
-        deploy:
-            replicas: 3
+
     clusters-keeper:
         deploy:
             replicas: 0
+
     payments:
         deploy:
             replicas: 0
-    rabbit:
-        deploy:
-            replicas: 0  # use standalone (cluster) rabbit stack
