@@ -138,16 +138,16 @@ vmdistributed:
           podMetadata:
             labels:
               app: vmauth-global-read
-          # Use standard path approach with monitoring FQDN this is possbile.
-          # See https://github.com/VictoriaMetrics/operator/issues/1617
           ingress:
-            host: {{ requiredEnv "K8S_METRICS_FQDN" }}
+            host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+            paths:
+            - /metrics/select/0/vmui
             annotations:
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
               traefik.ingress.kubernetes.io/router.middlewares: >-
                 traefik-traefik-basic-auth@kubernetescrd,
-                traefik-metrics-redirect-slash-to-vmui@kubernetescrd
+                traefik-metrics-strip-prefix@kubernetescrd
 
   # if enabled, some urls may need to be updated (e.g. automatic redirect middleware)
   # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-distributed#how-to-use-multitenancy
