@@ -3,7 +3,6 @@ certificates:
     secretName: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}-tls
     dnsNames:
       - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      - {{ requiredEnv "K8S_METRICS_FQDN" }}
 
 cert-manager:
   crds:
