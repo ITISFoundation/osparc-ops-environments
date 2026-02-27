@@ -20,8 +20,6 @@ services:
       replicas: 1
 
   postgres:
-    labels:
-      - "pgbackup.enable=true"
     deploy:
       placement:
         constraints:
