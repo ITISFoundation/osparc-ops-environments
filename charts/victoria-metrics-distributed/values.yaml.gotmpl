@@ -141,7 +141,7 @@ vmdistributed:
           ingress:
             host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
             paths:
-            - /metrics/select/0/vmui
+            - /metrics
             annotations:
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
