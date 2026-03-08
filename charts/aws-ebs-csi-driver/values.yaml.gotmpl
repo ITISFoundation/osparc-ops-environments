@@ -12,7 +12,7 @@ storageClasses:
     reclaimPolicy: Retain  # EBS Volume will not be deleted when PV is deleted
 
 controller:
-    k8sTagClusterId: k8s-{{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" }}
+    k8sTagClusterId: k8s-{{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" | replace "." "-"}}
     extraVolumeTags:
         {{ requiredEnv "AWS_DEPLOYMENT_TAG_KEY" }}: {{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" }}
     volumeModificationFeature:
