@@ -34,10 +34,6 @@ services:
     deploy:
       replicas: 1
 
-  wb-api-server:
-    deploy:
-      replicas: 3
-
   rabbit:
     deploy:
       labels:

@@ -27,14 +27,6 @@ services:
         constraints:
           - node.labels.postgres==true
 
-  wb-api-server:
-    deploy:
-      replicas: 3
-
-  webserver:
-    deploy:
-      replicas: 3
-
   redis:
     networks:
       - public

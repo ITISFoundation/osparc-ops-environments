@@ -48,8 +48,7 @@ services:
       - /etc/traefik_certs:/etc/traefik_certs
     {% endif %}
     deploy:
-      # mode: global
-      replicas: ${OPS_TRAEFIK_REPLICAS}
+      mode: global
       update_config:
         order: stop-first
         delay: 20s

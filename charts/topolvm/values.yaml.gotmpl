@@ -9,6 +9,9 @@ lvmd:
       default: true
       spare-gb: 5
 
+controller:
+  replicaCount: 1
+
 storageClasses:
   - name: {{ .Values.topolvmStorageClassName }}
     storageClass:
