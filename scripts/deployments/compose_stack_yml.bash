@@ -80,6 +80,36 @@ envsubst < .env.nosub > .env
 cp .env ..
 cp ../../docker-compose.yml ./docker-compose.simcore.yml
 
+# Docker29
+# Verify that docker-compose.deploy.yml defines replicas for every service
+# that has replicas in docker-compose.simcore.yml. Since we strip replicas
+# from simcore below, the deploy overlay must provide them. This catches
+# cases where a new service with replicas is added upstream but the deploy
+# overlay was not updated.
+missing_replicas=()
+while IFS= read -r svc; do
+    deploy_val=$("$_yq" eval ".services.\"$svc\".deploy.replicas" docker-compose.deploy.yml)
+    if [ "$deploy_val" = "null" ]; then
+        missing_replicas+=("$svc")
+    fi
+done < <("$_yq" eval '.services | to_entries | .[] | select(.value.deploy.replicas != null) | .key' docker-compose.simcore.yml)
+
+if [ ${#missing_replicas[@]} -gt 0 ]; then
+    echo "ERROR: The following services in docker-compose.simcore.yml do not have" >&2
+    echo "       'replicas' defined in docker-compose.deploy.yml:" >&2
+    for svc in "${missing_replicas[@]}"; do
+        echo "         - $svc" >&2
+    done
+    echo "       Please add deploy.replicas for these services in docker-compose.deploy.yml." >&2
+    exit 1
+fi
+
+# Remove replicas from simcore compose to avoid duplicate mapping keys
+# when merging with the deploy overlay. The deploy overlay is the
+# authoritative source for replica counts. Docker 29+ uses a strict
+# YAML parser that rejects duplicate keys in merged output.
+"$_yq" eval --inplace 'del(.services.[].deploy.replicas)' docker-compose.simcore.yml
+
 "$repo_basedir"/scripts/docker-stack-config.bash -e .env docker-compose.simcore.yml docker-compose.deploy.yml > ../../stack.yml
 #
 #
