@@ -42,9 +42,10 @@ else
     echo "Error: No top-level secrets section found in the Docker Compose file"
     exit 1
 fi
-#
-# start
-#
+
+# pre pull images in parallel to speed up (otherwise images pull 1 by 1 sequentially)
+docker compose --file ${COMPOSE_FILE} pull
+
 for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     export TARGETNAME=${service#"${SERVICES_PREFIX}"_}
     #  continue if the service == director since it doesnt have settings

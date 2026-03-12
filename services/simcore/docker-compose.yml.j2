@@ -242,6 +242,7 @@ services:
       - WEBSERVER_LOGLEVEL=${WEBSERVER_LOGLEVEL}
       - WEBSERVER_ANNOUNCEMENTS=${WEBSERVER_ANNOUNCEMENTS}
     deploy:
+      replicas: ${WEBSERVER_REPLICAS}
       labels:
         # ssl header necessary so that socket.io upgrades correctly from polling to websocket mode. the middleware must be attached to the right connection.
         # NOTE: traefik does not like - in the sslheader middleware, so we override it here
@@ -265,7 +266,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      replicas: 3
       placement:
         constraints:
           - node.labels.simcore==true
@@ -282,6 +282,7 @@ services:
     networks:
       - monitored
     deploy:
+      replicas: ${WB_API_SERVER_REPLICAS}
       update_config:
         <<: *webserver_update_config
       restart_policy:

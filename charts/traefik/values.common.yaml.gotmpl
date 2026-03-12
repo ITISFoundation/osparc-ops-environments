@@ -168,12 +168,9 @@ extraObjects:
 - apiVersion: traefik.io/v1alpha1
   kind: Middleware
   metadata:
-    name: metrics-redirect-slash-to-vmui
-    namespace: {{ .Release.Namespace }}
+    name: metrics-strip-prefix
+    namespace: {{.Release.Namespace}}
   spec:
-    redirectRegex:
-      # capture metrics URL without path
-      regex: "^(https?://[^/]+)/?$"
-      # redirect to default UI (use default tenant 0)
-      # https://docs.victoriametrics.com/helm/victoria-metrics-distributed/#how-to-use-multitenancy
-      replacement: "${1}/select/0/vmui/"
+    stripPrefix:
+      prefixes:
+      - /metrics
