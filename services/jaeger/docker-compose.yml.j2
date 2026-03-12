@@ -33,7 +33,7 @@ services:
           memory: 64M
           cpus: "0.1"
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.135.0
+    image: otel/opentelemetry-collector-contrib:0.144.0
     configs:
       - source: opentelemetry-collector-config
         target: /etc/otel/config.yaml

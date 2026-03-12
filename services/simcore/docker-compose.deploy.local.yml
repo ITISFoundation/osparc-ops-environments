@@ -89,8 +89,6 @@ services:
       replicas: 1
 
   webserver:
-    deploy:
-      replicas: 1
     healthcheck:
       test: ["CMD", "echo", "health"]
     secrets:
