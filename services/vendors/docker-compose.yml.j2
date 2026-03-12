@@ -46,7 +46,7 @@ services:
       timeout: 10s
       retries: 3
     deploy:
-      replicas: 1
+      replicas: ${VENDOR_MEILISEARCH_REPLICAS}
       placement:
         constraints:
           - node.labels.simcore==true
@@ -77,7 +77,7 @@ services:
       timeout: 10s
       retries: 3
     deploy:
-      replicas: 1
+      replicas: ${VENDOR_MEILI_FASTAPI_REPLICAS}
       placement:
         constraints:
           - node.labels.simcore==true
