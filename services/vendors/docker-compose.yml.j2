@@ -65,11 +65,11 @@ services:
     networks:
       - internal
 
-  fastapi:
-    image: ${VENDOR_FASTAPI_SERVER_IMAGE}
+  meili-fastapi:
+    image: ${VENDOR_MEILI_FASTAPI_IMAGE}
     init: true
 {%- raw %}
-    hostname: "v-fastapi-{{.Node.Hostname}}-{{.Task.Slot}}"
+    hostname: "v-meili-fastapi-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
