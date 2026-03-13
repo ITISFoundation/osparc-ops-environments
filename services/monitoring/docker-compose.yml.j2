@@ -25,7 +25,7 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -44,8 +44,6 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheus/"
       - "--web.route-prefix=/"
-      - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
-      - "--enable-feature=exemplar-storage"
       #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
     networks:
       - monitored
@@ -73,7 +71,7 @@ services:
           cpus: "0.2"
   prometheusfederation:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data_federation:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -91,7 +89,6 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.external-url=https://${MONITORING_DOMAIN}/prometheusfederation/"
       - "--web.route-prefix=/"
-      - "--storage.tsdb.allow-overlapping-blocks" # via https://jessicagreben.medium.com/prometheus-fill-in-data-for-new-recording-rules-30a14ccb8467
       #- "--web.enable-admin-api" This allows messing with prometheus using its API from the CLI. Disabled for security reasons by default.
     networks:
       - monitored

@@ -3,6 +3,7 @@ scrape_configs:
   - job_name: "simcore"
     scrape_interval: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}s
     scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT_SECONDS}s
+    fallback_scrape_protocol: PrometheusText0.0.4
     relabel_configs:
       - source_labels: [__meta_dns_name]
         separator: ;
