@@ -4,7 +4,6 @@ global:
   scrape_interval:  ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}s
   evaluation_interval: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}s # By default, scrape targets every 15 seconds.
   scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT_SECONDS}s
-  fallback_scrape_protocol: PrometheusText0.0.4
 
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
