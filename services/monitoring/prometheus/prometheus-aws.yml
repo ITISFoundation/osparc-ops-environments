@@ -1,7 +1,6 @@
 scrape_configs:
   - job_name: 'federate-computational-clusters-ec2'
     honor_labels: true
-    fallback_scrape_protocol: PrometheusText0.0.4
     metrics_path: '/federate'
     params:
       # we match all metrics for now
