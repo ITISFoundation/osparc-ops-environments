@@ -83,7 +83,7 @@ services:
       - target: 12202
         published: 12202
         protocol: udp
-        mode: host
+        mode: ingress
     deploy:
       replicas: 1
       restart_policy:

@@ -266,7 +266,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      replicas: 3
       placement:
         constraints:
           - node.labels.simcore==true
