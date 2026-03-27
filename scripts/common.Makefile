@@ -64,7 +64,7 @@ export DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS:=$(shell set -o allexport; \
 	echo $$DEPLOYMENT_FQDNS_CAPTURE_INVITATIONS; \
 	set +o allexport; )
 
-export DEPLOYMENT_FQDNS_CAPTURE_STORAGE=$(shell set -o allexport; \
+export DEPLOYMENT_FQDNS_CAPTURE_STORAGE:=$(shell set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	if [ -z "$${DEPLOYMENT_FQDNS}" ]; then \
 		DEPLOYMENT_FQDNS_CAPTURE_STORAGE="(Host(\`storage.$$MACHINE_FQDN\`))"; \
