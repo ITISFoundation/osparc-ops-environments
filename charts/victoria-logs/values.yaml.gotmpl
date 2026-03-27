@@ -8,7 +8,14 @@ vector:
 server:
   replicaCount: 1
 
+  # https://docs.victoriametrics.com/victorialogs/#retention
   retentionPeriod: 30d
+  # https://docs.victoriametrics.com/victorialogs/#percentage-based-disk-space-limit
+  retentionMaxDiskUsagePercent: 95
+
+  persistentVolume:
+    enabled: true
+    size: 100Gi
 
   ingress:
     enabled: true
