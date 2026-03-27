@@ -1,7 +1,7 @@
 services:
   # MongoDB: https://hub.docker.com/_/mongo/
   mongodb:
-    image: mongo:6.0.6
+    image: mongo:8.0.4
     init: true
     volumes:
       # data persistency
@@ -50,7 +50,7 @@ services:
 
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:6.0.5
+    image: graylog/graylog:7.0.3 # Warning: Elasticsearch is removed from Graylog>7
     init: true
     configs:
     - source: graylog_config
