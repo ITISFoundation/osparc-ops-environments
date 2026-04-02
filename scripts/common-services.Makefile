@@ -18,6 +18,7 @@ up-default: ## Deploy stack (usage: `make up`)
 	$(MAKE) .up-$$OSPARC_DEPLOYMENT_TARGET
 
 down-default: guard-optional-bool-GRACEFUL ## Remove stack (usage: `make down`)
+	@# DETACH should be reverse of GRACEFUL (e.g., if GRACEFUL is false, DETACH is true)
 	$(eval DETACH = $(if $(filter false,$(GRACEFUL)),true,false))
 	@docker stack rm --detach=$(DETACH) ${STACK_NAME}
 
