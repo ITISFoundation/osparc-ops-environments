@@ -265,12 +265,6 @@ guard-%:
 guard-optional-%:
 	@:
 
-guard-bool-%:
-	@if [ "${${*}}" != "true" ] && [ "${${*}}" != "false" ]; then \
-		echo "Argument '${*}' must be 'true' or 'false'"; \
-		exit 1; \
-	fi;
-
 guard-optional-bool-%:
 	@if [ "${${*}}" != "true" ] && [ "${${*}}" != "false" ] && [ "${${*}}" != "" ]; then \
 		echo "Argument '${*}' must be 'true', 'false', or empty"; \
