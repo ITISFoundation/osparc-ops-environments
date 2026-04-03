@@ -1,0 +1,36 @@
+# NVIDIA GPU Operator values for Kubernetes GPU support
+# Drivers are pre-installed via Ansible (configure_gpu_k8s.yml).
+# The operator manages toolkit, device plugin, GFD, DCGM, and validation.
+
+# Do not install drivers - managed by ansible
+driver:
+  enabled: false
+
+# Let the operator manage the container toolkit (configures nvidia
+# runtime in containerd so the "nvidia" RuntimeClass works)
+toolkit:
+  enabled: true
+
+# Enable the device plugin to expose nvidia.com/gpu resources
+devicePlugin:
+  enabled: true
+
+# DCGM exporter for GPU metrics
+dcgmExporter:
+  enabled: true
+
+mig:
+  strategy: none
+
+gfd:
+  enabled: true
+
+operator:
+  defaultRuntime: containerd
+  runtimeClass: nvidia
+
+daemonsets:
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
