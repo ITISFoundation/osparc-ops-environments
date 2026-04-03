@@ -17,10 +17,10 @@ up-default: ## Deploy stack (usage: `make up`)
 	@set -a && source $(REPO_CONFIG_LOCATION) && set +a && \
 	$(MAKE) .up-$$OSPARC_DEPLOYMENT_TARGET
 
-.PHONY: down-default
-down-default: ## Remove stack (usage: `make down`)
-	@echo "${STACK_NAME}"
-	@docker stack rm --detach=false ${STACK_NAME}
+down-default: guard-optional-bool-GRACEFUL ## Remove stack (usage: `make down`)
+	@# DETACH should be reverse of GRACEFUL (e.g., if GRACEFUL is false, DETACH is true)
+	$(eval DETACH = $(if $(filter false,$(GRACEFUL)),true,false))
+	@docker stack rm --detach=$(DETACH) ${STACK_NAME}
 
 .PHONY: prune-docker-stack-configs-default
 prune-docker-stack-configs-default: ## Clean all unused stack configs
