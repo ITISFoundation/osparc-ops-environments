@@ -59,10 +59,14 @@ services:
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.registry.loadbalancer.server.port=5000
+        # stream large blob transfers immediately instead of buffering
+        - traefik.http.services.registry.loadbalancer.responseforwarding.flushinterval=1ms
         - traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)
         - traefik.http.routers.registry.entrypoints=https
         - traefik.http.routers.registry.tls=true
-        - traefik.http.routers.registry.middlewares=ops_gzip@swarm, ops_auth@swarm
+        # NOTE: ops_gzip removed — Docker image layers are already gzip-compressed;
+        # re-compressing wastes CPU and buffers large blobs in RAM
+        - traefik.http.routers.registry.middlewares=ops_auth@swarm
         - prometheus-job=registry
         - prometheus-port=5001
 
