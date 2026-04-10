@@ -6,8 +6,6 @@ services:
         volumes:
             - /docker/volumes/:/docker/volumes/
     postgres:
-        labels:
-            - "pgbackup.enable=true"
         deploy:
             placement:
                 constraints:
