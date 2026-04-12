@@ -1,0 +1,49 @@
+# Calico NetworkPolicy for NVIDIA GPU Operator namespace
+# Applied via helmfile hook (kubectl apply) since the chart is upstream.
+#
+# Components in this namespace (with our values):
+#   - GPU Operator controller (Deployment): K8s API client, metrics on 8080, health on 8081
+#   - Device Plugin (DaemonSet): K8s API client (registers nvidia.com/gpu)
+#   - NVIDIA Container Toolkit (DaemonSet): host-only (configures containerd)
+#   - DCGM Exporter (DaemonSet): exposes GPU metrics on port 9400
+#   - GPU Feature Discovery (DaemonSet): K8s API client (labels nodes)
+#   - NFD Master/Worker/GC (Deployment/DaemonSet): K8s API client, metrics on 8081
+#   - Validator (DaemonSet): K8s API client
+#
+# DNS egress is already allowed by the global deny policy.
+# Image pulls are handled by kubelet (host network), not by pods.
+#
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: gpu-operator-network-policy
+  namespace: gpu-operator
+spec:
+  types:
+    - Ingress
+    - Egress
+  egress:
+    # All controllers need access to the Kubernetes API server
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 6443
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+  ingress:
+    # DCGM exporter metrics scraping (Prometheus)
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9400
+    # GPU Operator controller metrics + NFD metrics + kubelet health probes
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 8080
+          - 8081

@@ -46,10 +46,11 @@ SIMCORE_REPO_DIR ?= $(abspath $(REPO_BASE_DIR)/../osparc-simcore)
 .PHONY: .up-public
 .up-public: .up
 
-down:
+down: guard-optional-bool-GRACEFUL ## Remove stack (usage: `make down`)
+	$(eval DETACH = $(if $(filter false,$(GRACEFUL)),true,false))
 	@# override default implementation as stack name is defined in the config file
 	@set -a && source $(REPO_CONFIG_LOCATION) && set +a && \
-	docker stack rm --detach=false $$SIMCORE_STACK_NAME
+	docker stack rm --detach=$(DETACH) $$SIMCORE_STACK_NAME
 
 #
 # Artifacts

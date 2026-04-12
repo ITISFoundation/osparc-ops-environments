@@ -93,9 +93,10 @@ start-loadbalancer: .stack.loadbalancer.yml prune-docker-stack-lb-configs ## sta
 
 update-loadbalancer: start-loadbalancer ## update rabbit cluster load balancer
 
-stop-loadbalancer:  ## stop rabbit cluster load balancer
+stop-loadbalancer: guard-optional-bool-GRACEFUL ## stop rabbit cluster load balancer
+	$(eval DETACH = $(if $(filter false,$(GRACEFUL)),true,false))
 	# Stopping Loadbalancer
-	@docker stack rm $(LOAD_BALANCER_STACK_NAME)
+	@docker stack rm --detach=$(DETACH) $(LOAD_BALANCER_STACK_NAME)
 
 #
 # Rabbit all Nodes together
@@ -144,11 +145,12 @@ update-node0%: validate-node-ix0% .stack.node0%.yml
 	docker stack deploy --detach=false --with-registry-auth --prune --compose-file $(word 2,$^) $$STACK_NAME
 
 stop-nodeINDEX:  ## stop rabbit cluster node <INDEX> (e.g. `make stop-node01` to stop node 1)
-stop-node0%: validate-node-ix0%
+stop-node0%: validate-node-ix0% guard-optional-bool-GRACEFUL
+	$(eval DETACH = $(if $(filter false,$(GRACEFUL)),true,false))
 	@STACK_NAME=$(call create_node_stack_name,$*); \
 	if docker stack ls --format '{{.Name}}' | grep --silent "$$STACK_NAME"; then \
 		echo "Stopping Rabbit Node $* ..."; \
-		docker stack rm --detach=false $$STACK_NAME; \
+		docker stack rm --detach=$(DETACH) $$STACK_NAME; \
 		$(call wait_cluster_to_stabilize,$(NODE_STATE_CHANGE_WAIT_TIME)); \
 	else \
 		echo "Rabbit Node $* is not running, skipping"; \
