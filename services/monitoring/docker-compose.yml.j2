@@ -385,6 +385,7 @@ services:
         target: /etc/tempo.yaml
     networks:
       - monitored
+      - public
     deploy:
       labels:
         - prometheus-job=tempo
