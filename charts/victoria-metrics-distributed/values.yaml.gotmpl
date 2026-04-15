@@ -229,6 +229,29 @@ vmdistributed:
     # container metrics (cpu / memory)
     kubelet:
       enabled: true
+      vmScrape:
+        spec:
+          metricRelabelConfigs:
+            # upstream defaults
+            - action: labeldrop
+              regex: (uid)
+            - action: labeldrop
+              regex: (id|name)
+            - action: drop
+              source_labels: [__name__]
+              regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+            # Drop noisy node labels mapped by the default labelmap rule.
+            # GPU nodes (NVIDIA operator + Node Feature Discovery) add 60+
+            # feature.node.kubernetes.io/* and nvidia.com/* labels to every
+            # scraped metric, exceeding maxLabelsPerTimeseries (default 40)
+            # and causing VictoriaMetrics to silently drop entire series
+            # (container_memory_usage_bytes, container_cpu_usage_seconds_total, etc.)
+            # These labels are for pod scheduling, not observability.
+            # Ref: https://github.com/ITISFoundation/osparc-ops-environments/issues/1383
+            - action: labeldrop
+              regex: feature_node_kubernetes_io_.*
+            - action: labeldrop
+              regex: nvidia_com_.*
 
     kubeApiServer:
       enabled: false
