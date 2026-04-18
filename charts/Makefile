@@ -16,6 +16,9 @@ CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 HELMFILE_EXTRA_ARGS ?=
 HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 
+CHART_TEMPLATE_DIR := $(REPO_BASE_DIR)/charts/.template
+CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
+
 #
 # Helpers
 #
@@ -31,6 +34,16 @@ HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 .helmfile-%: .check-helmfile-installed helmfile.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml $*
+
+.PHONY: add-new-chart
+add-new-chart: guard-CHART_NAME venv ## Adds a new chart folder with standard structure
+	$(eval CHART_DIR := $(REPO_BASE_DIR)/charts/$(CHART_NAME))
+	@mkdir $(CHART_DIR)
+	@echo "CHART_NAME=$(CHART_NAME)" > $(CHART_DIR)/.env
+	@$(foreach tmpl,$(CHART_TEMPLATES),\
+		$(call jinja, $(tmpl), $(CHART_DIR)/.env, $(CHART_DIR)/$(notdir $(tmpl)));\
+	)
+	@rm $(CHART_DIR)/.env
 
 #
 # Artifacts
