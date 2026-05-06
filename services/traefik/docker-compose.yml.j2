@@ -33,6 +33,11 @@ services:
         published: 6379
         mode: host
       {% endif %}
+      {% if OPS_TRAEFIK_EXPOSE_SMTP|lower == "true" %}
+      - target: ${SMTP_PORT}
+        published: ${SMTP_PORT}
+        mode: host
+      {% endif %}
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml

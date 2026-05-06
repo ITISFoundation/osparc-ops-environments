@@ -24,15 +24,21 @@ services:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # WEB GUI: router
-        - traefik.http.routers.local-mail-server.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`${HTTP_PROXY_PREFIX_PATH}`)
-        - traefik.http.routers.local-mail-server.entrypoints=https
-        - traefik.http.routers.local-mail-server.tls=true
-        - traefik.http.routers.local-mail-server.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm
+        - traefik.http.routers.local-mail-server-gui.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`${HTTP_PROXY_PREFIX_PATH}`)
+        - traefik.http.routers.local-mail-server-gui.entrypoints=https
+        - traefik.http.routers.local-mail-server-gui.tls=true
+        - traefik.http.routers.local-mail-server-gui.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm
         # WEB GUI: service
-        - traefik.http.services.local-mail-server.loadbalancer.server.port=8025
-        - traefik.http.services.local-mail-server.loadbalancer.healthcheck.path=${HTTP_PROXY_PREFIX_PATH}
-        - traefik.http.services.local-mail-server.loadbalancer.healthcheck.interval=10s
-        - traefik.http.services.local-mail-server.loadbalancer.healthcheck.timeout=2s
+        - traefik.http.services.local-mail-server-gui.loadbalancer.server.port=8025
+        - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.path=${HTTP_PROXY_PREFIX_PATH}
+        - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.interval=10s
+        - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.timeout=2s
+        # SMTP: router
+        - traefik.tcp.routers.local-mail-server-smtp.rule=HostSNI(`${SMTP_HOST}`)
+        - traefik.tcp.routers.local-mail-server-smtp.entrypoints=smtp
+        - traefik.tcp.routers.local-mail-server-smtp.tls=true
+        # SMTP: service
+        - traefik.tcp.services.local-mail-server-smtp.loadbalancer.server.port=1025
       resources:
           limits:
               memory: 512M
