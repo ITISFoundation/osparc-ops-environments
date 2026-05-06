@@ -1,0 +1,54 @@
+services:
+  local-mail-server:
+    image:  axllent/mailpit:v1.29.6
+    networks:
+      - public
+      - monitored
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_WEBROOT: ${HTTP_PROXY_PREFIX_PATH}
+      MP_SMTP_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    volumes:
+      - data:/data
+    deploy:
+      replicas: 1
+      update_config:
+        order: stop-first
+        failure_action: rollback
+      placement:
+        constraints:
+          - node.labels.ops==true
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${PUBLIC_NETWORK}
+        # WEB GUI: router
+        - traefik.http.routers.local-mail-server.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`${HTTP_PROXY_PREFIX_PATH}`)
+        - traefik.http.routers.local-mail-server.entrypoints=https
+        - traefik.http.routers.local-mail-server.tls=true
+        - traefik.http.routers.local-mail-server.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm
+        # WEB GUI: service
+        - traefik.http.services.local-mail-server.loadbalancer.server.port=8025
+        - traefik.http.services.local-mail-server.loadbalancer.healthcheck.path=${HTTP_PROXY_PREFIX_PATH}
+        - traefik.http.services.local-mail-server.loadbalancer.healthcheck.interval=10s
+        - traefik.http.services.local-mail-server.loadbalancer.healthcheck.timeout=2s
+      resources:
+          limits:
+              memory: 512M
+              cpus: "0.5"
+          reservations:
+              memory: 256M
+              cpus: "0.1"
+    # healthcheck configured in https://github.com/axllent/mailpit/blob/v1.29.6/Dockerfile#L28
+
+volumes:
+  data:
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true
