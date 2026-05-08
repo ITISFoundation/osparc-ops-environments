@@ -38,6 +38,11 @@ services:
         published: ${SMTP_PORT}
         mode: host
       {% endif %}
+      {% if OPS_TRAEFIK_EXPOSE_POP3|lower == "true" %}
+      - target: ${POP3_PORT}
+        published: ${POP3_PORT}
+        mode: host
+      {% endif %}
     configs:
       - source: traefik_dynamic_config.yml
         target: /etc/traefik/dynamic_conf.yml

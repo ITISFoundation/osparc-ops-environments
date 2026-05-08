@@ -10,6 +10,7 @@ services:
       MP_WEBROOT: ${HTTP_PROXY_PREFIX_PATH}
       MP_SMTP_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+      MP_POP3_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
     volumes:
       - data:/data
     deploy:
@@ -39,6 +40,12 @@ services:
         - traefik.tcp.routers.local-mail-server-smtp.tls=true
         # SMTP: service
         - traefik.tcp.services.local-mail-server-smtp.loadbalancer.server.port=1025
+        # POP3: router
+        - traefik.tcp.routers.local-mail-server-pop3.rule=HostSNI(`${SMTP_HOST}`)
+        - traefik.tcp.routers.local-mail-server-pop3.entrypoints=pop3
+        - traefik.tcp.routers.local-mail-server-pop3.tls=true
+        # POP3: service
+        - traefik.tcp.services.local-mail-server-pop3.loadbalancer.server.port=1110
       resources:
           limits:
               memory: 512M
