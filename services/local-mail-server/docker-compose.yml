@@ -34,7 +34,7 @@ services:
         - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.timeout=2s
         # SMTP: router
         - traefik.tcp.routers.local-mail-server-smtp.rule=HostSNI(`${SMTP_HOST}`)
-        - traefik.tcp.routers.local-mail-server-smtp.entrypoints=smtp
+        - traefik.tcp.routers.local-mail-server-smtp.entrypoints=smtps
         - traefik.tcp.routers.local-mail-server-smtp.tls=true
         # SMTP: service
         - traefik.tcp.services.local-mail-server-smtp.loadbalancer.server.port=1025
