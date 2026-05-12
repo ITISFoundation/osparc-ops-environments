@@ -6,7 +6,6 @@ services:
       - monitored
     environment:
       MP_MAX_MESSAGES: 5000
-      MP_DATABASE: /data/mailpit.db
       MP_WEBROOT: ${HTTP_PROXY_PREFIX_PATH}
       MP_SMTP_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
