@@ -11,7 +11,7 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
       MP_POP3_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
       # https://mailpit.axllent.org/docs/configuration/prometheus/
-      MP_ENABLE_PROMETHEUS: "0.0.0.0:9090"
+      MP_ENABLE_PROMETHEUS: "0.0.0.0:${PROMETHEUS_PORT}"
     deploy:
       replicas: 1
       update_config:
@@ -25,7 +25,7 @@ services:
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # Prometheus
         - prometheus-job=local-mail-server
-        - prometheus-port=9090
+        - prometheus-port=${PROMETHEUS_PORT}
         # WEB GUI: router
         - traefik.http.routers.local-mail-server-gui.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`${HTTP_PROXY_PREFIX_PATH}`)
         - traefik.http.routers.local-mail-server-gui.entrypoints=https
