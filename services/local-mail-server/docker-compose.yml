@@ -43,6 +43,8 @@ services:
         - traefik.tcp.routers.local-mail-server-smtp.service=local-mail-server-smtp
         # SMTP: service (https://mailpit.axllent.org/docs/configuration/smtp/)
         - traefik.tcp.services.local-mail-server-smtp.loadbalancer.server.port=1025
+        - traefik.tcp.services.local-mail-server-smtp.loadbalancer.interval=30s
+        - traefik.tcp.services.local-mail-server-smtp.loadbalancer.timeout=2s
         # POP3: router
         - traefik.tcp.routers.local-mail-server-pop3.rule=HostSNI(`${SMTP_HOST}`)
         - traefik.tcp.routers.local-mail-server-pop3.entrypoints=pop3
@@ -50,6 +52,8 @@ services:
         - traefik.tcp.routers.local-mail-server-pop3.service=local-mail-server-pop3
         # POP3: service (https://mailpit.axllent.org/docs/configuration/pop3/)
         - traefik.tcp.services.local-mail-server-pop3.loadbalancer.server.port=1110
+        - traefik.tcp.services.local-mail-server-pop3.loadbalancer.interval=30s
+        - traefik.tcp.services.local-mail-server-pop3.loadbalancer.timeout=2s
       resources:
           limits:
               memory: 512M
