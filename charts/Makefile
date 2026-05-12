@@ -35,8 +35,8 @@ CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml $*
 
-.PHONY: add-new-chart-directory
-add-new-chart-directory: guard-CHART_NAME venv ## Adds a new chart directory with standard structure
+.PHONY: add-new-chart-directory-from-template
+add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart directory with standard structure
 	$(eval CHART_DIR := $(REPO_BASE_DIR)/charts/$(CHART_NAME))
 	@mkdir $(CHART_DIR)
 	@echo "CHART_NAME=$(CHART_NAME)" > $(CHART_DIR)/.env
