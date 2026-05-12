@@ -35,13 +35,15 @@ services:
         - traefik.tcp.routers.local-mail-server-smtp.rule=HostSNI(`${SMTP_HOST}`)
         - traefik.tcp.routers.local-mail-server-smtp.entrypoints=smtp
         - traefik.tcp.routers.local-mail-server-smtp.tls=true
-        # SMTP: service
+        - traefik.tcp.routers.local-mail-server-smtp.service=local-mail-server-smtp
+        # SMTP: service (https://mailpit.axllent.org/docs/configuration/smtp/)
         - traefik.tcp.services.local-mail-server-smtp.loadbalancer.server.port=1025
         # POP3: router
         - traefik.tcp.routers.local-mail-server-pop3.rule=HostSNI(`${SMTP_HOST}`)
         - traefik.tcp.routers.local-mail-server-pop3.entrypoints=pop3
         - traefik.tcp.routers.local-mail-server-pop3.tls=true
-        # POP3: service
+        - traefik.tcp.routers.local-mail-server-pop3.service=local-mail-server-pop3
+        # POP3: service (https://mailpit.axllent.org/docs/configuration/pop3/)
         - traefik.tcp.services.local-mail-server-pop3.loadbalancer.server.port=1110
       resources:
           limits:
