@@ -32,6 +32,8 @@ services:
       -H tcp://tasks.agent:9001 --tlsskipverify
       --admin-password-file=/run/secrets/portainer_admin_password
       --no-analytics
+    environment:
+      TRUSTED_ORIGINS: $MONITORING_DOMAIN
     volumes:
       - portainer_data:/data
     networks:

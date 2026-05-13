@@ -37,6 +37,8 @@ storage_config:
     secret_access_key: ${S3_SECRET_KEY_LOKI}
     endpoint: ${S3_ENDPOINT_LOKI}
     s3forcepathstyle: true
+    http_config:
+      insecure_skip_verify: true
 
 compactor:
   working_directory: /tmp/loki/compactor
