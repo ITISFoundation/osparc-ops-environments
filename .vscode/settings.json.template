@@ -1,0 +1,8 @@
+{
+    "codeQL.githubDatabase.update": "never",
+    "http.proxyStrictSSL": false,
+    "terminal.integrated.env.linux": {
+        "SSL_CERT_FILE": "${workspaceFolder}/certificates/rootca.crt",
+        "NODE_EXTRA_CA_CERTS": "${workspaceFolder}/certificates/rootca.crt"
+    }
+}

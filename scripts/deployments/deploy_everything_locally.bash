@@ -157,33 +157,33 @@ if [ "$start_opsstack" -eq 0 ]; then
     # -------------------------------- TRAEFIK -------------------------------
     log_info "starting traefik..."
     pushd "${repo_basedir}"/services/traefik
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # -------------------------------- PORTAINER ------------------------------
     log_info "starting portainer..."
     pushd "${repo_basedir}"/services/portainer
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # -------------------------------- Redis commander-------------------------------
     log_info "starting redis commander..."
     pushd "${repo_basedir}"/services/redis-commander
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # -------------------------------- JAEGER -------------------------------
     log_info "starting jaeger..."
     service_dir="${repo_basedir}"/services/jaeger
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # -------------------------------- Adminer -------------------------------
     log_info "starting adminer..."
     service_dir="${repo_basedir}"/services/adminer
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # only start minio for the local deployment
@@ -194,7 +194,7 @@ if [ "$start_opsstack" -eq 0 ]; then
         log_info "starting minio..."
         service_dir="${repo_basedir}"/services/minio
         pushd "${service_dir}"
-        call_make "." up-"$stack_target"
+        call_make "." up
         popd
 
         log_info "waiting for minio to run...don't worry..."
@@ -208,7 +208,7 @@ if [ "$start_opsstack" -eq 0 ]; then
     log_info "starting registry..."
     service_dir="${repo_basedir}"/services/registry
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
 
@@ -216,20 +216,20 @@ if [ "$start_opsstack" -eq 0 ]; then
     log_info "starting filestash..."
     service_dir="${repo_basedir}"/services/filestash
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # -------------------------------- APPMOTION GATEWAY -------------------------------
     log_info "starting appmotion-gateway..."
     pushd "${repo_basedir}"/services/appmotion_gateway
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 
     # -------------------------------- MONITORING -------------------------------
     log_info "starting monitoring..."
     # Pushd because a call with call_make trigger a strange behavior
     pushd "${repo_basedir}"/services/monitoring;
-    call_make "." up-"$stack_target";
+    call_make "." up;
     popd
 
     # -------------------------------- ADMIN-PANELS -------------------------------
@@ -240,14 +240,14 @@ if [ "$start_opsstack" -eq 0 ]; then
     docker stack ls | grep -q admin-panels && docker stack rm admin-panels >/dev/null 2>&1 || true
     # Pushd because a call with call_make trigger a strange behavior
     pushd "${repo_basedir}"/services/admin-panels;
-    call_make "." up-"$stack_target";
+    call_make "." up;
     popd
 
     # -------------------------------- LOGGING -------------------------------
     log_info "starting logging..."
     service_dir="${repo_basedir}"/services/logging
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     sleep 1
     call_make "." configure
     popd
@@ -256,11 +256,11 @@ if [ "$start_simcore" -eq 0 ]; then
     log_info "starting simcore..."
     service_dir="${repo_basedir}"/services/simcore
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
     log_info "starting vendor services..."
     service_dir="${repo_basedir}"/services/vendors
     pushd "${service_dir}"
-    call_make "." up-"$stack_target"
+    call_make "." up
     popd
 fi

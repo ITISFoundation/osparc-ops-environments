@@ -151,5 +151,8 @@ repo.config
 .temp
 .temp/**
 
+# Persistent clones of external repos (e.g. osparc-simcore)
+.clones/
+
 # By convention: `.secret` files are gitignored
 **/*.secret
