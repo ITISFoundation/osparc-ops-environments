@@ -1,5 +1,5 @@
 services:
-  local-mail-server:
+  local-mail-server: # not a real mail server, but a testing/dev tool
     image:  axllent/mailpit:v1.29.6
     networks:
       - public
