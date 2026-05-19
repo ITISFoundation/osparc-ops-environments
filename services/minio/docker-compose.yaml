@@ -13,8 +13,8 @@ services:
     ports:
       - target: 9000
     environment:
-      - MINIO_ACCESS_KEY_FILE=minio_access_key
-      - MINIO_SECRET_KEY_FILE=minio_secret_key
+      - MINIO_ROOT_USER_FILE=minio_access_key
+      - MINIO_ROOT_PASSWORD_FILE=minio_secret_key
     deploy:
       restart_policy:
         delay: 10s
