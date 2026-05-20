@@ -34,3 +34,26 @@ daemonsets:
     - key: nvidia.com/gpu
       operator: Exists
       effect: NoSchedule
+
+# Limit Node Feature Discovery to only create PCI-related node labels.
+# By default, NFD enables ALL label sources (cpu, kernel, system, memory,
+# network, storage, usb, pci) which adds 50+ feature.node.kubernetes.io/*
+# labels to GPU nodes. These get copied onto every scraped metric by the
+# default kubelet VMNodeScrape labelmap rule, pushing total labels past
+# maxLabelsPerTimeseries=40 and causing VictoriaMetrics to silently drop
+# series (container_memory_usage_bytes, etc.)
+#
+# The GPU operator only needs "feature.node.kubernetes.io/pci-10de.present=true"
+# for GPU node detection. The PCI source (already configured upstream with
+# deviceClassWhitelist and deviceLabelFields: [vendor]) produces just a few
+# vendor-presence labels.
+#
+# NOTE: nvidia.com/* labels come from GFD (GPU Feature Discovery), not NFD.
+# Those are needed for GPU scheduling and cannot be excluded here.
+# Ref: https://github.com/ITISFoundation/osparc-ops-environments/issues/1383
+node-feature-discovery:
+  worker:
+    config:
+      core:
+        labelSources:
+          - "pci"
