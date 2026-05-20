@@ -71,6 +71,9 @@ services:
 {%- raw %}
     hostname: "v-meili-fastapi-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
+    environment:
+      - MEILISEARCH_HOST=${VENDOR_MEILISEARCH_MEILISEARCH_HOST}
+      - MEILISEARCH_PORT=${VENDOR_MEILISEARCH_MEILISEARCH_PORT}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
       interval: 30s
