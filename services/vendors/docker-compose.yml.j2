@@ -5,6 +5,8 @@ services:
 {%- raw %}
     hostname: "v-manual-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
+    environment:
+      - FASTAPI_HOST=${VENDOR_MEILI_FASTAPI_HOST}
     deploy:
       replicas: ${VENDOR_MANUAL_REPLICAS}
       placement:
