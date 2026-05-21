@@ -7,6 +7,12 @@ services:
 {%- endraw %}
     environment:
       - FASTAPI_HOST=${VENDOR_MEILI_FASTAPI_HOST}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/web-full/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     deploy:
       replicas: ${VENDOR_MANUAL_REPLICAS}
       placement:
@@ -43,10 +49,11 @@ services:
     hostname: "v-meilisearch-{{.Node.Hostname}}-{{.Task.Slot}}"
 {%- endraw %}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7700/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
     deploy:
       replicas: ${VENDOR_MEILISEARCH_REPLICAS}
       placement:
@@ -81,6 +88,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
     deploy:
       replicas: ${VENDOR_MEILI_FASTAPI_REPLICAS}
       placement:
