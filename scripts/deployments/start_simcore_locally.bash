@@ -59,6 +59,11 @@ set +o allexport
 cd "$repo_basedir" || exit 1
 #
 #
+# Persistent clone directory (survives across runs, gitignored)
+clonesdir="$repo_basedir"/.clones
+mkdir -p "$clonesdir"
+
+# Ephemeral build artefacts
 tempdirname=.temp
 mkdir -p "$repo_basedir"/"$tempdirname"
 
@@ -67,17 +72,20 @@ mkdir -p "$repo_basedir"/"$tempdirname"
 # IF NOT FLAG SET: SIMCORE DEVEL
 if [[ "$devel_repo_path" = "0" ]] ; then
     log_info "Deploying osparc-simcore origin/master via github..."
-    pushd "$tempdirname"
-    #
-    #       IF GETREPO DOESNT EXIST
-    if [ ! -d osparc-simcore ]; then
-        export GIT_SIMCORE_REPO_URL="https://github.com/ITISFoundation/osparc-simcore.git"
-        git clone --depth 1 "$GIT_SIMCORE_REPO_URL"
+    GIT_SIMCORE_REPO_URL="https://github.com/ITISFoundation/osparc-simcore.git"
+    simcore_clone="$clonesdir"/osparc-simcore
+
+    if [ -d "$simcore_clone"/.git ]; then
+        log_info "Reusing existing clone at $simcore_clone"
+        pushd "$simcore_clone"
+        git fetch --depth 1 origin "$GIT_SIMCORE_REPO_BRANCH"
+    else
+        log_info "Cloning osparc-simcore into $simcore_clone ..."
+        rm -rf "$simcore_clone"
+        git clone --depth 1 --branch "$GIT_SIMCORE_REPO_BRANCH" "$GIT_SIMCORE_REPO_URL" "$simcore_clone"
+        pushd "$simcore_clone"
     fi
-    #       FI
-    #
-    cd osparc-simcore
-    git pull
+
     git checkout "$GIT_SIMCORE_REPO_BRANCH"
     cp services/docker-compose.yml "$repo_basedir"
 else
@@ -92,11 +100,14 @@ else
     export DOCKER_REGISTRY=local;
     export DOCKER_IMAGE_TAG=development;
     export DEV_PC_CPU_COUNT=8;
-    # Download yq utility
-    python -c "import urllib.request,os,sys,urllib; f = open(os.path.basename(sys.argv[1]), 'wb'); f.write(urllib.request.urlopen(sys.argv[1]).read()); f.close();" https://github.com/mikefarah/yq/releases/download/v4.29.2/yq_linux_amd64
-    mv yq_linux_amd64 "$repo_basedir"/"$tempdirname"/yq
-    chmod +x "$repo_basedir"/"$tempdirname"/yq
-    _yq=$(realpath "$repo_basedir"/"$tempdirname"/yq)
+    # Download yq utility (only if not already cached)
+    if [ ! -x "$clonesdir"/yq ]; then
+        log_info "Downloading yq..."
+        python -c "import urllib.request,os,sys,urllib; f = open(os.path.basename(sys.argv[1]), 'wb'); f.write(urllib.request.urlopen(sys.argv[1]).read()); f.close();" https://github.com/mikefarah/yq/releases/download/v4.29.2/yq_linux_amd64
+        mv yq_linux_amd64 "$clonesdir"/yq
+        chmod +x "$clonesdir"/yq
+    fi
+    _yq="$clonesdir"/yq
     #
     # Mutate yaml
 
@@ -108,7 +119,6 @@ else
             "$repo_basedir"/"$tempdirname"/docker-compose.local.mutated.yml \
             "$osparcsimcoredeveldir"/services/docker-compose.devel.yml \
             > "$osparcsimcoredeveldir"/.stack-simcore-development.yml
-    # Ensures swarm is initialized
     # Ensures source-output folder always exists to avoid issues when mounting webclient->static-webserver dockers. Supports PowerShell
     mkdir -p "$osparcsimcoredeveldir"/services/static-webserver/client/source-output
     # Start compile+watch front-end container [front-end]
@@ -124,7 +134,7 @@ popd
 cp "$repo_config" "$repo_basedir"
 #
 cd "$repo_basedir"
-rm -fr "$repo_basedir"/.temp
+rm -fr "${repo_basedir:?}"/"${tempdirname:?}"
 #
 log_info "Creating stack.yml file..."
 scripts/deployments/compose_stack_yml.bash
@@ -142,9 +152,3 @@ log_info "Deploying: Running docker stack deploy for stack $SIMCORE_STACK_NAME..
 # Retry logic via https://unix.stackexchange.com/a/82610
 # shellcheck disable=2015
 for i in {1..5}; do docker stack deploy -c stack_with_prefix.yml "$SIMCORE_STACK_NAME" && break || sleep 5; done
-
-
-############
-# CLEANUP
-# shellcheck disable=1073
-rm -r "${repo_basedir:?}"/"${tempdirname:?}" 2>/dev/null || true

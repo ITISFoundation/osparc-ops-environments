@@ -14,7 +14,7 @@ services:
       REGISTRY_STORAGE_S3_BUCKET: ${REGISTRY_S3_BUCKET}
       REGISTRY_STORAGE_S3_REGION: ${REGISTRY_AWS_REGION}
       REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR: inmemory
-      REGISTRY_STORAGE_REDIRECT_DISABLE: "true"
+      REGISTRY_STORAGE_REDIRECT_DISABLE: ${REGISTRY_REDIRECT_DISABLE}
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
       # Read-only mode - MANDATORY to use the garbage collector
       #REGISTRY_STORAGE_MAINTENANCE: |-
@@ -49,7 +49,7 @@ services:
           - node.labels.ops==true
       resources:
         limits:
-          memory: 1G
+          memory: 4G
           cpus: '6'
         reservations:
           memory: 128M
