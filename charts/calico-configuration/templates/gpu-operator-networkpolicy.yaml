@@ -1,5 +1,5 @@
 # Calico NetworkPolicy for NVIDIA GPU Operator namespace
-# Applied via helmfile hook (kubectl apply) since the chart is upstream.
+# Deployed here because gpu-operator uses an upstream Helm chart (no custom templates).
 #
 # Components in this namespace (with our values):
 #   - GPU Operator controller (Deployment): K8s API client, metrics on 8080, health on 8081
@@ -10,7 +10,7 @@
 #   - NFD Master/Worker/GC (Deployment/DaemonSet): K8s API client, metrics on 8081
 #   - Validator (DaemonSet): K8s API client
 #
-# DNS egress is already allowed by the global deny policy.
+# DNS egress is already allowed by the global deny policy (globalpolicy.yaml).
 # Image pulls are handled by kubelet (host network), not by pods.
 #
 apiVersion: projectcalico.org/v3
