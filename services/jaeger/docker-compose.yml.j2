@@ -33,6 +33,8 @@ services:
           memory: 64M
           cpus: "0.1"
   otel-collector:
+    # NOTE: please keep below in sync with the version of `otel/opentelemetry-collector` inside director-v2's settings
+    # https://github.com/itisfoundation/osparc-simcore/blob/master/services/dynamic-sidecar/src/simcore_service_dynamic_sidecar/core/settings.py
     image: otel/opentelemetry-collector-contrib:0.144.0
     configs:
       - source: opentelemetry-collector-config
