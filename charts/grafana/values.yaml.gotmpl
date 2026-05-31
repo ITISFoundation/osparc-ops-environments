@@ -9,8 +9,9 @@ networkPolicy:
     enabled: true
     ports:
       - port: 8427 # global read vmauth port of vm distributed
-      - port: 443 # install plugins from outside
+      - port: 443  # install plugins from outside
       - port: 6443 # sidecars talk to k8s api server (monitor resources to be imported)
+      - port: 9428 # victoria logs
 
 persistence:
   enabled: true
@@ -113,3 +114,4 @@ sidecar:
 
 plugins:
   - victoriametrics-metrics-datasource
+  - victoriametrics-logs-datasource
