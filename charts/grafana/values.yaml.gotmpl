@@ -113,5 +113,7 @@ sidecar:
     searchNamespace: ALL
 
 plugins:
-  - victoriametrics-metrics-datasource
-  - victoriametrics-logs-datasource
+  # install specific version of victoria logs datasource
+  # source: https://github.com/VictoriaMetrics/victorialogs-datasource/issues/401#issuecomment-3339823945
+  - https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.27.1/victoriametrics-logs-datasource-v0.27.1.zip;victoriametrics-logs-datasource
+  - https://github.com/VictoriaMetrics/victoriametrics-datasource/releases/download/v0.23.3/victoriametrics-metrics-datasource-v0.23.3.zip;victoriametrics-metrics-datasource
