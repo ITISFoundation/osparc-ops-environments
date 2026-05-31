@@ -18,6 +18,9 @@ persistence:
   # YH statefulset is not properly supported. The state is not syncronized between replicas.
   type: pvc
   size: 1Gi
+  # when updating plugin version, (after applying changes) helmfile diff always shows pvc change.
+  # It fixes this behaviour
+  lookupVolumeName: false
 
 # copied from grafana docker (swarm) service
 resources:
