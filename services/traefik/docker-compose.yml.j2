@@ -34,8 +34,8 @@ services:
         mode: host
       {% endif %}
       {% if OPS_TRAEFIK_EXPOSE_SMTP|lower == "true" %}
-      - target: ${SMTP_PORT}
-        published: ${SMTP_PORT}
+      - target: ${OPS_TRAEFIK_EXPOSED_SMTP_PORT}
+        published: ${OPS_TRAEFIK_EXPOSED_SMTP_PORT}
         mode: host
       {% endif %}
       {% if OPS_TRAEFIK_EXPOSE_POP3|lower == "true" %}
