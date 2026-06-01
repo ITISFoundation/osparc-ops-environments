@@ -55,6 +55,35 @@ server:
       memory: 512Mi
 
 extraObjects:
+  # Grafana datasource provisioned as a Secret with special label.
+  # Picked up by the grafana sidecar (see grafana chart values).
+  # Modeled after charts/victoria-metrics-distributed/templates/grafana/datasource.yaml
+  - |
+    {{`{{- $ctx := dict "helm" . "appKey" "server" }}`}}
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: victoria-logs-grafana-datasource
+      labels:
+        # special label to be picked up by the grafana sidecar
+        grafana_datasource: true_string
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: {{`{{ .Chart.Name | trunc 63 }}`}}
+        app.kubernetes.io/instance: {{`{{ .Release.Name | trunc 63 }}`}}
+        helm.sh/chart: {{`{{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}`}}
+    stringData:
+      # https://docs.victoriametrics.com/victorialogs/victorialogs-datasource/
+      datasource.yaml: |-
+        apiVersion: 1
+        datasources:
+          - name: VictoriaLogs
+            # this plugin needs to be installed in grafana beforehand
+            type: victoriametrics-logs-datasource
+            uid: {{ .Values.grafanaVictoriaLogsDatasourceUid }}
+            access: proxy
+            url: http://{{`{{ include "vm.plain.fullname" $ctx }}`}}.{{`{{ include "vm.namespace" $ctx }}`}}.svc.cluster.local:{{`{{ .Values.server.service.servicePort }}`}}
+            isDefault: false
+            editable: true
   - |
     # Extra objects can be templated. See https://github.com/VictoriaMetrics/helm-charts/pull/1903
     # Escape expressions with curly braces and backticks to pass them to Helm
