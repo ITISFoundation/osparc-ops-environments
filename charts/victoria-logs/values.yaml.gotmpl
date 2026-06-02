@@ -4,6 +4,12 @@ vector:
   # by default it will generate sink per statefulset's pod
   # each pod has a separate PV, so the data is replicated
   enabled: true
+  customConfig:
+    sinks:
+      vlogs:
+        request:
+          headers:
+            VL-Stream-Fields: source_type,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
 
 server:
   replicaCount: 1
