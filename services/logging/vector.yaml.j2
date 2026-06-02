@@ -171,7 +171,7 @@ sinks:
         # (original field key is dropped / not present in VictoriaLogs GUI)
         VL-Msg-Field: log_msg,message
         # log field names, which uniquely identify every log stream
-        VL-Stream-Fields: source_type,service_name,container_name,container_id
+        VL-Stream-Fields: source_type,service_name,container_name
         VL-Time-Field: timestamp
         # WARNING: we overwrite source_type from `socket` to `docker_swarm_logs`
         # This makes more sense to users of victoria logs. Users can use filters
