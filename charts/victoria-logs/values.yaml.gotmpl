@@ -11,7 +11,7 @@ vector:
           # https://docs.victoriametrics.com/victorialogs/data-ingestion/#http-headers
           headers:
             VL-Stream-Fields: source_type,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
-            VL-Ignore-Fields: kubernetes.node_labels.*,kubernetes.pod_labels.*,kubernetes.pod_annotations.*,kubernetes.namespace_labels.*
+            VL-Ignore-Fields: kubernetes.node_labels.*,kubernetes.pod_labels.*,kubernetes.pod_annotations.*,kubernetes.namespace_labels.*,kubernetes.pod_ip,kubernetes.pod_ips
 
 server:
   replicaCount: 1
