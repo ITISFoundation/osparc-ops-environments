@@ -4,6 +4,14 @@ vector:
   # by default it will generate sink per statefulset's pod
   # each pod has a separate PV, so the data is replicated
   enabled: true
+  customConfig:
+    sinks:
+      vlogs:
+        request:
+          # https://docs.victoriametrics.com/victorialogs/data-ingestion/#http-headers
+          headers:
+            VL-Stream-Fields: source_type,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+            VL-Ignore-Fields: kubernetes.node_labels.*,kubernetes.pod_labels.*,kubernetes.pod_annotations.*,kubernetes.namespace_labels.*,kubernetes.pod_ip,kubernetes.pod_ips
 
 server:
   replicaCount: 1
@@ -48,13 +56,42 @@ server:
 
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2
+      memory: 2Gi
     requests:
       cpu: 500m
       memory: 512Mi
 
 extraObjects:
+  # Grafana datasource provisioned as a Secret with special label.
+  # Picked up by the grafana sidecar (see grafana chart values).
+  # Modeled after charts/victoria-metrics-distributed/templates/grafana/datasource.yaml
+  - |
+    {{`{{- $ctx := dict "helm" . "appKey" "server" }}`}}
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: victoria-logs-grafana-datasource
+      labels:
+        # special label to be picked up by the grafana sidecar
+        grafana_datasource: true_string
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: {{`{{ .Chart.Name | trunc 63 }}`}}
+        app.kubernetes.io/instance: {{`{{ .Release.Name | trunc 63 }}`}}
+        helm.sh/chart: {{`{{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}`}}
+    stringData:
+      # https://docs.victoriametrics.com/victorialogs/victorialogs-datasource/
+      datasource.yaml: |-
+        apiVersion: 1
+        datasources:
+          - name: VictoriaLogs
+            # this plugin needs to be installed in grafana beforehand
+            type: victoriametrics-logs-datasource
+            uid: {{ .Values.grafanaVictoriaLogsDatasourceUid }}
+            access: proxy
+            url: http://{{`{{ include "vm.plain.fullname" $ctx }}`}}.{{`{{ include "vm.namespace" $ctx }}`}}.svc.cluster.local:{{`{{ .Values.server.service.servicePort }}`}}
+            isDefault: false
+            editable: true
   - |
     # Extra objects can be templated. See https://github.com/VictoriaMetrics/helm-charts/pull/1903
     # Escape expressions with curly braces and backticks to pass them to Helm

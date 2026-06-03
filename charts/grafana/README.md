@@ -24,7 +24,7 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 
 ## How to add a datasource
 
-Create a Kubernetes secret with a special labels. It can be in any namespace (double check searchNamespace in datasource sidecar container of grafana).
+Create a Kubernetes secret with a special labels. It can be in any namespace (double check searchNamespace in datasource sidecar container of grafana). If datasource needs a plugin, install a plugin first (see instructions in the corresponding section).
 
 Important: explicitly define datasource uid & type and store these values in global values so that it can be referenced in other charts.
 
@@ -47,6 +47,10 @@ stringData:
 ```
 kubectl -n grafana logs grafana-0 --container grafana-sc-dashboard
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-datasources
+
+## How to add a plugin
+
+Use `plugins` key in helm chart values. Every plugin shall be pinned to a version (see existing plugins for example).
 
 ## How to edit dashboard
 * Make changes in UI
