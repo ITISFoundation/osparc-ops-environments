@@ -57,9 +57,6 @@ transforms:
         del(.created)
       }
 
-      # Add processing metadata
-      .processed_by = "vector"
-
       # Extract structured log fields from message using regex pattern
       if exists(.message) {
         # python service logs
@@ -175,7 +172,7 @@ sinks:
         # or source_type="docker_swarm_logs"
         VL-Extra-Fields: source_type=docker_swarm_logs
         # ignore internal fields to save space (e.g. _command, _image_id, etc.)
-        VL-Ignore-Fields: _*,version,processed_by,port
+        VL-Ignore-Fields: _*,version,port
     {%- if MACHINE_FQDN == "osparc.local" %}
     tls:
       verify_certificate: false
