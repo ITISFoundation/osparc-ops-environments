@@ -57,13 +57,6 @@ transforms:
         del(.created)
       }
 
-      # Handle image name
-      if exists(._image_name) {
-        .image_name = ._image_name
-      } else {
-        .image_name = "unknown"
-      }
-
       # Add processing metadata
       .processed_by = "vector"
 
@@ -182,7 +175,7 @@ sinks:
         # or source_type="docker_swarm_logs"
         VL-Extra-Fields: source_type=docker_swarm_logs
         # ignore internal fields to save space (e.g. _command, _image_id, etc.)
-        VL-Ignore-Fields: _*,version,processed_by,port,image_name
+        VL-Ignore-Fields: _*,version,processed_by,port
     {%- if MACHINE_FQDN == "osparc.local" %}
     tls:
       verify_certificate: false
