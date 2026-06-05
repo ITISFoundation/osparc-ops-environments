@@ -57,16 +57,6 @@ transforms:
         del(.created)
       }
 
-      # Handle image name
-      if exists(._image_name) {
-        .image_name = ._image_name
-      } else {
-        .image_name = "unknown"
-      }
-
-      # Add processing metadata
-      .processed_by = "vector"
-
       # Extract structured log fields from message using regex pattern
       if exists(.message) {
         # python service logs
@@ -169,9 +159,12 @@ sinks:
         # first non-empty field from the list is treated as log message
         # WARNING: the message field with value is being renamed to `_msg`
         # (original field key is dropped / not present in VictoriaLogs GUI)
+        # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#message-field
         VL-Msg-Field: log_msg,message
         # log field names, which uniquely identify every log stream
-        VL-Stream-Fields: service_name,container_name,container_id
+        # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#stream-fields
+        VL-Stream-Fields: source_type,service_name,container_name,container_id
+        # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#time-field
         VL-Time-Field: timestamp
         # WARNING: we overwrite source_type from `socket` to `docker_swarm_logs`
         # This makes more sense to users of victoria logs. Users can use filters
@@ -179,7 +172,7 @@ sinks:
         # or source_type="docker_swarm_logs"
         VL-Extra-Fields: source_type=docker_swarm_logs
         # ignore internal fields to save space (e.g. _command, _image_id, etc.)
-        VL-Ignore-Fields: _*
+        VL-Ignore-Fields: _*,version,port
     {%- if MACHINE_FQDN == "osparc.local" %}
     tls:
       verify_certificate: false
