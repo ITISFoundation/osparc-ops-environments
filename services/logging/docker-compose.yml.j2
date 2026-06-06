@@ -80,10 +80,6 @@ services:
         published: 12203
         protocol: tcp
         mode: host
-      - target: 12202
-        published: 12202
-        protocol: udp
-        mode: ingress
     deploy:
       replicas: 1
       restart_policy:
@@ -112,6 +108,10 @@ services:
     ports:
       - target: 12201
         published: 12201
+        protocol: udp
+        mode: ingress
+      - target: 12202
+        published: 12202
         protocol: udp
         mode: ingress
     volumes:

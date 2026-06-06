@@ -1,6 +1,10 @@
 # Ingests GELF logs from Docker daemon and forwards to Loki and Graylog (both over TCP)
 
 sources:
+  syslog_tcp:
+    type: syslog
+    address: "0.0.0.0:12202"
+    mode: tcp
   # Receive GELF messages from Docker containers via UDP
   vector_metrics:
     type: internal_metrics
@@ -124,7 +128,9 @@ sinks:
   # Send to Graylog via GELF over TCP
   graylog:
     type: socket
-    inputs: ["process_logs_base"]
+    inputs:
+      - process_logs_base
+      - syslog_tcp
     address: "${VECTOR_LOG_DESTINATION:?err}:12203"
     mode: tcp
     encoding:
@@ -134,7 +140,7 @@ sinks:
 
 {%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
   # https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/
-  kubernetes-victoria-logs:
+  docker-logs-to-kubernetes-victoria-logs:
     inputs:
       - process_logs_base
     # https://vector.dev/docs/reference/configuration/sinks/elasticsearch/
@@ -178,6 +184,35 @@ sinks:
       verify_certificate: false
       verify_hostname: false
     {%- endif %}
+
+  syslogs-to-kubernetes-victoria-logs:
+    inputs:
+      - syslog_tcp
+    type: elasticsearch
+    auth:
+      strategy: basic
+      user: "${SERVICES_USER}"
+      password: "${SERVICES_PASSWORD}"
+    endpoints:
+      - ${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}/logs/insert/elasticsearch
+    api_version: v8
+    compression: gzip
+    healthcheck:
+      enabled: false
+    mode: bulk
+    request:
+      headers:
+        AccountID: "0"
+        VL-Msg-Field: message,msg
+        VL-Stream-Fields: source_type,host,facility,appname
+        VL-Time-Field: timestamp
+        VL-Ignore-Fields: _*,version
+    {%- if MACHINE_FQDN == "osparc.local" %}
+    tls:
+      verify_certificate: false
+      verify_hostname: false
+    {%- endif %}
+
 {%- endif %}
 
   # Temporary: Output to console for debugging
