@@ -125,8 +125,9 @@ sinks:
     inputs:
       - vector_metrics
     address: "0.0.0.0:9598"
+
   # Send to Graylog via GELF over TCP
-  graylog:
+  graylog-logs: &graylog-sink-common
     type: socket
     inputs:
       - process_logs_base
@@ -137,6 +138,15 @@ sinks:
       codec: gelf
     healthcheck:
       enabled: true
+
+  graylog-syslogs:
+    <<: *graylog-sink-common
+    inputs:
+      - syslog_tcp
+    address: "${VECTOR_LOG_DESTINATION:?err}:12202"
+    encoding:
+      codec: syslog
+
 
 {%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
   # https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/
@@ -195,6 +205,7 @@ sinks:
         VL-Msg-Field: message,msg
         VL-Stream-Fields: source_type,host,facility,appname
         VL-Time-Field: timestamp
+        VL-Extra-Fields: source_type=docker_swarm_syslogs
         VL-Ignore-Fields: _*,version
 
 {%- endif %}
