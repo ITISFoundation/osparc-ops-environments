@@ -20,6 +20,15 @@ nodes:
     labels:
       ops: "true"
       simcore: "true"
+    # kind runs the "node" as a Docker container with its own (volatile) journal,
+    # so /var/log/journal does not exist inside it. Bind-mount the host's
+    # persistent journal into the node at the same path the vector DaemonSet
+    # already reads (node /var/log), so victoria-logs' journald source can scrape
+    # real system logs locally. Read-only: we never want to mutate the host journal.
+    extraMounts:
+      - hostPath: /var/log/journal
+        containerPath: /var/log/journal
+        readOnly: true
 
 # https://archive-os-3-26.netlify.app/calico/3.26/getting-started/kubernetes/kind/
 networking:

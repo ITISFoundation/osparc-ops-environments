@@ -1,9 +1,83 @@
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.11.2/charts/victoria-logs-single/values.yaml
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.13.6/charts/victoria-logs-single/values.yaml
 
 vector:
   # by default it will generate sink per statefulset's pod
   # each pod has a separate PV, so the data is replicated
   enabled: true
+
+  # Distroless image lacks journalctl, which Vector's `journald` source shells out to.
+  # https://github.com/vectordotdev/vector/issues/19325#issuecomment-2816718363
+  image:
+    base: debian
+
+  customConfig:
+    sources:
+      # Host systemd journal (kubelet, containerd, kernel, ...).
+      # Assumes persistent journald: Storage=persistent in journald.conf
+      # so that /var/log/journal exists on every node. Verify before rollout.
+      journald:
+        type: journald
+        journal_directory: /var/log/journal
+        current_boot_only: true
+
+    transforms:
+      # Trim journald events to a low-cardinality, useful field set.
+      journald_parser:
+        type: remap
+        inputs: [journald]
+        source: |
+          # PRIORITY arrives as string in Vector's journald source.
+          level = to_syslog_level(to_int(.PRIORITY) ?? 6) ?? "unknown"
+
+          # `unit` is a VictoriaLogs stream field, so it must stay low-cardinality:
+          # every distinct value creates a new log stream, and too many streams
+          # degrade ingestion/query performance and inflate disk usage.
+          # systemd uses per-instance unit names for transient units (container
+          # scopes, per-pod slices, user managers, run-* transients) which are
+          # effectively unbounded. We collapse each of those families into a single
+          # stable label while leaving real services (kubelet.service, ...) intact.
+          unit = string(._SYSTEMD_UNIT) ?? string(._TRANSPORT) ?? "unknown"
+          if ends_with(unit, ".scope") {
+            # cri-containerd-<hash>.scope, session-c123.scope, machine-….scope, ...
+            unit = "transient.scope"
+          } else if starts_with(unit, "kubepods") {
+            # kubepods-burstable-pod<UID>.slice lifecycle msgs -> bound the per-pod UID
+            unit = "kubepods.slice"
+          } else if starts_with(unit, "user@") {
+            unit = "user.service"
+          } else if starts_with(unit, "run-") {
+            unit = "transient.service"
+          }
+
+          # see field explanations
+          # https://www.freedesktop.org/software/systemd/man/latest/systemd.journal-fields.html
+          . = {
+            "_msg":              .message,
+            "timestamp":         .timestamp,
+            "host":              .host,
+            "unit":              unit,
+            "syslog_identifier": .SYSLOG_IDENTIFIER,
+            "transport":         ._TRANSPORT,
+            "level":             level,
+            "source_type":       .source_type,
+          }
+
+    sinks:
+      vlogs_journald:
+        type: elasticsearch
+        inputs: [journald_parser]
+        mode: bulk
+        api_version: v8
+        compression: gzip
+        healthcheck:
+          enabled: false
+        request:
+          headers:
+            VL-Time-Field: timestamp
+            VL-Stream-Fields: source_type,host,unit
+            VL-Msg-Field: _msg
+            AccountID: "0"
+            ProjectID: "0"
 
 server:
   replicaCount: 1
