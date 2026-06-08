@@ -178,7 +178,7 @@ sinks:
         VL-Msg-Field: log_msg,message
         # log field names, which uniquely identify every log stream
         # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#stream-fields
-        VL-Stream-Fields: source_type,service_name,container_name,container_id
+        VL-Stream-Fields: source_type,service_name,container_id
         # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#time-field
         VL-Time-Field: timestamp
         # WARNING: we overwrite source_type from `socket` to `docker_swarm_logs`
@@ -212,7 +212,7 @@ sinks:
   # Temporary: Output to console for debugging
   #console_debug:
   #  type: console
-  #  inputs: ["process_logs"]
+  #  inputs: ["process_logs_base"]
   #  encoding:
   #    codec: json
 
