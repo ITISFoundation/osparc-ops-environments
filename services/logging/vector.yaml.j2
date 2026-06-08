@@ -131,8 +131,7 @@ sinks:
     type: socket
     inputs:
       - process_logs_base
-      - syslog_tcp
-    address: "${VECTOR_LOG_DESTINATION:?err}:12203"
+    address: "${VECTOR_LOG_DESTINATION:?err}:12201"
     mode: tcp
     encoding:
       codec: gelf
