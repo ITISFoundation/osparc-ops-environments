@@ -144,7 +144,6 @@ sinks:
     encoding:
       codec: syslog
 
-
 {%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
   # https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/
   docker-logs-to-kubernetes-victoria-logs: &victoria-logs-sink-common
