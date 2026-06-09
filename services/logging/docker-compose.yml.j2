@@ -114,13 +114,6 @@ services:
     environment:
       - VECTOR_CONFIG=/etc/vector/vector.yaml
       - VECTOR_LOG=info
-      - VECTOR_LOG_DESTINATION=${VECTOR_LOG_DESTINATION}
-      - PROMETHEUS_SCRAPE_INTERVAL_SECONDS=${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
-      {%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
-      - LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT=${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}
-      - SERVICES_USER=${SERVICES_USER}
-      - SERVICES_PASSWORD=${SERVICES_PASSWORD}
-      {%- endif %}
     configs:
       - source: vector_config
         target: /etc/vector/vector.yaml
@@ -140,11 +133,6 @@ services:
 
   loki:
     image: grafana/loki:3.6.4
-    ports:
-      - target: 3100
-        published: 12204
-        protocol: tcp
-        mode: host
     configs:
       - source: loki_config
         target: /etc/loki/loki.yaml

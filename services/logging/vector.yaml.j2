@@ -7,7 +7,7 @@ sources:
     mode: udp
   vector_metrics:
     type: internal_metrics
-    scrape_interval_secs: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
+    scrape_interval_secs: {{ PROMETHEUS_SCRAPE_INTERVAL_SECONDS }}
   docker_gelf:
     type: socket
     address: "0.0.0.0:12201"
@@ -102,11 +102,10 @@ transforms:
       }
 
 sinks:
-  # Send to Loki over TCP
   loki:
     type: loki
     inputs: ["process_logs_loki"]
-    endpoint: "http://${VECTOR_LOG_DESTINATION:?err}:12204"
+    endpoint: "http://{{STACK_NAME}}_loki:12204"
     encoding:
       codec: json
     labels:
@@ -129,7 +128,7 @@ sinks:
     type: socket
     inputs:
       - process_logs_base
-    address: "${VECTOR_LOG_DESTINATION:?err}:12201"
+    address: "{{STACK_NAME}}_graylog:12201"
     mode: tcp
     encoding:
       codec: gelf
@@ -140,7 +139,7 @@ sinks:
     <<: *graylog-sink-common
     inputs:
       - syslog_udp
-    address: "${VECTOR_LOG_DESTINATION:?err}:12202"
+    address: "{{STACK_NAME}}_graylog:12202"
     encoding:
       codec: syslog
 
@@ -153,10 +152,10 @@ sinks:
     type: elasticsearch
     auth:
       strategy: basic
-      user: "${SERVICES_USER}"
-      password: "${SERVICES_PASSWORD}"
+      user: "{{ SERVICES_USER }}"
+      password: "{{ SERVICES_PASSWORD }}"
     endpoints:
-      - ${LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT}/logs/insert/elasticsearch
+      - {{ LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT }}/logs/insert/elasticsearch
     api_version: v8
     compression: gzip
     healthcheck:
