@@ -168,6 +168,7 @@ services:
         order: stop-first # Due to host port binding
     networks:
       - monitoring
+      - logging
 
 volumes:
   mongo_data:
