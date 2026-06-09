@@ -105,7 +105,7 @@ sinks:
   loki:
     type: loki
     inputs: ["process_logs_loki"]
-    endpoint: "http://{{STACK_NAME}}_loki:12204"
+    endpoint: "http://{{STACK_NAME}}_loki:3100"
     encoding:
       codec: json
     labels:
