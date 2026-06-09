@@ -1,7 +1,10 @@
 # Ingests GELF logs from Docker daemon and forwards to Loki and Graylog (both over TCP)
 
 sources:
-  # Receive GELF messages from Docker containers via UDP
+  syslog_udp:
+    type: syslog
+    address: "0.0.0.0:12202"
+    mode: udp
   vector_metrics:
     type: internal_metrics
     scrape_interval_secs: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
@@ -17,7 +20,6 @@ sources:
       decompression: Auto
 
 transforms:
-  # Process and enrich the logs
   process_logs_base:
     type: remap
     inputs: ["docker_gelf"]
@@ -121,20 +123,30 @@ sinks:
     inputs:
       - vector_metrics
     address: "0.0.0.0:9598"
+
   # Send to Graylog via GELF over TCP
-  graylog:
+  graylog-logs: &graylog-sink-common
     type: socket
-    inputs: ["process_logs_base"]
-    address: "${VECTOR_LOG_DESTINATION:?err}:12203"
+    inputs:
+      - process_logs_base
+    address: "${VECTOR_LOG_DESTINATION:?err}:12201"
     mode: tcp
     encoding:
       codec: gelf
     healthcheck:
       enabled: true
 
+  graylog-syslogs:
+    <<: *graylog-sink-common
+    inputs:
+      - syslog_udp
+    address: "${VECTOR_LOG_DESTINATION:?err}:12202"
+    encoding:
+      codec: syslog
+
 {%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
   # https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/
-  kubernetes-victoria-logs:
+  docker-logs-to-kubernetes-victoria-logs: &victoria-logs-sink-common
     inputs:
       - process_logs_base
     # https://vector.dev/docs/reference/configuration/sinks/elasticsearch/
@@ -163,7 +175,7 @@ sinks:
         VL-Msg-Field: log_msg,message
         # log field names, which uniquely identify every log stream
         # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#stream-fields
-        VL-Stream-Fields: source_type,service_name,container_name,container_id
+        VL-Stream-Fields: source_type,service_name,container_id
         # see https://docs.victoriametrics.com/victorialogs/keyconcepts/#time-field
         VL-Time-Field: timestamp
         # WARNING: we overwrite source_type from `socket` to `docker_swarm_logs`
@@ -178,12 +190,27 @@ sinks:
       verify_certificate: false
       verify_hostname: false
     {%- endif %}
+
+  syslogs-to-kubernetes-victoria-logs:
+    <<: *victoria-logs-sink-common
+    inputs:
+      - syslog_udp
+    request:
+      headers:
+        AccountID: "0"
+        ProjectID: "0"
+        VL-Msg-Field: message,msg
+        VL-Stream-Fields: source_type,host,facility,appname
+        VL-Time-Field: timestamp
+        VL-Extra-Fields: source_type=docker_swarm_syslogs
+        VL-Ignore-Fields: _*,version
+
 {%- endif %}
 
   # Temporary: Output to console for debugging
   #console_debug:
   #  type: console
-  #  inputs: ["process_logs"]
+  #  inputs: ["process_logs_base"]
   #  encoding:
   #    codec: json
 
