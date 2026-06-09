@@ -1,11 +1,10 @@
 # Ingests GELF logs from Docker daemon and forwards to Loki and Graylog (both over TCP)
 
 sources:
-  syslog_tcp:
+  syslog_udp:
     type: syslog
     address: "0.0.0.0:12202"
-    mode: tcp
-  # Receive GELF messages from Docker containers via UDP
+    mode: udp
   vector_metrics:
     type: internal_metrics
     scrape_interval_secs: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}
@@ -21,7 +20,6 @@ sources:
       decompression: Auto
 
 transforms:
-  # Process and enrich the logs
   process_logs_base:
     type: remap
     inputs: ["docker_gelf"]
@@ -141,7 +139,7 @@ sinks:
   graylog-syslogs:
     <<: *graylog-sink-common
     inputs:
-      - syslog_tcp
+      - syslog_udp
     address: "${VECTOR_LOG_DESTINATION:?err}:12202"
     encoding:
       codec: syslog
@@ -197,7 +195,7 @@ sinks:
   syslogs-to-kubernetes-victoria-logs:
     <<: *victoria-logs-sink-common
     inputs:
-      - syslog_tcp
+      - syslog_udp
     request:
       headers:
         AccountID: "0"

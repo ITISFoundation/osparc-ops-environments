@@ -107,7 +107,7 @@ services:
         mode: ingress
       - target: 12202
         published: 12202
-        protocol: tcp
+        protocol: udp
         mode: ingress
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
