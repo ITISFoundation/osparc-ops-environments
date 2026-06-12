@@ -1,0 +1,69 @@
+vm-k8s-stack:
+  # operator is deployed separately
+  victoria-metrics-operator:
+    enabled: false
+
+  # vmagent scrapes the targets and writes to vmsingle
+  vmagent:
+    enabled: true
+
+  vmsingle:
+    enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path: /metrics
+      pathType: Prefix
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: >-
+          traefik-traefik-basic-auth@kubernetescrd,
+          traefik-metrics-strip-prefix@kubernetescrd
+
+  # alerting / dashboards / cluster mode are out of scope for this stack
+  vmcluster:
+    enabled: false
+  alertmanager:
+    enabled: false
+  vmalert:
+    enabled: false
+  grafana:
+    enabled: false
+  defaultDashboards:
+    enabled: false
+  defaultRules:
+    enabled: false
+
+  # Exporter for node (server) metrics
+  prometheus-node-exporter:
+    enabled: true
+    # it needs to run in a privileged namespace
+    # to scrape node metrics
+    namespaceOverride: "{{ .Release.Namespace }}-privileged"
+    vmScrape:
+      spec:
+        # chart templates do not set it properly when namespace is overriden
+        namespaceSelector:
+          matchNames: ["{{ .Release.Namespace }}-privileged"]
+
+  # cluster metrics about the state of the objects (pods, deploymentsets, ...)
+  kube-state-metrics:
+    enabled: true
+
+  # container metrics (cpu / memory)
+  kubelet:
+    enabled: true
+
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
