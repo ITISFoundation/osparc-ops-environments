@@ -36,7 +36,7 @@ vm-k8s-stack:
 
   # Exporter for node (server) metrics
   prometheus-node-exporter:
-    enabled: false
+    enabled: true
     # it needs to run in a privileged namespace to scrape node metrics
     namespaceOverride: "{{ .Release.Namespace }}-privileged"
     vmScrape:
@@ -45,7 +45,7 @@ vm-k8s-stack:
         namespaceSelector:
           matchNames: ["{{ .Release.Namespace }}-privileged"]
     networkPolicy:
-      enabled: false
+      enabled: true
 
   # cluster metrics about the state of the objects (pods, deploymentsets, ...)
   kube-state-metrics:
