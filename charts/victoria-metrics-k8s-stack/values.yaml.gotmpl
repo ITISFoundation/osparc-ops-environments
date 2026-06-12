@@ -1,14 +1,25 @@
 vm-k8s-stack:
-  # operator is deployed separately
-  victoria-metrics-operator:
-    enabled: false
-
   # vmagent scrapes the targets and writes to vmsingle
   vmagent:
     enabled: true
+    spec:
+      port: "8429"
+      # labels used by the network policies (templates/networkpolicies)
+      podMetadata:
+        labels:
+          app: vmagent
+          part-of: {{ .Release.Name }}
 
+  # vmsingle stores metrics and serves them to vmauth
   vmsingle:
     enabled: true
+    spec:
+      port: "8428"
+      # labels used by the network policies (templates/networkpolicies)
+      podMetadata:
+        labels:
+          app: vmsingle
+          part-of: {{ .Release.Name }}
     ingress:
       enabled: true
       ingressClassName: traefik
@@ -23,7 +34,44 @@ vm-k8s-stack:
           traefik-traefik-basic-auth@kubernetescrd,
           traefik-metrics-strip-prefix@kubernetescrd
 
-  # alerting / dashboards / cluster mode are out of scope for this stack
+  # Exporter for node (server) metrics
+  prometheus-node-exporter:
+    enabled: false
+    # it needs to run in a privileged namespace to scrape node metrics
+    namespaceOverride: "{{ .Release.Namespace }}-privileged"
+    vmScrape:
+      spec:
+        # chart templates do not set it properly when namespace is overriden
+        namespaceSelector:
+          matchNames: ["{{ .Release.Namespace }}-privileged"]
+    networkPolicy:
+      enabled: false
+
+  # cluster metrics about the state of the objects (pods, deploymentsets, ...)
+  kube-state-metrics:
+    enabled: true
+    networkPolicy:
+      enabled: true
+      flavor: kubernetes # calico understands kubernetes network policy
+      # kube-state-metrics watches the kubernetes api server
+      egress:
+      - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16
+        ports:
+        - protocol: TCP
+          port: 6443
+
+  # container metrics (cpu / memory)
+  kubelet:
+    enabled: true
+
+  victoria-metrics-operator:
+    enabled: false # operator is deployed separately
   vmcluster:
     enabled: false
   alertmanager:
@@ -36,27 +84,6 @@ vm-k8s-stack:
     enabled: false
   defaultRules:
     enabled: false
-
-  # Exporter for node (server) metrics
-  prometheus-node-exporter:
-    enabled: true
-    # it needs to run in a privileged namespace
-    # to scrape node metrics
-    namespaceOverride: "{{ .Release.Namespace }}-privileged"
-    vmScrape:
-      spec:
-        # chart templates do not set it properly when namespace is overriden
-        namespaceSelector:
-          matchNames: ["{{ .Release.Namespace }}-privileged"]
-
-  # cluster metrics about the state of the objects (pods, deploymentsets, ...)
-  kube-state-metrics:
-    enabled: true
-
-  # container metrics (cpu / memory)
-  kubelet:
-    enabled: true
-
   kubeApiServer:
     enabled: false
   kubeControllerManager:

@@ -1,0 +1,15 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmagent-network-policy
+spec:
+  selector: app == "vmagent" && part-of == "{{ .Release.Name }}"
+  egress:
+    # scrape targets (kubelet, node-exporter, kube-state-metrics),
+    # api server discovery (:6443) and remote-write to vmsingle
+    - action: Allow
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
