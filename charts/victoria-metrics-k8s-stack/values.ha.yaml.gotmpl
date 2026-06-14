@@ -12,6 +12,7 @@ vm-k8s-stack:
       retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
       vmstorage:
         replicaCount: 2
+        disableSelfServiceScrape: true # do not scrape vm's own components
         port: "8482" # http port (metrics/api)
         vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
         vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
@@ -36,6 +37,7 @@ vm-k8s-stack:
       vmselect:
         replicaCount: 2
         port: "8481" # http port (serves reads)
+        disableSelfServiceScrape: true # do not scrape vm's own components
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app: vmselect
@@ -49,6 +51,7 @@ vm-k8s-stack:
       vminsert:
         replicaCount: 2
         port: "8480" # http port (receives remote-write)
+        disableSelfServiceScrape: true # do not scrape vm's own components
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app: vminsert
@@ -58,6 +61,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       port: "8427"
+      disableSelfServiceScrape: true # do not scrape vm's own components
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
           app: vmauth

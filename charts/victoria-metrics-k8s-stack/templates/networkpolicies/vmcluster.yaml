@@ -13,7 +13,6 @@ Ports are read from the overlay values so they stay in sync with the CR spec.
 {{- $selectPort := dig "vmselect" "port" "8481" $cluster }}
 {{- $storageInsertPort := dig "vmstorage" "vmInsertPort" "8400" $cluster }}
 {{- $storageSelectPort := dig "vmstorage" "vmSelectPort" "8401" $cluster }}
-{{- $storageMetricsPort := dig "vmstorage" "vmMetricsPort" "8482" $cluster }}
 {{- $vmauthLabels := dig "vmauth" "spec" "podMetadata" "labels" (dict) $stack }}
 {{- $insertLabels := dig "vminsert" "podMetadata" "labels" (dict) $cluster }}
 {{- $selectLabels := dig "vmselect" "podMetadata" "labels" (dict) $cluster }}
@@ -129,5 +128,4 @@ spec:
         ports:
           - {{ $storageInsertPort }}
           - {{ $storageSelectPort }}
-          - {{ $storageMetricsPort }}
 {{- end }}

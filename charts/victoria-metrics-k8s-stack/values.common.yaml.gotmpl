@@ -5,6 +5,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       port: "8429"
+      disableSelfServiceScrape: true # do not scrape vm's own components
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
           app: vmagent-scraper
@@ -14,6 +15,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       port: "8428"
+      disableSelfServiceScrape: true # do not scrape vm's own components
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
           app: vmsingle
