@@ -13,6 +13,7 @@ Ports are read from the overlay values so they stay in sync with the CR spec.
 {{- $selectPort := dig "vmselect" "port" "8481" $cluster }}
 {{- $storageInsertPort := dig "vmstorage" "vmInsertPort" "8400" $cluster }}
 {{- $storageSelectPort := dig "vmstorage" "vmSelectPort" "8401" $cluster }}
+{{- $storageMetricsPort := dig "vmstorage" "vmMetricsPort" "8482" $cluster }}
 {{- $vmauthLabels := dig "vmauth" "spec" "podMetadata" "labels" (dict) $stack }}
 {{- $insertLabels := dig "vminsert" "podMetadata" "labels" (dict) $cluster }}
 {{- $selectLabels := dig "vmselect" "podMetadata" "labels" (dict) $cluster }}
@@ -26,7 +27,7 @@ metadata:
 spec:
   selector: app == "{{ $vmauthLabels.app }}" && part-of == "{{ index $vmauthLabels "part-of" }}"
   ingress:
-    # reads/writes coming from traefik (via ingress)
+    # reads from traefik, writes from vmagent
     - action: Allow
       protocol: TCP
       destination:
@@ -63,9 +64,11 @@ metadata:
 spec:
   selector: app == "{{ $insertLabels.app }}" && part-of == "{{ index $insertLabels "part-of" }}"
   ingress:
-    # writes from vmagent and from the vmauth proxy
+    # writes from vmagent and from the vmauth proxy.
     - action: Allow
       protocol: TCP
+      source:
+        selector: part-of == "{{ index $insertLabels "part-of" }}" # allow only from vm stack namespace
       destination:
         ports:
           - {{ $insertPort }}
@@ -89,9 +92,11 @@ metadata:
 spec:
   selector: app == "{{ $selectLabels.app }}" && part-of == "{{ index $selectLabels "part-of" }}"
   ingress:
-    # reads from the vmauth proxy
+    # reads from the vmauth proxy.
     - action: Allow
       protocol: TCP
+      source:
+        selector: part-of == "{{ index $selectLabels "part-of" }}" # allow only from vm stack namespace
       destination:
         ports:
           - {{ $selectPort }}
@@ -115,11 +120,14 @@ metadata:
 spec:
   selector: app == "{{ $storageLabels.app }}" && part-of == "{{ index $storageLabels "part-of" }}"
   ingress:
-    # ingestion from vminsert and queries from vmselect
+    # ingestion from vminsert and queries from vmselect.
     - action: Allow
       protocol: TCP
+      source:
+        selector: part-of == "{{ index $storageLabels "part-of" }}" # allow only from vm stack namespace
       destination:
         ports:
           - {{ $storageInsertPort }}
           - {{ $storageSelectPort }}
+          - {{ $storageMetricsPort }}
 {{- end }}
