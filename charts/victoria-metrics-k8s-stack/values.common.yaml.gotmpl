@@ -1,23 +1,21 @@
 vm-k8s-stack:
-  # vmagent scrapes the targets and writes to vmsingle
-  vmagent:
+  fullnameOverride: &fullnameOverride vm-k8s-stack # by default names are long and redundant
+
+  vmagent: # scrapes the targets and writes to vmsingle
     enabled: true
     spec:
       port: "8429"
-      # labels used by the network policies (templates/networkpolicies)
       podMetadata:
-        labels:
+        labels: # labels used by the network policies (templates/networkpolicies)
           app: vmagent-scraper
           part-of: {{ .Release.Name }}
 
-  # vmsingle stores metrics and serves them to vmauth
-  vmsingle:
+  vmsingle: # stores metrics and serves them
     enabled: true
     spec:
       port: "8428"
-      # labels used by the network policies (templates/networkpolicies)
       podMetadata:
-        labels:
+        labels: # labels used by the network policies (templates/networkpolicies)
           app: vmsingle
           part-of: {{ .Release.Name }}
     ingress:
@@ -34,26 +32,24 @@ vm-k8s-stack:
           traefik-traefik-basic-auth@kubernetescrd,
           traefik-metrics-strip-prefix@kubernetescrd
 
-  # Exporter for node (server) metrics
-  prometheus-node-exporter:
+  prometheus-node-exporter:  # exports node (server) metrics
     enabled: true
+    fullnameOverride: node-exporter-vm-k8s-stack
     # it needs to run in a privileged namespace to scrape node metrics
     namespaceOverride: "{{ .Release.Namespace }}-privileged"
     vmScrape:
       spec:
-        # chart templates do not set it properly when namespace is overriden
-        namespaceSelector:
+        namespaceSelector: # chart templates do not set it properly when namespace is overriden
           matchNames: ["{{ .Release.Namespace }}-privileged"]
     networkPolicy:
       enabled: true
 
-  # cluster metrics about the state of the objects (pods, deploymentsets, ...)
-  kube-state-metrics:
+  kube-state-metrics: # cluster metrics about the state of the objects (pods, PVs, etc.)
     enabled: true
+    fullnameOverride: kube-state-metrics-vm-k8s-stack
     networkPolicy:
       enabled: true
       flavor: kubernetes # calico understands kubernetes network policy
-      # kube-state-metrics watches the kubernetes api server
       egress:
       - to:
         - ipBlock:
@@ -64,10 +60,9 @@ vm-k8s-stack:
             cidr: 192.168.0.0/16
         ports:
         - protocol: TCP
-          port: 6443
+          port: 6443 # kube-state-metrics watches the kubernetes api server
 
-  # container metrics (cpu / memory)
-  kubelet:
+  kubelet: # container metrics (cpu / memory)
     enabled: true
 
   victoria-metrics-operator:

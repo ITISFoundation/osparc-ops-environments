@@ -12,13 +12,11 @@ vm-k8s-stack:
       retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
       vmstorage:
         replicaCount: 2
-        storageDataPath: /vm-data
         port: "8482" # http port (metrics/api)
         vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
         vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
-        # labels used by the network policies (templates/networkpolicies)
         podMetadata:
-          labels:
+          labels: # labels used by the network policies (templates/networkpolicies)
             app: vmstorage
             part-of: {{ .Release.Name }}
         topologySpreadConstraints:
@@ -36,12 +34,10 @@ vm-k8s-stack:
                 requests:
                   storage: 50Gi
       vmselect:
-        replicaCount: 1
-        # http port (serves reads)
-        port: "8481"
-        # labels used by the network policies (templates/networkpolicies)
+        replicaCount: 2
+        port: "8481" # http port (serves reads)
         podMetadata:
-          labels:
+          labels: # labels used by the network policies (templates/networkpolicies)
             app: vmselect
             part-of: {{ .Release.Name }}
         storage:
@@ -51,23 +47,19 @@ vm-k8s-stack:
                 requests:
                   storage: 2Gi
       vminsert:
-        replicaCount: 1
-        # http port (receives remote-write)
-        port: "8480"
-        # labels used by the network policies (templates/networkpolicies)
+        replicaCount: 2
+        port: "8480" # http port (receives remote-write)
         podMetadata:
-          labels:
+          labels: # labels used by the network policies (templates/networkpolicies)
             app: vminsert
             part-of: {{ .Release.Name }}
 
-  # vmauth fronts the cluster (read + write) and takes over the ingress
-  vmauth:
+  vmauth: # fronts the cluster (read + write) and takes over the ingress
     enabled: true
     spec:
       port: "8427"
-      # labels used by the network policies (templates/networkpolicies)
       podMetadata:
-        labels:
+        labels: # labels used by the network policies (templates/networkpolicies)
           app: vmauth
           part-of: {{ .Release.Name }}
     ingress:
