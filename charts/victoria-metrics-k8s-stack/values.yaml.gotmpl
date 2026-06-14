@@ -7,7 +7,7 @@ vm-k8s-stack:
       # labels used by the network policies (templates/networkpolicies)
       podMetadata:
         labels:
-          app: vmagent
+          app: vmagent-scraper
           part-of: {{ .Release.Name }}
 
   # vmsingle stores metrics and serves them to vmauth

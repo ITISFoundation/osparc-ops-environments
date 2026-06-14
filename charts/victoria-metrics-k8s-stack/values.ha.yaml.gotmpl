@@ -1,0 +1,85 @@
+vm-k8s-stack:
+  # the single instance is replaced by the cluster below
+  vmsingle:
+    enabled: false
+    ingress:
+      enabled: false
+
+  vmcluster:
+    enabled: true
+    spec:
+      replicationFactor: 2 # to how many storage nodes the data is replicated
+      retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
+      vmstorage:
+        replicaCount: 2
+        storageDataPath: /vm-data
+        port: "8482" # http port (metrics/api)
+        vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
+        vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
+        # labels used by the network policies (templates/networkpolicies)
+        podMetadata:
+          labels:
+            app: vmstorage
+            part-of: {{ .Release.Name }}
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app: vmstorage
+                part-of: {{ .Release.Name }}
+        storage:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 50Gi
+      vmselect:
+        replicaCount: 1
+        # http port (serves reads)
+        port: "8481"
+        # labels used by the network policies (templates/networkpolicies)
+        podMetadata:
+          labels:
+            app: vmselect
+            part-of: {{ .Release.Name }}
+        storage:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 2Gi
+      vminsert:
+        replicaCount: 1
+        # http port (receives remote-write)
+        port: "8480"
+        # labels used by the network policies (templates/networkpolicies)
+        podMetadata:
+          labels:
+            app: vminsert
+            part-of: {{ .Release.Name }}
+
+  # vmauth fronts the cluster (read + write) and takes over the ingress
+  vmauth:
+    enabled: true
+    spec:
+      port: "8427"
+      # labels used by the network policies (templates/networkpolicies)
+      podMetadata:
+        labels:
+          app: vmauth
+          part-of: {{ .Release.Name }}
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path: /metrics
+      pathType: Prefix
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: >-
+          traefik-traefik-basic-auth@kubernetescrd,
+          traefik-metrics-strip-prefix@kubernetescrd

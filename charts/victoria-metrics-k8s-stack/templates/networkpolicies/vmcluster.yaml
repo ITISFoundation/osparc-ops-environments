@@ -1,0 +1,125 @@
+{{- /*
+Network policies for the cluster (HA overlay only). They render only when
+vmcluster is enabled, i.e. when values.ha.yaml.gotmpl is layered in; in the
+non-HA setup these components do not exist.
+
+Ports are read from the overlay values so they stay in sync with the CR spec.
+*/ -}}
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmcluster" "enabled" false $stack }}
+{{- $cluster := dig "vmcluster" "spec" (dict) $stack }}
+{{- $vmauthPort := dig "vmauth" "spec" "port" "8427" $stack }}
+{{- $insertPort := dig "vminsert" "port" "8480" $cluster }}
+{{- $selectPort := dig "vmselect" "port" "8481" $cluster }}
+{{- $storageInsertPort := dig "vmstorage" "vmInsertPort" "8400" $cluster }}
+{{- $storageSelectPort := dig "vmstorage" "vmSelectPort" "8401" $cluster }}
+{{- $vmauthLabels := dig "vmauth" "spec" "podMetadata" "labels" (dict) $stack }}
+{{- $insertLabels := dig "vminsert" "podMetadata" "labels" (dict) $cluster }}
+{{- $selectLabels := dig "vmselect" "podMetadata" "labels" (dict) $cluster }}
+{{- $storageLabels := dig "vmstorage" "podMetadata" "labels" (dict) $cluster }}
+---
+# vmauth: global read/write proxy fronting the cluster
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-network-policy
+spec:
+  selector: app == "{{ $vmauthLabels.app }}" && part-of == "{{ index $vmauthLabels "part-of" }}"
+  ingress:
+    # reads/writes coming from traefik (via ingress)
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $vmauthPort }}
+  egress:
+    # proxy writes to vminsert and reads to vmselect
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ $insertPort }}
+          - {{ $selectPort }}
+    # config-reloader sidecar watches the vmauth config Secret via the K8s API
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
+---
+# vminsert: receives remote-write and fans out to vmstorage
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vminsert-network-policy
+spec:
+  selector: app == "{{ $insertLabels.app }}" && part-of == "{{ index $insertLabels "part-of" }}"
+  ingress:
+    # writes from vmagent and from the vmauth proxy
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $insertPort }}
+  egress:
+    # fan out ingestion to the vmstorage instances
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ $storageInsertPort }}
+---
+# vmselect: serves reads, queries vmstorage
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmselect-network-policy
+spec:
+  selector: app == "{{ $selectLabels.app }}" && part-of == "{{ index $selectLabels "part-of" }}"
+  ingress:
+    # reads from the vmauth proxy
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $selectPort }}
+  egress:
+    # query the vmstorage instances
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ $storageSelectPort }}
+---
+# vmstorage: stores data, receives from vminsert and serves vmselect
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmstorage-network-policy
+spec:
+  selector: app == "{{ $storageLabels.app }}" && part-of == "{{ index $storageLabels "part-of" }}"
+  ingress:
+    # ingestion from vminsert and queries from vmselect
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $storageInsertPort }}
+          - {{ $storageSelectPort }}
+{{- end }}
