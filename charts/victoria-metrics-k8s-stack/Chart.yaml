@@ -1,6 +1,8 @@
 apiVersion: v2
 name: victoria-metrics-k8s-stack
-description: A Helm chart for Kubernetes
+description: >
+  A wrapper chart for victoria-metrics-k8s-stack.
+  It adds extra templates (e.g., network policies)
 type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
