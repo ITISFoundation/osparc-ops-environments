@@ -1,4 +1,7 @@
-{{- $labels := index .Values "vm-k8s-stack" "vmsingle" "spec" "podMetadata" "labels" }}
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmsingle" "enabled" false $stack }}
+
+{{- $labels := $stack.vmsingle.spec.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -11,4 +14,5 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - {{ index .Values "vm-k8s-stack" "vmsingle" "spec" "port" }}
+          - {{ $stack.vmsingle.spec.port }}
+{{- end }}

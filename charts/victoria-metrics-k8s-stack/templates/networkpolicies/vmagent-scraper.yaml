@@ -1,4 +1,7 @@
-{{- $labels := index .Values "vm-k8s-stack" "vmagent" "spec" "podMetadata" "labels" }}
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmagent" "enabled" false $stack }}
+
+{{- $labels := $stack.vmagent.spec.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -14,3 +17,4 @@ spec:
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
+{{- end }}
