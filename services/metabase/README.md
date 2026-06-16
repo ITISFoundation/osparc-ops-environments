@@ -17,7 +17,7 @@ This can be automated via https://github.com/ITISFoundation/osparc-ops-environme
 Setting up email (manual):
 * go to admin settings
 * go to email
-* configure email using SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_PROTOCOL, SMTP_USERNAME env from config
+* configure email (rely on SMTP_SETTINGS env from config)
   - Note: `FROM NAME` shall potentially clearly indicate deployment (if we use metabase in multiple deployments this helps to avoid confusion)
   - Note: `FROM ADDRESS` use support email (we may consider adding a separate user and mail for metabase later)
   - Note: `REPLY-TO ADDRESS` must NOT be support email. Feel free to choose some of backenders / devops email

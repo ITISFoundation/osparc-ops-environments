@@ -1,0 +1,72 @@
+services:
+  local-mail-server: # not a real mail server, but a testing/dev tool
+    image:  axllent/mailpit:v1.29.6
+    networks:
+      - public
+      - monitored
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_WEBROOT: ${HTTP_PROXY_PREFIX_PATH}
+      MP_SMTP_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+      MP_POP3_AUTH: "${SMTP_USERNAME}:${SMTP_PASSWORD}"
+      # https://mailpit.axllent.org/docs/configuration/prometheus/
+      MP_ENABLE_PROMETHEUS: "0.0.0.0:${PROMETHEUS_PORT}"
+    deploy:
+      replicas: 1
+      update_config:
+        order: stop-first
+        failure_action: rollback
+      placement:
+        constraints:
+          - node.labels.ops==true
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=${PUBLIC_NETWORK}
+        # Prometheus
+        - prometheus-job=local-mail-server
+        - prometheus-port=${PROMETHEUS_PORT}
+        # WEB GUI: router
+        - traefik.http.routers.local-mail-server-gui.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`${HTTP_PROXY_PREFIX_PATH}`)
+        - traefik.http.routers.local-mail-server-gui.entrypoints=https
+        - traefik.http.routers.local-mail-server-gui.tls=true
+        - traefik.http.routers.local-mail-server-gui.middlewares=ops_whitelist_ips@swarm, ops_gzip@swarm, ops_auth@swarm
+        # WEB GUI: service
+        - traefik.http.services.local-mail-server-gui.loadbalancer.server.port=8025
+        - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.path=${HTTP_PROXY_PREFIX_PATH}
+        - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.interval=10s
+        - traefik.http.services.local-mail-server-gui.loadbalancer.healthcheck.timeout=2s
+        # SMTP: router
+        - traefik.tcp.routers.local-mail-server-smtp.rule=HostSNI(`${SMTP_HOST}`)
+        - traefik.tcp.routers.local-mail-server-smtp.entrypoints=smtp
+        - traefik.tcp.routers.local-mail-server-smtp.tls=true
+        - traefik.tcp.routers.local-mail-server-smtp.service=local-mail-server-smtp
+        # SMTP: service (https://mailpit.axllent.org/docs/configuration/smtp/)
+        - traefik.tcp.services.local-mail-server-smtp.loadbalancer.server.port=1025
+        - traefik.tcp.services.local-mail-server-smtp.loadbalancer.healthCheck.interval=30s
+        - traefik.tcp.services.local-mail-server-smtp.loadbalancer.healthCheck.timeout=2s
+        # POP3: router
+        - traefik.tcp.routers.local-mail-server-pop3.rule=HostSNI(`${SMTP_HOST}`)
+        - traefik.tcp.routers.local-mail-server-pop3.entrypoints=pop3
+        - traefik.tcp.routers.local-mail-server-pop3.tls=true
+        - traefik.tcp.routers.local-mail-server-pop3.service=local-mail-server-pop3
+        # POP3: service (https://mailpit.axllent.org/docs/configuration/pop3/)
+        - traefik.tcp.services.local-mail-server-pop3.loadbalancer.server.port=1110
+        - traefik.tcp.services.local-mail-server-pop3.loadbalancer.healthCheck.interval=30s
+        - traefik.tcp.services.local-mail-server-pop3.loadbalancer.healthCheck.timeout=2s
+      resources:
+          limits:
+              memory: 512M
+              cpus: "0.5"
+          reservations:
+              memory: 256M
+              cpus: "0.1"
+    # healthcheck configured in https://github.com/axllent/mailpit/blob/v1.29.6/Dockerfile#L28
+
+networks:
+  public:
+    external: true
+    name: ${PUBLIC_NETWORK}
+  monitored:
+    name: ${MONITORED_NETWORK}
+    external: true

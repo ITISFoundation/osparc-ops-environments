@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "dfaeea11-bde6-4203-9cfe-6ca2a23ca22e",
-  "rev": 45,
+  "rev": 46,
   "name": "osparc-custom-content-pack-v2",
   "summary": "osparc-custom-content-pack-v2",
   "description": "",
@@ -9,6 +9,206 @@
   "url": "",
   "parameters": [],
   "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "6c33e9c3-ebc5-404b-bb90-09c729f143c6",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Syslog TCP"
+        },
+        "configuration": {
+          "tls_key_file": {
+            "@type": "string",
+            "@value": "admin"
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12202
+          },
+          "tls_enable": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "use_null_delimiter": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 1048576
+          },
+          "tcp_keepalive": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "force_rdns": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "allow_override_date": {
+            "@type": "boolean",
+            "@value": true
+          },
+          "tls_client_auth_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "tls_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "expand_structured_data": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "max_message_size": {
+            "@type": "integer",
+            "@value": 2097152
+          },
+          "store_full_message": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "tls_client_auth": {
+            "@type": "string",
+            "@value": "disabled"
+          },
+          "timezone": {
+            "@type": "string",
+            "@value": "NotSet"
+          },
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 2
+          },
+          "tls_key_password": {
+            "@type": "string",
+            "@value": "adminadminadmin"
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.5+3ef5be7"
+        }
+      ]
+    },
+     {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "f3c9e1be-70e3-4450-bf8d-38f27dbf2fe4",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "GELF TCP"
+        },
+        "configuration": {
+          "tls_key_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12201
+          },
+          "tls_enable": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "use_null_delimiter": {
+            "@type": "boolean",
+            "@value": true
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 1048576
+          },
+          "tcp_keepalive": {
+            "@type": "boolean",
+            "@value": true
+          },
+          "tls_client_auth_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "tls_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "max_message_size": {
+            "@type": "integer",
+            "@value": 2097152
+          },
+          "tls_client_auth": {
+            "@type": "string",
+            "@value": "disabled"
+          },
+          "decompress_size_limit": {
+            "@type": "integer",
+            "@value": 8388608
+          },
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 2
+          },
+          "tls_key_password": {
+            "@type": "string",
+            "@value": ""
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.gelf.tcp.GELFTCPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.5+3ef5be7"
+        }
+      ]
+    },
     {
       "v": "1",
       "type": {
@@ -532,182 +732,6 @@
     {
       "v": "1",
       "type": {
-        "name": "input",
-        "version": "1"
-      },
-      "id": "36895679-3b4f-499d-bee7-58fd5f2e1703",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "standard GELF UDP input"
-        },
-        "configuration": {
-          "bind_address": {
-            "@type": "string",
-            "@value": "0.0.0.0"
-          },
-          "port": {
-            "@type": "integer",
-            "@value": 12201
-          }
-        },
-        "static_fields": {},
-        "type": {
-          "@type": "string",
-          "@value": "org.graylog2.inputs.gelf.udp.GELFUDPInput"
-        },
-        "global": {
-          "@type": "boolean",
-          "@value": true
-        },
-        "extractors": [
-          {
-            "target_field": {
-              "@type": "string",
-              "@value": "log_service"
-            },
-            "condition_value": {
-              "@type": "string",
-              "@value": ""
-            },
-            "order": {
-              "@type": "integer",
-              "@value": 0
-            },
-            "converters": [],
-            "configuration": {
-              "index": {
-                "@type": "integer",
-                "@value": 1
-              },
-              "split_by": {
-                "@type": "string",
-                "@value": "."
-              }
-            },
-            "source_field": {
-              "@type": "string",
-              "@value": "container_name"
-            },
-            "title": {
-              "@type": "string",
-              "@value": "Extract service from container name"
-            },
-            "type": {
-              "@type": "string",
-              "@value": "SPLIT_AND_INDEX"
-            },
-            "cursor_strategy": {
-              "@type": "string",
-              "@value": "COPY"
-            },
-            "condition_type": {
-              "@type": "string",
-              "@value": "NONE"
-            }
-          },
-          {
-            "target_field": {
-              "@type": "string",
-              "@value": ""
-            },
-            "condition_value": {
-              "@type": "string",
-              "@value": ""
-            },
-            "order": {
-              "@type": "integer",
-              "@value": 0
-            },
-            "converters": [],
-            "configuration": {
-              "grok_pattern": {
-                "@type": "string",
-                "@value": "log_level=%{WORD:log_level} \\| log_timestamp=%{TIMESTAMP_ISO8601:log_timestamp} \\| log_source=%{NOTSPACE:log_source} \\| log_uid=%{NOTSPACE:log_uid} \\| log_oec=%{NOTSPACE:log_oec} \\| log_trace_id=%{NOTSPACE:log_trace_id} \\| log_span_id=%{DATA:log_span_id} \\| log_msg=%{GREEDYDATA:log_msg}"
-              },
-              "named_captures_only": {
-                "@type": "boolean",
-                "@value": false
-              }
-            },
-            "source_field": {
-              "@type": "string",
-              "@value": "message"
-            },
-            "title": {
-              "@type": "string",
-              "@value": "osparc-simcore python extractor"
-            },
-            "type": {
-              "@type": "string",
-              "@value": "GROK"
-            },
-            "cursor_strategy": {
-              "@type": "string",
-              "@value": "COPY"
-            },
-            "condition_type": {
-              "@type": "string",
-              "@value": "NONE"
-            }
-          },
-          {
-            "target_field": {
-              "@type": "string",
-              "@value": ""
-            },
-            "condition_value": {
-              "@type": "string",
-              "@value": ""
-            },
-            "order": {
-              "@type": "integer",
-              "@value": 0
-            },
-            "converters": [],
-            "configuration": {
-              "grok_pattern": {
-                "@type": "string",
-                "@value": "level=%{WORD:log_level} msg=\"%{GREEDYDATA:log_msg}\""
-              },
-              "named_captures_only": {
-                "@type": "boolean",
-                "@value": false
-              }
-            },
-            "source_field": {
-              "@type": "string",
-              "@value": "message"
-            },
-            "title": {
-              "@type": "string",
-              "@value": "traefik log extractor"
-            },
-            "type": {
-              "@type": "string",
-              "@value": "GROK"
-            },
-            "cursor_strategy": {
-              "@type": "string",
-              "@value": "COPY"
-            },
-            "condition_type": {
-              "@type": "string",
-              "@value": "NONE"
-            }
-          }
-        ]
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=5.0.5+d61a926"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "pipeline",
         "version": "1"
       },
@@ -742,35 +766,35 @@
     {
       "id": "4f5294d2-1d1e-4293-bd59-df5ed21db8e3",
       "type": {
-          "name": "pipeline",
-          "version": "1"
+        "name": "pipeline",
+        "version": "1"
       },
       "v": "1",
       "data": {
-          "title": {
-              "@type": "string",
-              "@value": "Standardize common values"
-          },
-          "description": {
-              "@type": "string",
-              "@value": "Make common values (e.g. LOG LEVEL) follow the same format (e.g. upper case)"
-          },
-          "source": {
-              "@type": "string",
-              "@value": "pipeline \"Standardize common values\"\nstage 0 match pass\nrule \"uppercase log level\"\nend"
-          },
-          "connected_streams": [
-              {
-                  "@type": "string",
-                  "@value": "000000000000000000000001"
-              }
-          ]
+        "title": {
+          "@type": "string",
+          "@value": "Standardize common values"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Make common values (e.g. LOG LEVEL) follow the same format (e.g. upper case)"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Standardize common values\"\nstage 0 match pass\nrule \"uppercase log level\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "000000000000000000000001"
+          }
+        ]
       },
       "constraints": [
-          {
-              "type": "server-version",
-              "version": ">=5.1.4+6fa2de3"
-          }
+        {
+          "type": "server-version",
+          "version": ">=5.1.4+6fa2de3"
+        }
       ]
     },
     {
@@ -832,29 +856,29 @@
     {
       "id": "e5cd3009-3bbc-4a91-ae8c-41141da55239",
       "type": {
-          "name": "pipeline_rule",
-          "version": "1"
+        "name": "pipeline_rule",
+        "version": "1"
       },
       "v": "1",
       "data": {
-          "title": {
-              "@type": "string",
-              "@value": "uppercase log level"
-          },
-          "description": {
-              "@type": "string",
-              "@value": "Uppercase log level to have the same format"
-          },
-          "source": {
-              "@type": "string",
-              "@value": "rule \"uppercase log level\"\nwhen\n  has_field(\"log_level\")\nthen\n  let upper_case_level = uppercase(to_string($message.log_level));\n  set_field(\"log_level\", upper_case_level);\nend"
-          }
+        "title": {
+          "@type": "string",
+          "@value": "uppercase log level"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Uppercase log level to have the same format"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"uppercase log level\"\nwhen\n  has_field(\"log_level\")\nthen\n  let upper_case_level = uppercase(to_string($message.log_level));\n  set_field(\"log_level\", upper_case_level);\nend"
+        }
       },
       "constraints": [
-          {
-              "type": "server-version",
-              "version": ">=5.1.4+6fa2de3"
-          }
+        {
+          "type": "server-version",
+          "version": ">=5.1.4+6fa2de3"
+        }
       ]
     },
     {
