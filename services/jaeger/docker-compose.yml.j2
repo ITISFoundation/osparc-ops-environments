@@ -35,7 +35,7 @@ services:
   otel-collector:
     # NOTE: please keep below in sync with the version of `otel/opentelemetry-collector` inside director-v2's settings
     # https://github.com/itisfoundation/osparc-simcore/blob/master/services/dynamic-sidecar/src/simcore_service_dynamic_sidecar/core/settings.py
-    image: otel/opentelemetry-collector-contrib:0.144.0
+    image: otel/opentelemetry-collector-contrib:${TRACING_OPENTELEMETRY_COLLECTOR_IMAGE_VERSION}
     configs:
       - source: opentelemetry-collector-config
         target: /etc/otel/config.yaml
