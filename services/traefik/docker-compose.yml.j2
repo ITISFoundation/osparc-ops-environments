@@ -167,7 +167,7 @@ services:
         #     Use https://regex101.com/r/58sIgx/2 for regex explanation and experimentation.
         #     Below we include dollar escaping and j2 expressions. It is not clean / pure regex
         #     You can fetch baked and clean regex from traefik dashboards.
-        - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.regex=^https?://((?:[a-zA-Z0-9-]+\.)*)*{{ from_domain }}(.*)$$
+        - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.regex=^https?://((?:[a-zA-Z0-9-]+\.)*)*{{ from_domain }}(.*?)/?$$
         - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.replacement=https://$${1}{{ to_domain }}$${2}
         - traefik.http.middlewares.redirect-{{ from_domain_no_dots }}.redirectregex.permanent={{ redirect_is_permanent }}
         - traefik.http.routers.{{ from_domain_no_dots }}.rule={{ generate_domain_capture_all_rule(from_domain) }}
