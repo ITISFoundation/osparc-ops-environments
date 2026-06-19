@@ -1,0 +1,81 @@
+vm-k8s-stack:
+  # the single instance is replaced by the cluster below
+  vmsingle:
+    enabled: false
+    ingress:
+      enabled: false
+
+  vmcluster:
+    enabled: true
+    spec:
+      replicationFactor: 2 # to how many storage nodes the data is replicated
+      retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
+      vmstorage:
+        replicaCount: 2
+        disableSelfServiceScrape: true # do not scrape vm's own components
+        port: "8482" # http port (metrics/api)
+        vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
+        vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
+        podMetadata:
+          labels: # labels used by the network policies (templates/networkpolicies)
+            app: vmstorage
+            part-of: {{ .Release.Name }}
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app: vmstorage
+                part-of: {{ .Release.Name }}
+        storage:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 50Gi
+      vmselect:
+        replicaCount: 2
+        port: "8481" # http port (serves reads)
+        disableSelfServiceScrape: true # do not scrape vm's own components
+        podMetadata:
+          labels: # labels used by the network policies (templates/networkpolicies)
+            app: vmselect
+            part-of: {{ .Release.Name }}
+        storage:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 2Gi
+      vminsert:
+        replicaCount: 2
+        port: "8480" # http port (receives remote-write)
+        disableSelfServiceScrape: true # do not scrape vm's own components
+        podMetadata:
+          labels: # labels used by the network policies (templates/networkpolicies)
+            app: vminsert
+            part-of: {{ .Release.Name }}
+
+  vmauth: # fronts the cluster (read + write) and takes over the ingress
+    enabled: true
+    spec:
+      port: "8427"
+      disableSelfServiceScrape: true # do not scrape vm's own components
+      podMetadata:
+        labels: # labels used by the network policies (templates/networkpolicies)
+          app: vmauth
+          part-of: {{ .Release.Name }}
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path: /metrics
+      pathType: Prefix
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: >-
+          traefik-traefik-basic-auth@kubernetescrd,
+          traefik-metrics-strip-prefix@kubernetescrd

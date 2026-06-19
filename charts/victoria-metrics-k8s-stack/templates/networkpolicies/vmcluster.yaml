@@ -1,0 +1,125 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmcluster" "enabled" false $stack }}
+
+{{- $cluster := $stack.vmcluster.spec }}
+{{- $vmauthPort := $stack.vmauth.spec.port }}
+{{- $insertPort := $cluster.vminsert.port }}
+{{- $selectPort := $cluster.vmselect.port }}
+{{- $storageInsertPort := $cluster.vmstorage.vmInsertPort }}
+{{- $storageSelectPort := $cluster.vmstorage.vmSelectPort }}
+{{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
+{{- $insertLabels := $cluster.vminsert.podMetadata.labels }}
+{{- $selectLabels := $cluster.vmselect.podMetadata.labels }}
+{{- $storageLabels := $cluster.vmstorage.podMetadata.labels }}
+---
+# vmauth: global read/write proxy fronting the cluster
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-network-policy
+spec:
+  selector: app == "{{ $vmauthLabels.app }}" && part-of == "{{ index $vmauthLabels "part-of" }}"
+  ingress:
+    # reads from traefik, writes from vmagent
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $vmauthPort }}
+  egress:
+    # proxy writes to vminsert and reads to vmselect
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ $insertPort }}
+          - {{ $selectPort }}
+    # config-reloader sidecar watches the vmauth config Secret via the K8s API
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
+---
+# vminsert: receives remote-write and fans out to vmstorage
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vminsert-network-policy
+spec:
+  selector: app == "{{ $insertLabels.app }}" && part-of == "{{ index $insertLabels "part-of" }}"
+  ingress:
+    # writes from vmagent and from the vmauth proxy.
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: part-of == "{{ index $insertLabels "part-of" }}" # allow only from vm stack namespace
+      destination:
+        ports:
+          - {{ $insertPort }}
+  egress:
+    # fan out ingestion to the vmstorage instances
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ $storageInsertPort }}
+---
+# vmselect: serves reads, queries vmstorage
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmselect-network-policy
+spec:
+  selector: app == "{{ $selectLabels.app }}" && part-of == "{{ index $selectLabels "part-of" }}"
+  ingress:
+    # reads from the vmauth proxy.
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: part-of == "{{ index $selectLabels "part-of" }}" # allow only from vm stack namespace
+      destination:
+        ports:
+          - {{ $selectPort }}
+  egress:
+    # query the vmstorage instances
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ $storageSelectPort }}
+---
+# vmstorage: stores data, receives from vminsert and serves vmselect
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmstorage-network-policy
+spec:
+  selector: app == "{{ $storageLabels.app }}" && part-of == "{{ index $storageLabels "part-of" }}"
+  ingress:
+    # ingestion from vminsert and queries from vmselect.
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: part-of == "{{ index $storageLabels "part-of" }}" # allow only from vm stack namespace
+      destination:
+        ports:
+          - {{ $storageInsertPort }}
+          - {{ $storageSelectPort }}
+{{- end }}

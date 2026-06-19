@@ -1,0 +1,93 @@
+vm-k8s-stack:
+  fullnameOverride: &fullnameOverride vm-k8s-stack # by default names are long and redundant
+
+  vmagent: # scrapes the targets and writes to vmsingle
+    enabled: true
+    spec:
+      port: "8429"
+      disableSelfServiceScrape: true # do not scrape vm's own components
+      podMetadata:
+        labels: # labels used by the network policies (templates/networkpolicies)
+          app: vmagent-scraper
+          part-of: {{ .Release.Name }}
+
+  vmsingle: # stores metrics and serves them
+    enabled: true
+    spec:
+      port: "8428"
+      disableSelfServiceScrape: true # do not scrape vm's own components
+      podMetadata:
+        labels: # labels used by the network policies (templates/networkpolicies)
+          app: vmsingle
+          part-of: {{ .Release.Name }}
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path: /metrics
+      pathType: Prefix
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: >-
+          traefik-traefik-basic-auth@kubernetescrd,
+          traefik-metrics-strip-prefix@kubernetescrd
+
+  prometheus-node-exporter:  # exports node (server) metrics
+    enabled: true
+    fullnameOverride: node-exporter-vm-k8s-stack
+    # it needs to run in a privileged namespace to scrape node metrics
+    namespaceOverride: "{{ .Release.Namespace }}-privileged"
+    vmScrape:
+      spec:
+        namespaceSelector: # chart templates do not set it properly when namespace is overriden
+          matchNames: ["{{ .Release.Namespace }}-privileged"]
+    networkPolicy:
+      enabled: true
+
+  kube-state-metrics: # cluster metrics about the state of the objects (pods, PVs, etc.)
+    enabled: true
+    fullnameOverride: kube-state-metrics-vm-k8s-stack
+    networkPolicy:
+      enabled: true
+      flavor: kubernetes # calico understands kubernetes network policy
+      egress:
+      - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16
+        ports:
+        - protocol: TCP
+          port: 6443 # kube-state-metrics watches the kubernetes api server
+
+  kubelet: # container metrics (cpu / memory)
+    enabled: true
+
+  victoria-metrics-operator:
+    enabled: false # operator is deployed separately
+  vmcluster:
+    enabled: false
+  alertmanager:
+    enabled: false
+  vmalert:
+    enabled: false
+  grafana:
+    enabled: false
+  defaultDashboards:
+    enabled: false
+  defaultRules:
+    enabled: false
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
