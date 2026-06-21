@@ -1,13 +1,27 @@
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: calico-apiserver-allow-all
+  name: calico-apiserver-network-policy
   namespace: calico-apiserver
 spec:
   types:
     - Ingress
     - Egress
   ingress:
+    # Aggregated API requests from kube-apiserver + kubelet health probes
     - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 5443
   egress:
+    # Access to the Kubernetes API server
     - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 6443
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
