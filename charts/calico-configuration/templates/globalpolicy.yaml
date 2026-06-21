@@ -4,10 +4,8 @@ kind: GlobalNetworkPolicy
 metadata:
   name: default-global-deny-network-policy
 spec:
-  # "kube-public", "kube-system", "kube-node-lease" -- system namespaces
-  # "calico-system", "calico-apiserver", "tigera-operator" -- calico namespaces (when installed via scripts [local deployment])
   namespaceSelector:
-    kubernetes.io/metadata.name not in {"kube-public", "kube-system", "kube-node-lease", "calico-system", "calico-apiserver", "tigera-operator"}
+    kubernetes.io/metadata.name not in {"kube-public", "kube-system", "kube-node-lease"} # system namespaces
   types:
     - Ingress
     - Egress

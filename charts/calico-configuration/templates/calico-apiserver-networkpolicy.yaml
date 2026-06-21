@@ -1,0 +1,13 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: calico-apiserver-allow-all
+  namespace: calico-apiserver
+spec:
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+  egress:
+    - action: Allow
