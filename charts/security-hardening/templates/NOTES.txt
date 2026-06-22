@@ -1,0 +1,3 @@
+This chart configures misc. resources to harden security of the cluster. It must be deployed before any other application.
+
+Note: to make sure network policies are applied correctly, you may need to restart targeted application pods.
