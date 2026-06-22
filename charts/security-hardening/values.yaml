@@ -1,0 +1,4 @@
+vapContainerResourceLimits:
+  excludedNamespaces:
+    - kube-system
+    - calico-apiserver
