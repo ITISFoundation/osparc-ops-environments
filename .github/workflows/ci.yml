@@ -1,6 +1,13 @@
-name: CI
+name: PR CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - "*"
+  # https://github.blog/changelog/2023-02-08-pull-request-merge-queue-public-beta/
+  merge_group:
+    branches:
+      - "main"
 
 jobs:
   pre-commit:
