@@ -34,7 +34,7 @@ jobs:
         with:
           helmfile-version: v0.165.0
           helmfile-workdirectory: charts/
-          helmfile-plugins: >
+          helm-plugins: >
             https://github.com/databus23/helm-diff@v3.1.3
           helmfile-auto-init: 'true'
           helmfile-args: >-
