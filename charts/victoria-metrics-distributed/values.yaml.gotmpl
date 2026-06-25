@@ -1,4 +1,5 @@
 grafanaVictoriaMetricsDatasourceUid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}
+k8sMonitoringPrivateFqdn: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
 
 vmdistributed:
   fullnameOverride: "vm-distributed"

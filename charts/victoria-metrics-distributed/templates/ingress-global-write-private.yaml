@@ -1,0 +1,34 @@
+{{- /*
+Private ingress for the global write entrypoint (vmauth-global-write).
+
+Exposes the Prometheus remote_write endpoint over the internal/private
+Traefik entrypoint so remote Prometheus instances (e.g. on Swarm) can
+push metrics into the VictoriaMetrics distributed cluster.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vmauth-global-write-private
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # private (VPC-only) entrypoint, not exposed publicly
+    traefik.ingress.kubernetes.io/router.entrypoints: webinternal
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-traefik-basic-auth@kubernetescrd
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  rules:
+    - host: {{ .Values.k8sMonitoringPrivateFqdn }}
+      http:
+        paths:
+          - path: /api/v1/write
+            pathType: Prefix
+            backend:
+              service:
+                name: vmauth-{{ .Values.vmdistributed.write.global.vmauth.name }}
+                port:
+                  number: {{ .Values.vmdistributed.common.vmauth.spec.port }}
