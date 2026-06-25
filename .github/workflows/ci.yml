@@ -40,8 +40,8 @@ jobs:
             --output-dir /tmp/rendered
             --output-dir-template={{.OutputDir}}
 
-      - name: Install trivy
-        uses: aquasecurity/setup-trivy@v0.2.2
+      - name: Install trivy # https://github.com/aquasecurity/setup-trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
 
       - name: Trivy config scan
         run: >-
