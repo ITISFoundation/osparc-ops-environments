@@ -29,13 +29,11 @@ jobs:
       - name: Load ci.env into job environment
         run: cat charts/ci.env >> "$GITHUB_ENV"
 
-      - name: Render charts
+      - name: Render charts templates
         uses: helmfile/helmfile-action@v2.4.3
         with:
-          helmfile-version: v0.165.0
+          helmfile-version: v0.165.0 # keep in sync with version used in deployments!
           helmfile-workdirectory: charts/
-          helm-plugins: >
-            https://github.com/databus23/helm-diff@v3.1.3
           helmfile-auto-init: 'true'
           helmfile-args: >-
             -f helmfile.ci.yaml
@@ -47,9 +45,4 @@ jobs:
         uses: aquasecurity/setup-trivy@v0.2.6
 
       - name: Trivy config scan
-        run: >-
-          trivy config
-            --severity CRITICAL,HIGH,MEDIUM
-            --exit-code 1
-            --ignorefile charts/.trivyignore.yaml
-            /tmp/rendered
+        run: trivy config --severity CRITICAL,HIGH,MEDIUM --exit-code 1 --ignorefile charts/.trivyignore.yaml /tmp/rendered
