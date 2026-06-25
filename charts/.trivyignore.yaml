@@ -1,0 +1,7 @@
+misconfigurations:
+  - id: AVD-KSV-0038
+    paths:
+      - "security-hardening/templates/gpu-operator-networkpolicy.yaml"
+    statement: >
+      This policy is not supposed to be in this chart
+      and will be moved to gpu-operator chart and fixed.
