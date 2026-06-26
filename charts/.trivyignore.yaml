@@ -1,7 +1,8 @@
 misconfigurations:
   - id: AVD-KSV-0038
     paths:
-      - "security-hardening/templates/gpu-operator-networkpolicy.yaml"
+      - "security-hardening/templates/calico-apiserver-networkpolicy.yaml"
     statement: >
-      This policy is not supposed to be in this chart
-      and will be moved to gpu-operator chart and fixed.
+      This policy is not using any selectors as we do not control installation
+      of calico-apiserver (done via Kubespray). To avoid labels mismatch on 
+      Kubespray updates, we apply this network policy to all applications.
