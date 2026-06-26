@@ -122,3 +122,9 @@ repos:
         language: system
         files: ^charts/
         pass_filenames: false
+      - id: helmfile-ci-coverage
+        name: helmfile.ci.yaml covers all charts
+        entry: scripts/pre-commit-hooks/check-helmfile-ci-coverage.sh
+        language: system
+        pass_filenames: false
+        files: ^charts/
