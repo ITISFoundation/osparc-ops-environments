@@ -3,7 +3,7 @@
 # Ensures every new chart is scanned by the Trivy PR workflow.
 set -euo pipefail
 
-SKIP_RE='^(\.template|simcore-charts)$'
+SKIP_RE='^(\.template)$'
 return_code=0
 
 for d in charts/*/; do
