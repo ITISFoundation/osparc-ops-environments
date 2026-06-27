@@ -61,4 +61,5 @@ jobs:
           --severity CRITICAL,HIGH,MEDIUM
           --exit-code 1
           --ignorefile charts/.trivyignore.yaml
+          --format github
           /tmp/rendered
