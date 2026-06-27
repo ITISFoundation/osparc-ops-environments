@@ -56,10 +56,11 @@ jobs:
         uses: aquasecurity/setup-trivy@v0.2.6
 
       - name: Scan charts's templates
+        env:
+          FORCE_COLOR: 1
         run: >-
           trivy config
           --severity CRITICAL,HIGH,MEDIUM
           --exit-code 1
           --ignorefile charts/.trivyignore.yaml
-          --format github
           /tmp/rendered
