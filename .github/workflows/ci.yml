@@ -1,13 +1,17 @@
-name: PR CI
+name: Code static analysis
 
 on:
-  pull_request:
-    branches:
-      - "*"
-  # https://github.blog/changelog/2023-02-08-pull-request-merge-queue-public-beta/
-  merge_group:
+  push:
     branches:
       - "main"
+  pull_request:
+  merge_group: # necessary when adding a PR to a merge queue
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pre-commit:
