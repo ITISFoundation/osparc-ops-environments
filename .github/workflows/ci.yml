@@ -1,6 +1,17 @@
-name: CI
+name: Code static analysis
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  merge_group: # necessary when adding a PR to a merge queue
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pre-commit:
@@ -18,3 +29,36 @@ jobs:
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
+
+  trivy-scan-charts:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Load ci.env into job environment
+        run: cat charts/ci.env >> "$GITHUB_ENV"
+
+      - name: Render charts's templates
+        uses: helmfile/helmfile-action@v2.4.3
+        with:
+          helmfile-version: v0.165.0 # keep in sync with version used in deployments!
+          helmfile-workdirectory: charts/
+          helmfile-auto-init: 'true'
+          helmfile-args: >-
+            -f helmfile.ci.yaml
+            template
+            --output-dir /tmp/rendered
+            --output-dir-template={{.OutputDir}}
+
+      - name: Install trivy # https://github.com/aquasecurity/setup-trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
+
+      - name: Scan charts's templates
+        run: >-
+          trivy config
+          --severity CRITICAL,HIGH,MEDIUM
+          --exit-code 1
+          --ignorefile charts/.trivyignore.yaml
+          /tmp/rendered
