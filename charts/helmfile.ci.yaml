@@ -1,0 +1,10 @@
+# CI-only stub for Trivy chart scanning.
+
+repositories: []
+
+releases:
+  - name: security-hardening
+    chart: ./security-hardening
+    namespace: kube-system
+    values:
+      - security-hardening/values.yaml
