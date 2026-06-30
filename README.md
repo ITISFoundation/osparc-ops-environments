@@ -1,5 +1,9 @@
 # oSparc Simcore - Full Ops Stack with Monitoring and Debugging tools
 
+<!-- BADGES: LINKS TO IMAGES. Default to https://shields.io/ ------------------------------>
+[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)]([https://developer.mend.io/](https://developer.mend.io/github/ITISFoundation/osparc-ops-environments))
+<!------------------------------------------------------------------------------------------>
+
 ## tl;dr
 - In this repo's source path, create the file `.config.location` that contains the absolute full path to a oSparc Configuration Repo.
 - `make help`
