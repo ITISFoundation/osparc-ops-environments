@@ -10,6 +10,7 @@ repos:
         args: ["--maxkb=499"] # ensures docker config compatability for all files
       - id: check-merge-conflict
       - id: check-yaml
+        args: ["--allow-multiple-documents"]
         exclude: ^(.*.go.yml)|(.*.template.y*ml)$|^charts/
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -121,3 +122,9 @@ repos:
         language: system
         files: ^charts/
         pass_filenames: false
+      - id: helmfile-ci-coverage
+        name: helmfile.ci.yaml covers all charts
+        entry: scripts/pre-commit-hooks/check-helmfile-ci-coverage.sh
+        language: system
+        pass_filenames: false
+        files: ^charts/

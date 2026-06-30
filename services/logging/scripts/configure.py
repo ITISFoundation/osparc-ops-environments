@@ -6,12 +6,11 @@ import logging
 import os
 import sys
 import warnings
-from time import sleep
 from typing import Any, Dict, Optional, Tuple
 
 import requests
 import yaml
-from environs import Env, EnvError
+from environs import Env
 from requests.exceptions import HTTPError
 from requests.sessions import Session
 from tenacity import (
@@ -42,7 +41,6 @@ REQUESTS_AUTH: Tuple[str, str] = (
     env.str("SERVICES_USER"),
     env.str("SERVICES_PASSWORD"),
 )
-GRAYLOG_SYSLOG_CAPTURE_PORT: int = env.int("GRAYLOG_SYSLOG_CAPTURE_PORT")
 GRAYLOG_LOG_MAX_DAYS_IN_STORAGE: int = env.int("GRAYLOG_LOG_MAX_DAYS_IN_STORAGE")
 GRAYLOG_LOG_MIN_DAYS_IN_STORAGE: int = env.int("GRAYLOG_LOG_MIN_DAYS_IN_STORAGE")
 GRAYLOG_SLACK_WEBHOOK_URL: str = env.str("GRAYLOG_SLACK_WEBHOOK_URL")
@@ -52,7 +50,6 @@ GRAYLOG_SLACK_WEBHOOK_CHANNEL: str = env.str("GRAYLOG_SLACK_WEBHOOK_CHANNEL")
 
 assert MACHINE_FQDN
 assert REQUESTS_AUTH
-assert GRAYLOG_SYSLOG_CAPTURE_PORT
 assert GRAYLOG_LOG_MAX_DAYS_IN_STORAGE
 assert GRAYLOG_LOG_MIN_DAYS_IN_STORAGE
 
@@ -278,46 +275,6 @@ def configure_log_retention(_session: requests.Session, _headers: dict) -> None:
         )
 
 
-def configure_syslog_capture(_session: requests.Session, _headers: dict) -> None:
-    try:
-        _url = (
-            "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/cluster/nodes"
-        )
-        _r = _session.get(_url, headers=_headers, verify=False).json()
-        assert len(_r["nodes"]) == 1
-        node_uuid = _r["nodes"][0]["node_id"]
-        #
-        _url = "https://monitoring." + MACHINE_FQDN + "/graylog/api/system/inputs"
-        r2 = _session.get(_url, headers=_headers, verify=False).json()
-        if len([i for i in r2["inputs"] if i["title"] == "Syslog"]) == 0:
-            raw_data = (
-                '{"title":"Syslog","type":"org.graylog2.inputs.syslog.udp.SyslogUDPInput","configuration":{"bind_address":"0.0.0.0","port":'
-                + str(GRAYLOG_SYSLOG_CAPTURE_PORT)
-                + ',"recv_buffer_size":262144,"number_worker_threads":8,"override_source":null,"force_rdns":false,"allow_override_date":true,"store_full_message":true,"expand_structured_data":false},"global":true,"node":"'
-                + node_uuid
-                + '"}'
-            )
-            input_id = _session.post(
-                _url, headers=_headers, data=raw_data, verify=False
-            ).json()["id"]
-            #
-            sleep(0.3)
-            _url = (
-                "https://monitoring."
-                + MACHINE_FQDN
-                + "/graylog/api/system/inputs/"
-                + input_id
-                + "/extractors"
-            )
-            raw_data = '{"title":"Fill container_name","cut_or_copy":"copy","source_field":"application_name","target_field":"container_name","extractor_type":"regex_replace","extractor_config":{"regex":"(^.)","replacement":"Syslog: $1"},"converters":{},"condition_type":"none","condition_value":""}'
-            _session.post(_url, headers=_headers, data=raw_data, verify=False)
-            print("Graylog Syslog Capture setup successful.")
-        else:
-            print("Graylog Syslog Capture already present, skipping...")
-    except EnvError:
-        print("Error setting up graylog syslog capturing.")
-
-
 def configure_alerts(
     _session: requests.Session,
     _headers: dict,
@@ -505,7 +462,6 @@ if __name__ == "__main__":
     r = get_graylog_inputs(session, hed, url)
 
     configure_log_retention(session, hed)
-    configure_syslog_capture(session, hed)
     # Configure sending email notifications
     mail_notification_id = None
     slack_notification_id = None
