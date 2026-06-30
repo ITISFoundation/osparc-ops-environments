@@ -1,0 +1,11 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "labels": ["renovate"],
+  "dependencyDashboard": true,
+  "enabledManagers": ["helmv3", "helmfile"],
+  "helmfile": {
+    "managerFilePatterns": [
+      "/^charts/helmfile\\.ci\\.yaml$/"
+    ]
+  }
+}
