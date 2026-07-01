@@ -1,0 +1,12 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "schedule": ["before 6am on monday"],
+  "labels": ["renovate"],
+  "dependencyDashboard": true,
+  "enabledManagers": ["helmv3", "helmfile"],
+  "helmfile": {
+    "managerFilePatterns": [
+      "/^charts/helmfile\\.ci\\.yaml$/"
+    ]
+  }
+}
