@@ -1,7 +1,11 @@
 # oSparc Simcore - Full Ops Stack with Monitoring and Debugging tools
 
+
+<!-- BADGES: LINKS ON CLICK --------------------------------------------------------------->
+[![renovate_badge]](https://developer.mend.io/github/ITISFoundation/osparc-ops-environments)
+
 <!-- BADGES: LINKS TO IMAGES. Default to https://shields.io/ ------------------------------>
-[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)]([https://developer.mend.io/](https://developer.mend.io/github/ITISFoundation/osparc-ops-environments))
+[renovate_badge]:https://img.shields.io/badge/renovate-enabled-brightgreen.svg?url=https://developer.mend.io/github/ITISFoundation/osparc-ops-environments
 <!------------------------------------------------------------------------------------------>
 
 ## tl;dr
