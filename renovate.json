@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "schedule": ["before 6am on monday"],
+  "schedule": ["* 0-4 * * *"],
   "labels": ["renovate"],
   "dependencyDashboard": true,
   "enabledManagers": ["helmv3", "helmfile"],
