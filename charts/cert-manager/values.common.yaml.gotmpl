@@ -1,0 +1,61 @@
+certificates:
+  - certName: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}
+    secretName: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}-tls
+    dnsNames:
+      - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+
+cert-manager:
+  crds:
+    enabled: true
+    keep: true
+
+  nodeSelector:
+    ops: "true"
+
+  # controller
+  replicaCount: 1
+  # Resource limits are mandatory: the security-hardening ValidatingAdmissionPolicy
+  # `require-resource-limits-for-all-containers` denies any pod without cpu+memory limits.
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+  webhook:
+    securePort: 10250
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+
+  cainjector:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+
+  startupapicheck:
+    enabled: true
+
+    jobAnnotations:
+      # Explicitly set hook weight to have explicit reference.
+      # Needed to properly install cert-manager resources first time
+      helm.sh/hook-weight: "1"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
