@@ -7,3 +7,53 @@ misconfigurations:
       of calico-apiserver (done via Kubespray). To avoid labels mismatch on
       Kubespray updates, we apply this network policy to all applications
       in calico api server namespace
+
+  #
+  # cert-manager
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+      - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
+    statement: >
+      cert-manager must manage Secrets to store issued certificates and CA
+      private keys. These permissions are defined by the upstream chart and
+      cannot be narrowed without breaking certificate issuance.
+
+  - id: AVD-KSV-0113
+    paths:
+      - "cert-manager/charts/cert-manager/templates/webhook-rbac.yaml"
+    statement: >
+      The cert-manager webhook manages its own dynamic serving-certificate
+      Secret within its namespace. Required by the upstream chart.
+
+  - id: AVD-KSV-0114
+    paths:
+      - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
+    statement: >
+      The cainjector must create/update mutating and validating webhook
+      configurations to inject CA bundles. This is its core function.
+
+  - id: AVD-KSV-0048
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+    statement: >
+      The ACME challenge controller creates solver Pods/Jobs for HTTP01
+      challenges. Granted by the upstream ClusterRole regardless of the solver
+      type actually used.
+
+  - id: AVD-KSV-0056
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+    statement: >
+      The ACME challenge controller manages Services/Ingresses/NetworkPolicies
+      for HTTP01 solvers. Granted by the upstream ClusterRole and cannot be
+      narrowed.
+
+  - id: AVD-KSV-0038
+    paths:
+      - "cert-manager/templates/networkpolicy.yaml"
+    statement: >
+      Ingress must allow the Kubernetes API server (webhook calls), which is not
+      a selectable Pod. We therefore scope the source by CIDR (nets) instead of
+      pod/namespace selectors.

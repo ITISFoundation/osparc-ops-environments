@@ -58,6 +58,7 @@ jobs:
       - name: Scan charts's templates
         run: >-
           trivy config
+          --config-data charts/.trivy-config/
           --severity CRITICAL,HIGH,MEDIUM
           --exit-code 1
           --ignorefile charts/.trivyignore.yaml

@@ -1,0 +1,4 @@
+# https://trivy.dev/docs/v0.72/guide/scanner/misconfiguration/custom/data/
+ksv0125:
+  trusted_registries:
+    - "quay.io"

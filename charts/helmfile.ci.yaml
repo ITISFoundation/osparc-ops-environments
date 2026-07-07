@@ -1,6 +1,8 @@
 # CI-only stub for Trivy chart scanning.
 
-repositories: []
+repositories:
+  - name: jetstack
+    url: https://charts.jetstack.io
 
 releases:
   - name: security-hardening
@@ -8,3 +10,10 @@ releases:
     namespace: kube-system
     values:
       - security-hardening/values.yaml
+
+  - name: cert-manager
+    chart: ./cert-manager
+    namespace: cert-manager
+    values:
+      - cert-manager/values.common.yaml.gotmpl
+      - cert-manager/values.selfsigned.yaml.gotmpl
