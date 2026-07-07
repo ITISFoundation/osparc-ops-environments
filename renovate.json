@@ -4,7 +4,7 @@
   "labels": ["renovate"],
   "minimumReleaseAge": "60 days",
   "dependencyDashboard": true,
-  "enabledManagers": ["helmv3", "helmfile"],
+  "enabledManagers": ["helmv3", "helmfile", "github-actions"],
   "helmfile": {
     "managerFilePatterns": [
       "/^charts/helmfile\\.ci\\.yaml$/"
