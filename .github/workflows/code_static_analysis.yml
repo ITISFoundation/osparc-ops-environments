@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5  # defaults to .python-version
+        uses: actions/setup-python@v6  # defaults to .python-version
 
       - name: Show python version
         run: python --version
