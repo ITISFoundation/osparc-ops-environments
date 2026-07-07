@@ -9,9 +9,9 @@ spec:
     - action: Allow
       protocol: TCP
       source:
-        # both selectors below did not work
-        # selector: 'component == "kube-apiserver"'
-        # namespaceSelector: kubernetes.io/metadata.name == "kube-system"
+        # we cannot use selectors as kube apiserver is deployed as
+        # static pod with hostNetwork: true. Calico does not see it
+        # as a selectable workload so selectors don't work
         nets:
           - 10.0.0.0/8
           - 172.16.0.0/12
