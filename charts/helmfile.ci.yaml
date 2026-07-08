@@ -1,8 +1,10 @@
 # CI-only stub for Trivy chart scanning.
 
 repositories:
-  - name: jetstack
+  - name: jetstack # cert-manager
     url: https://charts.jetstack.io
+  - name: emberstack # reflector
+    url: https://emberstack.github.io/helm-charts
 
 releases:
   - name: security-hardening
@@ -11,9 +13,17 @@ releases:
     values:
       - security-hardening/values.yaml
 
+  - name: reflector
+    namespace: reflector
+    chart: ./reflector
+    values:
+      - ./reflector/values.yaml.gotmpl
+
   - name: cert-manager
     chart: ./cert-manager
     namespace: cert-manager
+    needs:
+      - reflector/reflector
     values:
       - cert-manager/values.common.yaml.gotmpl
       - cert-manager/values.selfsigned.yaml.gotmpl

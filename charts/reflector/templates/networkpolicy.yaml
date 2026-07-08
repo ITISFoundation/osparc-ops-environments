@@ -1,0 +1,24 @@
+# The security-hardening chart applies a Calico GlobalNetworkPolicy that
+# default-denies ingress + egress for all non-system namespaces (only DNS egress
+# is globally allowed). Reflector must reach the Kubernetes API server to watch
+# and mirror Secrets/ConfigMaps, so we explicitly allow that egress.
+# https://docs.tigera.io/calico/latest/network-policy/get-started/kubernetes-default-deny
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: reflector-network-policy
+spec:
+  egress:
+    # TCP: reflector -> Kubernetes API server
+    - action: Allow
+      protocol: TCP
+      destination:
+        # we cannot use selectors as the kube apiserver is deployed as a static
+        # pod with hostNetwork: true. Calico does not see it as a selectable
+        # workload so selectors don't work
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
