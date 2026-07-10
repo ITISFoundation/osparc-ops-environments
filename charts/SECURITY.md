@@ -1,17 +1,10 @@
 # Security
 
-This file documents security measures and their configuration in current code base
+## Enforced controls
 
-## Application developer
-
-Full list: https://kubernetes.io/docs/concepts/security/application-security-checklist/
-
-#### Pod-level securityContext recommendations
-
-Enable pod security standard on namespace level:
-* create namespace with labels (examples and explanations https://aro-labs.com/pod-security-standards/)
-* configure pod and container security context to satisfy security standards (read more https://medium.com/dynatrace-engineering/kubernetes-security-part-3-security-context-7d44862c4cfa)
-
-## Cluster / OPS developers
-
-Full list: https://kubernetes.io/docs/concepts/security/security-checklist/
+| Control | What it does | Gotcha |
+|---|---|---|
+| Restricted Pod Security Standard | `restricted` is the cluster default; can be overriden in namespace. | Violating pods are **silently rejected** — check `kubectl -n <ns> events`. |
+| Trivy scan (CI) | Scans charts for misconfigurations (trusted registries, network policies, `securityContext`, …). | Blocks at the PR gate, not at deploy. Helm **replaces** (not merges) `securityContext`, so each chart must repeat the full block. |
+| Mandatory resource limits | Admission policy denies pods whose containers lack cpu+memory limits. | Includes init & ephemeral containers. Can be skipped via a speical label. |
+| Default-deny network policy | Denies all ingress/egress (except DNS) cluster-wide. | All apps must explicitly define network connections they need via Network Policies |
