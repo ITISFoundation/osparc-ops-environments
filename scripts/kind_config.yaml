@@ -4,19 +4,17 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
     extraPortMappings:
-      # web port
-      - containerPort: 32080
+      # web: traefik binds the node's :80 directly via hostPort
+      - containerPort: 80
         hostPort: 80
-      # webinternal port
+      # websecure: traefik binds the node's :443 directly via hostPort
+      - containerPort: 443
+        hostPort: 443
+      # webinternal port (NodePort entrypoint)
       # we use as is (no port remapping)
       # Not a common port (like http) that expects 80/443
       - containerPort: 32081
         hostPort: 32081
-      # websecure port
-      - containerPort: 32443
-        hostPort: 443
-      - containerPort: 32443
-        hostPort: 8443  ## handle traefik [interal] http --> https redirect
     labels:
       ops: "true"
       simcore: "true"

@@ -91,3 +91,47 @@ misconfigurations:
     statement: >
       Reflector must create/update ConfigMaps in target namespaces to mirror
       them. Granted by the upstream chart and required for reflection.
+
+  #
+  # traefik
+  #
+  - id: AVD-KSV-0022
+    paths:
+      - "traefik/templates/daemonset.yaml"
+    statement: >
+      Traefik binds the privileged ports 80/443 directly, which requires the
+      NET_BIND_SERVICE capability. All other capabilities are dropped and the
+      container still runs as non-root.
+      https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#bind-to-privileged-ports-80-and-443
+
+  - id: AVD-KSV-0024
+    paths:
+      - "traefik/templates/daemonset.yaml"
+    statement: >
+      Traefik is the public ingress gateway and binds ports 80/443 on each node
+      via hostPort (restricted to this known list). This is the intended
+      hostPort ingress setup for bare-metal/self-managed clusters.
+
+  - id: AVD-KSV-0117
+    paths:
+      - "traefik/templates/daemonset.yaml"
+    statement: >
+      The web/websecure entrypoints intentionally use privileged containerPorts
+      80/443 so the ingress gateway serves the standard HTTP/HTTPS ports.
+
+  - id: AVD-KSV-0038
+    paths:
+      - "traefik/templates/extra-objects.yaml"
+    statement: >
+      Traefik is the public ingress gateway: ingress must be allowed from
+      anywhere, and egress is scoped by CIDR (nets) to internal/private networks
+      (incl. the kube API server, a hostNetwork static pod that is not a
+      selectable Calico workload).
+
+  - id: AVD-KSV-0041
+    paths:
+      - "traefik/templates/rbac/clusterrole.yaml"
+    statement: >
+      Traefik must read Secrets (get/list/watch) to load the TLS certificates
+      referenced by Ingresses/IngressRoutes. Defined by the upstream chart's
+      ClusterRole and cannot be narrowed without breaking TLS.

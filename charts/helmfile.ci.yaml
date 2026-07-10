@@ -5,6 +5,8 @@ repositories:
     url: https://charts.jetstack.io
   - name: emberstack # reflector
     url: https://emberstack.github.io/helm-charts
+  - name: traefik
+    url: https://traefik.github.io/charts
 
 releases:
   - name: security-hardening
@@ -27,3 +29,10 @@ releases:
     values:
       - cert-manager/values.common.yaml.gotmpl
       - cert-manager/values.selfsigned.yaml.gotmpl
+
+  - name: traefik
+    chart: traefik/traefik
+    version: 40.0.0
+    namespace: traefik
+    values:
+      - traefik/values.common.yaml.gotmpl
