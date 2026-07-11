@@ -3,8 +3,6 @@
 repositories:
   - name: jetstack # cert-manager
     url: https://charts.jetstack.io
-  - name: emberstack # reflector
-    url: https://emberstack.github.io/helm-charts
   - name: traefik
     url: https://traefik.github.io/charts
 
@@ -15,24 +13,17 @@ releases:
     values:
       - security-hardening/values.yaml
 
-  - name: reflector
-    namespace: reflector
-    chart: ./reflector
-    values:
-      - ./reflector/values.yaml.gotmpl
-
   - name: cert-manager
     chart: ./cert-manager
     namespace: cert-manager
-    needs:
-      - reflector/reflector
     values:
       - cert-manager/values.common.yaml.gotmpl
       - cert-manager/values.selfsigned.yaml.gotmpl
 
   - name: traefik
-    chart: traefik/traefik
-    version: 40.0.0
+    chart: ./traefik
     namespace: traefik
+    needs:
+      - cert-manager/cert-manager
     values:
       - traefik/values.common.yaml.gotmpl

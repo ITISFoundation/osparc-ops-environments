@@ -1,0 +1,18 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: traefik-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingress:
+    # accept traffic from anywhere (public ingress gateway)
+    - action: Allow
+  egress:
+    # egress to internal/private networks only
+    # (DNS egress is already allowed by the global policy)
+    - action: Allow
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
