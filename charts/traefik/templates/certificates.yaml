@@ -3,6 +3,13 @@ kind: Certificate
 metadata:
   name: {{ .Values.certificate.name }}
   namespace: {{ .Release.Namespace }}
+  finalizers:
+    # deleting traefik namespace has an important side effect.
+    # it requires re-issuance of certificates and might cause rate-limits
+    # if done many times https://letsencrypt.org/docs/rate-limits/#certificate-issuance-limits
+    # TIP 1: for testing use let's encrypt staging environment or self-signed issuers
+    # TIP 2: backup secrets before deleting the namespace to avoid re-issuance of certificates
+    - tls-certificate-reissue-rate-limit-protection
 spec:
   duration: 2160h # 90 days
   renewBefore: 720h # 30 days
