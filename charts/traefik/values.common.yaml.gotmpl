@@ -3,7 +3,7 @@ middlewares:
     username: {{ requiredEnv "SERVICES_USER" }}
     password: {{ requiredEnv "SERVICES_PASSWORD" }}
 
-traefikDashboard:
+dashboard:
   domain: {{ requiredEnv "K8S_MONITORING_FQDN" }}
 
 # cert-manager Certificate issued directly into the traefik namespace and

@@ -27,7 +27,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   rules:
-    - host: {{ .Values.traefikDashboard.domain }}
+    - host: {{ .Values.dashboard.domain }}
       http:
         paths:
           - path: /dashboard
