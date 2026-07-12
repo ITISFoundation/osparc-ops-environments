@@ -23,14 +23,21 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     # namespace + middleware name
-    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-traefik-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   rules:
-    - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+    - host: {{ .Values.traefikDashboard.domain }}
       http:
         paths:
-          - path: /
+          - path: /dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-api
+                port:
+                  name: traefik
+          - path: /api
             pathType: Prefix
             backend:
               service:

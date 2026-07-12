@@ -1,3 +1,11 @@
+middlewares:
+  basicAuth:
+    username: {{ requiredEnv "SERVICES_USER" }}
+    password: {{ requiredEnv "SERVICES_PASSWORD" }}
+
+traefikDashboard:
+  domain: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+
 # cert-manager Certificate issued directly into the traefik namespace and
 # consumed by the default TLSStore below.
 # https://github.com/traefik/traefik/issues/12116
@@ -6,6 +14,9 @@ certificate:
   secretName: &certSecretName {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}-tls
   dnsNames:
     - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+  issuerRef: # created in cert-manager. keep in sync
+    name: cert-issuer
+    kind: ClusterIssuer
 
 traefik:
   deployment:
