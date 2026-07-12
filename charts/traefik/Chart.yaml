@@ -26,4 +26,4 @@ appVersion: "3.7.1"
 dependencies:
   - name: traefik
     version: *traefikHelmChartVersion
-    repository: "https://helm.traefik.io/traefik"
+    repository: "https://traefik.github.io/charts"
