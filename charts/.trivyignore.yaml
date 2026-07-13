@@ -59,35 +59,23 @@ misconfigurations:
       pod/namespace selectors.
 
   #
-  # reflector
+  # traefik
   #
   - id: AVD-KSV-0038
     paths:
-      - "reflector/templates/networkpolicy.yaml"
+      - "traefik/templates/networkpolicy.yaml"
     statement: >
-      Egress must reach the Kubernetes API server, which runs as a hostNetwork
-      static pod and is not a selectable Calico workload. We therefore scope the
-      destination by CIDR (nets) instead of pod/namespace selectors.
+      Traefik is an entry point for external traffic. It must accept it from outside
+      and send to anything inside the cluster.
 
-  - id: AVD-KSV-0041
+  - id: KSV-0024
     paths:
-      - "reflector/charts/reflector/templates/clusterRole.yaml"
+      - "traefik/charts/traefik/templates/daemonset.yaml"
     statement: >
-      Reflector's core function is to mirror Secrets across namespaces, so it
-      must manage Secrets cluster-wide. Defined by the upstream chart and cannot
-      be narrowed without breaking reflection.
+      Traefik listens on hostPorts of the nodes. This is done for simplicity.
 
-  - id: AVD-KSV-0045
+  - id: KSV-0041
     paths:
-      - "reflector/charts/reflector/templates/clusterRole.yaml"
+      - "traefik/charts/traefik/templates/rbac/clusterrole.yaml"
     statement: >
-      The upstream reflector ClusterRole grants a wildcard verb on ConfigMaps
-      and Secrets to watch, read and mirror them across namespaces. This is
-      required by the upstream chart and cannot be narrowed.
-
-  - id: AVD-KSV-0049
-    paths:
-      - "reflector/charts/reflector/templates/clusterRole.yaml"
-    statement: >
-      Reflector must create/update ConfigMaps in target namespaces to mirror
-      them. Granted by the upstream chart and required for reflection.
+      Traefik needs to manages see secrets to manage middlewares or other resources.

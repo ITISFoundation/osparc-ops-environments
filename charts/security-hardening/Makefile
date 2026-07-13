@@ -2,7 +2,7 @@ REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common.Makefile
 
-enable-flow-logs: ## observe network traffic in kubernetes cluster
+enable-network-flow-logs: ## observe network traffic in cluster to debug network policies
 	@$(call confirm_action,Are you using calico 3.30+?,yes)
 	# https://docs.tigera.io/calico/3.30/observability/enable-whisker
 	kubectl apply -f flowlogs.yaml
