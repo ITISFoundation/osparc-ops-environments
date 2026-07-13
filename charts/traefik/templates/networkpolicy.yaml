@@ -1,0 +1,25 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: traefik-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingress:
+    # public HTTP/HTTPS entrypoints + dashboard API.
+    # container ports (host 80/443 are DNAT'd to these before Calico enforces policy)
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.traefik.ports.web.port }}
+          - {{ .Values.traefik.ports.websecure.port }}
+          - {{ .Values.traefik.ports.traefik.port }}
+  egress:
+    # egress to internal/private networks only
+    # (DNS egress is already allowed by the global policy)
+    - action: Allow
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
