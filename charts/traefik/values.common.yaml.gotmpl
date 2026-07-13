@@ -54,11 +54,9 @@ traefik:
   # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md#bind-to-privileged-ports-80-and-443
   ports:
     web:
-      port: 8000
+      port: 8000 # keep above privileged ports. Otherwise extra security configuration is needed
       hostPort: 80
-      exposedPort: 80
-      # only reachable via hostPort, not published on the Service
-      expose:
+      expose: # only reachable via hostPort, not published on the Service
         default: false
       http:
         redirections:
@@ -67,9 +65,13 @@ traefik:
             scheme: https
             permanent: true
     websecure:
-      port: 8443
+      port: 8443 # keep above privileged ports. Otherwise extra security configuration is needed
       hostPort: 443
-      exposedPort: 443
+      exposedPort: 443 # used to resolve redirect port
+      expose:
+        default: false
+    traefik:
+      port: 8080
       expose:
         default: false
 

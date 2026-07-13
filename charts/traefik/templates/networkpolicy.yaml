@@ -5,8 +5,15 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   ingress:
-    # accept traffic from anywhere (public ingress gateway)
+    # public HTTP/HTTPS entrypoints + dashboard API.
+    # container ports (host 80/443 are DNAT'd to these before Calico enforces policy)
     - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.traefik.ports.web.port }}
+          - {{ .Values.traefik.ports.websecure.port }}
+          - {{ .Values.traefik.ports.traefik.port }}
   egress:
     # egress to internal/private networks only
     # (DNS egress is already allowed by the global policy)
