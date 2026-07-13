@@ -1,0 +1,95 @@
+middlewares:
+  basicAuth:
+    username: {{ requiredEnv "SERVICES_USER" }}
+    password: {{ requiredEnv "SERVICES_PASSWORD" }}
+
+dashboard:
+  domain: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+
+# cert-manager Certificate issued directly into the traefik namespace and
+# consumed by the default TLSStore below.
+# https://github.com/traefik/traefik/issues/12116
+certificate:
+  name: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}
+  secretName: &certSecretName {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}-tls
+  dnsNames:
+    - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+  issuerRef: # created in cert-manager. keep in sync
+    name: cert-issuer
+    kind: ClusterIssuer
+
+traefik:
+  deployment:
+    kind: DaemonSet
+
+  updateStrategy:
+    type: RollingUpdate
+    # One pod at a time. Old pod stops first. New pod replaces it
+    # Must be done this way due to host port (port conflict on node)
+    # It means a short downtime. Run multiple pods to cure it.
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+
+  ingressClass:
+    enabled: true
+    isDefaultClass: true
+    name: "traefik"
+
+  additionalArguments:
+  - "--api.insecure=true" # required to expose dashboard
+
+  logs:
+    general:
+      level: INFO
+    access:
+      enabled: false
+
+  service:
+    # we use traefik via hostPorts only
+    # so we don't need traefik to be reachable
+    # inside kubernetes cluster (via service)
+    enabled: false
+
+  ports:
+    web:
+      port: 8000 # keep above privileged ports. Otherwise extra security configuration is needed
+      hostPort: 80
+      expose: # only reachable via hostPort, not published on the Service
+        default: false
+      http:
+        redirections:
+          entryPoint:
+            to: websecure
+            scheme: https
+            permanent: true
+    websecure:
+      port: 8443 # keep above privileged ports. Otherwise extra security configuration is needed
+      hostPort: 443
+      exposedPort: 443 # used to resolve redirect port
+      expose:
+        default: false
+    traefik:
+      port: 8080
+      expose:
+        default: false
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 256Mi
+
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "" # in some cases may require tolerations
+
+  tlsStore:
+    default:
+      certificates:
+        # issued by cert-manager into the traefik namespace (see the Certificate
+        # in templates/certificates.yaml). Traefik matches the DNS name of a
+        # request against the certificates in the default TLSStore.
+        # https://github.com/traefik/traefik/issues/12116
+        - secretName: *certSecretName

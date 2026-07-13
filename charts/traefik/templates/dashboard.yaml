@@ -1,0 +1,46 @@
+# https://github.com/traefik/traefik-helm-chart/blob/v40.0.0/EXAMPLES.md#publish-and-protect-the-traefik-dashboard-with-an-ingress
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: {{ .Release.Namespace }}-traefik
+  ports:
+    - port: {{ .Values.traefik.ports.traefik.port }}
+      name: traefik
+      targetPort: {{ .Values.traefik.ports.traefik.port }}
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-dashboard
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # namespace + middleware name
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: {{ .Values.dashboard.domain }}
+      http:
+        paths:
+          - path: /dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-api
+                port:
+                  name: traefik
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-api
+                port:
+                  name: traefik
