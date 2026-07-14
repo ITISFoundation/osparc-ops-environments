@@ -19,6 +19,8 @@ HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 CHART_TEMPLATE_DIR := $(REPO_BASE_DIR)/charts/.template
 CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
 
+TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
+
 #
 # Helpers
 #
@@ -28,7 +30,6 @@ CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
 	@if ! command -v helmfile >/dev/null 2>&1; then \
 			echo "'helmfile' is not installed. Install it to continue ...";\
 	fi
-
 
 .PHONY: .helmfile-%
 .helmfile-%: .check-helmfile-installed helmfile.yaml
@@ -55,6 +56,11 @@ helmfile.yaml: simcore-charts/helmfile.yaml ## Copies the helmfile.yaml to the c
 simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts directory
 	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
 
+$(TRIVY_TEMPLATES_DIR):
+	@rm -rf $(TRIVY_TEMPLATES_DIR)
+	@$(MAKE) --no-print-directory helmfile-template \
+		HELMFILE_EXTRA_ARGS="--output-dir $(TRIVY_TEMPLATES_DIR) --output-dir-template={{.OutputDir}}"
+
 #
 # Public / Exposed targets
 #
@@ -76,3 +82,13 @@ helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unles
 
 .PHONY: helmfile-delete
 helmfile-delete: .helmfile-delete ## Delete the helmfile configuration
+
+.PHONY: trivy-scan
+trivy-scan: $(TRIVY_TEMPLATES_DIR)
+trivy-scan: ## Scan rendered helm templates for vulnerabilities
+	@trivy config \
+		--config-data $(REPO_BASE_DIR)/charts/.trivy-config \
+		--ignorefile $(REPO_BASE_DIR)/charts/.trivyignore.yaml \
+		--severity MEDIUM,HIGH,CRITICAL \
+		--exit-code 1 \
+		$(TRIVY_TEMPLATES_DIR)
