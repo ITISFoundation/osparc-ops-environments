@@ -38,7 +38,7 @@ CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
 	fi
 	@if ! helmfile --version | grep -q "$(HELMFILE_EXPECTED_VERSION)"; then \
 		echo "WARNING: installed helmfile version does not match"> /dev/stderr; \
-		echo "Expected helmfile version:'$(HELMFILE_EXPECTED_VERSION)'" > /dev/stderr; \
+		echo "Expected helmfile version:'$(HELMFILE_EXPECTED_VERSION)'. Please, update!" > /dev/stderr; \
 		sleep 3s; \
 	fi
 
