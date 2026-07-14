@@ -2,7 +2,6 @@
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common.Makefile
-include $(REPO_CONFIG_LOCATION)
 
 #
 # Vars
@@ -10,6 +9,14 @@ include $(REPO_CONFIG_LOCATION)
 
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
+
+
+# Helmfile version is dictated by helm version installed in the cluster.
+# Kubepsray dictates the helm version to be installed in the cluster.
+# Based on helm version choose the highest compatible helmfile version.
+# (helmfile defines minimum required helm version)
+# NOTE: keep in sync with github workflows and version in running clusters
+HELMFILE_EXPECTED_VERSION := 0.165.0
 
 # Example of usage:
 # make helmfile-diff HELMFILE_EXTRA_ARGS='--selector app=adminer'
@@ -23,15 +30,20 @@ CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
 # Helpers
 #
 
-.PHONY: .check-helmfile-installed
-.check-helmfile-installed: ## Checks if helmfile is installed
+.PHONY: .verify-helmfile-installation
+.verify-helmfile-installation:
 	@if ! command -v helmfile >/dev/null 2>&1; then \
-			echo "'helmfile' is not installed. Install it to continue ...";\
+		echo "'helmfile' is not installed. Install version $(HELMFILE_EXPECTED_VERSION) to continue ..."; \
+		exit 1; \
+	fi
+	@if ! helmfile --version | grep -q "$(HELMFILE_EXPECTED_VERSION)"; then \
+		echo "WARNING: installed helmfile version does not match"> /dev/stderr; \
+		echo "Expected helmfile version:'$(HELMFILE_EXPECTED_VERSION)'. Please, update!" > /dev/stderr; \
+		sleep 3s; \
 	fi
 
-
 .PHONY: .helmfile-%
-.helmfile-%: .check-helmfile-installed helmfile.yaml
+.helmfile-%: .verify-helmfile-installation helmfile.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml $*
 
