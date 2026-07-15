@@ -1,3 +1,4 @@
 k8s_hosts.ini
-helmfile.y?ml
+helmfile.yml
+helmfile.yaml
 *.tgz

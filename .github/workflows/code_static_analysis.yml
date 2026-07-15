@@ -30,6 +30,22 @@ jobs:
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
+  helmfile-static-checks:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup helmfile
+        uses: ./.github/actions/setup-helmfile
+
+      - name: Lint helmfile
+        run: make -C charts helmfile-lint
+
+      - name: Render helmfile templates
+        run: make -C charts helmfile-template
+
   trivy-scan-charts:
     runs-on: ubuntu-22.04
 
@@ -37,29 +53,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Load ci.env into job environment
-        run: cat charts/ci.env >> "$GITHUB_ENV"
-
-      - name: Render charts's templates
-        uses: helmfile/helmfile-action@v2.4.4
-        with:
-          helmfile-version: v0.165.0 # keep in sync with version used in deployments!
-          helmfile-workdirectory: charts/
-          helmfile-auto-init: 'true'
-          helmfile-args: >-
-            -f helmfile.ci.yaml
-            template
-            --output-dir /tmp/rendered
-            --output-dir-template={{.OutputDir}}
+      - name: Setup helmfile
+        uses: ./.github/actions/setup-helmfile
 
       - name: Install trivy # https://github.com/aquasecurity/setup-trivy
         uses: aquasecurity/setup-trivy@v0.2.6
 
-      - name: Scan charts's templates
-        run: >-
-          trivy config
-          --config-data charts/.trivy-config/
-          --severity CRITICAL,HIGH,MEDIUM
-          --exit-code 1
-          --ignorefile charts/.trivyignore.yaml
-          /tmp/rendered
+      - name: Run trivy scan
+        run: make -C charts trivy-scan
