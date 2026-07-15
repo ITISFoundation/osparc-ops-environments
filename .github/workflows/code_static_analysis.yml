@@ -59,7 +59,10 @@ jobs:
       - name: Install trivy # https://github.com/aquasecurity/setup-trivy
         uses: aquasecurity/setup-trivy@v0.2.6
         with:
-          # tracked by renovate
+          # tracked by renovate via github actions
+          # see list of supported `with version` actions
+          # https://docs.renovatebot.com/modules/manager/github-actions/#withversion-support-for-built-in-actions
+          # NOTE: keep in sync with trivy version in makefile
           version: v0.71.2
 
       - name: Run trivy scan

@@ -5,8 +5,8 @@
 # NOTE: keep in sync with github workflows and version in running clusters
 HELMFILE_EXPECTED_VERSION := 0.165.0
 
-# renovate: datasource=github-releases depName=aquasecurity/trivy extractVersion=^v(?<version>.+)$
-TRIVY_EXPECTED_VERSION    := 0.71.2
+# NOTE: keep in sync with version used in github workflows (actions)
+TRIVY_EXPECTED_VERSION := 0.71.2
 
 # $(call verify_tool_installation,tool,expected_version)
 define verify_tool_installation
