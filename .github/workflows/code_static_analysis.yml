@@ -58,6 +58,9 @@ jobs:
 
       - name: Install trivy # https://github.com/aquasecurity/setup-trivy
         uses: aquasecurity/setup-trivy@v0.2.6
+        with:
+          # renovate: datasource=github-releases depName=aquasecurity/trivy
+          version: v0.71.2
 
       - name: Run trivy scan
         run: make -C charts trivy-scan
