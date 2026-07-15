@@ -5,18 +5,19 @@
   "labels": ["renovate"],
   "minimumReleaseAge": "60 days",
   "dependencyDashboard": true,
-  "enabledManagers": ["helmv3", "helmfile", "github-actions", "custom.regex"],
+  "enabledManagers": ["helmv3", "helmfile", "custom.regex"],
   "helmfile": {
     "managerFilePatterns": [
-      "/^charts/helmfile\\.ci\\.yaml$/"
+      "/(^|/)helmfile\\.ya?ml$/",
+      "/(^|/)helmfile\\.simcore\\.ya?ml$/"
     ]
   },
   "customManagers": [
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^charts/\\.tools\\.Makefile$/",
-        "/^\\.github/workflows/[^/]+\\.ya?ml$/"
+        "/(^|/)Makefile$/",
+        "/(^|/)[^/]+\\.Makefile$/"
       ],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+?)(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\s*[\\r\\n]+\\s*[A-Za-z0-9_.-]+\\s*(?::=|:)\\s*[\"']?(?<currentValue>[^\"'\\s]+)"

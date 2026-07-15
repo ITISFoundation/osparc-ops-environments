@@ -59,7 +59,7 @@ jobs:
       - name: Install trivy # https://github.com/aquasecurity/setup-trivy
         uses: aquasecurity/setup-trivy@v0.2.6
         with:
-          # renovate: datasource=github-releases depName=aquasecurity/trivy
+          # tracked by renovate
           version: v0.71.2
 
       - name: Run trivy scan
