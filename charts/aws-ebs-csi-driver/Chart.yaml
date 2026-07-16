@@ -1,0 +1,18 @@
+apiVersion: v2
+name: aws-ebs-csi-driver
+description: |
+  A wrapper around aws-ebs-csi-driver helm chart to add network policies.
+  Once https://github.com/kubernetes-sigs/aws-ebs-csi-driver/issues/2963
+  is resolved, this wrapper chart can be removed and the original chart
+  can be used directly.
+
+type: application
+
+version: "1.0.0" # not really used. see dependency version
+
+appVersion: "1.0.0" # not really used. see dependency version
+
+dependencies:
+  - name: aws-ebs-csi-driver
+    version: 2.60.0
+    repository: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"

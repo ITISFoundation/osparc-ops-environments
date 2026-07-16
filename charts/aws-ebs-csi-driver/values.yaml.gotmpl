@@ -1,0 +1,131 @@
+# https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/charts/aws-ebs-csi-driver/values.yaml
+
+aws-ebs-csi-driver:
+
+  awsAccessSecret:
+    name: ebs-csi-driver-access-keys
+    keyId: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_ACCESS_KEY" }}
+    accessKey: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_SECRET_KEY" }}
+
+  storageClasses:
+    - name: "{{ .Values.ebsStorageClassName }}"
+      parameters:
+          type: "gp3"
+      allowVolumeExpansion: true # Allow resizing of EBS volumes (only making larger)
+      reclaimPolicy: Retain  # EBS Volume will not be deleted when PV is deleted
+      annotations:
+          storageclass.kubernetes.io/is-default-class: "true"
+
+  controller:
+      k8sTagClusterId: k8s-{{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" | replace "." "-"}}
+      extraVolumeTags:
+          {{ requiredEnv "AWS_DEPLOYMENT_TAG_KEY" }}: {{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" }}
+
+      # Use VolumeAttributeClass to modify volumes instead.
+      # It requires `VolumeAttributesClass` feature gate
+      # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/modify-volume.md
+      volumeModificationFeature:
+          enabled: false
+      resources:
+          requests:
+              cpu: 10m
+              memory: 40Mi
+          limits:
+              cpu: "1"
+              memory: 256Mi
+
+  node:
+      # We only run Linux nodes; disable the Windows DaemonSet to avoid
+      # shipping (and having to secure) a component we don't use.
+      enableWindows: false
+      resources:
+          requests:
+              cpu: 10m
+              memory: 40Mi
+          limits:
+              cpu: "1"
+              memory: 256Mi
+      # Upstream leaves seccompProfile unset on the node plugin container which
+      # triggers KSV-0104. `privileged: true` is required for the CSI node
+      # driver to mount block devices on the host.
+      containerSecurityContext:
+          readOnlyRootFilesystem: true
+          privileged: true
+          allowPrivilegeEscalation: false
+          seccompProfile:
+              type: RuntimeDefault
+
+  sidecars:
+      provisioner:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 40Mi
+              limits:
+                  cpu: 200m
+                  memory: 128Mi
+      attacher:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 40Mi
+              limits:
+                  cpu: 200m
+                  memory: 128Mi
+      snapshotter:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 40Mi
+              limits:
+                  cpu: 200m
+                  memory: 128Mi
+      livenessProbe:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 20Mi
+              limits:
+                  cpu: 100m
+                  memory: 64Mi
+          # Upstream default has no seccompProfile (KSV-0104).
+          securityContext:
+              readOnlyRootFilesystem: true
+              allowPrivilegeEscalation: false
+              seccompProfile:
+                  type: RuntimeDefault
+      resizer:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 40Mi
+              limits:
+                  cpu: 200m
+                  memory: 128Mi
+      nodeDriverRegistrar:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 20Mi
+              limits:
+                  cpu: 100m
+                  memory: 64Mi
+          # Upstream default has no seccompProfile (KSV-0104).
+          securityContext:
+              readOnlyRootFilesystem: true
+              allowPrivilegeEscalation: false
+              seccompProfile:
+                  type: RuntimeDefault
+      volumemodifier:
+          resources:
+              requests:
+                  cpu: 10m
+                  memory: 40Mi
+              limits:
+                  cpu: 200m
+                  memory: 128Mi
+
+  # The helm-tester pod is only used by `helm test`; disable it so we don't
+  # have to define resource limits for it (would otherwise be rejected).
+  helmTester:
+      enabled: false
