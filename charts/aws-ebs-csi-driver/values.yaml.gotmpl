@@ -1,11 +1,16 @@
-# https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/charts/aws-ebs-csi-driver/values.yaml
+awsCredentials:
+  accessKeyId: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_ACCESS_KEY" }}
+  secretAccessKey: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_SECRET_KEY" }}
 
+# https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/charts/aws-ebs-csi-driver/values.yaml
 aws-ebs-csi-driver:
 
+  # Names only: `keyId` / `accessKey` are the *field names inside the
+  # Secret* (see templates/secret.yaml), not the credential values.
   awsAccessSecret:
     name: ebs-csi-driver-access-keys
-    keyId: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_ACCESS_KEY" }}
-    accessKey: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_SECRET_KEY" }}
+    keyId: access_key_id
+    accessKey: secret_access_key
 
   storageClasses:
     - name: "{{ .Values.ebsStorageClassName }}"
@@ -17,7 +22,10 @@ aws-ebs-csi-driver:
           storageclass.kubernetes.io/is-default-class: "true"
 
   controller:
-      k8sTagClusterId: k8s-{{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" | replace "." "-"}}
+      k8sTagClusterId: {{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" | replace "." "-"}}
+
+      # use to separate managed EBS volume between deployments.
+      # AWS IAM Policy requires this tag to be set.
       extraVolumeTags:
           {{ requiredEnv "AWS_DEPLOYMENT_TAG_KEY" }}: {{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" }}
 
