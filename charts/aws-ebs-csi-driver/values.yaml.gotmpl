@@ -5,8 +5,6 @@ awsCredentials:
 # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/charts/aws-ebs-csi-driver/values.yaml
 aws-ebs-csi-driver:
 
-  # Names only: `keyId` / `accessKey` are the *field names inside the
-  # Secret* (see templates/secret.yaml), not the credential values.
   awsAccessSecret:
     name: ebs-csi-driver-access-keys
     keyId: access_key_id
@@ -53,9 +51,7 @@ aws-ebs-csi-driver:
           limits:
               cpu: "1"
               memory: 256Mi
-      # Upstream leaves seccompProfile unset on the node plugin container which
-      # triggers KSV-0104. `privileged: true` is required for the CSI node
-      # driver to mount block devices on the host.
+
       containerSecurityContext:
           readOnlyRootFilesystem: true
           privileged: true
@@ -96,7 +92,6 @@ aws-ebs-csi-driver:
               limits:
                   cpu: 100m
                   memory: 64Mi
-          # Upstream default has no seccompProfile (KSV-0104).
           securityContext:
               readOnlyRootFilesystem: true
               allowPrivilegeEscalation: false
@@ -118,7 +113,6 @@ aws-ebs-csi-driver:
               limits:
                   cpu: 100m
                   memory: 64Mi
-          # Upstream default has no seccompProfile (KSV-0104).
           securityContext:
               readOnlyRootFilesystem: true
               allowPrivilegeEscalation: false
