@@ -2,6 +2,7 @@
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common.Makefile
+include ${REPO_BASE_DIR}/charts/.tools.Makefile
 
 #
 # Vars
@@ -9,14 +10,6 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
-
-
-# Helmfile version is dictated by helm version installed in the cluster.
-# Kubepsray dictates the helm version to be installed in the cluster.
-# Based on helm version choose the highest compatible helmfile version.
-# (helmfile defines minimum required helm version)
-# NOTE: keep in sync with github workflows and version in running clusters
-HELMFILE_EXPECTED_VERSION := 0.165.0
 
 # Example of usage:
 # make helmfile-diff HELMFILE_EXTRA_ARGS='--selector app=adminer'
@@ -31,18 +24,6 @@ TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 #
 # Helpers
 #
-
-.PHONY: .verify-helmfile-installation
-.verify-helmfile-installation:
-	@if ! command -v helmfile >/dev/null 2>&1; then \
-		echo "'helmfile' is not installed. Install version $(HELMFILE_EXPECTED_VERSION) to continue ..."; \
-		exit 1; \
-	fi
-	@if ! helmfile --version | grep -q "$(HELMFILE_EXPECTED_VERSION)"; then \
-		echo "WARNING: installed helmfile version does not match"> /dev/stderr; \
-		echo "Expected helmfile version:'$(HELMFILE_EXPECTED_VERSION)'. Please, update!" > /dev/stderr; \
-		sleep 3s; \
-	fi
 
 .PHONY: .helmfile-%
 .helmfile-%: .verify-helmfile-installation helmfile.yaml
@@ -97,7 +78,7 @@ helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unles
 helmfile-delete: .helmfile-delete ## Delete the helmfile configuration
 
 .PHONY: trivy-scan
-trivy-scan: $(TRIVY_TEMPLATES_DIR)
+trivy-scan: $(TRIVY_TEMPLATES_DIR) .verify-trivy-installation
 trivy-scan: ## Scan rendered helm templates for vulnerabilities
 	@trivy config \
 		--config-data $(REPO_BASE_DIR)/charts/.trivy-config \
