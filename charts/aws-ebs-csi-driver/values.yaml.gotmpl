@@ -54,8 +54,10 @@ aws-ebs-csi-driver:
 
       containerSecurityContext:
           readOnlyRootFilesystem: true
+          # Privileged containers always run as `Unconfined` and imply
+          # `allowPrivilegeEscalation: true`; the API server rejects the
+          # combination `privileged: true` + `allowPrivilegeEscalation: false`.
           privileged: true
-          allowPrivilegeEscalation: false
           seccompProfile:
               type: RuntimeDefault
 

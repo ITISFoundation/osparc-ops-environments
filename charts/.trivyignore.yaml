@@ -84,6 +84,16 @@ misconfigurations:
   # aws-ebs-csi-driver
   #
 
+  - id: AVD-KSV-0001
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The ebs-plugin node container runs as privileged (required to attach EBS
+      block devices and perform mount/format operations on the host). The
+      Kubernetes API server rejects the combination `privileged: true` with
+      `allowPrivilegeEscalation: false`, so this control cannot be enforced
+      for this container.
+
   - id: AVD-KSV-0012
     paths:
       - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
