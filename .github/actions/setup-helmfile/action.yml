@@ -9,7 +9,7 @@ runs:
       run: echo $(realpath charts/.ci-deployment/repo.config) > .config.location
 
     - name: Install helmfile
-      uses: helmfile/helmfile-action@v2.4.4
+      uses: helmfile/helmfile-action@f6f7844b9e6d9f5ac8cf4cdae8ada1a42755c036 # v2.4.4
       with:
         helmfile-version: v0.165.0 # keep in sync with charts/Makefile and version in running clusters
         helmfile-auto-init: 'true'
