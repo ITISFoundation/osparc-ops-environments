@@ -20,6 +20,8 @@ aws-ebs-csi-driver:
           storageclass.kubernetes.io/is-default-class: "true"
 
   controller:
+      replicaCount: 1
+
       k8sTagClusterId: {{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" | replace "." "-"}}
 
       # use to separate managed EBS volume between deployments.
