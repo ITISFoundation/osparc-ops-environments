@@ -46,6 +46,8 @@ aws-ebs-csi-driver:
       # We only run Linux nodes; disable the Windows DaemonSet to avoid
       # shipping (and having to secure) a component we don't use.
       enableWindows: false
+
+      volumeAttachLimit: 15 # safeguard. It applies per node
       resources:
           requests:
               cpu: 10m
