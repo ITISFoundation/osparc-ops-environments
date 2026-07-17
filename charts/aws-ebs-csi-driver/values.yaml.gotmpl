@@ -22,7 +22,7 @@ aws-ebs-csi-driver:
   controller:
       replicaCount: 1
 
-      k8sTagClusterId: {{ requiredEnv "AWS_DEPLOYMENT_TAG_VALUE" | replace "." "-"}}
+      k8sTagClusterId: {{ requiredEnv "AWS_RESOURCE_PREFIX" }}-k8s
 
       # use to separate managed EBS volume between deployments.
       # AWS IAM Policy requires this tag to be set.
