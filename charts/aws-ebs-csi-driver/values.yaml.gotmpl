@@ -18,9 +18,16 @@ aws-ebs-csi-driver:
       parameters:
           type: "gp3"
       allowVolumeExpansion: true # Allow resizing of EBS volumes (only making larger)
-      reclaimPolicy: Retain  # EBS Volume will not be deleted when PV is deleted
+      reclaimPolicy: Delete # EBS Volume will be deleted when PV is deleted
       annotations:
           storageclass.kubernetes.io/is-default-class: "true"
+    - name: "{{ .Values.ebsStorageCriticalClassName }}"
+      volumeBindingMode: WaitForFirstConsumer
+      parameters:
+          type: "gp3"
+      allowVolumeExpansion: true
+      reclaimPolicy: Retain  # EBS Volume will NOT be deleted when PV is deleted
+      annotations:
 
   controller:
       replicaCount: 1
