@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup-helmfile
 
       - name: Lint helmfile
-        run: make -C charts helmfile-lint
+        run: make --directory ./charts helmfile-lint
 
       - name: Render helmfile templates
         run: make --directory ./charts helmfile-template
