@@ -44,7 +44,7 @@ jobs:
         run: make -C charts helmfile-lint
 
       - name: Render helmfile templates
-        run: make -C charts helmfile-template
+        run: make --directory ./charts helmfile-template
 
   trivy-scan-charts:
     runs-on: ubuntu-22.04
@@ -66,4 +66,4 @@ jobs:
           version: v0.71.2
 
       - name: Run trivy scan
-        run: make -C charts trivy-scan
+        run: make --directory ./charts trivy-scan
