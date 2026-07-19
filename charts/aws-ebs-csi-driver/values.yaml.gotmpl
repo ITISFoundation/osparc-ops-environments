@@ -21,6 +21,8 @@ aws-ebs-csi-driver:
 
   controller:
       replicaCount: 1
+      podDisruptionBudget:
+        enabled: false # does not make sense with 1 replica
 
       k8sTagClusterId: {{ requiredEnv "AWS_RESOURCE_PREFIX" }}-k8s
 
@@ -48,6 +50,7 @@ aws-ebs-csi-driver:
       enableWindows: false
 
       volumeAttachLimit: 15 # safeguard. It applies per node
+
       resources:
           requests:
               cpu: 10m
