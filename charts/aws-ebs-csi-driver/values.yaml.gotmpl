@@ -12,6 +12,9 @@ aws-ebs-csi-driver:
 
   storageClasses:
     - name: "{{ .Values.ebsStorageClassName }}"
+
+      # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/parameters.md#volume-availability-zone-and-topologies
+      volumeBindingMode: WaitForFirstConsumer
       parameters:
           type: "gp3"
       allowVolumeExpansion: true # Allow resizing of EBS volumes (only making larger)
