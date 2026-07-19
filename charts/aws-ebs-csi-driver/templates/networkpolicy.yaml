@@ -1,10 +1,14 @@
 # Once https://github.com/kubernetes-sigs/aws-ebs-csi-driver/issues/2963
 # is solved, we can drop our own template
 
+# Note: `aws-ebs-csi-node` pod runs on hostNetwork.
+# NetworkPolicy do not apply to hostNetwork pods
+# So, it is not defined here.
+
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: aws-ebs-csi-driver-network-policy
+  name: aws-ebs-csi-driver-controller-network-policy
   namespace: {{ .Release.Namespace }}
 spec:
   selector: 'app.kubernetes.io/name == "aws-ebs-csi-driver"'
