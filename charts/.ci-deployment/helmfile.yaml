@@ -13,9 +13,6 @@ environments:
     values:
       - ebsStorageClassName: "ebs-sc"
       - ebsStorageCriticalClassName: "ebs-sc-critical"
-      - grafanaVictoriaMetricsDatasourceUid: "P4169E755C3094E38"
-      - longhornStorageClassName: "longhorn"
-      - topolvmStorageClassName: "topolvm"
 ---
 releases:
   - name: security-hardening
