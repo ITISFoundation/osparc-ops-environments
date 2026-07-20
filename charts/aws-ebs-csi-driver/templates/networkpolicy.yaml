@@ -1,0 +1,42 @@
+# Once https://github.com/kubernetes-sigs/aws-ebs-csi-driver/issues/2963
+# is solved, we can drop our own template
+
+# Note: `aws-ebs-csi-node` pod runs on hostNetwork.
+# NetworkPolicy do not apply to hostNetwork pods
+# So, it is not defined here.
+
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: aws-ebs-csi-driver-controller-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: 'app.kubernetes.io/name == "aws-ebs-csi-driver"'
+  egress:
+    # Talk to the Kubernetes API Server
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
+    # EC2 instance metadata service (IMDS)
+    # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/install.md#metadata
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 169.254.169.254/32
+        ports:
+          - 80
+          - 443
+    # AWS EC2 API endpoints (public internet, HTTPS)
+    # controller/node call the EC2 API to manage volumes and read metadata.
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 443

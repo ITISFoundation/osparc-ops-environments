@@ -1,0 +1,16 @@
+apiVersion: v2
+name: aws-ebs-csi-driver
+description: >-
+  A wrapper around aws-ebs-csi-driver helm chart. It adds missing resources
+  (e.g., NetworkPolicy and Secret for AWS Access Keys)
+
+type: application
+
+version: "1.0.0" # not really used. see dependency version
+
+appVersion: "1.0.0" # not really used. see dependency version
+
+dependencies:
+  - name: aws-ebs-csi-driver
+    version: 2.60.0
+    repository: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
