@@ -3,3 +3,4 @@ ksv0125:
   trusted_registries:
     - "quay.io"
     - "docker.io"
+    - "public.ecr.aws"

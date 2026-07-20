@@ -51,6 +51,7 @@ simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts direc
 	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
 
 $(TRIVY_TEMPLATES_DIR):
+	# generate helm templates for trivy scanning
 	@rm -rf $(TRIVY_TEMPLATES_DIR)
 	@$(MAKE) --no-print-directory helmfile-template \
 		HELMFILE_EXTRA_ARGS="--output-dir $(TRIVY_TEMPLATES_DIR) --output-dir-template={{.OutputDir}}"
@@ -80,6 +81,7 @@ helmfile-delete: .helmfile-delete ## Delete the helmfile configuration
 .PHONY: trivy-scan
 trivy-scan: $(TRIVY_TEMPLATES_DIR) .verify-trivy-installation
 trivy-scan: ## Scan rendered helm templates for vulnerabilities
+	# Scan templates with trivy
 	@trivy config \
 		--config-data $(REPO_BASE_DIR)/charts/.trivy-config \
 		--ignorefile $(REPO_BASE_DIR)/charts/.trivyignore.yaml \

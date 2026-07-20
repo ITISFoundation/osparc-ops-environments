@@ -5,7 +5,15 @@ repositories:
     url: https://charts.jetstack.io
   - name: traefik
     url: https://traefik.github.io/charts
-
+  - name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+---
+environments:
+  default:
+    values:
+      - ebsStorageClassName: "ebs-sc"
+      - ebsStorageCriticalClassName: "ebs-sc-critical"
+---
 releases:
   - name: security-hardening
     chart: ./security-hardening
@@ -27,3 +35,9 @@ releases:
       - cert-manager/cert-manager
     values:
       - traefik/values.common.yaml.gotmpl
+
+  - name: aws-ebs-csi-driver
+    chart: ./aws-ebs-csi-driver
+    namespace: aws-ebs-csi-driver
+    values:
+      - aws-ebs-csi-driver/values.yaml.gotmpl
