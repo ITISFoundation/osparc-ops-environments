@@ -1,0 +1,15 @@
+# namespace with defined pod security standard
+# ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+#
+# TopoLVM requires privileged pods:
+#   - lvmd DaemonSet needs host access to /dev/ and /run/topolvm/ (LVM ioctls)
+#   - node DaemonSet mounts CSI socket to kubelet and creates block-devices via
+#     hostPath. It runs as root with `privileged: true`.
+# The cluster default is `restricted`; without this override the DaemonSets are
+# silently rejected. See charts/SECURITY.md.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: topolvm-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

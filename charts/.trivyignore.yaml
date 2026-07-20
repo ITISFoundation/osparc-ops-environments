@@ -79,3 +79,15 @@ misconfigurations:
       - "traefik/charts/traefik/templates/rbac/clusterrole.yaml"
     statement: >
       Traefik needs to manages see secrets to manage middlewares or other resources.
+
+  #
+  # topolvm
+  #
+  - id: AVD-KSV-0038
+    paths:
+      - "topolvm/templates/networkpolicy.yaml"
+    statement: >
+      Ingress must allow the Kubernetes API server (webhook calls) and egress
+      must reach it back. kube-apiserver is a static pod with hostNetwork: true
+      and is not a selectable workload in Calico, so we scope by CIDR (nets)
+      instead of pod/namespace selectors.

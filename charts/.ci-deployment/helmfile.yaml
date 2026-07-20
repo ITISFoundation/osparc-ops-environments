@@ -5,7 +5,14 @@ repositories:
     url: https://charts.jetstack.io
   - name: traefik
     url: https://traefik.github.io/charts
-
+  - name: topolvm
+    url: https://topolvm.github.io/topolvm
+---
+environments:
+  default:
+    values:
+      - topolvmStorageClassName: "topolvm"
+---
 releases:
   - name: security-hardening
     chart: ./security-hardening
@@ -27,3 +34,9 @@ releases:
       - cert-manager/cert-manager
     values:
       - traefik/values.common.yaml.gotmpl
+
+  - name: topolvm
+    chart: ./topolvm
+    namespace: topolvm-system
+    values:
+      - topolvm/values.yaml.gotmpl
