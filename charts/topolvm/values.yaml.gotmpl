@@ -12,11 +12,42 @@ topolvm:
         default: true
         spare-gb: 5
 
+    # Container-level seccomp profile for the lvmd container.
+    # The lvmd DaemonSet template does not expose a pod-level securityContext
+    # option, so we add seccompProfile to the container securityContext.
+    # Keep `privileged: true` as required for LVM ioctls on the host.
+    securityContext:
+      privileged: true
+      seccompProfile:
+        type: RuntimeDefault
+
   controller:
     replicaCount: 1
 
     nodeSelector:
       node-role.kubernetes.io/control-plane: ""
+
+  node:
+    # Pod-level seccomp profile applies to all containers in the pod
+    # (topolvm-node, csi-registrar, liveness-probe). The upstream chart does
+    # not expose container-level securityContext for the CSI sidecars, so we
+    # rely on the pod-level default to satisfy KSV-0104.
+    podSecurityContext:
+      seccompProfile:
+        type: RuntimeDefault
+
+  # Top-level (chart-wide) pod securityContext. The controller Deployment
+  # renders this under `spec.template.spec.securityContext` when
+  # controller.securityContext.enabled is true (default). Adding
+  # runAsNonRoot and seccompProfile here satisfies KSV-0012 and KSV-0104
+  # for all controller containers, including CSI sidecars whose
+  # container-level securityContext is hardcoded upstream.
+  securityContext:
+    runAsUser: 10000
+    runAsGroup: 10000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
 
   storageClasses:
     - name: {{ .Values.topolvmStorageClassName }}
