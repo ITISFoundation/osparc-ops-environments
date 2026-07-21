@@ -50,5 +50,7 @@ releases:
   - name: topolvm
     chart: ./topolvm
     namespace: topolvm-system
+    needs:
+      - cert-manager/cert-manager
     values:
       - topolvm/values.yaml.gotmpl
