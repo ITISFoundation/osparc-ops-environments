@@ -1,0 +1,11 @@
+# namespace with defined pod security standard
+# ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+# The aws-ebs-csi-driver node DaemonSet runs a privileged container that
+# mounts host paths (kubelet dir, /dev, ...) to attach EBS volumes.
+# Therefore the namespace must allow the "privileged" Pod Security level.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aws-ebs-csi-driver
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

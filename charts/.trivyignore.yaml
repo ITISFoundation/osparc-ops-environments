@@ -81,6 +81,57 @@ misconfigurations:
       Traefik needs to manages see secrets to manage middlewares or other resources.
 
   #
+  # aws-ebs-csi-driver
+  #
+
+  - id: AVD-KSV-0001
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The ebs-plugin node container runs as privileged (required to attach EBS
+      block devices and perform mount/format operations on the host). The
+      Kubernetes API server rejects the combination `privileged: true` with
+      `allowPrivilegeEscalation: false`, so this control cannot be enforced
+      for this container.
+
+  - id: AVD-KSV-0012
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The CSI node containers (ebs-plugin, liveness-probe, node-driver-registrar)
+      must run as root to bind the CSI unix socket in the kubelet plugin
+      directory and to mount block devices on the host.
+
+  - id: AVD-KSV-0017
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The ebs-plugin node container must be privileged to attach EBS block
+      devices and to perform mount/format operations on the host.
+
+  - id: AVD-KSV-0023
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The CSI node DaemonSet must mount kubelet directories as hostPath volumes
+      so the kubelet can discover the driver and use volumes it publishes.
+
+  - id: AVD-KSV-0121
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      /dev must be mounted from the host so the driver can attach EBS volumes
+      as block devices to the node.
+
+  - id: AVD-KSV-0038
+    paths:
+      - "aws-ebs-csi-driver/templates/networkpolicy.yaml"
+    statement: >
+      This is a Calico NetworkPolicy (projectcalico.org/v3) which uses `selector`
+      instead of the native `podSelector` field. Trivy only understands the
+      Kubernetes-native NetworkPolicy schema and reports a false positive.
+
+  #
   # topolvm
   #
   - id: AVD-KSV-0038

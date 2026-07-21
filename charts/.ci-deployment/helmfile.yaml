@@ -7,11 +7,17 @@ repositories:
     url: https://traefik.github.io/charts
   - name: topolvm
     url: https://topolvm.github.io/topolvm
+  - name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+
 ---
 environments:
   default:
     values:
-      - topolvmStorageClassName: "topolvm"
+      - topolvmStorageClassName: "topolvm-sc"
+      - topolvmStorageCriticalClassName: "topolvm-sc-critical"
+      - ebsStorageClassName: "ebs-sc"
+      - ebsStorageCriticalClassName: "ebs-sc-critical"
 ---
 releases:
   - name: security-hardening
@@ -34,6 +40,12 @@ releases:
       - cert-manager/cert-manager
     values:
       - traefik/values.common.yaml.gotmpl
+
+  - name: aws-ebs-csi-driver
+    chart: ./aws-ebs-csi-driver
+    namespace: aws-ebs-csi-driver
+    values:
+      - aws-ebs-csi-driver/values.yaml.gotmpl
 
   - name: topolvm
     chart: ./topolvm
