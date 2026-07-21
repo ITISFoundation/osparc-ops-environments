@@ -25,12 +25,20 @@ topolvm:
         # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/snapshot-and-restore.md#set-up-a-storage-class
 
         fsType: xfs
-        isDefaultClass: false
+        isDefaultClass: true
         allowVolumeExpansion: true
 
         # volumeBindingMode can be either WaitForFirstConsumer or Immediate.
         # WaitForFirstConsumer is recommended because TopoLVM cannot schedule
         #  pods wisely if volumeBindingMode is Immediate.
+        volumeBindingMode: WaitForFirstConsumer
+        reclaimPolicy: Delete
+
+    - name: {{ .Values.topolvmStorageCriticalClassName }}
+      storageClass:
+        fsType: xfs
+        isDefaultClass: false
+        allowVolumeExpansion: true
         volumeBindingMode: WaitForFirstConsumer
 
         # NOTE: On removal requires manual clean up of PVs, LVMs
