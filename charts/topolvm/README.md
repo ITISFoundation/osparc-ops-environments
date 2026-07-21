@@ -14,12 +14,7 @@ Source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getti
 5. Remove PV's finalizers (`kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'`)
 
 ## Backup / Snapshotting
-1. Only possible while using thin provisioning
-2. We use thick (non-thin provisioned) volumes --> no snapshot support
-
-   Track this feature request for changes https://github.com/topolvm/topolvm/issues/1070
-
-Note: there might be alternative not documented ways (e.g. via Velero)
+We can try useing velero. To be investigated.
 
 ## Resizing PVs
 1. Update storage capacity in configuration

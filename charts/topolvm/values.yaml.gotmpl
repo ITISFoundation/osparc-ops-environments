@@ -158,8 +158,11 @@ topolvm:
     enabled: false
 
   cert-manager:
-    # start simple
-    enabled: false
+    enabled: false # use existing cert manager
 
   snapshot:
-    enabled: true
+    # It requires thin vg provisioning
+    # see https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/snapshot-and-restore.md#prerequisites
+    # Currently, we use thick provisioning for simplicity (and robustness).
+    # For backups we can use https://velero.io/docs/v1.18/file-system-backup/
+    enabled: false
