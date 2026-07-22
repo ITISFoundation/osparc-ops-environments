@@ -1,4 +1,4 @@
-# CI-only stub for Trivy chart scanning.
+# CI-only stub for static tests (trivy scan, helmfile lint, etc.)
 
 repositories:
   - name: jetstack # cert-manager
@@ -18,6 +18,7 @@ environments:
       - topolvmStorageCriticalClassName: "topolvm-sc-critical"
       - ebsStorageClassName: "ebs-sc"
       - ebsStorageCriticalClassName: "ebs-sc-critical"
+
 ---
 releases:
   - name: security-hardening
@@ -49,7 +50,7 @@ releases:
 
   - name: topolvm
     chart: ./topolvm
-    namespace: topolvm-system
+    namespace: topolvm
     needs:
       - cert-manager/cert-manager
     values:

@@ -14,7 +14,7 @@ Source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getti
 5. Remove PV's finalizers (`kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'`)
 
 ## Backup / Snapshotting
-We can try useing velero. To be investigated.
+We can try using velero. To be investigated.
 
 ## Resizing PVs
 1. Update storage capacity in configuration
