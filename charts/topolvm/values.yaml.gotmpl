@@ -7,10 +7,10 @@ topolvm:
 
     # device classes (VGs) need to be created outside of topolvm (e.g. manually, via ansible, ...)
     deviceClasses:
-      - name: ssd
-        volume-group: topovg-sdd
+      - name: default
+        volume-group: topolvm
         default: true
-        spare-gb: 5
+        spare-gb: 10
 
     # Container-level seccomp profile for the lvmd container.
     # The lvmd DaemonSet template does not expose a pod-level securityContext
