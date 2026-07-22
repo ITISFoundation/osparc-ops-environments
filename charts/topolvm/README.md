@@ -2,7 +2,7 @@
 See diagram https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/design.md
 
 ## Preqrequisites
-`topolvm` does not automatically creates Volume Groups (specified in device-classes). This needs to be configured additionally (e.g. manually, via ansible, ...) Use ansible playbooks to configure volume groups.
+`topolvm` does not automatically creates Volume Groups (specified in device-classes). This needs to be configured separately. Use ansible playbooks to configure volume groups.
 
 Source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getting-started.md#prerequisites
 
@@ -14,7 +14,7 @@ Source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getti
 5. Remove PV's finalizers (`kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'`)
 
 ## Backup / Snapshotting
-We can try using velero. To be investigated.
+We can try using velero. See https://velero.io/docs/main/file-system-backup/
 
 ## Resizing PVs
 1. Update storage capacity in configuration
