@@ -28,6 +28,20 @@ spec:
         selector: 'app.kubernetes.io/component == "controller"'
         ports:
           - 9443
+    # TCP: Prometheus -> topolvm (controller, node, lvmd) metrics endpoint.
+    # All three components expose metrics on container port 8080. The scraper
+    # is not a selectable Calico workload (external / host-network Prometheus),
+    # so we scope by the private network CIDRs, same as the webhook rule above.
+    - action: Allow
+      protocol: TCP
+      source:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      destination:
+        ports:
+          - 8080
   egress:
     # TCP: topolvm (controller, node) -> Kubernetes API server
     - action: Allow
