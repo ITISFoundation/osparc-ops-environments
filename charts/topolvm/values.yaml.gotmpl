@@ -8,7 +8,7 @@ topolvm:
     # device classes (VGs) need to be created outside of topolvm (e.g. manually, via ansible, ...)
     deviceClasses:
       - name: default
-        volume-group: topolvm
+        volume-group: topolvm # hardcoded. Keep in sync with vg volume pre-configured
         default: true
         spare-gb: 10
 
