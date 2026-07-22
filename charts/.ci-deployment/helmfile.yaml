@@ -14,10 +14,10 @@ repositories:
 environments:
   default:
     values:
-      - topolvmStorageClassName: "topolvm-sc"
-      - topolvmStorageCriticalClassName: "topolvm-sc-critical"
-      - ebsStorageClassName: "ebs-sc"
-      - ebsStorageCriticalClassName: "ebs-sc-critical"
+      - topolvmStorageClassName: "topolvm"
+      - topolvmStorageCriticalClassName: "topolvm-critical"
+      - ebsStorageClassName: "ebs"
+      - ebsStorageCriticalClassName: "ebs-critical"
 
 ---
 releases:
