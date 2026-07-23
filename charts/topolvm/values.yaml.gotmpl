@@ -79,12 +79,6 @@ topolvm:
         # Read more: https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/advanced-setup.md#storageclass
         reclaimPolicy: Retain
 
-  webhook:
-    certManager: true
-    existingCertManagerIssuer: # taken from cert-manager chart
-      kind: ClusterIssuer
-      name: cert-issuer
-
   # Resource limits are mandatory: the security-hardening ValidatingAdmissionPolicy
   # `require-resource-limits-for-all-containers` denies any pod without cpu+memory limits.
   resources:
