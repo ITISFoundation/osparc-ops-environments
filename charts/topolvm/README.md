@@ -1,4 +1,7 @@
-## topolvm components and architecture
+## TopoLVM
+Topolvm is a storage [CSI](https://github.com/container-storage-interface/spec/blob/v1.12.0/spec.md) used on Kubernetes cluster to manage PV/PVC via [Volume Groups](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
+
+## TopoLVM components and architecture
 See diagram https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/design.md
 
 ## Preqrequisites
@@ -14,6 +17,8 @@ Source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getti
 4. Delete PV (`kubectl delete PV <pv-name>`)
 5. Remove PV's finalizers (`kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'`)
 
+Useful source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/advanced-setup.md#storageclass
+
 ## Backup / Snapshotting
 We can try using velero. See https://velero.io/docs/main/file-system-backup/
 
@@ -26,6 +31,9 @@ Note: storage size can only be increased. Otherwise, one gets `Forbidden: field 
 ## Node maintenance
 
 Read https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/node-maintenance.md
+
+## Uninstalling
+Read https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/uninstall.md
 
 ## Using topolvm. Notes
 * `topolvm` may not work with pods that define `spec.nodeName` Use node affinity instead
