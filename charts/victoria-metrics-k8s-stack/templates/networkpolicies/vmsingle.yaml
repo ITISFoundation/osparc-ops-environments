@@ -1,0 +1,20 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmsingle" "enabled" false $stack }}
+
+{{- $labels := $stack.vmsingle.spec.podMetadata.labels }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmsingle-network-policy
+spec:
+  selector: >-
+    simcore.io/app == "{{ index $labels "simcore.io/app" }}"
+    && simcore.io/part-of == "{{ index $labels "simcore.io/part-of" }}"
+  ingress:
+    # writes from vmagent and reads from traefik (via ingress)
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmsingle.spec.port }}
+{{- end }}

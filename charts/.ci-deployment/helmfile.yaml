@@ -9,11 +9,17 @@ repositories:
     url: https://topolvm.github.io/topolvm
   - name: aws-ebs-csi-driver
     url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+  - name: victoria-metrics
+    url: https://victoriametrics.github.io/helm-charts/
 
 ---
 environments:
   default:
     values:
+      - traefik:
+          namespace: traefik
+          basicAuthMiddlewareName: basic-auth
+      - kubeApiServerPort: 6443
       - topolvmStorageClassName: "topolvm"
       - topolvmStorageCriticalClassName: "topolvm-critical"
       - ebsStorageClassName: "ebs"
@@ -55,3 +61,11 @@ releases:
       - cert-manager/cert-manager
     values:
       - topolvm/values.yaml.gotmpl
+
+  - name: victoria-metrics-k8s-stack
+    chart: ./victoria-metrics-k8s-stack
+    namespace: victoria-metrics-k8s-stack
+    needs:
+      - traefik/traefik # ingress + Middleware CRD (traefik.io) must exist
+    values:
+      - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
