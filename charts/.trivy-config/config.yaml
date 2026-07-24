@@ -4,3 +4,4 @@ ksv0125:
     - "quay.io"
     - "docker.io"
     - "public.ecr.aws"
+    - "ghcr.io"

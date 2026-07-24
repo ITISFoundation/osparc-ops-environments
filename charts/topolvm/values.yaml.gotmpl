@@ -1,0 +1,154 @@
+# https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/charts/topolvm/values.yaml
+
+topolvm:
+  lvmd:
+    # set up lvmd service with DaemonSet
+    managed: true
+
+    # device classes (VGs) need to be created outside of topolvm (e.g. manually, via ansible, ...)
+    deviceClasses:
+      - name: default
+        volume-group: topolvm # hardcoded. Keep in sync with vg volume pre-configured
+        default: true
+        spare-gb: 10
+
+    # Container-level seccomp profile for the lvmd container.
+    # The lvmd DaemonSet template does not expose a pod-level securityContext
+    # option, so we add seccompProfile to the container securityContext.
+    # Keep `privileged: true` as required for LVM ioctls on the host.
+    securityContext:
+      privileged: true
+      seccompProfile:
+        type: RuntimeDefault
+
+  controller:
+    replicaCount: 1
+
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: ""
+
+  node:
+    # Pod-level seccomp profile applies to all containers in the pod
+    # (topolvm-node, csi-registrar, liveness-probe). The upstream chart does
+    # not expose container-level securityContext for the CSI sidecars, so we
+    # rely on the pod-level default to satisfy KSV-0104.
+    podSecurityContext:
+      seccompProfile:
+        type: RuntimeDefault
+
+  # Top-level (chart-wide) pod securityContext. The controller Deployment
+  # renders this under `spec.template.spec.securityContext` when
+  # controller.securityContext.enabled is true (default). Adding
+  # runAsNonRoot and seccompProfile here satisfies KSV-0012 and KSV-0104
+  # for all controller containers, including CSI sidecars whose
+  # container-level securityContext is hardcoded upstream.
+  securityContext:
+    runAsUser: 10000
+    runAsGroup: 10000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  storageClasses:
+    - name: {{ .Values.topolvmStorageClassName }}
+      storageClass:
+        # Want to use non-default device class? See configuration example in
+        # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/snapshot-and-restore.md#set-up-a-storage-class
+
+        fsType: xfs
+        isDefaultClass: true
+        allowVolumeExpansion: true
+
+        # volumeBindingMode can be either WaitForFirstConsumer or Immediate.
+        # WaitForFirstConsumer is recommended because TopoLVM cannot schedule
+        #  pods wisely if volumeBindingMode is Immediate.
+        volumeBindingMode: WaitForFirstConsumer
+        reclaimPolicy: Delete
+
+    - name: {{ .Values.topolvmStorageCriticalClassName }}
+      storageClass:
+        fsType: xfs
+        isDefaultClass: false
+        allowVolumeExpansion: true
+        volumeBindingMode: WaitForFirstConsumer
+
+        # NOTE: On removal requires manual clean up of PVs, LVMs
+        # and Logical Volumes (CR logicalvolumes.topolvm.io).
+        # Removal Logical Volume (CR) would clean up the LVM on the node,
+        # but PV has still to be removed manually.
+        # Read more: https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/advanced-setup.md#storageclass
+        reclaimPolicy: Retain
+
+  # Resource limits are mandatory: the security-hardening ValidatingAdmissionPolicy
+  # `require-resource-limits-for-all-containers` denies any pod without cpu+memory limits.
+  resources:
+    topolvm_node:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
+        cpu: 500m
+
+    topolvm_controller:
+      requests:
+        memory: 50Mi
+        cpu: 50m
+      limits:
+        memory: 200Mi
+        cpu: 200m
+
+    lvmd:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
+        cpu: 500m
+
+    csi_registrar:
+      requests:
+        cpu: 25m
+        memory: 10Mi
+      limits:
+        cpu: 200m
+        memory: 200Mi
+
+    csi_provisioner:
+      requests:
+        memory: 50Mi
+        cpu: 50m
+      limits:
+        memory: 200Mi
+        cpu: 200m
+
+    csi_resizer:
+      requests:
+        memory: 50Mi
+        cpu: 50m
+      limits:
+        memory: 200Mi
+        cpu: 200m
+
+    liveness_probe:
+      requests:
+        cpu: 25m
+        memory: 10Mi
+      limits:
+        cpu: 200m
+        memory: 200Mi
+
+  # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/topolvm-scheduler.md
+  scheduler:
+    # start simple
+    enabled: false
+
+  cert-manager:
+    enabled: false # use existing cert manager
+
+  snapshot:
+    # It requires thin vg provisioning
+    # see https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/snapshot-and-restore.md#prerequisites
+    # Currently, we use thick provisioning for simplicity (and robustness).
+    # For backups we can use https://velero.io/docs/v1.18/file-system-backup/
+    enabled: false

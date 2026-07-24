@@ -130,3 +130,115 @@ misconfigurations:
       This is a Calico NetworkPolicy (projectcalico.org/v3) which uses `selector`
       instead of the native `podSelector` field. Trivy only understands the
       Kubernetes-native NetworkPolicy schema and reports a false positive.
+
+  #
+  # topolvm
+  #
+  - id: AVD-KSV-0038
+    paths:
+      - "topolvm/templates/networkpolicy.yaml"
+    statement: >
+      Ingress must allow the Kubernetes API server (webhook calls) and egress
+      must reach it back. kube-apiserver is a static pod with hostNetwork: true
+      and is not a selectable workload in Calico, so we scope by CIDR (nets)
+      instead of pod/namespace selectors.
+
+  - id: AVD-KSV-0001
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The topolvm-node and lvmd containers must run with `privileged: true` to
+      access block devices, perform LVM ioctls, and mount volumes on the host;
+      privileged implies `allowPrivilegeEscalation`. The csi-registrar and
+      liveness-probe sidecars in the node DaemonSet have no securityContext
+      block exposed by the upstream chart, so this control cannot be enforced
+      via values.
+
+  - id: AVD-KSV-0010
+    paths:
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The lvmd DaemonSet sets `hostPID: true` in the upstream chart to interact
+      with LVM subsystems on the host. This is hardcoded in the template and
+      cannot be disabled without patching upstream.
+
+  - id: AVD-KSV-0012
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The topolvm-node and lvmd containers must run as root to perform LVM
+      ioctls and manage block devices via CSI. The csi-registrar and
+      liveness-probe sidecars in the node DaemonSet have no container-level
+      securityContext exposed by the upstream chart, so `runAsNonRoot` cannot
+      be enforced there either.
+
+  - id: AVD-KSV-0014
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/controller/deployment.yaml"
+    statement: >
+      The upstream chart hardcodes the container-level securityContext for the
+      controller containers (topolvm-controller and the CSI sidecars) and does
+      not expose it at all for the node CSI sidecars, so `readOnlyRootFilesystem`
+      cannot be set from values. For the privileged topolvm-node and lvmd
+      containers we keep the writable root filesystem for parity with the
+      upstream defaults and their runtime write needs (LVM tooling, socket
+      creation).
+
+  - id: AVD-KSV-0017
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The topolvm-node and lvmd containers require `privileged: true` to
+      attach/detach block devices, perform LVM operations, and mount volumes on
+      the host. This is inherent to how the CSI driver operates on the node.
+
+  - id: AVD-KSV-0023
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The CSI node driver must mount kubelet plugin directories, the pod
+      volumes directory, and `/dev` (and `/run/topolvm` for lvmd) as hostPath
+      volumes so that the kubelet can discover the driver and so that volumes
+      published by the driver are visible on the host.
+
+  - id: AVD-KSV-0048
+    paths:
+      - "topolvm/charts/topolvm/templates/controller/clusterroles.yaml"
+    statement: >
+      The topolvm-controller needs write access to workload resources (pods,
+      deployments, statefulsets, etc.) because CSI storage-capacity tracking
+      and PVC controller logic set owner references and update finalizers on
+      those objects. Granted by the upstream ClusterRole.
+
+  - id: AVD-KSV-0049
+    paths:
+      - "topolvm/charts/topolvm/templates/controller/roles.yaml"
+    statement: >
+      The topolvm-controller uses the standard Kubernetes leader-election
+      mechanism, which requires create/update/patch/delete on the coordination
+      configmap in its own namespace. Granted by the upstream leader-election
+      Role.
+
+  - id: AVD-KSV-0118
+    paths:
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The lvmd DaemonSet template in the upstream chart does not render a
+      pod-level securityContext block, so a non-default pod securityContext
+      cannot be set via values. The lvmd container itself runs privileged as
+      required for LVM operations on the host.
+
+  - id: AVD-KSV-0121
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      Mounting `/dev` from the host is required so that the CSI driver and
+      lvmd can attach EBS/local block devices and manage LVM logical volumes
+      as block devices on the node.
