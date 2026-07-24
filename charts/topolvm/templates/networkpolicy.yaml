@@ -1,0 +1,55 @@
+# TopoLVM component communication:
+#   - kube-apiserver -> topolvm controller webhook (admission for PVCs)
+#   - topolvm controller / node -> kube-apiserver (LogicalVolume CR watch/update,
+#     CSI provisioning calls)
+#   - lvmd <-> node: unix domain socket on the host, does not cross the network.
+#
+# DNS egress is already allowed by the cluster-wide global policy shipped by
+# `security-hardening`. See charts/SECURITY.md.
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: topolvm-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingress:
+    # TCP: Kubernetes (API server) -> topolvm controller (mutating/validating webhook)
+    - action: Allow
+      protocol: TCP
+      source:
+        # kube-apiserver is a static pod with hostNetwork: true. Calico does
+        # not see it as a selectable workload, so we scope by CIDR (same
+        # approach as the cert-manager NetworkPolicy in this repo).
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      destination:
+        selector: 'app.kubernetes.io/component == "controller"'
+        ports:
+          - 9443
+    # TCP: Prometheus -> topolvm (controller, node, lvmd) metrics endpoint.
+    # All three components expose metrics on container port 8080. The scraper
+    # is not a selectable Calico workload (external / host-network Prometheus),
+    # so we scope by the private network CIDRs, same as the webhook rule above.
+    - action: Allow
+      protocol: TCP
+      source:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      destination:
+        ports:
+          - 8080
+  egress:
+    # TCP: topolvm (controller, node) -> Kubernetes API server
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - 6443
