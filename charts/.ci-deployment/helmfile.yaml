@@ -9,6 +9,8 @@ repositories:
     url: https://topolvm.github.io/topolvm
   - name: aws-ebs-csi-driver
     url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+  - name: victoria-metrics-operator
+    url: https://victoriametrics.github.io/helm-charts/
 
 ---
 environments:
@@ -55,3 +57,12 @@ releases:
       - cert-manager/cert-manager
     values:
       - topolvm/values.yaml.gotmpl
+
+  - name: victoria-metrics-operator
+    chart: victoria-metrics-operator/victoria-metrics-operator
+    version: 0.63.1
+    namespace: victoria-metrics-operator
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - victoria-metrics-operator/values.yaml.gotmpl
