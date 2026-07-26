@@ -52,6 +52,11 @@ vm-k8s-stack:
     fullnameOverride: node-exporter-vm-k8s-stack
     # it needs to run in a privileged namespace to scrape node metrics
     namespaceOverride: "{{ .Release.Namespace }}-privileged"
+    containerSecurityContext: # harden the container (KSV-0001, KSV-0104)
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
     vmScrape:
       spec:
         namespaceSelector: # chart templates do not set it properly when namespace is overriden

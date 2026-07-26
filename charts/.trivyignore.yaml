@@ -242,3 +242,56 @@ misconfigurations:
       Mounting `/dev` from the host is required so that the CSI driver and
       lvmd can attach EBS/local block devices and manage LVM logical volumes
       as block devices on the node.
+
+  #
+  # victoria-metrics-k8s-stack
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/kube-state-metrics/templates/role.yaml"
+    statement: >
+      kube-state-metrics needs cluster-wide list/watch on Secrets to expose
+      metrics about them (kube_secret_*). It never reads secret data, only
+      metadata. Granted by the upstream chart's default collector set.
+
+  - id: AVD-KSV-0009
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      node-exporter uses hostNetwork so it can bind to the node IP and expose
+      accurate per-node network statistics. This is the upstream default and
+      required for node-level metric collection.
+
+  - id: AVD-KSV-0010
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      node-exporter uses hostPID to read host process information from /proc
+      for its node-level metrics. This is the upstream default and required for
+      accurate host metric collection.
+
+  - id: AVD-KSV-0023
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      node-exporter must mount host paths (/proc, /sys, /) as hostPath volumes
+      to read kernel and hardware metrics from the node. This is inherent to
+      how node-exporter operates.
+
+  - id: AVD-KSV-0121
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      Mounting the critical host paths /, /proc and /sys (read-only) is
+      required so node-exporter can collect filesystem, kernel and hardware
+      metrics from the node.
+
+  - id: AVD-KSV-0038
+    paths:
+      - "victoria-metrics-k8s-stack/templates/networkpolicies/vmagent-scraper.yaml"
+      - "victoria-metrics-k8s-stack/templates/networkpolicies/vmsingle.yaml"
+    statement: >
+      These are Calico NetworkPolicies (projectcalico.org/v3) which use the
+      `selector` field instead of the native `podSelector`. Trivy only
+      understands the Kubernetes-native NetworkPolicy schema and reports a
+      false positive.
