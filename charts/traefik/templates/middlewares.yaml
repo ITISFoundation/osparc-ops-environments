@@ -11,7 +11,7 @@ stringData:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: basic-auth
+  name: {{ .Values.middlewares.basicAuth.name | quote }}
   namespace: {{ .Release.Namespace }}
 spec:
   basicAuth:

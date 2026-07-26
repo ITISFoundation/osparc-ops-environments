@@ -16,9 +16,6 @@ repositories:
 environments:
   default:
     values:
-      - traefik:
-          namespace: traefik
-          basicAuthMiddlewareName: basic-auth
       - topolvmStorageClassName: "topolvm"
       - topolvmStorageCriticalClassName: "topolvm-critical"
       - ebsStorageClassName: "ebs"
