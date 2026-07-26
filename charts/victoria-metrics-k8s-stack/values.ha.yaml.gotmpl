@@ -28,6 +28,13 @@ vm-k8s-stack:
               matchLabels:
                 simcore.io/app: vmstorage
                 simcore.io/part-of: {{ .Release.Name }}
+        resources: # mandatory cpu+memory limits (see SECURITY.md)
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
         storage:
           volumeClaimTemplate:
             spec:
@@ -42,6 +49,13 @@ vm-k8s-stack:
           labels: # labels used by the network policies (templates/networkpolicies)
             simcore.io/app: vmselect
             simcore.io/part-of: {{ .Release.Name }}
+        resources: # mandatory cpu+memory limits (see SECURITY.md)
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
         storage:
           volumeClaimTemplate:
             spec:
@@ -56,6 +70,13 @@ vm-k8s-stack:
           labels: # labels used by the network policies (templates/networkpolicies)
             simcore.io/app: vminsert
             simcore.io/part-of: {{ .Release.Name }}
+        resources: # mandatory cpu+memory limits (see SECURITY.md)
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
 
   vmauth: # fronts the cluster (read + write) and takes over the ingress
     enabled: true
@@ -66,6 +87,13 @@ vm-k8s-stack:
         labels: # labels used by the network policies (templates/networkpolicies)
           simcore.io/app: vmauth
           simcore.io/part-of: {{ .Release.Name }}
+      resources: # mandatory cpu+memory limits (see SECURITY.md)
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
     ingress:
       enabled: true
       ingressClassName: traefik

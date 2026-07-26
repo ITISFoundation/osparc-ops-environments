@@ -23,6 +23,13 @@ vm-k8s-stack:
         labels: # labels used by the network policies (templates/networkpolicies)
           simcore.io/app: vmagent-scraper
           simcore.io/part-of: {{ .Release.Name }}
+      resources: # mandatory cpu+memory limits (see SECURITY.md)
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
 
   vmsingle: # stores metrics and serves them
     enabled: true
@@ -33,6 +40,13 @@ vm-k8s-stack:
         labels: # labels used by the network policies (templates/networkpolicies)
           simcore.io/app: vmsingle
           simcore.io/part-of: {{ .Release.Name }}
+      resources: # mandatory cpu+memory limits (see SECURITY.md)
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 1Gi
     ingress:
       enabled: true
       ingressClassName: traefik
@@ -57,6 +71,13 @@ vm-k8s-stack:
       allowPrivilegeEscalation: false
       seccompProfile:
         type: RuntimeDefault
+    resources: # mandatory cpu+memory limits (see SECURITY.md)
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
     vmScrape:
       spec:
         namespaceSelector: # chart templates do not set it properly when namespace is overriden
@@ -67,6 +88,13 @@ vm-k8s-stack:
   kube-state-metrics: # cluster metrics about the state of the objects (pods, PVs, etc.)
     enabled: true
     fullnameOverride: kube-state-metrics-vm-k8s-stack
+    resources: # mandatory cpu+memory limits (see SECURITY.md)
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
     networkPolicy:
       enabled: true
       flavor: kubernetes # calico understands kubernetes network policy
