@@ -19,7 +19,6 @@ environments:
       - traefik:
           namespace: traefik
           basicAuthMiddlewareName: basic-auth
-      - kubeApiServerPort: 6443
       - topolvmStorageClassName: "topolvm"
       - topolvmStorageCriticalClassName: "topolvm-critical"
       - ebsStorageClassName: "ebs"
