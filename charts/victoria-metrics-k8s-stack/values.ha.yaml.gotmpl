@@ -18,16 +18,16 @@ vm-k8s-stack:
         vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
-            simcore.io/app: vmstorage
-            simcore.io/part-of: {{ .Release.Name }}
+            app.simcore.io/name: vmstorage
+            app.simcore.io/part-of: {{ .Release.Name }}
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname
             whenUnsatisfiable: DoNotSchedule
             labelSelector:
               matchLabels:
-                simcore.io/app: vmstorage
-                simcore.io/part-of: {{ .Release.Name }}
+                app.simcore.io/name: vmstorage
+                app.simcore.io/part-of: {{ .Release.Name }}
         resources: # mandatory cpu+memory limits (see SECURITY.md)
           requests:
             cpu: 100m
@@ -47,8 +47,8 @@ vm-k8s-stack:
         disableSelfServiceScrape: true # do not scrape vm's own components
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
-            simcore.io/app: vmselect
-            simcore.io/part-of: {{ .Release.Name }}
+            app.simcore.io/name: vmselect
+            app.simcore.io/part-of: {{ .Release.Name }}
         resources: # mandatory cpu+memory limits (see SECURITY.md)
           requests:
             cpu: 50m
@@ -68,8 +68,8 @@ vm-k8s-stack:
         disableSelfServiceScrape: true # do not scrape vm's own components
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
-            simcore.io/app: vminsert
-            simcore.io/part-of: {{ .Release.Name }}
+            app.simcore.io/name: vminsert
+            app.simcore.io/part-of: {{ .Release.Name }}
         resources: # mandatory cpu+memory limits (see SECURITY.md)
           requests:
             cpu: 50m
@@ -85,8 +85,8 @@ vm-k8s-stack:
       disableSelfServiceScrape: true # do not scrape vm's own components
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
-          simcore.io/app: vmauth
-          simcore.io/part-of: {{ .Release.Name }}
+          app.simcore.io/name: vmauth
+          app.simcore.io/part-of: {{ .Release.Name }}
       resources: # mandatory cpu+memory limits (see SECURITY.md)
         requests:
           cpu: 10m

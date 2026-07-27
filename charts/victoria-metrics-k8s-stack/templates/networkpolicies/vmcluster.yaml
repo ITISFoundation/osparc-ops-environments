@@ -19,8 +19,8 @@ metadata:
   name: vmauth-network-policy
 spec:
   selector: >-
-    simcore.io/app == "{{ index $vmauthLabels "simcore.io/app" }}"
-    && simcore.io/part-of == "{{ index $vmauthLabels "simcore.io/part-of" }}"
+    app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
   ingress:
     # reads from traefik, writes from vmagent
     - action: Allow
@@ -58,14 +58,14 @@ metadata:
   name: vminsert-network-policy
 spec:
   selector: >-
-    simcore.io/app == "{{ index $insertLabels "simcore.io/app" }}"
-    && simcore.io/part-of == "{{ index $insertLabels "simcore.io/part-of" }}"
+    app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
   ingress:
     # writes from vmagent and from the vmauth proxy.
     - action: Allow
       protocol: TCP
       source:
-        selector: simcore.io/part-of == "{{ index $insertLabels "simcore.io/part-of" }}" # allow only from vm stack namespace
+        selector: app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}" # allow only from vm stack namespace
       destination:
         ports:
           - {{ $insertPort }}
@@ -88,14 +88,14 @@ metadata:
   name: vmselect-network-policy
 spec:
   selector: >-
-    simcore.io/app == "{{ index $selectLabels "simcore.io/app" }}"
-    && simcore.io/part-of == "{{ index $selectLabels "simcore.io/part-of" }}"
+    app.simcore.io/name == "{{ index $selectLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}"
   ingress:
     # reads from the vmauth proxy.
     - action: Allow
       protocol: TCP
       source:
-        selector: simcore.io/part-of == "{{ index $selectLabels "simcore.io/part-of" }}" # allow only from vm stack namespace
+        selector: app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}" # allow only from vm stack namespace
       destination:
         ports:
           - {{ $selectPort }}
@@ -118,14 +118,14 @@ metadata:
   name: vmstorage-network-policy
 spec:
   selector: >-
-    simcore.io/app == "{{ index $storageLabels "simcore.io/app" }}"
-    && simcore.io/part-of == "{{ index $storageLabels "simcore.io/part-of" }}"
+    app.simcore.io/name == "{{ index $storageLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}"
   ingress:
     # ingestion from vminsert and queries from vmselect.
     - action: Allow
       protocol: TCP
       source:
-        selector: simcore.io/part-of == "{{ index $storageLabels "simcore.io/part-of" }}" # allow only from vm stack namespace
+        selector: app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}" # allow only from vm stack namespace
       destination:
         ports:
           - {{ $storageInsertPort }}

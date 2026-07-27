@@ -21,8 +21,8 @@ vm-k8s-stack:
       disableSelfServiceScrape: true # do not scrape vm's own components
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
-          simcore.io/app: vmagent-scraper
-          simcore.io/part-of: {{ .Release.Name }}
+          app.simcore.io/name: vmagent-scraper
+          app.simcore.io/part-of: {{ .Release.Name }}
       resources: # mandatory cpu+memory limits (see SECURITY.md)
         requests:
           cpu: 50m
@@ -38,8 +38,8 @@ vm-k8s-stack:
       disableSelfServiceScrape: true # do not scrape vm's own components
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
-          simcore.io/app: vmsingle
-          simcore.io/part-of: {{ .Release.Name }}
+          app.simcore.io/name: vmsingle
+          app.simcore.io/part-of: {{ .Release.Name }}
       resources: # mandatory cpu+memory limits (see SECURITY.md)
         requests:
           cpu: 100m
