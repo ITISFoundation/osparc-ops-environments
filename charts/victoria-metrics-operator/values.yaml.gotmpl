@@ -1,5 +1,6 @@
 # Values reference https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-operator-0.55.1/charts/victoria-metrics-operator/values.yaml
-{{- $appLabel := "victoria-metrics-operator" -}}
+{{- $appLabelValue := "victoria-metrics-operator" }}
+{{- $webhookPort := 9443 }}
 
 operator:
   # converts prometheus-operator objects into victoria-metrics-operator ones
@@ -13,22 +14,27 @@ operator:
 nodeSelector:
   ops: "true"
 
+# Use trusted (from trivy config) registry
+# https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/#using-alternative-image-registry
+image:
+  registry: quay.io
+
 service:
-  webhookPort: &webhookPort 9443
+  webhookPort: {{ $webhookPort }}
 
 podLabels:
-  app.simcore.io/app: {{ $appLabel }}
+  app.simcore.io/name: {{ $appLabelValue }} # app.kubernetes.io/name is used inside the chart
   app.simcore.io/part-of: {{ .Release.Name }}
 
 # Resource limits are mandatory: the security-hardening ValidatingAdmissionPolicy
 # `require-resource-limits-for-all-containers` denies any pod without cpu+memory limits.
 resources:
   requests:
-    cpu: 10m
-    memory: 64Mi
-  limits:
-    cpu: 100m
+    cpu: 25m
     memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
 
 securityContext:
   seccompProfile:
@@ -45,13 +51,15 @@ extraObjects:
   metadata:
     name: victoria-metrics-operator-network-policy
   spec:
-    selector: app.simcore.io/app == '{{ $appLabel }}' && app.simcore.io/part-of == '{{ .Release.Name }}'
+    selector: >-
+      app.simcore.io/name == '{{ $appLabelValue }}'
+      && app.simcore.io/part-of == '{{ .Release.Name }}'
     ingress:
       - action: Allow
         protocol: TCP
         destination:
           ports:
-            - *webhookPort
+            - {{ $webhookPort }}
     egress:
       - action: Allow
         protocol: TCP
