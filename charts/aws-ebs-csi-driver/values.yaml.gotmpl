@@ -11,7 +11,7 @@ aws-ebs-csi-driver:
     accessKey: secret_access_key
 
   storageClasses:
-    - name: "{{ .Values.ebsStorageClassName }}"
+    - name: "{{ requiredEnv "KUBERNETES_DEFAULT_STORAGE_CLASS_NAME" }}"
 
       # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/parameters.md#volume-availability-zone-and-topologies
       volumeBindingMode: WaitForFirstConsumer
@@ -21,7 +21,7 @@ aws-ebs-csi-driver:
       reclaimPolicy: Delete # EBS Volume will be deleted when PV is deleted
       annotations:
           storageclass.kubernetes.io/is-default-class: "true"
-    - name: "{{ .Values.ebsStorageCriticalClassName }}"
+    - name: "{{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" }}"
       volumeBindingMode: WaitForFirstConsumer
       parameters:
           type: "gp3"
