@@ -10,16 +10,6 @@ repositories:
   - name: aws-ebs-csi-driver
     url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
 
----
-environments:
-  default:
-    values:
-      - topolvmStorageClassName: "topolvm"
-      - topolvmStorageCriticalClassName: "topolvm-critical"
-      - ebsStorageClassName: "ebs"
-      - ebsStorageCriticalClassName: "ebs-critical"
-
----
 releases:
   - name: security-hardening
     chart: ./security-hardening
