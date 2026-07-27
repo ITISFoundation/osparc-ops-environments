@@ -48,6 +48,16 @@ releases:
     values:
       - topolvm/values.yaml.gotmpl
 
+  - name: victoria-metrics-operator
+    chart: victoria-metrics/victoria-metrics-operator
+    version: 0.63.1
+    namespace: victoria-metrics-operator
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - victoria-metrics-operator/values.common.yaml.gotmpl
+      - victoria-metrics-operator/values.ha.yaml.gotmpl
+
   - name: victoria-metrics-k8s-stack
     chart: ./victoria-metrics-k8s-stack
     namespace: victoria-metrics-k8s-stack

@@ -1,12 +1,13 @@
 misconfigurations:
-  - id: AVD-KSV-0038
-    paths:
-      - "security-hardening/templates/calico-apiserver-networkpolicy.yaml"
+  #
+  # global (for all charts and templates)
+  #
+  - id: AVD-KSV-0038 # Error: Network policy should uses podSelector and/or the namespaceSelector ...
     statement: >
-      This policy is not using any selectors as we do not control installation
-      of calico-apiserver (done via Kubespray). To avoid labels mismatch on
-      Kubespray updates, we apply this network policy to all applications
-      in calico api server namespace
+      We use Calico NetworkPolicy (projectcalico.org/v3) which uses `selector`
+      instead of the native `podSelector` field. Trivy only understands the
+      Kubernetes-native NetworkPolicy schema and reports a false positive
+      To avoid having the same exception repated in every chart, we make it global
 
   #
   # cert-manager
@@ -50,24 +51,9 @@ misconfigurations:
       for HTTP01 solvers. Granted by the upstream ClusterRole and cannot be
       narrowed.
 
-  - id: AVD-KSV-0038
-    paths:
-      - "cert-manager/templates/networkpolicy.yaml"
-    statement: >
-      Ingress must allow the Kubernetes API server (webhook calls), which is not
-      a selectable Pod. We therefore scope the source by CIDR (nets) instead of
-      pod/namespace selectors.
-
   #
   # traefik
   #
-  - id: AVD-KSV-0038
-    paths:
-      - "traefik/templates/networkpolicy.yaml"
-    statement: >
-      Traefik is an entry point for external traffic. It must accept it from outside
-      and send to anything inside the cluster.
-
   - id: KSV-0024
     paths:
       - "traefik/charts/traefik/templates/daemonset.yaml"
@@ -123,26 +109,9 @@ misconfigurations:
       /dev must be mounted from the host so the driver can attach EBS volumes
       as block devices to the node.
 
-  - id: AVD-KSV-0038
-    paths:
-      - "aws-ebs-csi-driver/templates/networkpolicy.yaml"
-    statement: >
-      This is a Calico NetworkPolicy (projectcalico.org/v3) which uses `selector`
-      instead of the native `podSelector` field. Trivy only understands the
-      Kubernetes-native NetworkPolicy schema and reports a false positive.
-
   #
   # topolvm
   #
-  - id: AVD-KSV-0038
-    paths:
-      - "topolvm/templates/networkpolicy.yaml"
-    statement: >
-      Ingress must allow the Kubernetes API server (webhook calls) and egress
-      must reach it back. kube-apiserver is a static pod with hostNetwork: true
-      and is not a selectable workload in Calico, so we scope by CIDR (nets)
-      instead of pod/namespace selectors.
-
   - id: AVD-KSV-0001
     paths:
       - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
@@ -242,6 +211,66 @@ misconfigurations:
       Mounting `/dev` from the host is required so that the CSI driver and
       lvmd can attach EBS/local block devices and manage LVM logical volumes
       as block devices on the node.
+
+  #
+  # victoria-metrics-operator
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator must manage Secrets to store TLS material for the admission
+      webhook and for the VictoriaMetrics components it reconciles. Granted by
+      the upstream ClusterRole and cannot be narrowed without breaking the
+      operator.
+
+  - id: AVD-KSV-0045
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The upstream ClusterRole grants wildcard verbs on the resources the
+      operator reconciles (core, apps and rbac objects for its managed
+      components). Defined by the upstream chart and required for reconciliation.
+
+  - id: AVD-KSV-0046
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator needs full access to `monitoring.coreos.com` resources to
+      convert prometheus-operator objects into VictoriaMetrics ones. Granted by
+      the upstream ClusterRole.
+
+  - id: AVD-KSV-0048
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator creates and manages workload resources (Deployments,
+      StatefulSets, DaemonSets, …) for the VictoriaMetrics components it
+      reconciles. Granted by the upstream ClusterRole.
+
+  - id: AVD-KSV-0049
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator manages ConfigMaps holding the generated configuration of the
+      VictoriaMetrics components it reconciles. Granted by the upstream
+      ClusterRole.
+
+  - id: AVD-KSV-0050
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator manages Roles/RoleBindings/ClusterRoles for the service
+      accounts of the components it reconciles. Granted by the upstream
+      ClusterRole and required for reconciliation.
+
+  - id: AVD-KSV-0056
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator manages Services, Endpoints and Ingresses for the
+      VictoriaMetrics components it reconciles. Granted by the upstream
+      ClusterRole.
 
   #
   # victoria-metrics-k8s-stack
