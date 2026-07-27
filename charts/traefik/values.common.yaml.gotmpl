@@ -1,4 +1,4 @@
-{{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") -}}
+{{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") }}
 
 middlewares:
   basicAuth:

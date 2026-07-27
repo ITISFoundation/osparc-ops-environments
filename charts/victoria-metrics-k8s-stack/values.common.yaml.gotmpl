@@ -1,4 +1,4 @@
-kubeApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+{{- $metricsStripPrefixMiddlewareName := "metrics-strip-prefix" }}
 
 vm-k8s-stack:
   fullnameOverride: fullnameOverride vm-k8s-stack # by default names are long and redundant
@@ -7,7 +7,7 @@ vm-k8s-stack:
     - apiVersion: traefik.io/v1alpha1
       kind: Middleware
       metadata:
-        name: metrics-strip-prefix
+        name: {{ $metricsStripPrefixMiddlewareName }}
         namespace: {{ .Release.Namespace }}
       spec:
         stripPrefix:
@@ -58,8 +58,8 @@ vm-k8s-stack:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: >-
-          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd,
-          {{ .Release.Namespace }}-metrics-strip-prefix@kubernetescrd
+          traefik-basic-auth@kubernetescrd,
+          {{ .Release.Namespace }}-{{ $metricsStripPrefixMiddlewareName }}@kubernetescrd
 
   prometheus-node-exporter:  # exports node (server) metrics
     enabled: true
@@ -108,7 +108,7 @@ vm-k8s-stack:
             cidr: 192.168.0.0/16
         ports:
         - protocol: TCP
-          port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }} # kube-state-metrics watches the kubernetes api server
+          port: 6443 # kube-state-metrics watches the kubernetes api server
 
   kubelet: # container metrics (cpu / memory)
     enabled: true
