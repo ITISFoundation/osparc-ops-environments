@@ -1,6 +1,7 @@
+{{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") -}}
+
 middlewares:
   basicAuth:
-    name: {{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}
     username: {{ requiredEnv "SERVICES_USER" }}
     password: {{ requiredEnv "SERVICES_PASSWORD" }}
 
@@ -12,7 +13,7 @@ dashboard:
 # https://github.com/traefik/traefik/issues/12116
 certificate:
   name: {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}
-  secretName: &certSecretName {{ requiredEnv "MACHINE_FQDN" | replace "." "-" }}-tls
+  secretName: {{ $certSecretName }}
   dnsNames:
     - {{ requiredEnv "K8S_MONITORING_FQDN" }}
   issuerRef: # created in cert-manager. keep in sync
@@ -93,4 +94,4 @@ traefik:
         # in templates/certificates.yaml). Traefik matches the DNS name of a
         # request against the certificates in the default TLSStore.
         # https://github.com/traefik/traefik/issues/12116
-        - secretName: *certSecretName
+        - secretName: {{ $certSecretName }}
