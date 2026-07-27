@@ -65,5 +65,5 @@ releases:
     needs:
       - cert-manager/cert-manager
     values:
-      - victoria-metrics-operator/values.yaml.gotmpl
+      - victoria-metrics-operator/values.common.yaml.gotmpl
       - victoria-metrics-operator/values.ha.yaml.gotmpl
