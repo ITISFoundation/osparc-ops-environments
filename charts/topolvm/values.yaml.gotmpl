@@ -50,7 +50,7 @@ topolvm:
       type: RuntimeDefault
 
   storageClasses:
-    - name: {{ .Values.topolvmStorageClassName }}
+    - name: "{{ requiredEnv "KUBERNETES_DEFAULT_STORAGE_CLASS_NAME" }}"
       storageClass:
         # Want to use non-default device class? See configuration example in
         # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/snapshot-and-restore.md#set-up-a-storage-class
@@ -65,7 +65,7 @@ topolvm:
         volumeBindingMode: WaitForFirstConsumer
         reclaimPolicy: Delete
 
-    - name: {{ .Values.topolvmStorageCriticalClassName }}
+    - name: "{{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" }}"
       storageClass:
         fsType: xfs
         isDefaultClass: false

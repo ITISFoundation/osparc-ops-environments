@@ -12,16 +12,6 @@ repositories:
   - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
 
----
-environments:
-  default:
-    values:
-      - topolvmStorageClassName: "topolvm"
-      - topolvmStorageCriticalClassName: "topolvm-critical"
-      - ebsStorageClassName: "ebs"
-      - ebsStorageCriticalClassName: "ebs-critical"
-
----
 releases:
   - name: security-hardening
     chart: ./security-hardening
