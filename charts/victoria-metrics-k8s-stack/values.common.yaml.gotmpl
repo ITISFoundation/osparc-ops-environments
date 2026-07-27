@@ -1,3 +1,4 @@
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml
 {{- $metricsStripPrefixMiddlewareName := "metrics-strip-prefix" }}
 
 vm-k8s-stack:
@@ -23,6 +24,8 @@ vm-k8s-stack:
         labels: # labels used by the network policies (templates/networkpolicies)
           app.simcore.io/name: vmagent-scraper
           app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        ops: "true"
       resources: # mandatory cpu+memory limits (see SECURITY.md)
         requests:
           cpu: 50m
@@ -40,6 +43,8 @@ vm-k8s-stack:
         labels: # labels used by the network policies (templates/networkpolicies)
           app.simcore.io/name: vmsingle
           app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        ops: "true"
       resources: # mandatory cpu+memory limits (see SECURITY.md)
         requests:
           cpu: 100m
@@ -88,6 +93,8 @@ vm-k8s-stack:
   kube-state-metrics: # cluster metrics about the state of the objects (pods, PVs, etc.)
     enabled: true
     fullnameOverride: kube-state-metrics-vm-k8s-stack
+    nodeSelector:
+      ops: "true"
     resources: # mandatory cpu+memory limits (see SECURITY.md)
       requests:
         cpu: 10m

@@ -20,6 +20,8 @@ vm-k8s-stack:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vmstorage
             app.simcore.io/part-of: {{ .Release.Name }}
+        nodeSelector:
+          ops: "true"
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname
@@ -49,6 +51,8 @@ vm-k8s-stack:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vmselect
             app.simcore.io/part-of: {{ .Release.Name }}
+        nodeSelector:
+          ops: "true"
         resources: # mandatory cpu+memory limits (see SECURITY.md)
           requests:
             cpu: 50m
@@ -70,6 +74,8 @@ vm-k8s-stack:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vminsert
             app.simcore.io/part-of: {{ .Release.Name }}
+        nodeSelector:
+          ops: "true"
         resources: # mandatory cpu+memory limits (see SECURITY.md)
           requests:
             cpu: 50m
@@ -87,6 +93,8 @@ vm-k8s-stack:
         labels: # labels used by the network policies (templates/networkpolicies)
           app.simcore.io/name: vmauth
           app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        ops: "true"
       resources: # mandatory cpu+memory limits (see SECURITY.md)
         requests:
           cpu: 10m
