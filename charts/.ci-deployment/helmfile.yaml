@@ -61,7 +61,5 @@ releases:
   - name: victoria-metrics-k8s-stack
     chart: ./victoria-metrics-k8s-stack
     namespace: victoria-metrics-k8s-stack
-    needs:
-      - traefik/traefik # ingress + Middleware CRD (traefik.io) must exist
     values:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
