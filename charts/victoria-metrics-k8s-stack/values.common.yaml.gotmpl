@@ -2,7 +2,7 @@
 {{- $metricsStripPrefixMiddlewareName := "metrics-strip-prefix" }}
 
 vm-k8s-stack:
-  fullnameOverride: fullnameOverride vm-k8s-stack # by default names are long and redundant
+  fullnameOverride: vm-k8s-stack # by default names are long and redundant
 
   extraObjects:
     - apiVersion: traefik.io/v1alpha1
@@ -15,11 +15,18 @@ vm-k8s-stack:
           prefixes:
             - /metrics
 
+  #
+  # vmagent
+  #
   vmagent: # scrapes the targets and writes to vmsingle
     enabled: true
     spec:
       port: "8429"
       disableSelfServiceScrape: true # do not scrape vm's own components
+      # enforce restricted PodSecurity on operator-managed containers
+      # (config-init, vmagent, config-reloader): runAsNonRoot, seccompProfile,
+      # allowPrivilegeEscalation=false, capabilities.drop=[ALL]
+      useStrictSecurity: true
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
           app.simcore.io/name: vmagent-scraper
@@ -33,12 +40,26 @@ vm-k8s-stack:
         limits:
           cpu: 500m
           memory: 512Mi
+      configReloaderResources: # limits for config-init + config-reloader sidecars (see SECURITY.md)
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
 
+  #
+  # vmsingle
+  #
   vmsingle: # stores metrics and serves them
     enabled: true
     spec:
       port: "8428"
       disableSelfServiceScrape: true # do not scrape vm's own components
+      # enforce restricted PodSecurity on the vmsingle container:
+      # runAsNonRoot, seccompProfile, allowPrivilegeEscalation=false,
+      # capabilities.drop=[ALL]
+      useStrictSecurity: true
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
           app.simcore.io/name: vmsingle
@@ -63,9 +84,12 @@ vm-k8s-stack:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: >-
-          {{ requiredEnv "TRAEFIK_NAMESPACE"}}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME }}@kubernetescrd,
+          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd,
           {{ .Release.Namespace }}-{{ $metricsStripPrefixMiddlewareName }}@kubernetescrd
 
+  #
+  # prometheus-node-exporter
+  #
   prometheus-node-exporter:  # exports node (server) metrics
     enabled: true
     fullnameOverride: node-exporter-vm-k8s-stack
@@ -90,6 +114,9 @@ vm-k8s-stack:
     networkPolicy:
       enabled: true
 
+  #
+  # kube-state-metrics
+  #
   kube-state-metrics: # cluster metrics about the state of the objects (pods, PVs, etc.)
     enabled: true
     fullnameOverride: kube-state-metrics-vm-k8s-stack
@@ -117,6 +144,9 @@ vm-k8s-stack:
         - protocol: TCP
           port: 6443 # kube-state-metrics watches the kubernetes api server
 
+  #
+  # kubelet
+  #
   kubelet: # container metrics (cpu / memory)
     enabled: true
 

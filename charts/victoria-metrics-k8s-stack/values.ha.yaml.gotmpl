@@ -13,6 +13,8 @@ vm-k8s-stack:
       vmstorage:
         replicaCount: 2
         disableSelfServiceScrape: true # do not scrape vm's own components
+        # enforce restricted PodSecurity on operator-managed containers
+        useStrictSecurity: true
         port: "8482" # http port (metrics/api)
         vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
         vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
@@ -47,6 +49,8 @@ vm-k8s-stack:
         replicaCount: 2
         port: "8481" # http port (serves reads)
         disableSelfServiceScrape: true # do not scrape vm's own components
+        # enforce restricted PodSecurity on operator-managed containers
+        useStrictSecurity: true
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vmselect
@@ -70,6 +74,8 @@ vm-k8s-stack:
         replicaCount: 2
         port: "8480" # http port (receives remote-write)
         disableSelfServiceScrape: true # do not scrape vm's own components
+        # enforce restricted PodSecurity on operator-managed containers
+        useStrictSecurity: true
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vminsert
@@ -89,6 +95,8 @@ vm-k8s-stack:
     spec:
       port: "8427"
       disableSelfServiceScrape: true # do not scrape vm's own components
+      # enforce restricted PodSecurity on operator-managed containers
+      useStrictSecurity: true
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
           app.simcore.io/name: vmauth
@@ -102,6 +110,13 @@ vm-k8s-stack:
         limits:
           cpu: 200m
           memory: 128Mi
+      configReloaderResources: # limits for config-reloader sidecar (see SECURITY.md)
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
     ingress:
       enabled: true
       ingressClassName: traefik
