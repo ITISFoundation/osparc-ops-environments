@@ -28,7 +28,7 @@ releases:
 
   - name: traefik
     chart: ./traefik
-    namespace: traefik
+    namespace: {{ requiredEnv "TRAEFIK_NAMESPACE" }}
     needs:
       - cert-manager/cert-manager
     values:
