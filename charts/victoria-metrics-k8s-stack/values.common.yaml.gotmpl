@@ -1,5 +1,6 @@
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml
 {{- $metricsStripPrefixMiddlewareName := "metrics-strip-prefix" }}
+{{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
 
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
@@ -22,6 +23,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       port: "8429"
+      logLevel: {{ $logLevel }}
       disableSelfServiceScrape: true # do not scrape vm's own components
       # enforce restricted PodSecurity on operator-managed containers
       # (config-init, vmagent, config-reloader): runAsNonRoot, seccompProfile,
@@ -55,6 +57,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       port: "8428"
+      logLevel: {{ $logLevel }}
       disableSelfServiceScrape: true # do not scrape vm's own components
       # enforce restricted PodSecurity on the vmsingle container:
       # runAsNonRoot, seccompProfile, allowPrivilegeEscalation=false,

@@ -1,3 +1,5 @@
+{{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
+
 vm-k8s-stack:
   # the single instance is replaced by the cluster below
   vmsingle:
@@ -13,6 +15,7 @@ vm-k8s-stack:
       vmstorage:
         replicaCount: 2
         disableSelfServiceScrape: true # do not scrape vm's own components
+        logLevel: {{ $logLevel }}
         # enforce restricted PodSecurity on operator-managed containers
         useStrictSecurity: true
         port: "8482" # http port (metrics/api)
@@ -49,6 +52,7 @@ vm-k8s-stack:
         replicaCount: 2
         port: "8481" # http port (serves reads)
         disableSelfServiceScrape: true # do not scrape vm's own components
+        logLevel: {{ $logLevel }}
         # enforce restricted PodSecurity on operator-managed containers
         useStrictSecurity: true
         podMetadata:
@@ -74,6 +78,7 @@ vm-k8s-stack:
         replicaCount: 2
         port: "8480" # http port (receives remote-write)
         disableSelfServiceScrape: true # do not scrape vm's own components
+        logLevel: {{ $logLevel }}
         # enforce restricted PodSecurity on operator-managed containers
         useStrictSecurity: true
         podMetadata:
@@ -94,6 +99,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       port: "8427"
+      logLevel: {{ $logLevel }}
       disableSelfServiceScrape: true # do not scrape vm's own components
       # enforce restricted PodSecurity on operator-managed containers
       useStrictSecurity: true
