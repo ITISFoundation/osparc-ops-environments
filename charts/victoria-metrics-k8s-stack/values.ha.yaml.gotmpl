@@ -1,4 +1,5 @@
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
+{{- $httpPathPrefix := "/metrics" }} # ingress path prefix; VM apps use -http.pathPrefix so VMUI links resolve correctly
 
 vm-k8s-stack:
   # the single instance is replaced by the cluster below
@@ -100,6 +101,10 @@ vm-k8s-stack:
     spec:
       port: "8427"
       logLevel: {{ $logLevel }}
+      # served under a path prefix on the ingress; makes VMUI links resolve correctly
+      # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
+      extraArgs:
+        http.pathPrefix: {{ $httpPathPrefix | quote }}
       disableSelfServiceScrape: true # do not scrape vm's own components
       # enforce restricted PodSecurity on operator-managed containers
       useStrictSecurity: true
@@ -128,11 +133,10 @@ vm-k8s-stack:
       ingressClassName: traefik
       hosts:
         - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      path: /metrics
+      path: {{ $httpPathPrefix }}
       pathType: Prefix
       annotations:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: >-
-          traefik-basic-auth@kubernetescrd,
-          {{ .Release.Namespace }}-metrics-strip-prefix@kubernetescrd
+          traefik-basic-auth@kubernetescrd

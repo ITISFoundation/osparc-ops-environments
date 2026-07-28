@@ -1,20 +1,9 @@
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml
-{{- $metricsStripPrefixMiddlewareName := "metrics-strip-prefix" }}
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
+{{- $httpPathPrefix := "/metrics" }}
 
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
-
-  extraObjects:
-    - apiVersion: traefik.io/v1alpha1
-      kind: Middleware
-      metadata:
-        name: {{ $metricsStripPrefixMiddlewareName }}
-        namespace: {{ .Release.Namespace }}
-      spec:
-        stripPrefix:
-          prefixes:
-            - /metrics
 
   #
   # vmagent
@@ -58,6 +47,10 @@ vm-k8s-stack:
     spec:
       port: "8428"
       logLevel: {{ $logLevel }}
+      # served under a path prefix on the ingress; makes VMUI links resolve correctly
+      # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
+      extraArgs:
+        http.pathPrefix: {{ $httpPathPrefix | quote }}
       disableSelfServiceScrape: true # do not scrape vm's own components
       # enforce restricted PodSecurity on the vmsingle container:
       # runAsNonRoot, seccompProfile, allowPrivilegeEscalation=false,
@@ -81,14 +74,13 @@ vm-k8s-stack:
       ingressClassName: traefik
       hosts:
         - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      path: /metrics
+      path: {{ $httpPathPrefix }}
       pathType: Prefix
       annotations:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: >-
-          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd,
-          {{ .Release.Namespace }}-{{ $metricsStripPrefixMiddlewareName }}@kubernetescrd
+          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd
 
   #
   # prometheus-node-exporter
