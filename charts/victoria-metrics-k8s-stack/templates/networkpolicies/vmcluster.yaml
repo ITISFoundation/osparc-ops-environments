@@ -49,7 +49,7 @@ spec:
           - 172.16.0.0/12
           - 192.168.0.0/16
         ports:
-          - {{ .Values.kubeApiServerPort }}
+          - 6443
 ---
 # vminsert: receives remote-write and fans out to vmstorage
 apiVersion: projectcalico.org/v3
