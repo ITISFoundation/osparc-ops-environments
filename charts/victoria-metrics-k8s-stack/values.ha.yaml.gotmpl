@@ -70,6 +70,7 @@ vm-k8s-stack:
         storage:
           volumeClaimTemplate:
             spec:
+              storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
               resources:
                 requests:
                   storage: 50Gi

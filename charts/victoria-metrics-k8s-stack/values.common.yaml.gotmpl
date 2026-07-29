@@ -69,6 +69,11 @@ vm-k8s-stack:
         limits:
           cpu: "1"
           memory: 1Gi
+      storage:
+        storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
+        resources:
+          requests:
+            storage: 50Gi
     ingress:
       enabled: true
       ingressClassName: traefik
