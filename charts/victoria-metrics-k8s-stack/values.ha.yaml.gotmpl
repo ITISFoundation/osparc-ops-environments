@@ -1,7 +1,8 @@
 # use on top of common values
 
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
-{{- $httpPathPrefix := "/metrics" }} # ingress path prefix
+{{- $httpPathPrefix := "/metrics" }}
+{{- $replicationFactor := 2 }}
 
 vm-k8s-stack:
   # the single instance is replaced by the cluster below
@@ -11,19 +12,33 @@ vm-k8s-stack:
       enabled: false
 
   #
-  # vmcluster: highly available
+  # vmagent (scraping metrics)
+  #
+  vmagent:
+    spec:
+      replicaCount: 2
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.simcore.io/name: vmagent
+              app.simcore.io/part-of: {{ .Release.Name }}
+  #
+  # vmcluster (highly available)
   #
   vmcluster:
     enabled: true
     spec:
-      replicationFactor: 2 # to how many storage nodes the data is replicated
+      replicationFactor: {{ $replicationFactor }} # to how many storage nodes the data is replicated
       retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
 
       #
       # vmstorage: stores metrics and serves them
       #
       vmstorage:
-        replicaCount: 2
+        replicaCount: {{ sub (mul 2 $replicationFactor) 1 }} # 2*N-1 - VMCluster HA Requirement
         disableSelfServiceScrape: true # do not scrape vm's own components
         logLevel: {{ $logLevel }}
         # enforce restricted PodSecurity on operator-managed containers
@@ -45,7 +60,7 @@ vm-k8s-stack:
               matchLabels:
                 app.simcore.io/name: vmstorage
                 app.simcore.io/part-of: {{ .Release.Name }}
-        resources: # mandatory cpu+memory limits (see SECURITY.md)
+        resources:
           requests:
             cpu: 100m
             memory: 256Mi
@@ -75,7 +90,15 @@ vm-k8s-stack:
             app.simcore.io/part-of: {{ .Release.Name }}
         nodeSelector:
           ops: "true"
-        resources: # mandatory cpu+memory limits (see SECURITY.md)
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app.simcore.io/name: vmselect
+                app.simcore.io/part-of: {{ .Release.Name }}
+        resources:
           requests:
             cpu: 50m
             memory: 128Mi
@@ -105,7 +128,15 @@ vm-k8s-stack:
             app.simcore.io/part-of: {{ .Release.Name }}
         nodeSelector:
           ops: "true"
-        resources: # mandatory cpu+memory limits (see SECURITY.md)
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app.simcore.io/name: vminsert
+                app.simcore.io/part-of: {{ .Release.Name }}
+        resources:
           requests:
             cpu: 50m
             memory: 128Mi
@@ -134,7 +165,7 @@ vm-k8s-stack:
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
         ops: "true"
-      resources: # mandatory cpu+memory limits (see SECURITY.md)
+      resources:
         requests:
           cpu: 10m
           memory: 64Mi

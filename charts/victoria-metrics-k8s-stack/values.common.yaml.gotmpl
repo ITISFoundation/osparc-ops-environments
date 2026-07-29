@@ -6,7 +6,7 @@ vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
 
   #
-  # vmagent
+  # vmagent (scraping metrics)
   #
   vmagent: # scrapes the targets and writes to vmsingle
     enabled: true
@@ -20,7 +20,7 @@ vm-k8s-stack:
       useStrictSecurity: true
       podMetadata:
         labels: # labels used by the network policies (templates/networkpolicies)
-          app.simcore.io/name: vmagent-scraper
+          app.simcore.io/name: vmagent
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
         ops: "true"
