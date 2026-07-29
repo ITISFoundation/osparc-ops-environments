@@ -52,14 +52,14 @@ vm-k8s-stack:
             app.simcore.io/part-of: {{ .Release.Name }}
         nodeSelector:
           ops: "true"
-        topologySpreadConstraints:
-          - maxSkew: 1
-            topologyKey: kubernetes.io/hostname
-            whenUnsatisfiable: DoNotSchedule
-            labelSelector:
-              matchLabels:
-                app.simcore.io/name: vmstorage
-                app.simcore.io/part-of: {{ .Release.Name }}
+        affinity:
+          podAntiAffinity: # enforce that vmstorage pods are not scheduled on the same node
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.simcore.io/name: vmstorage
+                    app.simcore.io/part-of: {{ .Release.Name }}
         resources:
           requests:
             cpu: 100m
