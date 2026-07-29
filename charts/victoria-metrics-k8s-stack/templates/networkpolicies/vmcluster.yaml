@@ -8,6 +8,7 @@
 {{- $storageInsertPort := $cluster.vmstorage.vmInsertPort }}
 {{- $storageSelectPort := $cluster.vmstorage.vmSelectPort }}
 {{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
+{{- $vmagentLabels := $stack.vmagent.spec.podMetadata.labels }}
 {{- $insertLabels := $cluster.vminsert.podMetadata.labels }}
 {{- $selectLabels := $cluster.vmselect.podMetadata.labels }}
 {{- $storageLabels := $cluster.vmstorage.podMetadata.labels }}
@@ -22,23 +23,31 @@ spec:
     app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
     && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
   ingress:
-    # reads from traefik, writes from vmagent
+    # reads from traefik, grafana, etc.
+    # writes from vmagent
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - {{ $vmauthPort }}
   egress:
-    # proxy writes to vminsert and reads to vmselect
+    # proxy writes to vminsert
     - action: Allow
       protocol: TCP
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
+        selector: >-
+          app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
         ports:
           - {{ $insertPort }}
+    # proxy reads to vmselect
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $selectLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}"
+        ports:
           - {{ $selectPort }}
     # config-reloader sidecar watches the vmauth config Secret via the K8s API
     - action: Allow
@@ -61,11 +70,23 @@ spec:
     app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
     && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
   ingress:
-    # writes from vmagent and from the vmauth proxy.
+    # remote-write from vmagent
     - action: Allow
       protocol: TCP
       source:
-        selector: app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}" # allow only from vm stack namespace
+        selector: >-
+          app.simcore.io/name == "{{ index $vmagentLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmagentLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $insertPort }}
+    # writes proxied by vmauth
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
       destination:
         ports:
           - {{ $insertPort }}
@@ -74,10 +95,9 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
+        selector: >-
+          app.simcore.io/name == "{{ index $storageLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}"
         ports:
           - {{ $storageInsertPort }}
 ---
@@ -95,7 +115,9 @@ spec:
     - action: Allow
       protocol: TCP
       source:
-        selector: app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}" # allow only from vm stack namespace
+        selector: >-
+          app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
       destination:
         ports:
           - {{ $selectPort }}
@@ -104,10 +126,9 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
+        selector: >-
+          app.simcore.io/name == "{{ index $storageLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}"
         ports:
           - {{ $storageSelectPort }}
 ---
@@ -121,13 +142,24 @@ spec:
     app.simcore.io/name == "{{ index $storageLabels "app.simcore.io/name" }}"
     && app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}"
   ingress:
-    # ingestion from vminsert and queries from vmselect.
+    # ingestion RPC: from vminsert
     - action: Allow
       protocol: TCP
       source:
-        selector: app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}" # allow only from vm stack namespace
+        selector: >-
+          app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
       destination:
         ports:
           - {{ $storageInsertPort }}
+    # query RPC: from vmselect
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $selectLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
           - {{ $storageSelectPort }}
 {{- end }}
