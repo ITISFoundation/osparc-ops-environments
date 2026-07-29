@@ -105,12 +105,6 @@ vm-k8s-stack:
           limits:
             cpu: 500m
             memory: 512Mi
-        storage:
-          volumeClaimTemplate:
-            spec:
-              resources:
-                requests:
-                  storage: 2Gi
 
       #
       # vminsert: receives remote-write and fans out to vmstorage
