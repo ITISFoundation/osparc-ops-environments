@@ -24,7 +24,7 @@ vm-k8s-stack:
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
         ops: "true"
-      resources: # mandatory cpu+memory limits (see SECURITY.md)
+      resources:
         requests:
           cpu: 50m
           memory: 128Mi
@@ -62,7 +62,7 @@ vm-k8s-stack:
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
         ops: "true"
-      resources: # mandatory cpu+memory limits (see SECURITY.md)
+      resources:
         requests:
           cpu: 100m
           memory: 256Mi
@@ -100,7 +100,7 @@ vm-k8s-stack:
       allowPrivilegeEscalation: false
       seccompProfile:
         type: RuntimeDefault
-    resources: # mandatory cpu+memory limits (see SECURITY.md)
+    resources:
       requests:
         cpu: 10m
         memory: 32Mi
@@ -122,7 +122,7 @@ vm-k8s-stack:
     fullnameOverride: kube-state-metrics-vm-k8s-stack
     nodeSelector:
       ops: "true"
-    resources: # mandatory cpu+memory limits (see SECURITY.md)
+    resources:
       requests:
         cpu: 10m
         memory: 64Mi
