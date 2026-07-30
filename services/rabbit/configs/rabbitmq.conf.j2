@@ -13,6 +13,15 @@ cluster_formation.classic_config.nodes.{{ ix }} = rabbit@rabbit-node0{{ ix }}_ra
 # important for grafana dashboard to work properly
 cluster_name={{ RABBIT_CLUSTER_NAME }}
 
+# https://www.rabbitmq.com/docs/4.1/partitions#automatic-handling
+# https://www.rabbitmq.com/docs/4.1/partitions#pause-minority
+# In pause-minority mode RabbitMQ will automatically pause cluster nodes
+# which determine themselves to be in a minority  (i.e. fewer or equal
+# than half the total number of nodes). The Erlang VM on the paused nodes
+# will continue running but the nodes will not listen on any ports or be
+# otherwise available)
+cluster_partition_handling = pause_minority
+
 ## Sets the initial quorum queue replica count for newly declared quorum queues.
 ## This value can be overridden using the 'x-quorum-initial-group-size' queue argument
 ## at declaration time.
