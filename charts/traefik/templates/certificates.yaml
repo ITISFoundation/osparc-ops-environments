@@ -10,7 +10,7 @@ metadata:
     # Note: this does not prevent deletion of secret with cert and key. Certificate must be re-issued
     # TIP 1: for testing use let's encrypt staging environment or self-signed issuers
     # TIP 2: backup secrets before deleting the namespace to avoid re-issuance of certificates
-    - osparc-ops.io/tls-certificate-reissue-rate-limit-protection
+    - simcore.io/tls-certificate-reissue-rate-limit-protection
 spec:
   duration: 2160h # 90 days
   renewBefore: 720h # 30 days

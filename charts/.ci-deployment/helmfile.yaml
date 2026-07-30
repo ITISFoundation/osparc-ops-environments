@@ -9,7 +9,7 @@ repositories:
     url: https://topolvm.github.io/topolvm
   - name: aws-ebs-csi-driver
     url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
-  - name: victoria-metrics-operator
+  - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
 
 releases:
@@ -28,7 +28,7 @@ releases:
 
   - name: traefik
     chart: ./traefik
-    namespace: traefik
+    namespace: {{ requiredEnv "TRAEFIK_NAMESPACE" }}
     needs:
       - cert-manager/cert-manager
     values:
@@ -49,7 +49,7 @@ releases:
       - topolvm/values.yaml.gotmpl
 
   - name: victoria-metrics-operator
-    chart: victoria-metrics-operator/victoria-metrics-operator
+    chart: victoria-metrics/victoria-metrics-operator
     version: 0.63.1
     namespace: victoria-metrics-operator
     needs:
@@ -57,3 +57,11 @@ releases:
     values:
       - victoria-metrics-operator/values.common.yaml.gotmpl
       - victoria-metrics-operator/values.ha.yaml.gotmpl
+
+  - name: victoria-metrics-k8s-stack
+    chart: ./victoria-metrics-k8s-stack
+    namespace: victoria-metrics-k8s-stack
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+    values:
+      - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
