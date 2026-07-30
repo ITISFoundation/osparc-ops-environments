@@ -7,6 +7,7 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Targets
 #
 
+# All cluster operations (start, stop, etc) are included below
 include ${REPO_BASE_DIR}/services/rabbit/.operations.Makefile
 
 #
