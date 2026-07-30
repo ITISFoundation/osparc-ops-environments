@@ -17,7 +17,7 @@ releases:
     chart: ./security-hardening
     namespace: kube-system
     values:
-      - security-hardening/values.yaml
+      - security-hardening/values.yaml.gotmpl
 
   - name: cert-manager
     chart: ./cert-manager
