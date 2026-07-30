@@ -61,5 +61,7 @@ releases:
   - name: victoria-metrics-k8s-stack
     chart: ./victoria-metrics-k8s-stack
     namespace: victoria-metrics-k8s-stack
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
     values:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
