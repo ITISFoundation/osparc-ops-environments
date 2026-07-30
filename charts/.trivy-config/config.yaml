@@ -5,3 +5,4 @@ ksv0125:
     - "docker.io"
     - "public.ecr.aws"
     - "ghcr.io"
+    - "registry.k8s.io"

@@ -11,11 +11,11 @@ This needs to be configured separately. Use ansible playbooks to configure volum
 Source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getting-started.md#prerequisites
 
 ## Deleting PV(C)s with `retain` reclaim policy
-1. Delete release (e.g. helm uninstall -n test test)
+1. Delete release (in osparc done via helmfile make target)
 2. Find LogicalVolume CR (`kubectl get logicalvolumes.topolvm.io`)
 3. Delete LogicalVolume CR (`kubectl delete logicalvolumes.topolvm.io <lv-name>`)
 4. Delete PV (`kubectl delete PV <pv-name>`)
-5. Remove PV's finalizers (`kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'`)
+    * You might need to remove PV's finalizers (`kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'`)
 
 Useful source: https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/advanced-setup.md#storageclass
 

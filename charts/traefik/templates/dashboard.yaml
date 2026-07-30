@@ -23,7 +23,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     # namespace + middleware name
-    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ .Values.middlewares.basicAuth.name }}@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   rules:
