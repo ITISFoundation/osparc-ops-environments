@@ -1,3 +1,5 @@
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+
 vapContainerResourceLimits:
   excludedNamespaces:
     - kube-system

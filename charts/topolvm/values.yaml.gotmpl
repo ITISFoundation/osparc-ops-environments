@@ -1,5 +1,7 @@
 # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/charts/topolvm/values.yaml
 
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+
 topolvm:
   lvmd:
     # set up lvmd service with DaemonSet
