@@ -2,6 +2,8 @@
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
 {{- $httpPathPrefix := "/metrics" }}
 
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
 
@@ -142,7 +144,7 @@ vm-k8s-stack:
             cidr: 192.168.0.0/16
         ports:
         - protocol: TCP
-          port: 6443 # kube-state-metrics watches the kubernetes api server
+          port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }} # kube-state-metrics watches the kubernetes api server
 
   #
   # kubelet

@@ -20,7 +20,7 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - 6443
+          - {{ .Values.kubernetesApiServerPort }}
         nets:
           - 10.0.0.0/8
           - 172.16.0.0/12

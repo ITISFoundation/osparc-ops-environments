@@ -2,6 +2,8 @@ awsCredentials:
   accessKeyId: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_ACCESS_KEY" }}
   secretAccessKey: {{ requiredEnv "AWS_K8S_EBS_CSI_DRIVER_IAM_SECRET_KEY" }}
 
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+
 # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/charts/aws-ebs-csi-driver/values.yaml
 aws-ebs-csi-driver:
 

@@ -22,7 +22,7 @@ spec:
           - 172.16.0.0/12
           - 192.168.0.0/16
         ports:
-          - 6443
+          - {{ .Values.kubernetesApiServerPort }}
     # EC2 instance metadata service (IMDS)
     # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/install.md#metadata
     - action: Allow

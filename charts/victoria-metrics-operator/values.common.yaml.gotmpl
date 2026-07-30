@@ -71,4 +71,4 @@ extraObjects:
             - 172.16.0.0/12
             - 192.168.0.0/16
           ports:
-            - 6443
+            - {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
