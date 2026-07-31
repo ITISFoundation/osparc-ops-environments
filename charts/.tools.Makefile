@@ -60,7 +60,7 @@ install-helmfile: guard-HELMFILE_EXPECTED_VERSION
 	@rm /tmp/helmfile
 	# installing helmfile plugins...
 	@helmfile init --force --quiet
-	@helmfile --version
+	@helmfile version
 
 .PHONY: install-trivy
 install-trivy: guard-TRIVY_EXPECTED_VERSION
