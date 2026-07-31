@@ -50,15 +50,16 @@ endef
 
 .PHONY: install-helmfile
 install-helmfile: guard-HELMFILE_EXPECTED_VERSION
-	# identifying environment ...
+	# installing helmfile...
 	@os="$$(uname -s | tr '[:upper:]' '[:lower:]')"; \
 	arch="$$(uname -m)"; \
 	case "$$arch" in aarch64) arch=arm64;; x86_64) arch=amd64;; esac; \
 	url="https://github.com/helmfile/helmfile/releases/download/v$(HELMFILE_EXPECTED_VERSION)/helmfile_$(HELMFILE_EXPECTED_VERSION)_$${os}_$${arch}.tar.gz"; \
-	# installing helmfile ...
 	curl --silent --show-error --location "$$url" | tar xz -C /tmp helmfile
-	@sudo install /tmp/helmfile /usr/local/bin/helmfile
+	sudo install /tmp/helmfile /usr/local/bin/helmfile
 	@rm /tmp/helmfile
+	# installing helmfile plugins...
+	@helmfile init --force --quiet
 	@helmfile --version
 
 .PHONY: install-trivy
