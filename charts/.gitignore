@@ -1,4 +1,7 @@
 k8s_hosts.ini
+*.tgz
+
 helmfile.yml
 helmfile.yaml
-*.tgz
+helmfile.yml.gotmpl
+helmfile.yaml.gotmpl
