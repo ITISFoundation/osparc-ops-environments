@@ -12,7 +12,7 @@ export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
 # Example of usage:
-# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector app=adminer'
+# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector name=traefik'
 HELMFILE_EXTRA_ARGS ?=
 HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 
@@ -26,9 +26,9 @@ TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation helmfile.yaml
+.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml $*
+	$(HELMFILE) -f $(word 2,$^) $*
 
 .PHONY: add-new-chart-directory-from-template
 add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart directory with standard structure
@@ -44,8 +44,8 @@ add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart
 # Artifacts
 #
 
-helmfile.yaml: simcore-charts/helmfile.yaml ## Copies the helmfile.yaml to the charts directory
-	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml
+helmfile.yaml.gotmpl: simcore-charts/helmfile.yaml
+	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml.gotmpl
 
 simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts directory
 	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
