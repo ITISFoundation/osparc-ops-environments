@@ -10,8 +10,8 @@ return_code=0
 for d in charts/*/; do
   name="$(basename "$d")"
   [[ "$name" =~ $exclude_dirs_regex ]] && continue
-  grep -q "${name}/" charts/.ci-deployment/helmfile.yaml && continue
-  echo "Missing in charts/.ci-deployment/helmfile.yaml: $name" >&2
+  grep -q "${name}/" charts/.ci-deployment/helmfile.yaml.gotmpl && continue
+  echo "Missing in charts/.ci-deployment/helmfile.yaml.gotmpl: $name" >&2
   return_code=1
 done
 
