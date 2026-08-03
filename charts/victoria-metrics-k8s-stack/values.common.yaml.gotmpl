@@ -25,7 +25,7 @@ vm-k8s-stack:
           app.simcore.io/name: vmagent
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
-        ops: "true"
+        node-role.kubernetes.io/ops: ""
       resources:
         requests:
           cpu: 50m
@@ -64,7 +64,7 @@ vm-k8s-stack:
           app.simcore.io/name: vmsingle
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
-        ops: "true"
+        node-role.kubernetes.io/ops: ""
       resources:
         requests:
           cpu: 100m
@@ -124,7 +124,7 @@ vm-k8s-stack:
     enabled: true
     fullnameOverride: kube-state-metrics-vm-k8s-stack
     nodeSelector:
-      ops: "true"
+      node-role.kubernetes.io/ops: ""
     resources:
       requests:
         cpu: 10m

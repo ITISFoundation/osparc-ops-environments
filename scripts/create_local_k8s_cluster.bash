@@ -37,6 +37,21 @@ echo "Creating a local Kubernetes cluster named '$KIND_CLUSTER_NAME' using confi
 kind create cluster --config "$KIND_CONFIG_FILE" --name "$KIND_CLUSTER_NAME"
 
 #
+# apply node-role labels
+#
+
+# node-role.kubernetes.io/* labels cannot be self-assigned by the kubelet
+# (NodeRestriction admission), so they must be set via the API after creation.
+# see https://github.com/kubernetes-sigs/kind/issues/3536
+
+echo "Applying node-role labels ..."
+
+kubectl label node --all \
+    node-role.kubernetes.io/ops="" \
+    node-role.kubernetes.io/simcore=""
+
+#
+#
 # install Calico network CNI
 #
 

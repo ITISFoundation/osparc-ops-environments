@@ -51,7 +51,7 @@ vm-k8s-stack:
             app.simcore.io/name: vmstorage
             app.simcore.io/part-of: {{ .Release.Name }}
         nodeSelector:
-          ops: "true"
+          node-role.kubernetes.io/ops: ""
         affinity:
           podAntiAffinity: # enforce that vmstorage pods are not scheduled on the same node
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -90,7 +90,7 @@ vm-k8s-stack:
             app.simcore.io/name: vmselect
             app.simcore.io/part-of: {{ .Release.Name }}
         nodeSelector:
-          ops: "true"
+          node-role.kubernetes.io/ops: ""
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname
@@ -122,7 +122,7 @@ vm-k8s-stack:
             app.simcore.io/name: vminsert
             app.simcore.io/part-of: {{ .Release.Name }}
         nodeSelector:
-          ops: "true"
+          node-role.kubernetes.io/ops: ""
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname
@@ -159,7 +159,7 @@ vm-k8s-stack:
           app.simcore.io/name: vmauth
           app.simcore.io/part-of: {{ .Release.Name }}
       nodeSelector:
-        ops: "true"
+        node-role.kubernetes.io/ops: ""
       resources:
         requests:
           cpu: 10m

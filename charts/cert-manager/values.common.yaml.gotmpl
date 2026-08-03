@@ -6,7 +6,7 @@ cert-manager:
     keep: true
 
   nodeSelector:
-    ops: "true"
+    node-role.kubernetes.io/ops: ""
 
   # controller
   replicaCount: 1
