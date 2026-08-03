@@ -1,4 +1,3 @@
-# kind-config.yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
@@ -8,9 +7,10 @@ nodes:
         hostPort: 80
       - containerPort: 443
         hostPort: 443
-    labels:
-      ops: "true"
-      simcore: "true"
+    # NOTE: node-role.kubernetes.io/* labels cannot be set here. kind passes
+    # them to the kubelet as --node-labels, but the NodeRestriction admission
+    # plugin rejects self-assigned labels in the node-role.kubernetes.io/
+    # namespace. They are applied via `kubectl label` after cluster creation.
 
 # https://archive-os-3-26.netlify.app/calico/3.26/getting-started/kubernetes/kind/
 networking:
