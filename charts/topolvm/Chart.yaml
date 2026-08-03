@@ -9,5 +9,5 @@ appVersion: 0.0.1 # unused
 
 dependencies:
   - name: topolvm
-    version: 16.1.0
+    version: 16.1.1
     repository: "https://topolvm.github.io/topolvm"
