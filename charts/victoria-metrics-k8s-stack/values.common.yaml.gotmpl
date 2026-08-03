@@ -49,6 +49,7 @@ vm-k8s-stack:
     spec:
       port: "8428"
       logLevel: {{ $logLevel }}
+      retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
       # served under a path prefix on the ingress; makes VMUI links resolve correctly
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
       extraArgs:
