@@ -75,8 +75,8 @@ helmfile-lint: .helmfile-lint ## Lint apps
 .PHONY: helmfile-sync
 helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unless you know why)
 
-.PHONY: helmfile-delete
-helmfile-delete: .helmfile-delete ## Delete the helmfile configuration
+.PHONY: helmfile-destroy
+helmfile-destroy: .helmfile-destroy ## Delete the helmfile configuration
 
 .PHONY: trivy-scan
 trivy-scan: $(TRIVY_TEMPLATES_DIR) .verify-trivy-installation
