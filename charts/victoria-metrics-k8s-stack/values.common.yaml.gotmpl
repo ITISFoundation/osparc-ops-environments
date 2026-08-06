@@ -13,9 +13,11 @@ vm-k8s-stack:
   vmagent: # scrapes the targets and writes to vmsingle
     enabled: true
     spec:
+      extraArgs:
+        remoteWrite.maxHourlySeries: "150000" # side-effect: enables a metric used in alerts
+        remoteWrite.maxDailySeries: "300000" # side-effect: enables a metric used in alerts
       port: "8429"
       logLevel: {{ $logLevel }}
-      disableSelfServiceScrape: true # do not scrape vm's own components
       # enforce restricted PodSecurity on operator-managed containers
       # (config-init, vmagent, config-reloader): runAsNonRoot, seccompProfile,
       # allowPrivilegeEscalation=false, capabilities.drop=[ALL]
@@ -54,7 +56,7 @@ vm-k8s-stack:
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
       extraArgs:
         http.pathPrefix: {{ $httpPathPrefix | quote }}
-      disableSelfServiceScrape: true # do not scrape vm's own components
+        vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080" # expose vmalert API
       # enforce restricted PodSecurity on the vmsingle container:
       # runAsNonRoot, seccompProfile, allowPrivilegeEscalation=false,
       # capabilities.drop=[ALL]
@@ -108,8 +110,8 @@ vm-k8s-stack:
         cpu: 10m
         memory: 32Mi
       limits:
-        cpu: 100m
-        memory: 64Mi
+        cpu: 0.5
+        memory: 128Mi
     vmScrape:
       spec:
         namespaceSelector: # chart templates do not set it properly when namespace is overriden
@@ -148,10 +150,129 @@ vm-k8s-stack:
           port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }} # kube-state-metrics watches the kubernetes api server
 
   #
-  # kubelet
+  # kubelet (scrape kubelet metrics)
   #
   kubelet: # container metrics (cpu / memory)
     enabled: true
+
+  #
+  # vmalert (alerting)
+  #
+  vmalert:
+    enabled: true
+    spec:
+      port: "8080"
+      logLevel: {{ $logLevel }}
+      selectAllByDefault: true
+      evaluationInterval: 30s
+      useStrictSecurity: true
+      extraArgs:
+        notifier.blackhole: "true" # no notifications
+        http.pathPrefix: "/"
+      podMetadata:
+        labels:
+          app.simcore.io/name: vmalert
+          app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        node-role.kubernetes.io/ops: ""
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 0.5
+          memory: 512Mi
+      configReloaderResources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+
+  defaultRules: # rules for vmalert
+    enabled: true
+    rules: # per-rule overrides
+      # stream aggregation is not configured, so vm_streamaggr_* metrics never
+      # exist and these two alerts sit permanently in "nomatch"; disable them
+      StreamAggrFlushTimeout:
+        enabled: false
+      StreamAggrDedupFlushTimeout:
+        enabled: false
+    # keep only the vmHealth group; every other group is disabled explicitly
+    groups:
+      etcd:
+        enabled: false
+      general:
+        enabled: false
+      k8sContainerCpuLimits:
+        enabled: false
+      k8sContainerCpuRequests:
+        enabled: false
+      k8sContainerCpuUsageSecondsTotal:
+        enabled: false
+      k8sContainerMemoryLimits:
+        enabled: false
+      k8sContainerMemoryRequests:
+        enabled: false
+      k8sContainerMemoryRss:
+        enabled: false
+      k8sContainerMemoryCache:
+        enabled: false
+      k8sContainerMemoryWorkingSetBytes:
+        enabled: false
+      k8sContainerMemorySwap:
+        enabled: false
+      k8sPodOwner:
+        enabled: false
+      k8sContainerResource:
+        enabled: false
+      kubeApiserver:
+        enabled: false
+      kubeApiserverAvailability:
+        enabled: false
+      kubeApiserverBurnrate:
+        enabled: false
+      kubeApiserverHistogram:
+        enabled: false
+      kubeApiserverSlos:
+        enabled: false
+      kubelet:
+        enabled: false
+      kubePrometheusGeneral:
+        enabled: false
+      kubePrometheusNodeRecording:
+        enabled: false
+      kubernetesApps:
+        enabled: false
+      kubernetesResources:
+        enabled: false
+      kubernetesStorage:
+        enabled: false
+      kubernetesSystem:
+        enabled: false
+      kubernetesSystemKubelet:
+        enabled: false
+      kubernetesSystemApiserver:
+        enabled: false
+      kubernetesSystemControllerManager:
+        enabled: false
+      kubeScheduler:
+        enabled: false
+      kubernetesSystemScheduler:
+        enabled: false
+      kubeStateMetrics:
+        enabled: false
+      nodeNetwork:
+        enabled: false
+      node:
+        enabled: false
+      # vm* groups stay enabled where the component runs (vmHealth, vmagent,
+      # vmsingle, vmoperator). vmcluster is off here and turned on in the HA overlay.
+      vmcluster:
+        enabled: false
+      alertmanager:
+        enabled: false
 
   victoria-metrics-operator:
     enabled: false # operator is deployed separately
@@ -159,13 +280,9 @@ vm-k8s-stack:
     enabled: false
   alertmanager:
     enabled: false
-  vmalert:
-    enabled: false
   grafana:
     enabled: false
   defaultDashboards:
-    enabled: false
-  defaultRules:
     enabled: false
   kubeApiServer:
     enabled: false

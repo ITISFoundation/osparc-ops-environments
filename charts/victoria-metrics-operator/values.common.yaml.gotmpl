@@ -1,6 +1,7 @@
 # Values reference https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-operator-0.55.1/charts/victoria-metrics-operator/values.yaml
 {{- $appLabelValue := "victoria-metrics-operator" }}
 {{- $webhookPort := 9443 }}
+{{- $servicePort := 8080 }} # service.servicePort exposing the operator /metrics endpoint
 
 operator:
   # converts prometheus-operator objects into victoria-metrics-operator ones
@@ -22,7 +23,14 @@ image:
   registry: quay.io
 
 service:
+  servicePort: {{ $servicePort }}
   webhookPort: {{ $webhookPort }}
+
+# Scrape the operator's own metrics. `vm: true` creates a VMServiceScrape
+# (reconciled by this operator) instead of a prometheus-operator ServiceMonitor.
+serviceMonitor:
+  enabled: true
+  vm: true
 
 podLabels:
   app.simcore.io/name: {{ $appLabelValue }} # app.kubernetes.io/name is used inside the chart
@@ -57,11 +65,18 @@ extraObjects:
       app.simcore.io/name == '{{ $appLabelValue }}'
       && app.simcore.io/part-of == '{{ .Release.Name }}'
     ingress:
+      # admission webhook calls from the kube-apiserver
       - action: Allow
         protocol: TCP
         destination:
           ports:
             - {{ $webhookPort }}
+      # metrics scraping by vmagent
+      - action: Allow
+        protocol: TCP
+        destination:
+          ports:
+            - {{ $servicePort }} # also metrics port
     egress:
       - action: Allow
         protocol: TCP

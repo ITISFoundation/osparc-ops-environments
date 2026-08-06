@@ -17,4 +17,16 @@ spec:
       destination:
         ports:
           - {{ $stack.vmsingle.spec.port }}
+  {{- if dig "vmalert" "enabled" false $stack }}
+  egress:
+    # proxy vmalert UI/API (-vmalert.proxyURL) to vmalert
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $stack.vmalert.spec.podMetadata.labels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $stack.vmalert.spec.podMetadata.labels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $stack.vmalert.spec.port }}
+  {{- end }}
 {{- end }}

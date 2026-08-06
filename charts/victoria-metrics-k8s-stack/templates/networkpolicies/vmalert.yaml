@@ -1,0 +1,98 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmalert" "enabled" false $stack }}
+
+{{- $vmSingleOn := dig "vmsingle" "enabled" false $stack }}
+{{- $labels := $stack.vmalert.spec.podMetadata.labels }}
+{{- $agentLabels := dig "vmagent" "spec" "podMetadata" "labels" dict $stack }}
+{{- $singleLabels := dig "vmsingle" "spec" "podMetadata" "labels" dict $stack }}
+{{- $clusterSelectLabels := dig "vmcluster" "spec" "vmselect" "podMetadata" "labels" dict $stack }}
+{{- $clusterInsertLabels := dig "vmcluster" "spec" "vminsert" "podMetadata" "labels" dict $stack }}
+{{- $clusterSelectPort := dig "vmcluster" "spec" "vmselect" "port" "" $stack }}
+{{- $clusterInsertPort := dig "vmcluster" "spec" "vminsert" "port" "" $stack }}
+
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmalert-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
+  ingress:
+    # https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
+    {{- if $vmSingleOn }}
+    # access vmalert UI/API via vmsingle
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $singleLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $singleLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $stack.vmalert.spec.port }}
+    {{- else }}
+    # access vmalert UI/API via vmselect
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $clusterSelectLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $clusterSelectLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $stack.vmalert.spec.port }}
+    {{- end }}
+    {{- if dig "vmagent" "enabled" false $stack }}
+    # metrics scraping by vmagent
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $agentLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $agentLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $stack.vmalert.spec.port }}
+    {{- end }}
+  egress:
+    # https://docs.victoriametrics.com/victoriametrics/vmalert/#single-node-victoriametrics
+    {{- if $vmSingleOn }}
+    - action: Allow # execute rules, persist alerts, restore state
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $singleLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $singleLabels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $stack.vmsingle.spec.port }}
+    {{- else }}
+    # https://docs.victoriametrics.com/victoriametrics/vmalert/#cluster-victoriametrics
+    - action: Allow # execute rules, restore state
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $clusterSelectLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $clusterSelectLabels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $clusterSelectPort }}
+    - action: Allow # persist alerts
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $clusterInsertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $clusterInsertLabels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $clusterInsertPort }}
+    {{- end }}
+    # config-reloader sidecar watches the generated rules Secret via the K8s API
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}
+{{- end }}
