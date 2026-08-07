@@ -5,6 +5,7 @@
 {{- $vmauthPort := $stack.vmauth.spec.port }}
 {{- $insertPort := $cluster.vminsert.port }}
 {{- $selectPort := $cluster.vmselect.port }}
+{{- $storageHttpPort := $cluster.vmstorage.port }}
 {{- $storageInsertPort := $cluster.vmstorage.vmInsertPort }}
 {{- $storageSelectPort := $cluster.vmstorage.vmSelectPort }}
 {{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
@@ -135,6 +136,16 @@ spec:
       destination:
         ports:
           - {{ $selectPort }}
+    # metric scraping by vmagent
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $vmagentLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmagentLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $selectPort }}
     {{- if and $vmalertPort $vmalertLabels }}
     # rule evaluation queries from vmalert
     - action: Allow
@@ -199,4 +210,14 @@ spec:
       destination:
         ports:
           - {{ $storageSelectPort }}
+    # metric scraping by vmagent (HTTP port, not RPC)
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $vmagentLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmagentLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $storageHttpPort }}
 {{- end }}
