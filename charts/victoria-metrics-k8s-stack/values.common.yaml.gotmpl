@@ -56,6 +56,8 @@ vm-k8s-stack:
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
       extraArgs:
         http.pathPrefix: {{ $httpPathPrefix | quote }}
+        # https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
+        # expose vmalert via VMUI
         vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080" # expose vmalert API
       # enforce restricted PodSecurity on the vmsingle container:
       # runAsNonRoot, seccompProfile, allowPrivilegeEscalation=false,

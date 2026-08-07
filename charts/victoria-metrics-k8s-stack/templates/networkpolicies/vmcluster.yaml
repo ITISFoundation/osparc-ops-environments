@@ -9,6 +9,8 @@
 {{- $storageSelectPort := $cluster.vmstorage.vmSelectPort }}
 {{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
 {{- $vmagentLabels := $stack.vmagent.spec.podMetadata.labels }}
+{{- $vmalertLabels := dig "vmalert" "spec" "podMetadata" "labels" dict $stack }}
+{{- $vmalertPort := dig "vmalert" "spec" "port" "" $stack }}
 {{- $insertLabels := $cluster.vminsert.podMetadata.labels }}
 {{- $selectLabels := $cluster.vmselect.podMetadata.labels }}
 {{- $storageLabels := $cluster.vmstorage.podMetadata.labels }}
@@ -131,6 +133,17 @@ spec:
           && app.simcore.io/part-of == "{{ index $storageLabels "app.simcore.io/part-of" }}"
         ports:
           - {{ $storageSelectPort }}
+    {{- if and $vmalertPort $vmalertLabels }}
+    # proxy vmalert API via -vmalert.proxyURL
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $vmalertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmalertLabels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $vmalertPort }}
+    {{- end }}
 ---
 # vmstorage: stores data, receives from vminsert and serves vmselect
 apiVersion: projectcalico.org/v3
