@@ -92,6 +92,18 @@ spec:
       destination:
         ports:
           - {{ $insertPort }}
+    {{- if and $vmalertPort $vmalertLabels }}
+    # alert state persistence from vmalert
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $vmalertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmalertLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $insertPort }}
+    {{- end }}
   egress:
     # fan out ingestion to the vmstorage instances
     - action: Allow
@@ -113,7 +125,7 @@ spec:
     app.simcore.io/name == "{{ index $selectLabels "app.simcore.io/name" }}"
     && app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}"
   ingress:
-    # reads from the vmauth proxy.
+    # reads from the vmauth proxy
     - action: Allow
       protocol: TCP
       source:
@@ -123,6 +135,18 @@ spec:
       destination:
         ports:
           - {{ $selectPort }}
+    {{- if and $vmalertPort $vmalertLabels }}
+    # rule evaluation queries from vmalert
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $vmalertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmalertLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $selectPort }}
+    {{- end }}
   egress:
     # query the vmstorage instances
     - action: Allow
@@ -134,7 +158,7 @@ spec:
         ports:
           - {{ $storageSelectPort }}
     {{- if and $vmalertPort $vmalertLabels }}
-    # proxy vmalert API via -vmalert.proxyURL
+    # proxying vmalert
     - action: Allow
       protocol: TCP
       destination:

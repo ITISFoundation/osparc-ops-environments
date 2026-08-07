@@ -90,8 +90,8 @@ vm-k8s-stack:
         # enforce restricted PodSecurity on operator-managed containers
         useStrictSecurity: true
         extraArgs:
-          # https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
-          # expose vmalert via VMUI
+          # Expose vmalert via VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
+          # Proxy request to vmalert https://docs.victoriametrics.com/victoriametrics/cluster-victoriametrics/#vmalert
           vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080"
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)

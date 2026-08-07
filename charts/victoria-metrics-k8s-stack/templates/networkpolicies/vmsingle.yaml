@@ -12,6 +12,7 @@ spec:
     && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
   ingress:
     # writes from vmagent and reads from traefik (via ingress)
+    # writes/reads from vmalert
     - action: Allow
       protocol: TCP
       destination:
