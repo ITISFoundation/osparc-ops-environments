@@ -10,6 +10,17 @@ spec:
   selector: >-
     app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
     && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
+  ingress:
+    # metric scraping (self / peer replicas)
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: >-
+          app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ $stack.vmagent.spec.port }}
   egress:
     # scrape targets (kubelet, node-exporter, kube-state-metrics),
     # api server discovery and remote-write to vmsingle
