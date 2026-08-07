@@ -199,12 +199,12 @@ vm-k8s-stack:
         enabled: false
       StreamAggrDedupFlushTimeout:
         enabled: false
-    # keep only the vmHealth group; every other group is disabled explicitly
+    # start with a few alerts. Add more with time
     groups:
       etcd:
         enabled: false
       general:
-        enabled: false
+        enabled: true
       k8sContainerCpuLimits:
         enabled: false
       k8sContainerCpuRequests:

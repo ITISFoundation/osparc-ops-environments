@@ -1,7 +1,7 @@
 # Values reference https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-operator-0.55.1/charts/victoria-metrics-operator/values.yaml
 {{- $appLabelValue := "victoria-metrics-operator" }}
 {{- $webhookPort := 9443 }}
-{{- $servicePort := 8080 }} # service.servicePort exposing the operator /metrics endpoint
+{{- $servicePort := 8080 }}
 
 operator:
   # converts prometheus-operator objects into victoria-metrics-operator ones
@@ -76,7 +76,7 @@ extraObjects:
         protocol: TCP
         destination:
           ports:
-            - {{ $servicePort }} # also metrics port
+            - {{ $servicePort }}
     egress:
       - action: Allow
         protocol: TCP
