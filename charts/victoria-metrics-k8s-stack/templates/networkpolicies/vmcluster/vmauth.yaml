@@ -1,15 +1,14 @@
 {{- $stack := index .Values "vm-k8s-stack" -}}
-{{- if dig "vmalert" "enabled" false $stack }}
-
-{{- $labels := $stack.vmalert.spec.podMetadata.labels }}
+{{- if dig "vmcluster" "enabled" false $stack }}
+{{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: vmalert-network-policy
+  name: vmauth-network-policy
 spec:
   selector: >-
-    app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
-    && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
+    app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
   types: # calico only defaults this on create, so it must be explicit
     - Ingress
     - Egress
@@ -18,22 +17,14 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - {{ $stack.vmalert.spec.port }}
+          - {{ $stack.vmauth.spec.port }}
   egress:
-    {{- if dig "vmsingle" "enabled" false $stack }}
     - action: Allow
       protocol: TCP
       destination:
         ports:
-          - {{ $stack.vmsingle.spec.port }}
-    {{- else }}
-    - action: Allow
-      protocol: TCP
-      destination:
-        ports:
-          - {{ $stack.vmcluster.spec.vmselect.port }}
           - {{ $stack.vmcluster.spec.vminsert.port }}
-    {{- end }}
+          - {{ $stack.vmcluster.spec.vmselect.port }}
     - action: Allow
       protocol: TCP
       destination:

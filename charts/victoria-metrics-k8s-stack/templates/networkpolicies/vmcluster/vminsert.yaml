@@ -1,0 +1,27 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if dig "vmcluster" "enabled" false $stack }}
+{{- $insertLabels := $stack.vmcluster.spec.vminsert.podMetadata.labels }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vminsert-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
+  types: # calico only defaults this on create, so it must be explicit
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmcluster.spec.vminsert.port }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmcluster.spec.vmstorage.vmInsertPort }}
+{{- end }}

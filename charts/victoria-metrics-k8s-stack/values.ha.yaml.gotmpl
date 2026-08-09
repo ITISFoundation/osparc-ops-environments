@@ -92,7 +92,7 @@ vm-k8s-stack:
         extraArgs:
           # Expose vmalert via VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
           # Proxy request to vmalert https://docs.victoriametrics.com/victoriametrics/cluster-victoriametrics/#vmalert
-          vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080"
+          vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080/alerts"
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vmselect
