@@ -2,6 +2,7 @@
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
 {{- $httpPathPrefix := "/metrics" }}
 {{- $alertsPathPrefix := "/alerts" }}
+{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 
@@ -57,8 +58,7 @@ vm-k8s-stack:
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
       extraArgs:
         http.pathPrefix: {{ $httpPathPrefix | quote }}
-        # Expose vmalert via VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
-        # proxy request to vmalert https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#vmalert
+        # Expose alerts in VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
         vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080{{ $alertsPathPrefix }}"
       # enforce restricted PodSecurity on the vmsingle container:
       # runAsNonRoot, seccompProfile, allowPrivilegeEscalation=false,
@@ -92,8 +92,7 @@ vm-k8s-stack:
       annotations:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: >-
-          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd
+        traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
 
   #
   # prometheus-node-exporter
@@ -202,8 +201,7 @@ vm-k8s-stack:
       annotations:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: >-
-          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd
+        traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
 
   defaultRules: # rules for vmalert
     enabled: true
