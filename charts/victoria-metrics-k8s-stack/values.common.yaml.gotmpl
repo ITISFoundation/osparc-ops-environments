@@ -42,7 +42,10 @@ vm-k8s-stack:
         limits:
           cpu: 100m
           memory: 64Mi
+
       # Adding `/admin/tenants` that is missing (a bug)
+      # Remove `unauthorizedUserAccessSpec` completely once the issue
+      # https://github.com/VictoriaMetrics/helm-charts/issues/3153 is solved
       # Copied from https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml#L930-L942
       unauthorizedUserAccessSpec:
         # -- Flag, that allows to disable default VMAuth unauthorized user access config
@@ -391,7 +394,7 @@ vm-k8s-stack:
         enabled: false
 
   #
-  # Components of k8s stack that we don't need (either installed separately or not needed at all)
+  # Rest of k8s stack's components (not used atm)
   #
   vmsingle:
     enabled: false
