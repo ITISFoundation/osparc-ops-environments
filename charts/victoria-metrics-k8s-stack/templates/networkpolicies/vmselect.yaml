@@ -1,5 +1,4 @@
 {{- $stack := index .Values "vm-k8s-stack" -}}
-{{- if dig "vmcluster" "enabled" false $stack }}
 {{- $selectLabels := $stack.vmcluster.spec.vmselect.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
@@ -25,4 +24,3 @@ spec:
         ports:
           - {{ $stack.vmcluster.spec.vmstorage.vmSelectPort }}
           - {{ $stack.vmalert.spec.port }}
-{{- end }}

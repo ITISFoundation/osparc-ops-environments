@@ -1,5 +1,4 @@
 {{- $stack := index .Values "vm-k8s-stack" -}}
-{{- if dig "vmcluster" "enabled" false $stack }}
 {{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
@@ -30,4 +29,3 @@ spec:
       destination:
         ports:
           - {{ .Values.kubernetesApiServerPort }}
-{{- end }}

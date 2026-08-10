@@ -1,6 +1,4 @@
 {{- $stack := index .Values "vm-k8s-stack" -}}
-{{- if dig "vmalert" "enabled" false $stack }}
-
 {{- $labels := $stack.vmalert.spec.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
@@ -39,4 +37,3 @@ spec:
       destination:
         ports:
           - {{ .Values.kubernetesApiServerPort }}
-{{- end }}
