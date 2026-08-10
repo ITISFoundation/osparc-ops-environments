@@ -1,5 +1,7 @@
 # Victoria metrics k8s stack
 
+Main scope: metrics and alerts
+
 Official documentation https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/
 
 ## Stack architecture
