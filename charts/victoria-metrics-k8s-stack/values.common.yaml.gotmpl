@@ -278,7 +278,7 @@ vm-k8s-stack:
         limits:
           cpu: 100m
           memory: 128Mi
-    ingress:
+    ingress: # a separate independent ingress (to access API)
       enabled: true
       ingressClassName: traefik
       hosts:
