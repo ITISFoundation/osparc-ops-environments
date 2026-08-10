@@ -1,9 +1,6 @@
 {{- $replicationFactor := 2 }}
 
 vm-k8s-stack:
-  #
-  # vmagent (scraping metrics)
-  #
   vmagent:
     spec:
       replicaCount: 2
@@ -15,17 +12,12 @@ vm-k8s-stack:
             matchLabels:
               app.simcore.io/name: vmagent
               app.simcore.io/part-of: {{ .Release.Name }}
-  #
-  # vmcluster (highly available)
-  #
+
   vmcluster:
     enabled: true
     spec:
       replicationFactor: {{ $replicationFactor }} # to how many storage nodes the data is replicated
 
-      #
-      # vmstorage: stores metrics and serves them
-      #
       vmstorage:
         replicaCount: {{ sub (mul 2 $replicationFactor) 1 }} # 2*N-1 - VMCluster HA Requirement
         affinity:
@@ -37,9 +29,6 @@ vm-k8s-stack:
                     app.simcore.io/name: vmstorage
                     app.simcore.io/part-of: {{ .Release.Name }}
 
-      #
-      # vmselect: serves reads, queries vmstorage
-      #
       vmselect:
         replicaCount: 2
         topologySpreadConstraints:
@@ -51,9 +40,6 @@ vm-k8s-stack:
                 app.simcore.io/name: vmselect
                 app.simcore.io/part-of: {{ .Release.Name }}
 
-      #
-      # vminsert: receives remote-write and fans out to vmstorage
-      #
       vminsert:
         replicaCount: 2
         topologySpreadConstraints:
