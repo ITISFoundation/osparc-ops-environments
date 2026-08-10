@@ -51,7 +51,7 @@ vm-k8s-stack:
         url_map:
           - src_paths:
               - {{`'{{ .vm.read.path }}/.*'`}}
-              - /admin/tenants # missing in original chart
+              - "/admin/tenants" # missing in original chart
             url_prefix:
               - {{`'{{ urlJoin (omit .vm.read "path") }}/'`}}
           - src_paths:
