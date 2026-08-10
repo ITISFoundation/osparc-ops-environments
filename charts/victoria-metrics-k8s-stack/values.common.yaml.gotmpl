@@ -42,6 +42,22 @@ vm-k8s-stack:
         limits:
           cpu: 100m
           memory: 64Mi
+      # Adding `/admin/tenants` that is missing (a bug)
+      # Copied from https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml#L930-L942
+      unauthorizedUserAccessSpec:
+        # -- Flag, that allows to disable default VMAuth unauthorized user access config
+        disabled: false
+        discover_backend_ips: true
+        url_map:
+          - src_paths:
+              - {{`'{{ .vm.read.path }}/.*'`}}
+              - /admin/tenants # missing in original chart
+            url_prefix:
+              - {{`'{{ urlJoin (omit .vm.read "path") }}/'`}}
+          - src_paths:
+              - {{`'{{ .vm.write.path }}/.*'`}}
+            url_prefix:
+              - {{`'{{ urlJoin (omit .vm.write "path") }}/'`}}
     ingress:
       enabled: true
       ingressClassName: traefik
