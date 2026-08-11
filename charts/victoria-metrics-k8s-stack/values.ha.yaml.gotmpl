@@ -1,19 +1,6 @@
-# use on top of common values
-
-{{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
-{{- $httpPathPrefix := "/metrics" }}
 {{- $replicationFactor := 2 }}
 
 vm-k8s-stack:
-  # the single instance is replaced by the cluster below
-  vmsingle:
-    enabled: false
-    ingress:
-      enabled: false
-
-  #
-  # vmagent (scraping metrics)
-  #
   vmagent:
     spec:
       replicaCount: 2
@@ -25,33 +12,14 @@ vm-k8s-stack:
             matchLabels:
               app.simcore.io/name: vmagent
               app.simcore.io/part-of: {{ .Release.Name }}
-  #
-  # vmcluster (highly available)
-  #
+
   vmcluster:
     enabled: true
     spec:
       replicationFactor: {{ $replicationFactor }} # to how many storage nodes the data is replicated
-      retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
 
-      #
-      # vmstorage: stores metrics and serves them
-      #
       vmstorage:
         replicaCount: {{ sub (mul 2 $replicationFactor) 1 }} # 2*N-1 - VMCluster HA Requirement
-        disableSelfServiceScrape: true # do not scrape vm's own components
-        logLevel: {{ $logLevel }}
-        # enforce restricted PodSecurity on operator-managed containers
-        useStrictSecurity: true
-        port: "8482" # http port (metrics/api)
-        vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
-        vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
-        podMetadata:
-          labels: # labels used by the network policies (templates/networkpolicies)
-            app.simcore.io/name: vmstorage
-            app.simcore.io/part-of: {{ .Release.Name }}
-        nodeSelector:
-          node-role.kubernetes.io/ops: ""
         affinity:
           podAntiAffinity: # enforce that vmstorage pods are not scheduled on the same node
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -60,37 +28,9 @@ vm-k8s-stack:
                   matchLabels:
                     app.simcore.io/name: vmstorage
                     app.simcore.io/part-of: {{ .Release.Name }}
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: "1"
-            memory: 2Gi
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
-              resources:
-                requests:
-                  storage: 50Gi
 
-      #
-      # vmselect: serves reads, queries vmstorage
-      #
       vmselect:
         replicaCount: 2
-        port: "8481" # http port (serves reads)
-        disableSelfServiceScrape: true # do not scrape vm's own components
-        logLevel: {{ $logLevel }}
-        # enforce restricted PodSecurity on operator-managed containers
-        useStrictSecurity: true
-        podMetadata:
-          labels: # labels used by the network policies (templates/networkpolicies)
-            app.simcore.io/name: vmselect
-            app.simcore.io/part-of: {{ .Release.Name }}
-        nodeSelector:
-          node-role.kubernetes.io/ops: ""
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname
@@ -99,30 +39,9 @@ vm-k8s-stack:
               matchLabels:
                 app.simcore.io/name: vmselect
                 app.simcore.io/part-of: {{ .Release.Name }}
-        resources:
-          requests:
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
 
-      #
-      # vminsert: receives remote-write and fans out to vmstorage
-      #
       vminsert:
         replicaCount: 2
-        port: "8480" # http port (receives remote-write)
-        disableSelfServiceScrape: true # do not scrape vm's own components
-        logLevel: {{ $logLevel }}
-        # enforce restricted PodSecurity on operator-managed containers
-        useStrictSecurity: true
-        podMetadata:
-          labels: # labels used by the network policies (templates/networkpolicies)
-            app.simcore.io/name: vminsert
-            app.simcore.io/part-of: {{ .Release.Name }}
-        nodeSelector:
-          node-role.kubernetes.io/ops: ""
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname
@@ -131,58 +50,3 @@ vm-k8s-stack:
               matchLabels:
                 app.simcore.io/name: vminsert
                 app.simcore.io/part-of: {{ .Release.Name }}
-        resources:
-          requests:
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-
-  #
-  # vmauth: fronts the cluster (read + write) and takes over the ingress
-  #
-  vmauth: # fronts the cluster (read + write) and takes over the ingress
-    enabled: true
-    spec:
-      port: "8427"
-      logLevel: {{ $logLevel }}
-      # served under a path prefix on the ingress; makes VMUI links resolve correctly
-      # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
-      extraArgs:
-        http.pathPrefix: {{ $httpPathPrefix | quote }}
-      disableSelfServiceScrape: true # do not scrape vm's own components
-      # enforce restricted PodSecurity on operator-managed containers
-      useStrictSecurity: true
-      podMetadata:
-        labels: # labels used by the network policies (templates/networkpolicies)
-          app.simcore.io/name: vmauth
-          app.simcore.io/part-of: {{ .Release.Name }}
-      nodeSelector:
-        node-role.kubernetes.io/ops: ""
-      resources:
-        requests:
-          cpu: 10m
-          memory: 64Mi
-        limits:
-          cpu: 200m
-          memory: 128Mi
-      configReloaderResources: # limits for config-reloader sidecar (see SECURITY.md)
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          cpu: 100m
-          memory: 64Mi
-    ingress:
-      enabled: true
-      ingressClassName: traefik
-      hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      path: {{ $httpPathPrefix }}
-      pathType: Prefix
-      annotations:
-        traefik.ingress.kubernetes.io/router.tls: "true"
-        traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: >-
-          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd
