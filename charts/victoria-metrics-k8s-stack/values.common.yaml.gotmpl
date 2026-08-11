@@ -167,7 +167,7 @@ vm-k8s-stack:
   #
   # vmagent (scrape metrics and push to vmcluster)
   #
-  vmagent: # scrapes the targets and writes to vmsingle
+  vmagent:
     enabled: true
     spec:
       extraArgs:
@@ -228,9 +228,9 @@ vm-k8s-stack:
       enabled: true
 
   #
-  # kube-state-metrics
+  # kube-state-metrics (cluster metrics about the state of the objects (pods, PVs, etc.))
   #
-  kube-state-metrics: # cluster metrics about the state of the objects (pods, PVs, etc.)
+  kube-state-metrics:
     enabled: true
     fullnameOverride: kube-state-metrics-vm-k8s-stack
     nodeSelector:
@@ -258,13 +258,13 @@ vm-k8s-stack:
           port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }} # kube-state-metrics watches the kubernetes api server
 
   #
-  # kubelet (scrape kubelet metrics)
+  # kubelet (scrape kubelet metrics, e.g. container metrics such as cpu / memory)
   #
-  kubelet: # container metrics (cpu / memory)
+  kubelet:
     enabled: true
 
   #
-  # vmalert (alert rules and states).
+  # vmalert (alert rules and states)
   #
   vmalert:
     enabled: true
