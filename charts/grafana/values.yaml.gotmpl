@@ -1,0 +1,162 @@
+# https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/values.yaml
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  ingress:
+    enabled: true
+  egress:
+    enabled: true
+    ports:
+      - port: 8427 # global read vmauth port of vm distributed
+      - port: 443 # install plugins from outside
+      - port: 6443 # sidecars talk to k8s api server (monitor resources to be imported)
+
+persistence:
+  enabled: true
+  # statefulset is not properly supported — state is not synchronized between replicas
+  type: pvc
+  size: 1Gi
+  storageClassName: {{ requiredEnv "KUBERNETES_STORAGE_CLASS_NAME" | quote }}
+
+resources:
+  limits:
+    cpu: 1
+    memory: 256Mi
+  requests:
+    cpu: 0.1
+    memory: 128Mi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 472
+  runAsGroup: 472
+  fsGroup: 472
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+nodeSelector:
+  ops: "true"
+
+podLabels:
+  app: grafana
+  instance: {{ .Release.Name }}
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app: grafana
+        instance: {{ .Release.Name }}
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  hosts:
+    - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+  path: /grafana
+
+admin:
+  existingSecret: {{ .Release.Name }}-grafana-basic-auth
+  userKey: admin-user
+  passwordKey: admin-password
+
+assertNoLeakedSecrets: true
+
+# writable /tmp required because containerSecurityContext.readOnlyRootFilesystem is true
+extraVolumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  # unified_storage.index_path default is /var/lib/grafana-search/bleve which is outside the PVC
+  - name: grafana-search
+    mountPath: /var/lib/grafana-search
+
+extraVolumes:
+  - name: tmp
+    emptyDir: {}
+  - name: grafana-search
+    emptyDir: {}
+
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: {{ .Release.Name }}-grafana-basic-auth
+      labels:
+        app: grafana
+        instance: {{ .Release.Name }}
+    type: Opaque
+    stringData:
+      admin-user: {{ requiredEnv "SERVICES_USER" }}
+      admin-password: {{ requiredEnv "SERVICES_PASSWORD" }}
+
+initChownData:
+  # runs as root — does not align with restricted pod security standard
+  enabled: false
+
+grafana.ini:
+  server:
+    # https://stackoverflow.com/a/69766805/12124525
+    # https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md#example-ingress-with-path
+    root_url: https://{{ requiredEnv "K8S_MONITORING_FQDN" }}/grafana
+    serve_from_sub_path: true
+  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#log
+  log:
+    # console mode avoids writes to /var/log/grafana (required for readOnlyRootFilesystem)
+    mode: console
+    # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#level
+    level: {{ requiredEnv "GRAFANA_LOG_LEVEL" | lower }}
+
+sidecar:
+  resources:
+    limits:
+      cpu: 0.5
+      memory: 256Mi
+    requests:
+      cpu: 0.1
+      memory: 32Mi
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  dashboards: # https://grafana.com/docs/grafana/v12.4/administration/provisioning/#dashboards
+    enabled: true
+    # configmap-only avoids cluster-wide secret read access in the ClusterRole (KSV-0041)
+    resource: configmap
+    label: grafana_dashboard
+    labelValue: true_string
+    logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
+    searchNamespace: ALL
+    folderAnnotation: "dashboard_folder"
+    provider:
+      # nested folders are not supported https://github.com/grafana/grafana/issues/107158
+      # until this PR is released https://github.com/grafana/grafana/pull/119852
+      foldersFromFilesStructure: true
+      allowUiUpdates: false
+      disableDelete: false
+  datasources: # https://grafana.com/docs/grafana/v12.4/administration/provisioning/#data-sources
+    enabled: true
+    resource: secret
+    label: grafana_datasource
+    labelValue: true_string
+    logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
+    searchNamespace: ALL
+
+plugins:
+  - victoriametrics-metrics-datasource
