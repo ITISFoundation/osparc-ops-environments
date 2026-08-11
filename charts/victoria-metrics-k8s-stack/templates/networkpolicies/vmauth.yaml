@@ -1,0 +1,35 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
+  types: # calico only defaults this on create, so it must be explicit
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmauth.spec.port }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmcluster.spec.vminsert.port }}
+          - {{ $stack.vmcluster.spec.vmselect.port }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}
