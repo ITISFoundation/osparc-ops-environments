@@ -1,3 +1,4 @@
+{{- $grafanaBasicAuthSecretName := "grafana-basic-auth" }}
 # https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/values.yaml
 networkPolicy:
   enabled: true
@@ -55,7 +56,7 @@ ingress:
   path: /grafana
 
 admin:
-  existingSecret: {{ .Release.Name }}-grafana-basic-auth
+  existingSecret: {{ $grafanaBasicAuthSecretName }}
   userKey: admin-user
   passwordKey: admin-password
 
@@ -74,10 +75,10 @@ extraObjects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: {{ .Release.Name }}-grafana-basic-auth
+      name: {{ $grafanaBasicAuthSecretName }}
       labels:
-        app: grafana
-        instance: {{ .Release.Name }}
+        app.kubernetes.io/app: grafana
+        app.kubernetes.io/instance: {{ .Release.Name }}
     type: Opaque
     stringData:
       admin-user: {{ requiredEnv "SERVICES_USER" }}
