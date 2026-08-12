@@ -1,12 +1,14 @@
 # Victoria metrics k8s stack
 
+Main scope: metrics and alerts
+
 Official documentation https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/
 
-## Stack architecture (no HA)
+## Stack architecture
 
 See https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/#overview
 
-## VM Cluster (HA substitute of vm-single)
+## VM Cluster
 
 See Architecture Overview https://docs.victoriametrics.com/victoriametrics/cluster-victoriametrics/#architecture-overview
 
