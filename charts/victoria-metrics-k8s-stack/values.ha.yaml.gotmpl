@@ -145,7 +145,7 @@ vm-k8s-stack:
   vmauth: # fronts the cluster (read + write) and takes over the ingress
     enabled: true
     spec:
-      port: "8427"
+      port: {{ requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" | quote }}
       logLevel: {{ $logLevel }}
       # served under a path prefix on the ingress; makes VMUI links resolve correctly
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints

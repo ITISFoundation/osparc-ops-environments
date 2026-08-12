@@ -2,21 +2,20 @@
 networkPolicy:
   enabled: true
   allowExternal: true
-  ingress:
-    enabled: true
+  ingress: true
   egress:
     enabled: true
     ports:
-      - port: 8427 # global read vmauth port of vm distributed
+      - port: {{ requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" | int }}
       - port: 443 # install plugins from outside
-      - port: 6443 # sidecars talk to k8s api server (monitor resources to be imported)
+      - port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" | int }}
 
 persistence:
   enabled: true
   # statefulset is not properly supported — state is not synchronized between replicas
   type: pvc
   size: 1Gi
-  storageClassName: {{ requiredEnv "KUBERNETES_STORAGE_CLASS_NAME" | quote }}
+  storageClassName: {{ requiredEnv "KUBERNETES_DEFAULT_STORAGE_CLASS_NAME" | quote }}
 
 resources:
   limits:
@@ -44,20 +43,7 @@ containerSecurityContext:
     type: RuntimeDefault
 
 nodeSelector:
-  ops: "true"
-
-podLabels:
-  app: grafana
-  instance: {{ .Release.Name }}
-
-topologySpreadConstraints:
-  - maxSkew: 1
-    topologyKey: kubernetes.io/hostname
-    whenUnsatisfiable: ScheduleAnyway
-    labelSelector:
-      matchLabels:
-        app: grafana
-        instance: {{ .Release.Name }}
+  node-role.kubernetes.io/ops: ""
 
 ingress:
   enabled: true
@@ -79,14 +65,8 @@ assertNoLeakedSecrets: true
 extraVolumeMounts:
   - name: tmp
     mountPath: /tmp
-  # unified_storage.index_path default is /var/lib/grafana-search/bleve which is outside the PVC
-  - name: grafana-search
-    mountPath: /var/lib/grafana-search
-
 extraVolumes:
   - name: tmp
-    emptyDir: {}
-  - name: grafana-search
     emptyDir: {}
 
 extraObjects:
@@ -157,6 +137,10 @@ sidecar:
     labelValue: true_string
     logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
     searchNamespace: ALL
+
+# shadows /usr/share/grafana/data/plugins-bundled with an emptyDir so bundled
+# plugins (e.g. elasticsearch) can be updated on the read-only root filesystem
+shadowBundledPlugins: true
 
 plugins:
   - victoriametrics-metrics-datasource
