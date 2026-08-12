@@ -24,9 +24,10 @@ stringData:
     datasources:
       - name: VictoriaMetrics
         # this plugin needs to be installed in grafana beforehand
-        type: victoriametrics-metrics-datasource
-        uid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}
+        type: {{ .Values.grafanaMetricsDatasourceType }}
+        uid: {{ .Values.grafanaMetricsDatasourceUid }}
         access: proxy
         url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ $port }}{{ $pathPrefix }}/select/0/prometheus/
-        isDefault: true
+        # not default on purpose: dashboards must reference the uid explicitly
+        isDefault: false
         editable: true
