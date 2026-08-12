@@ -1,9 +1,9 @@
 {{- $stack := index .Values "vm-k8s-stack" -}}
-{{- $labels := $stack.vmagent.spec.podMetadata.labels }}
+{{- $labels := $stack.vmalert.spec.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: vmagent-network-policy
+  name: vmalert-network-policy
 spec:
   selector: >-
     app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
@@ -16,11 +16,20 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - {{ $stack.vmagent.spec.port }}
+          - {{ $stack.vmalert.spec.port }}
   egress:
     - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmcluster.spec.vmselect.port }}
+          - {{ $stack.vmcluster.spec.vminsert.port }}
+    - action: Allow
+      protocol: TCP
       destination:
         nets:
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}
