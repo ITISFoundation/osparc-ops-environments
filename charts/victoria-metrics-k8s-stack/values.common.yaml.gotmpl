@@ -6,7 +6,13 @@
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 
+# values for the grafana datasource template (templates/grafana-datasource.yaml)
+grafanaVictoriaMetricsDatasourceUid: "victoria-metrics"
+
 vm-k8s-stack:
+  global:
+    cluster:
+      dnsDomain: cluster.local.
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
   #
   # vmauth: fronts the cluster (read + write) for the outside world

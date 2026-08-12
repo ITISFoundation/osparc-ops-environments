@@ -1,3 +1,9 @@
+{{- $vmauth := index .Values "vm-k8s-stack" "vmauth" }}
+{{- $fullname := index .Values "vm-k8s-stack" "fullnameOverride" }}
+{{- $svcName := printf "vmauth-%s" $fullname }}
+{{- $port := $vmauth.spec.port }}
+{{- $pathPrefix := index $vmauth.spec.extraArgs "http.pathPrefix" }}
+{{- $clusterDomain := index .Values "vm-k8s-stack" "global" "cluster" "dnsDomain" }}
 # https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-datasources
 apiVersion: v1
 kind: Secret
@@ -21,8 +27,6 @@ stringData:
         type: victoriametrics-metrics-datasource
         uid: {{ .Values.grafanaVictoriaMetricsDatasourceUid }}
         access: proxy
-        # https://docs.victoriametrics.com/helm/victoria-metrics-distributed/#how-to-query-data
-        # vmauth CR creates a service named vmauth-<vmauth-name> in the same namespace
-        url: http://vmauth-{{ .Values.vmdistributed.read.global.vmauth.name }}.{{ .Release.Namespace }}.svc.{{ .Values.vmdistributed.global.cluster.dnsDomain }}:{{ .Values.vmdistributed.common.vmauth.spec.port }}/select/0/prometheus/
+        url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ $port }}{{ $pathPrefix }}/select/0/prometheus/
         isDefault: true
         editable: true
