@@ -18,7 +18,7 @@ kind: Secret
 metadata:
   name: my-grafana-datasource
   labels:
-    grafana_datasource: 'true_string'  # key/value from grafana chart values
+    grafana_datasource: 'true_string'  # without this label grafana won't import this datasource
 stringData:
   datasource.yaml: |-
     apiVersion: 1
@@ -42,7 +42,7 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 2. Export dashboard as json file
 3. Replace hardcoded datasource uid/type with `__DS_UID__` / `__DS_TYPE__`
 4. Add config map with dashboard json and special label
-5. When rendering dashboard json datasource uid/type with real values
+5. When rendering dashboard json datasource replace uid/type variables with real values
 
 NOTE: if you have multiple datasources, just use multiple variables. It is fine as long as you replace them at helm render time
 
@@ -71,5 +71,6 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 
 ## Troubleshooting
 
+* Check sidecar settings in values file and see comments to get clues for behaviour in different scenarios
 * Make sure the corresponding ConfigMap / Secret exists in the expected namespace.
 * Check sidecar logs: (see logs of sidecars running inside grafana pod)

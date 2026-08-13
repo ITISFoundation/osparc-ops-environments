@@ -18,6 +18,9 @@ persistence:
   size: 1Gi
   storageClassName: {{ requiredEnv "KUBERNETES_DEFAULT_STORAGE_CLASS_NAME" | quote }}
 
+deploymentStrategy:
+  type: Recreate # needed because of PVC. At most 1 pod shall use PVC at a time
+
 resources:
   limits:
     cpu: 1
@@ -125,7 +128,7 @@ sidecar:
       type: RuntimeDefault
   dashboards: # https://grafana.com/docs/grafana/v12.4/administration/provisioning/#dashboards
     enabled: true
-    # configmap-only avoids cluster-wide secret read access in the ClusterRole (KSV-0041)
+    # configmap-only avoids cluster-wide secret read access in the ClusterRole
     resource: configmap
     label: grafana_dashboard
     labelValue: true_string
@@ -136,10 +139,17 @@ sidecar:
       # nested folders are not supported https://github.com/grafana/grafana/issues/107158
       # until this PR is released https://github.com/grafana/grafana/pull/119852
       foldersFromFilesStructure: true
+      # users can edit IMPORTED dashboards in the UI but cannot save it.
+      # instead grafana offers to export json file (which then can be added
+      # to code and deployed via CI). It does not relate to dashboards
+      # manually created in the UI
       allowUiUpdates: false
+      # imported dashboards still cannot be deleted via the UI. Delete related config map
+      # to actually delete imported dashboard https://github.com/grafana/grafana/issues/41085
       disableDelete: false
   datasources: # https://grafana.com/docs/grafana/v12.4/administration/provisioning/#data-sources
     enabled: true
+    # monitor only secrets
     resource: secret
     label: grafana_datasource
     labelValue: true_string
