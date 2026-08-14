@@ -28,4 +28,5 @@ stringData:
         url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ $port }}{{ $pathPrefix }}/select/0/prometheus/
         # not default on purpose: dashboards must reference the uid explicitly
         isDefault: false
+        # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
         editable: false
