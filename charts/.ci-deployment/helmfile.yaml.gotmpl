@@ -48,12 +48,18 @@ releases:
     values:
       - topolvm/values.yaml.gotmpl
 
+  - name: prometheus-operator-crds
+    namespace: victoria-metrics-operator
+    chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
+    version: 30.0.0
+
   - name: victoria-metrics-operator
     chart: victoria-metrics/victoria-metrics-operator
     version: 0.63.1
     namespace: victoria-metrics-operator
     needs:
       - cert-manager/cert-manager
+      - victoria-metrics-operator/prometheus-operator-crds
     values:
       - victoria-metrics-operator/values.common.yaml.gotmpl
       - victoria-metrics-operator/values.ha.yaml.gotmpl
