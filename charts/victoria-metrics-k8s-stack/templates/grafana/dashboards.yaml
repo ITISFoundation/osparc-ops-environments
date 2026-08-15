@@ -11,8 +11,8 @@
 {{- end -}}
 
 {{- $dashboardContent := .Files.Get $dashboardFilePath
-  | replace "__DS_UID__" .Values.grafanaMetricsDatasourceUid
-  | replace "__DS_TYPE__" .Values.grafanaMetricsDatasourceType -}}
+  | replace "__DS_UID__" .Values.metricsDatasourceUid
+  | replace "__DS_TYPE__" .Values.metricsDatasourceType -}}
 
 apiVersion: v1
 kind: ConfigMap

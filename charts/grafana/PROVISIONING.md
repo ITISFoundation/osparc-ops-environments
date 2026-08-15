@@ -25,7 +25,7 @@ stringData:
     datasources:
       - name: VictoriaMetrics
         type: {{ .Values.grafanaMetricsDatasourceType }}
-        uid: {{ .Values.grafanaMetricsDatasourceUid }}
+        uid: {{ .Values.metricsDatasourceUid }}
         access: proxy
         url: http://...
         isDefault: false

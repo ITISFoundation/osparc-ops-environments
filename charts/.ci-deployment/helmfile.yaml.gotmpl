@@ -77,8 +77,7 @@ releases:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
 
   - name: grafana
-    chart: oci://ghcr.io/grafana-community/helm-charts/grafana
-    version: 12.4.4
+    chart: ./grafana
     namespace: grafana
     values:
       - grafana/values.yaml.gotmpl

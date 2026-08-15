@@ -1,0 +1,16 @@
+apiVersion: v2
+name: grafana
+description: >-
+  A wrapper around the community Grafana helm chart.
+  It adds dashboard ConfigMaps with templated datasource UIDs.
+
+type: application
+
+version: 0.0.1 # unused
+
+appVersion: 0.0.1 # unused
+
+dependencies:
+  - name: grafana
+    version: 12.4.4
+    repository: "oci://ghcr.io/grafana-community/helm-charts"
