@@ -48,12 +48,22 @@ releases:
     values:
       - topolvm/values.yaml.gotmpl
 
+  - name: prometheus-operator-crds
+    namespace: victoria-metrics-operator
+    chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
+    # the version shall be dictated by victoria metrics operator
+    # but then we cannot manage it with renovate and most likely
+    # it will get out-of-sync. We just use latest version for now.
+    # See https://github.com/VictoriaMetrics/helm-charts/issues/3155
+    version: 30.0.0
+
   - name: victoria-metrics-operator
     chart: victoria-metrics/victoria-metrics-operator
     version: 0.64.1
     namespace: victoria-metrics-operator
     needs:
       - cert-manager/cert-manager
+      - victoria-metrics-operator/prometheus-operator-crds
     values:
       - victoria-metrics-operator/values.common.yaml.gotmpl
       - victoria-metrics-operator/values.ha.yaml.gotmpl
