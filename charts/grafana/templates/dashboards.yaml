@@ -5,7 +5,8 @@
 {{- $name := (trimSuffix (ext $fileName) $fileName) | replace "_" "-" -}}
 
 {{- $content := .Files.Get $path
-  | replace "__DS_UID__" .Values.metricsDatasourceUid -}}
+  | replace "__DS_UID__" .Values.metricsDatasourceUid
+  | replace "__DS_TYPE__" .Values.metricsDatasourceType -}}
 
 apiVersion: v1
 kind: ConfigMap

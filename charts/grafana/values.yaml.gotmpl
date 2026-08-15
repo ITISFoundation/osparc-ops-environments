@@ -4,6 +4,7 @@
 {{- $grafanaPathPrefix := "grafana" }}
 
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
 grafana:
   networkPolicy:
