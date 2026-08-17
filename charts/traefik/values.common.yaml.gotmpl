@@ -42,11 +42,10 @@ traefik:
   additionalArguments:
   - "--api.insecure=true" # required to expose dashboard
 
-  logs:
-    general:
-      level: INFO
-    access:
-      enabled: false
+  log:
+    level: INFO
+  accessLog:
+    enabled: false
 
   service:
     # we use traefik via hostPorts only
