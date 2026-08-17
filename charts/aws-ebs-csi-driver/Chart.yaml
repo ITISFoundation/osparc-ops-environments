@@ -12,5 +12,5 @@ appVersion: "1.0.0" # not really used. see dependency version
 
 dependencies:
   - name: aws-ebs-csi-driver
-    version: 2.61.1
+    version: 2.62.0
     repository: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
