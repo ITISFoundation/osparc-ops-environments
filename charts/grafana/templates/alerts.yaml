@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: grafana-health
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+spec:
+  groups:
+    - name: grafana-health
+      rules:
+        # Recorded before the alerts below, since rules within a group evaluate in order.
+        # The `> 0` on the denominator drops idle datasources from the division so the
+        # trailing `or` can supply a 0 ratio, both for zero traffic and for zero errors.
+        - record: datasource:grafana_datasource_request_errors:ratio_rate5m
+          expr: |
+            (
+              sum by (datasource) (rate(grafana_datasource_request_total{code!~"[23].."}[5m]))
+              /
+              (sum by (datasource) (rate(grafana_datasource_request_total[5m])) > 0)
+            )
+            or
+            0 * sum by (datasource) (rate(grafana_datasource_request_total[5m]))
+
+        - alert: GrafanaDatasourceRequestMetricAbsent
+          expr: absent(grafana_datasource_request_total{code=~"[12345].."})
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: grafana_datasource_request_total absent or missing 'code' label
+
+        - alert: GrafanaDatasourceTooManyErrors
+          expr: datasource:grafana_datasource_request_errors:ratio_rate5m > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Datasource {{ "{{ $labels.datasource }}" }} error ratio >5%"
