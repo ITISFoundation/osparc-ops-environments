@@ -5,6 +5,8 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
     app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 spec:
   groups:
     - name: grafana-health
@@ -20,5 +22,7 @@ spec:
         - alert: DatasourceTooManyErrors
           expr: sum by (datasource) (increase(grafana_datasource_request_total{code=~"[45].."}[5m])) > 0
           for: 15m
+          labels:
+            severity: warning
           annotations:
             summary: "Datasource {{`{{ $labels.datasource }}`}} returning errors"

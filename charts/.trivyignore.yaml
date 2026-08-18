@@ -330,7 +330,7 @@ misconfigurations:
   #
   - id: AVD-KSV-0041
     paths:
-      - "grafana/templates/clusterrole.yaml"
+      - "grafana/charts/grafana/templates/clusterrole.yaml"
     statement: >
       The datasource sidecar reads provisioning secrets (resource: secret)
       because datasource configs contain credentials. This requires cluster-wide
