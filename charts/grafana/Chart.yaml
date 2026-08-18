@@ -2,7 +2,8 @@ apiVersion: v2
 name: grafana
 description: >-
   A wrapper around the community Grafana helm chart.
-  It adds dashboard ConfigMaps with templated datasource UIDs.
+  It adds custom resources like dashboards config maps
+  or alerts.
 
 type: application
 
