@@ -7,7 +7,7 @@ The Grafana sidecar watches Kubernetes resources (across namespaces — see `sea
 ### Rules
 
 1. Explicitly define datasource `uid` and `type`.
-2. Store uid & type in chart values so dashboards can reference them.
+2. Store uid & type in chart values so dashboards can reference them (most likely needs saving in repo config)
 3. Set `isDefault: false` — dashboards must reference the datasource explicitly.
 
 ### Example (Helm template)
@@ -24,7 +24,7 @@ stringData:
     apiVersion: 1
     datasources:
       - name: VictoriaMetrics
-        type: {{ .Values.grafanaMetricsDatasourceType }}
+        type: {{ .Values.metricsDatasourceType }}
         uid: {{ .Values.metricsDatasourceUid }}
         access: proxy
         url: http://...
