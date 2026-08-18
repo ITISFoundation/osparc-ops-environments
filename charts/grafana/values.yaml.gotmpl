@@ -105,7 +105,7 @@ grafana:
   grafana.ini:
     server:
       # https://stackoverflow.com/a/69766805/12124525
-      # https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md#example-ingress-with-path
+      # https://github.com/grafana-community/helm-charts/tree/grafana-12.4.4/charts/grafana#how-to-serve-grafana-with-a-path-prefix-grafana
       root_url: http://localhost:3000/{{ $grafanaPathPrefix }}
       serve_from_sub_path: true
     # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#log
