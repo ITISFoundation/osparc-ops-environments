@@ -3,6 +3,12 @@
 {{- $webhookPort := 9443 }}
 {{- $servicePort := 8080 }}
 
+env:
+  # https://github.com/VictoriaMetrics/operator/issues/2270
+  # https://github.com/VictoriaMetrics/operator/pull/2442
+  - name: VM_PROMCR_VALIDATION_ENABLED
+    value: "true"
+
 operator:
   # converts prometheus-operator objects into victoria-metrics-operator ones
   # https://docs.victoriametrics.com/operator/integrations/prometheus/#objects-conversion
