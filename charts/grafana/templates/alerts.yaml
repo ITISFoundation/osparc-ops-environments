@@ -9,20 +9,7 @@ spec:
   groups:
     - name: grafana-health
       rules:
-        # Recorded before the alerts below, since rules within a group evaluate in order.
-        # The `> 0` on the denominator drops idle datasources from the division so the
-        # trailing `or` can supply a 0 ratio, both for zero traffic and for zero errors.
-        - record: datasource:grafana_datasource_request_errors:ratio_rate5m
-          expr: |
-            (
-              sum by (datasource) (rate(grafana_datasource_request_total{code!~"[23].."}[5m]))
-              /
-              (sum by (datasource) (rate(grafana_datasource_request_total[5m])) > 0)
-            )
-            or
-            0 * sum by (datasource) (rate(grafana_datasource_request_total[5m]))
-
-        - alert: GrafanaDatasourceRequestMetricAbsent
+        - alert: DatasourceRequestTotalMetricAbsent
           expr: absent(grafana_datasource_request_total{code=~"[12345].."})
           for: 15m
           labels:
@@ -30,10 +17,8 @@ spec:
           annotations:
             summary: grafana_datasource_request_total absent or missing 'code' label
 
-        - alert: GrafanaDatasourceTooManyErrors
-          expr: datasource:grafana_datasource_request_errors:ratio_rate5m > 0.05
-          for: 5m
-          labels:
-            severity: warning
+        - alert: DatasourceTooManyErrors
+          expr: sum by (datasource) (increase(grafana_datasource_request_total{code=~"[45].."}[5m])) > 0
+          for: 15m
           annotations:
-            summary: "Datasource {{ "{{ $labels.datasource }}" }} error ratio >5%"
+            summary: "Datasource {{`{{ $labels.datasource }}`}} returning errors"
