@@ -16,7 +16,7 @@ scrape_configs:
         filters:
           - name: "tag:io.simcore.instance-role"
             values: ["autoscaled-computational"]
-          - name: "tag:role"
+          - name: "tag:io.simcore.clusters-keeper.role"
             values: ["manager"]
     basic_auth:
       username: ${PRIMARY_EC2_INSTANCES_PROMETHEUS_USERNAME}
