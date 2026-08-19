@@ -1,10 +1,11 @@
+# https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/README.md#sidecar-for-datasources
 {{- $vmauth := index .Values "vm-k8s-stack" "vmauth" }}
 {{- $fullname := index .Values "vm-k8s-stack" "fullnameOverride" }}
 {{- $svcName := printf "vmauth-%s" $fullname }}
 {{- $port := $vmauth.spec.port }}
 {{- $pathPrefix := index $vmauth.spec.extraArgs "http.pathPrefix" }}
 {{- $clusterDomain := index .Values "vm-k8s-stack" "global" "cluster" "dnsDomain" }}
-# https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-datasources
+
 apiVersion: v1
 kind: Secret
 metadata:
@@ -26,7 +27,9 @@ stringData:
         uid: {{ .Values.metricsDatasourceUid }}
         access: proxy
         url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ $port }}{{ $pathPrefix }}/select/0/prometheus/
-        # not default on purpose: dashboards must reference the uid explicitly
-        isDefault: false
+        # historically, this is 1st datasource in grafana. Grafana sets
+        # first datasource automatically to be default. So, isDefault setting
+        # is not respected in this case
+        isDefault: true
         # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
         editable: false
