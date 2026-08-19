@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["helpers:pinGitHubActionDigests"],
+  "schedule": ["* 0-4 * * *"],
+  "labels": ["renovate"],
+  "minimumReleaseAge": "60 days",
+  "dependencyDashboard": true,
+  "enabledManagers": ["helmv3", "helmfile", "github-actions"],
+  "helmfile": {
+    "managerFilePatterns": [
+      "/(^|/)helmfile\\.ya?ml$/",
+      "/(^|/)helmfile\\.simcore\\.ya?ml$/"
+    ]
+  }
+}

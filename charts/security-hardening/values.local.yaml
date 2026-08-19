@@ -1,0 +1,7 @@
+vapContainerResourceLimits:
+  excludedNamespaces:
+    - kube-system
+    - calico-system # installed for local cluster only
+    - tigera-operator # installed for local cluster only
+    - calico-apiserver # installed for local cluster only
+    - local-path-storage # installed for local cluster only

@@ -2,7 +2,7 @@
 REPO_BASE_DIR := $(shell git rev-parse --show-toplevel)
 
 include ${REPO_BASE_DIR}/scripts/common.Makefile
-include $(REPO_CONFIG_LOCATION)
+include ${REPO_BASE_DIR}/charts/.tools.Makefile
 
 #
 # Vars
@@ -12,28 +12,23 @@ export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
 # Example of usage:
-# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector app=adminer'
+# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector name=traefik'
 HELMFILE_EXTRA_ARGS ?=
 HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 
 CHART_TEMPLATE_DIR := $(REPO_BASE_DIR)/charts/.template
 CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
 
+TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
+
 #
 # Helpers
 #
 
-.PHONY: .check-helmfile-installed
-.check-helmfile-installed: ## Checks if helmfile is installed
-	@if ! command -v helmfile >/dev/null 2>&1; then \
-			echo "'helmfile' is not installed. Install it to continue ...";\
-	fi
-
-
 .PHONY: .helmfile-%
-.helmfile-%: .check-helmfile-installed helmfile.yaml
+.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) -f $(REPO_BASE_DIR)/charts/helmfile.yaml $*
+	$(HELMFILE) -f $(word 2,$^) $*
 
 .PHONY: add-new-chart-directory-from-template
 add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart directory with standard structure
@@ -49,11 +44,17 @@ add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart
 # Artifacts
 #
 
-helmfile.yaml: simcore-charts/helmfile.yaml ## Copies the helmfile.yaml to the charts directory
-	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml
+helmfile.yaml.gotmpl: simcore-charts/helmfile.yaml
+	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml.gotmpl
 
 simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts directory
 	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
+
+$(TRIVY_TEMPLATES_DIR):
+	# generate helm templates for trivy scanning
+	@rm -rf $(TRIVY_TEMPLATES_DIR)
+	@$(MAKE) --no-print-directory helmfile-template \
+		HELMFILE_EXTRA_ARGS="--output-dir $(TRIVY_TEMPLATES_DIR) --output-dir-template={{.OutputDir}}"
 
 #
 # Public / Exposed targets
@@ -74,5 +75,16 @@ helmfile-lint: .helmfile-lint ## Lint apps
 .PHONY: helmfile-sync
 helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unless you know why)
 
-.PHONY: helmfile-delete
-helmfile-delete: .helmfile-delete ## Delete the helmfile configuration
+.PHONY: helmfile-destroy
+helmfile-destroy: .helmfile-destroy ## Delete the helmfile configuration
+
+.PHONY: trivy-scan
+trivy-scan: $(TRIVY_TEMPLATES_DIR) .verify-trivy-installation
+trivy-scan: ## Scan rendered helm templates for vulnerabilities
+	# Scan templates with trivy
+	@trivy config \
+		--config-data $(REPO_BASE_DIR)/charts/.trivy-config \
+		--ignorefile $(REPO_BASE_DIR)/charts/.trivyignore.yaml \
+		--severity MEDIUM,HIGH,CRITICAL \
+		--exit-code 1 \
+		$(TRIVY_TEMPLATES_DIR)

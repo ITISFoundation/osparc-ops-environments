@@ -1,0 +1,69 @@
+name: Code static analysis
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  merge_group: # necessary when adding a PR to a merge queue
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6  # defaults to .python-version
+
+      - name: Show python version
+        run: python --version
+
+      - name: Run pre-commit
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+
+  helmfile-static-checks:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup helmfile
+        uses: ./.github/actions/setup-helmfile
+
+      - name: Lint helmfile
+        run: make --directory ./charts helmfile-lint
+
+      - name: Render helmfile templates
+        run: make --directory ./charts helmfile-template
+
+  trivy-scan-charts:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup helmfile
+        uses: ./.github/actions/setup-helmfile
+
+      - name: Install trivy # https://github.com/aquasecurity/setup-trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          # tracked by renovate via github actions
+          # see list of supported `with version` actions
+          # https://docs.renovatebot.com/modules/manager/github-actions/#withversion-support-for-built-in-actions
+          # NOTE: keep in sync with trivy version in makefile
+          version: v0.71.2
+
+      - name: Run trivy scan
+        run: make --directory ./charts trivy-scan

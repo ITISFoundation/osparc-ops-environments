@@ -10,6 +10,7 @@ repos:
         args: ["--maxkb=499"] # ensures docker config compatability for all files
       - id: check-merge-conflict
       - id: check-yaml
+        args: ["--allow-multiple-documents"]
         exclude: ^(.*.go.yml)|(.*.template.y*ml)$|^charts/
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -114,10 +115,15 @@ repos:
         always_run: true
         language: script
         files: '^(.*)\/services\/simcore/(docker-compose.*\.y([a])?ml)$'
-      - id: helm-update-dependencies
+      - id: helm-dependency-update
         name: Helm Dependency Update
-        description: Make sure all Chart.lock files are up-to-date
-        entry: bash -c 'find . -name Chart.yaml -exec dirname {} \; | xargs -t -I% helm dependency update %'
+        description: Make sure Chart.lock files are up-to-date for changed charts
+        entry: bash -c 'set -e; for f; do helm dependency update "$(dirname "$f")"; done' --
         language: system
-        files: ^charts/
+        files: ^charts/.*/Chart\.ya?ml$
+      - id: helmfile-ci-coverage
+        name: Verify that CI helmfile.yaml covers all charts
+        entry: scripts/pre-commit-hooks/check-helmfile-ci-coverage.sh
+        language: system
         pass_filenames: false
+        files: ^charts/

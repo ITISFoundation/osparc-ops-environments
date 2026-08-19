@@ -118,6 +118,8 @@ services:
     extra_hosts: []
 
   api-worker:
+    networks:
+      - monitored # required to allow for api-worker <--> chat-backend communication
     deploy:
       replicas: ${SIMCORE_API_WORKER_REPLICAS}
       update_config:

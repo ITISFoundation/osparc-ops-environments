@@ -1,0 +1,52 @@
+{{- $replicationFactor := 2 }}
+
+vm-k8s-stack:
+  vmagent:
+    spec:
+      replicaCount: 2
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.simcore.io/name: vmagent
+              app.simcore.io/part-of: {{ .Release.Name }}
+
+  vmcluster:
+    enabled: true
+    spec:
+      replicationFactor: {{ $replicationFactor }} # to how many storage nodes the data is replicated
+
+      vmstorage:
+        replicaCount: {{ sub (mul 2 $replicationFactor) 1 }} # 2*N-1 - VMCluster HA Requirement
+        affinity:
+          podAntiAffinity: # enforce that vmstorage pods are not scheduled on the same node
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.simcore.io/name: vmstorage
+                    app.simcore.io/part-of: {{ .Release.Name }}
+
+      vmselect:
+        replicaCount: 2
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app.simcore.io/name: vmselect
+                app.simcore.io/part-of: {{ .Release.Name }}
+
+      vminsert:
+        replicaCount: 2
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app.simcore.io/name: vminsert
+                app.simcore.io/part-of: {{ .Release.Name }}

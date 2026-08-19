@@ -37,6 +37,21 @@ echo "Creating a local Kubernetes cluster named '$KIND_CLUSTER_NAME' using confi
 kind create cluster --config "$KIND_CONFIG_FILE" --name "$KIND_CLUSTER_NAME"
 
 #
+# apply node-role labels
+#
+
+# node-role.kubernetes.io/* labels cannot be self-assigned by the kubelet
+# (NodeRestriction admission), so they must be set via the API after creation.
+# see https://github.com/kubernetes-sigs/kind/issues/3536
+
+echo "Applying node-role labels ..."
+
+kubectl label node --all \
+    node-role.kubernetes.io/ops="" \
+    node-role.kubernetes.io/simcore=""
+
+#
+#
 # install Calico network CNI
 #
 
@@ -49,9 +64,20 @@ kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2
 
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/custom-resources.yaml
 
-while ! kubectl get pods -A -l k8s-app=calico-node 2>/dev/null | grep --quiet "Running"; do echo "Waiting for Calico pods to start..."; sleep 1; done
+while ! kubectl get pods -A -l k8s-app=calico-node 2>/dev/null | grep --quiet "Running"; do
+    echo "[$(date)] Waiting for Calico pods to start...";
+    sleep 1;
+done
 
 while ! kubectl api-resources --api-group=projectcalico.org | grep --ignore-case networkpolicy >/dev/null 2>&1; do
-    echo "Waiting for Calico API resources to be available (e.g. NetworkPolicy)..."
+    echo "[$(date)] Waiting for Calico API resources to be available (e.g. NetworkPolicy)..."
     sleep 1
 done
+
+#
+# network policies for kind-only namespaces (local-path-storage, calico-system, tigera-operator)
+#
+
+echo "Applying local cluster network policies ..."
+
+kubectl apply -f "$THIS_SCRIPT_DIR/local_k8s_cluster_network_policies.yaml"

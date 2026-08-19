@@ -1,0 +1,16 @@
+name: Setup helmfile with CI config
+description: Configure .config.location for CI and install helmfile
+
+runs:
+  using: composite
+  steps:
+    - name: Configure config location
+      shell: bash
+      run: echo $(realpath charts/.ci-deployment/repo.config) > .config.location
+
+    - name: Install helmfile
+      uses: helmfile/helmfile-action@daefb3e1fa5a91b7a88d30870d20da4896944818 # v2.4.5
+      with:
+        helmfile-version: v1.1.0 # keep in sync with charts/Makefile and version in running clusters
+        helmfile-auto-init: 'true'
+        helmfile-args: --version

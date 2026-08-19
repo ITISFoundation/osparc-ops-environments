@@ -1,0 +1,2 @@
+# needed for CI. helmfile.simcore.yaml is copied to this directory.
+# if directory does not exist, copy fail as well as CI Job

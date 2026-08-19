@@ -1,0 +1,337 @@
+misconfigurations:
+  #
+  # global (for all charts and templates)
+  #
+  - id: AVD-KSV-0038 # Error: Network policy should uses podSelector and/or the namespaceSelector ...
+    statement: >
+      We use Calico NetworkPolicy (projectcalico.org/v3) which uses `selector`
+      instead of the native `podSelector` field. Trivy only understands the
+      Kubernetes-native NetworkPolicy schema and reports a false positive
+      To avoid having the same exception repated in every chart, we make it global
+
+  #
+  # cert-manager
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+      - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
+    statement: >
+      cert-manager must manage Secrets to store issued certificates and CA
+      private keys. These permissions are defined by the upstream chart and
+      cannot be narrowed without breaking certificate issuance.
+
+  - id: AVD-KSV-0113
+    paths:
+      - "cert-manager/charts/cert-manager/templates/webhook-rbac.yaml"
+    statement: >
+      The cert-manager webhook manages its own dynamic serving-certificate
+      Secret within its namespace. Required by the upstream chart.
+
+  - id: AVD-KSV-0114
+    paths:
+      - "cert-manager/charts/cert-manager/templates/cainjector-rbac.yaml"
+    statement: >
+      The cainjector must create/update mutating and validating webhook
+      configurations to inject CA bundles. This is its core function.
+
+  - id: AVD-KSV-0048
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+    statement: >
+      The ACME challenge controller creates solver Pods/Jobs for HTTP01
+      challenges. Granted by the upstream ClusterRole regardless of the solver
+      type actually used.
+
+  - id: AVD-KSV-0056
+    paths:
+      - "cert-manager/charts/cert-manager/templates/rbac.yaml"
+    statement: >
+      The ACME challenge controller manages Services/Ingresses/NetworkPolicies
+      for HTTP01 solvers. Granted by the upstream ClusterRole and cannot be
+      narrowed.
+
+  #
+  # traefik
+  #
+  - id: KSV-0024
+    paths:
+      - "traefik/charts/traefik/templates/daemonset.yaml"
+    statement: >
+      Traefik listens on hostPorts of the nodes. This is done for simplicity.
+
+  - id: KSV-0041
+    paths:
+      - "traefik/charts/traefik/templates/rbac/clusterrole.yaml"
+    statement: >
+      Traefik needs to manages see secrets to manage middlewares or other resources.
+
+  #
+  # aws-ebs-csi-driver
+  #
+
+  - id: AVD-KSV-0001
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The ebs-plugin node container runs as privileged (required to attach EBS
+      block devices and perform mount/format operations on the host). The
+      Kubernetes API server rejects the combination `privileged: true` with
+      `allowPrivilegeEscalation: false`, so this control cannot be enforced
+      for this container.
+
+  - id: AVD-KSV-0012
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The CSI node containers (ebs-plugin, liveness-probe, node-driver-registrar)
+      must run as root to bind the CSI unix socket in the kubelet plugin
+      directory and to mount block devices on the host.
+
+  - id: AVD-KSV-0017
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The ebs-plugin node container must be privileged to attach EBS block
+      devices and to perform mount/format operations on the host.
+
+  - id: AVD-KSV-0023
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      The CSI node DaemonSet must mount kubelet directories as hostPath volumes
+      so the kubelet can discover the driver and use volumes it publishes.
+
+  - id: AVD-KSV-0121
+    paths:
+      - "aws-ebs-csi-driver/charts/aws-ebs-csi-driver/templates/node.yaml"
+    statement: >
+      /dev must be mounted from the host so the driver can attach EBS volumes
+      as block devices to the node.
+
+  #
+  # topolvm
+  #
+  - id: AVD-KSV-0001
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The topolvm-node and lvmd containers must run with `privileged: true` to
+      access block devices, perform LVM ioctls, and mount volumes on the host;
+      privileged implies `allowPrivilegeEscalation`. The csi-registrar and
+      liveness-probe sidecars in the node DaemonSet have no securityContext
+      block exposed by the upstream chart, so this control cannot be enforced
+      via values.
+
+  - id: AVD-KSV-0010
+    paths:
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The lvmd DaemonSet sets `hostPID: true` in the upstream chart to interact
+      with LVM subsystems on the host. This is hardcoded in the template and
+      cannot be disabled without patching upstream.
+
+  - id: AVD-KSV-0012
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The topolvm-node and lvmd containers must run as root to perform LVM
+      ioctls and manage block devices via CSI. The csi-registrar and
+      liveness-probe sidecars in the node DaemonSet have no container-level
+      securityContext exposed by the upstream chart, so `runAsNonRoot` cannot
+      be enforced there either.
+
+  - id: AVD-KSV-0014
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/controller/deployment.yaml"
+    statement: >
+      The upstream chart hardcodes the container-level securityContext for the
+      controller containers (topolvm-controller and the CSI sidecars) and does
+      not expose it at all for the node CSI sidecars, so `readOnlyRootFilesystem`
+      cannot be set from values. For the privileged topolvm-node and lvmd
+      containers we keep the writable root filesystem for parity with the
+      upstream defaults and their runtime write needs (LVM tooling, socket
+      creation).
+
+  - id: AVD-KSV-0017
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The topolvm-node and lvmd containers require `privileged: true` to
+      attach/detach block devices, perform LVM operations, and mount volumes on
+      the host. This is inherent to how the CSI driver operates on the node.
+
+  - id: AVD-KSV-0023
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The CSI node driver must mount kubelet plugin directories, the pod
+      volumes directory, and `/dev` (and `/run/topolvm` for lvmd) as hostPath
+      volumes so that the kubelet can discover the driver and so that volumes
+      published by the driver are visible on the host.
+
+  - id: AVD-KSV-0048
+    paths:
+      - "topolvm/charts/topolvm/templates/controller/clusterroles.yaml"
+    statement: >
+      The topolvm-controller needs write access to workload resources (pods,
+      deployments, statefulsets, etc.) because CSI storage-capacity tracking
+      and PVC controller logic set owner references and update finalizers on
+      those objects. Granted by the upstream ClusterRole.
+
+  - id: AVD-KSV-0049
+    paths:
+      - "topolvm/charts/topolvm/templates/controller/roles.yaml"
+    statement: >
+      The topolvm-controller uses the standard Kubernetes leader-election
+      mechanism, which requires create/update/patch/delete on the coordination
+      configmap in its own namespace. Granted by the upstream leader-election
+      Role.
+
+  - id: AVD-KSV-0118
+    paths:
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      The lvmd DaemonSet template in the upstream chart does not render a
+      pod-level securityContext block, so a non-default pod securityContext
+      cannot be set via values. The lvmd container itself runs privileged as
+      required for LVM operations on the host.
+
+  - id: AVD-KSV-0121
+    paths:
+      - "topolvm/charts/topolvm/templates/node/daemonset.yaml"
+      - "topolvm/charts/topolvm/templates/lvmd/daemonset.yaml"
+    statement: >
+      Mounting `/dev` from the host is required so that the CSI driver and
+      lvmd can attach EBS/local block devices and manage LVM logical volumes
+      as block devices on the node.
+
+  #
+  # victoria-metrics-operator
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator must manage Secrets to store TLS material for the admission
+      webhook and for the VictoriaMetrics components it reconciles. Granted by
+      the upstream ClusterRole and cannot be narrowed without breaking the
+      operator.
+
+  - id: AVD-KSV-0045
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The upstream ClusterRole grants wildcard verbs on the resources the
+      operator reconciles (core, apps and rbac objects for its managed
+      components). Defined by the upstream chart and required for reconciliation.
+
+  - id: AVD-KSV-0046
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator needs full access to `monitoring.coreos.com` resources to
+      convert prometheus-operator objects into VictoriaMetrics ones. Granted by
+      the upstream ClusterRole.
+
+  - id: AVD-KSV-0048
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator creates and manages workload resources (Deployments,
+      StatefulSets, DaemonSets, …) for the VictoriaMetrics components it
+      reconciles. Granted by the upstream ClusterRole.
+
+  - id: AVD-KSV-0049
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator manages ConfigMaps holding the generated configuration of the
+      VictoriaMetrics components it reconciles. Granted by the upstream
+      ClusterRole.
+
+  - id: AVD-KSV-0050
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator manages Roles/RoleBindings/ClusterRoles for the service
+      accounts of the components it reconciles. Granted by the upstream
+      ClusterRole and required for reconciliation.
+
+  - id: AVD-KSV-0056
+    paths:
+      - "victoria-metrics-operator/templates/role.yaml"
+    statement: >
+      The operator manages Services, Endpoints and Ingresses for the
+      VictoriaMetrics components it reconciles. Granted by the upstream
+      ClusterRole.
+
+  #
+  # victoria-metrics-k8s-stack
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/kube-state-metrics/templates/role.yaml"
+    statement: >
+      kube-state-metrics needs cluster-wide list/watch on Secrets to expose
+      metrics about them (kube_secret_*). It never reads secret data, only
+      metadata. Granted by the upstream chart's default collector set.
+
+  - id: AVD-KSV-0009
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      node-exporter uses hostNetwork so it can bind to the node IP and expose
+      accurate per-node network statistics. This is the upstream default and
+      required for node-level metric collection.
+
+  - id: AVD-KSV-0010
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      node-exporter uses hostPID to read host process information from /proc
+      for its node-level metrics. This is the upstream default and required for
+      accurate host metric collection.
+
+  - id: AVD-KSV-0023
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      node-exporter must mount host paths (/proc, /sys, /) as hostPath volumes
+      to read kernel and hardware metrics from the node. This is inherent to
+      how node-exporter operates.
+
+  - id: AVD-KSV-0121
+    paths:
+      - "victoria-metrics-k8s-stack/charts/vm-k8s-stack/charts/prometheus-node-exporter/templates/daemonset.yaml"
+    statement: >
+      Mounting the critical host paths /, /proc and /sys (read-only) is
+      required so node-exporter can collect filesystem, kernel and hardware
+      metrics from the node.
+
+  - id: AVD-KSV-0038
+    paths:
+      - "victoria-metrics-k8s-stack/templates/networkpolicies/vmagent-scraper.yaml"
+      - "victoria-metrics-k8s-stack/templates/networkpolicies/vmsingle.yaml"
+    statement: >
+      These are Calico NetworkPolicies (projectcalico.org/v3) which use the
+      `selector` field instead of the native `podSelector`. Trivy only
+      understands the Kubernetes-native NetworkPolicy schema and reports a
+      false positive.
+
+  #
+  # grafana
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "grafana/charts/grafana/templates/clusterrole.yaml"
+    statement: >
+      The datasource sidecar reads provisioning secrets (resource: secret)
+      because datasource configs contain credentials. This requires cluster-wide
+      secret read access (get, watch, list) in the ClusterRole.

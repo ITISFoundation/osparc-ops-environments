@@ -1,13 +1,13 @@
 ## How to delete volumes with `recalimPolicy: retain`
-1. Delete pvc:
-```
-kubectl delete pvc <pvc-name>
-```
+1. Delete pvc (happens automatically when deleting PVC's namespace)
+    ```
+    kubectl delete pvc <pvc-name>
+    ```
 
 2. Verify PV is `released`
-```
-kubectl get pv <pv-name>
-```
+    ```
+    kubectl get pv <pv-name>
+    ```
 
 3. Manually remove EBS in AWS
     1. Go to AWS GUI and List EBS Volumes
@@ -17,12 +17,18 @@ kubectl get pv <pv-name>
     1. Delete EBS Volume
 
 4. Delete the PV
-```
-kubectl delete pv <pv-name>
-```
+    ```
+    kubectl delete pv <pv-name>
+    ```
 
 5. Remove Finalizers (if necessary)
 If the PV remains in a Terminating state, remove its finalizers:
-```
-kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'
-```
+    ```
+    kubectl patch pv <pv-name> -p '{"metadata":{"finalizers":null}}'
+    ```
+
+## How to resize volume
+
+Change `requests.storage` value and deploy.
+
+Warning: only increasing volume size is supported

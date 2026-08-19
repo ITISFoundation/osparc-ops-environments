@@ -1,0 +1,425 @@
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml
+{{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
+{{- $httpPathPrefix := "/metrics" }}
+{{- $alertsPathPrefix := "/alerts" }}
+{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
+
+vm-k8s-stack:
+  fullnameOverride: vm-k8s-stack # by default names are long and redundant
+
+  global:
+    cluster:
+      dnsDomain: cluster.local.
+
+  #
+  # vmauth: fronts the cluster (read + write) for the outside world
+  #
+  vmauth:
+    enabled: true
+    spec:
+      port: "8427"
+      logLevel: {{ $logLevel }}
+      # served under a path prefix on the ingress; makes VMUI links resolve correctly
+      # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
+      extraArgs:
+        http.pathPrefix: {{ $httpPathPrefix | quote }}
+      # enforce restricted PodSecurity on operator-managed containers
+      useStrictSecurity: true
+      podMetadata:
+        labels: # labels used by the network policies (templates/networkpolicies)
+          app.simcore.io/name: vmauth
+          app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        node-role.kubernetes.io/ops: ""
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+      configReloaderResources: # limits for config-reloader sidecar (see SECURITY.md)
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+
+      # Adding `/admin/tenants` that is missing (a bug)
+      # Remove `unauthorizedUserAccessSpec` completely once the issue
+      # https://github.com/VictoriaMetrics/helm-charts/issues/3153 is solved
+      # Copied from https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml#L930-L942
+      unauthorizedUserAccessSpec:
+        # -- Flag, that allows to disable default VMAuth unauthorized user access config
+        disabled: false
+        discover_backend_ips: true
+        url_map:
+          - src_paths:
+              - {{`'{{ .vm.read.path }}/.*'`}}
+              - "/admin/tenants" # missing in original chart
+            url_prefix:
+              - {{`'{{ urlJoin (omit .vm.read "path") }}/'`}}
+          - src_paths:
+              - {{`'{{ .vm.write.path }}/.*'`}}
+            url_prefix:
+              - {{`'{{ urlJoin (omit .vm.write "path") }}/'`}}
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path: {{ $httpPathPrefix }}
+      pathType: Prefix
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: >-
+          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd
+
+  #
+  # vmcluster (store metrics and serve them)
+  #
+  vmcluster:
+    enabled: true
+    spec:
+      replicationFactor: 1
+      retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
+
+      #
+      # vmstorage: stores metrics and serves them
+      #
+      vmstorage:
+        replicaCount: 1
+        logLevel: {{ $logLevel }}
+        # enforce restricted PodSecurity on operator-managed containers
+        useStrictSecurity: true
+        port: "8482" # http port (metrics/api)
+        vmInsertPort: "8400" # vminsert -> vmstorage ingestion RPC port
+        vmSelectPort: "8401" # vmselect -> vmstorage query RPC port
+        podMetadata:
+          labels: # labels used by the network policies (templates/networkpolicies)
+            app.simcore.io/name: vmstorage
+            app.simcore.io/part-of: {{ .Release.Name }}
+        nodeSelector:
+          node-role.kubernetes.io/ops: ""
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 2Gi
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
+              resources:
+                requests:
+                  storage: 50Gi
+
+      #
+      # vmselect: serves reads, queries vmstorage
+      #
+      vmselect:
+        replicaCount: 1
+        port: "8481" # http port (serves reads)
+        logLevel: {{ $logLevel }}
+        # enforce restricted PodSecurity on operator-managed containers
+        useStrictSecurity: true
+        extraArgs:
+          # Expose alerts in VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
+          vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080{{ $alertsPathPrefix }}"
+        podMetadata:
+          labels: # labels used by the network policies (templates/networkpolicies)
+            app.simcore.io/name: vmselect
+            app.simcore.io/part-of: {{ .Release.Name }}
+        nodeSelector:
+          node-role.kubernetes.io/ops: ""
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+      #
+      # vminsert: receives remote-write and fans out to vmstorage
+      #
+      vminsert:
+        replicaCount: 1
+        port: "8480" # http port (receives remote-write)
+        logLevel: {{ $logLevel }}
+        # enforce restricted PodSecurity on operator-managed containers
+        useStrictSecurity: true
+        podMetadata:
+          labels: # labels used by the network policies (templates/networkpolicies)
+            app.simcore.io/name: vminsert
+            app.simcore.io/part-of: {{ .Release.Name }}
+        nodeSelector:
+          node-role.kubernetes.io/ops: ""
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+  #
+  # vmagent (scrape metrics and push to vmcluster)
+  #
+  vmagent:
+    enabled: true
+    spec:
+      extraArgs:
+        remoteWrite.maxHourlySeries: "150000" # side-effect: enables a metric used in alerts
+        remoteWrite.maxDailySeries: "300000" # side-effect: enables a metric used in alerts
+      port: "8429"
+      logLevel: {{ $logLevel }}
+      # enforce restricted PodSecurity on operator-managed containers
+      # (config-init, vmagent, config-reloader): runAsNonRoot, seccompProfile,
+      # allowPrivilegeEscalation=false, capabilities.drop=[ALL]
+      useStrictSecurity: true
+      podMetadata:
+        labels: # labels used by the network policies (templates/networkpolicies)
+          app.simcore.io/name: vmagent
+          app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        node-role.kubernetes.io/ops: ""
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      configReloaderResources: # limits for config-init + config-reloader sidecars (see SECURITY.md)
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+
+  #
+  # prometheus-node-exporter
+  #
+  prometheus-node-exporter:  # exports node (server) metrics
+    enabled: true
+    fullnameOverride: node-exporter-vm-k8s-stack
+    # it needs to run in a privileged namespace to scrape node metrics
+    namespaceOverride: "{{ .Release.Namespace }}-privileged"
+    containerSecurityContext: # harden the container (KSV-0001, KSV-0104)
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 0.5
+        memory: 128Mi
+    vmScrape:
+      spec:
+        namespaceSelector: # chart templates do not set it properly when namespace is overriden
+          matchNames: ["{{ .Release.Namespace }}-privileged"]
+    networkPolicy:
+      enabled: true
+
+  #
+  # kube-state-metrics (cluster metrics about the state of the objects (pods, PVs, etc.))
+  #
+  kube-state-metrics:
+    enabled: true
+    fullnameOverride: kube-state-metrics-vm-k8s-stack
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    networkPolicy:
+      enabled: true
+      flavor: kubernetes # calico understands kubernetes network policy
+      egress:
+      - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16
+        ports:
+        - protocol: TCP
+          port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }} # kube-state-metrics watches the kubernetes api server
+
+  #
+  # kubelet (scrape kubelet metrics, e.g. container metrics such as cpu / memory)
+  #
+  kubelet:
+    enabled: true
+
+  #
+  # vmalert (alert rules and states)
+  #
+  vmalert:
+    enabled: true
+    spec:
+      port: "8080"
+      logLevel: {{ $logLevel }}
+      selectAllByDefault: true
+      evaluationInterval: 30s
+      useStrictSecurity: true
+      extraArgs:
+        notifier.blackhole: "true" # no notifications
+        http.pathPrefix: {{ $alertsPathPrefix | quote }}
+      podMetadata:
+        labels:
+          app.simcore.io/name: vmalert
+          app.simcore.io/part-of: {{ .Release.Name }}
+      nodeSelector:
+        node-role.kubernetes.io/ops: ""
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 0.5
+          memory: 512Mi
+      configReloaderResources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+    ingress: # a separate independent ingress (to access API)
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
+      path: {{ $alertsPathPrefix }}
+      pathType: Prefix
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
+
+  defaultRules: # rules for vmalert
+    enabled: true
+    rules: # per-rule overrides
+      # stream aggregation is not configured, so vm_streamaggr_* metrics never
+      # exist and these two alerts sit permanently in "nomatch"; disable them
+      StreamAggrFlushTimeout:
+        enabled: false
+      StreamAggrDedupFlushTimeout:
+        enabled: false
+    # start with a few alerts. Add more with time
+    groups:
+      etcd:
+        enabled: false
+      general:
+        enabled: true
+      k8sContainerCpuLimits:
+        enabled: false
+      k8sContainerCpuRequests:
+        enabled: false
+      k8sContainerCpuUsageSecondsTotal:
+        enabled: false
+      k8sContainerMemoryLimits:
+        enabled: false
+      k8sContainerMemoryRequests:
+        enabled: false
+      k8sContainerMemoryRss:
+        enabled: false
+      k8sContainerMemoryCache:
+        enabled: false
+      k8sContainerMemoryWorkingSetBytes:
+        enabled: false
+      k8sContainerMemorySwap:
+        enabled: false
+      k8sPodOwner:
+        enabled: false
+      k8sContainerResource:
+        enabled: false
+      kubeApiserver:
+        enabled: false
+      kubeApiserverAvailability:
+        enabled: false
+      kubeApiserverBurnrate:
+        enabled: false
+      kubeApiserverHistogram:
+        enabled: false
+      kubeApiserverSlos:
+        enabled: false
+      kubelet:
+        enabled: false
+      kubePrometheusGeneral:
+        enabled: false
+      kubePrometheusNodeRecording:
+        enabled: false
+      kubernetesApps:
+        enabled: false
+      kubernetesResources:
+        enabled: false
+      kubernetesStorage:
+        enabled: false
+      kubernetesSystem:
+        enabled: false
+      kubernetesSystemKubelet:
+        enabled: false
+      kubernetesSystemApiserver:
+        enabled: false
+      kubernetesSystemControllerManager:
+        enabled: false
+      kubeScheduler:
+        enabled: false
+      kubernetesSystemScheduler:
+        enabled: false
+      kubeStateMetrics:
+        enabled: false
+      nodeNetwork:
+        enabled: false
+      node:
+        enabled: false
+      vmsingle:
+        enabled: false
+      vmcluster:
+        enabled: true
+      alertmanager:
+        enabled: false
+
+  #
+  # Rest of k8s stack's components (not used atm)
+  #
+  vmsingle:
+    enabled: false
+  victoria-metrics-operator:
+    enabled: false # operator is deployed separately
+  alertmanager:
+    enabled: false
+  grafana:
+    enabled: false
+  defaultDashboards:
+    enabled: false
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false

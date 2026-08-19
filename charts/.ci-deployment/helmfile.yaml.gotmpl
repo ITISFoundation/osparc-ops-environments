@@ -1,0 +1,85 @@
+# CI-only stub for static tests (trivy scan, helmfile lint, etc.)
+
+repositories:
+  - name: jetstack # cert-manager
+    url: https://charts.jetstack.io
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: topolvm
+    url: https://topolvm.github.io/topolvm
+  - name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+  - name: victoria-metrics
+    url: https://victoriametrics.github.io/helm-charts/
+
+releases:
+  - name: security-hardening
+    chart: ./security-hardening
+    namespace: kube-system
+    values:
+      - security-hardening/values.yaml.gotmpl
+
+  - name: cert-manager
+    chart: ./cert-manager
+    namespace: cert-manager
+    values:
+      - cert-manager/values.common.yaml.gotmpl
+      - cert-manager/values.selfsigned.yaml.gotmpl
+
+  - name: traefik
+    chart: ./traefik
+    namespace: {{ requiredEnv "TRAEFIK_NAMESPACE" }}
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - traefik/values.common.yaml.gotmpl
+
+  - name: aws-ebs-csi-driver
+    chart: ./aws-ebs-csi-driver
+    namespace: aws-ebs-csi-driver
+    values:
+      - aws-ebs-csi-driver/values.yaml.gotmpl
+
+  - name: topolvm
+    chart: ./topolvm
+    namespace: topolvm
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - topolvm/values.yaml.gotmpl
+
+  - name: prometheus-operator-crds
+    namespace: victoria-metrics-operator
+    chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
+    # the version shall be dictated by victoria metrics operator
+    # but then we cannot manage it with renovate and most likely
+    # it will get out-of-sync. We just use latest version for now.
+    # See https://github.com/VictoriaMetrics/helm-charts/issues/3155
+    version: 30.0.0
+
+  - name: victoria-metrics-operator
+    chart: victoria-metrics/victoria-metrics-operator
+    version: 0.65.1
+    namespace: victoria-metrics-operator
+    needs:
+      - cert-manager/cert-manager
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - victoria-metrics-operator/values.common.yaml.gotmpl
+      - victoria-metrics-operator/values.ha.yaml.gotmpl
+
+  - name: victoria-metrics-k8s-stack
+    chart: ./victoria-metrics-k8s-stack
+    namespace: victoria-metrics-k8s-stack
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+    values:
+      - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
+
+  - name: grafana
+    chart: ./grafana
+    namespace: grafana
+    needs:
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - grafana/values.yaml.gotmpl
