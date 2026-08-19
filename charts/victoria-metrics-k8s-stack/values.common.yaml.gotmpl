@@ -5,9 +5,16 @@
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
+
+  global:
+    cluster:
+      dnsDomain: cluster.local.
+
   #
   # vmauth: fronts the cluster (read + write) for the outside world
   #
