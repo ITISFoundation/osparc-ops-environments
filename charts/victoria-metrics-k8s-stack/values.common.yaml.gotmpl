@@ -325,6 +325,11 @@ vm-k8s-stack:
         enabled: false
       StreamAggrDedupFlushTimeout:
         enabled: false
+      # no HPAs configured; kube_horizontalpodautoscaler_* metrics do not exist
+      KubeHpaReplicasMismatch:
+        enabled: false
+      KubeHpaMaxedOut:
+        enabled: false
     # start with a few alerts. Add more with time
     groups:
       etcd:
@@ -370,7 +375,7 @@ vm-k8s-stack:
       kubePrometheusNodeRecording:
         enabled: false
       kubernetesApps:
-        enabled: false
+        enabled: true
       kubernetesResources:
         enabled: false
       kubernetesStorage:
