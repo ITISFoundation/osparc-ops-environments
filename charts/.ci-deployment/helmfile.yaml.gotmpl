@@ -75,3 +75,11 @@ releases:
       - victoria-metrics-operator/victoria-metrics-operator
     values:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
+
+  - name: grafana
+    chart: ./grafana
+    namespace: grafana
+    needs:
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - grafana/values.yaml.gotmpl

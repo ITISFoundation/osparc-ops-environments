@@ -324,3 +324,14 @@ misconfigurations:
       `selector` field instead of the native `podSelector`. Trivy only
       understands the Kubernetes-native NetworkPolicy schema and reports a
       false positive.
+
+  #
+  # grafana
+  #
+  - id: AVD-KSV-0041
+    paths:
+      - "grafana/charts/grafana/templates/clusterrole.yaml"
+    statement: >
+      The datasource sidecar reads provisioning secrets (resource: secret)
+      because datasource configs contain credentials. This requires cluster-wide
+      secret read access (get, watch, list) in the ClusterRole.
