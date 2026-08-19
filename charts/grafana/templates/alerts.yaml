@@ -11,6 +11,14 @@ spec:
   groups:
     - name: grafana-health
       rules:
+        # the `or` branch initializes every known datasource with 0 so the series
+        # exists even while no 4xx/5xx response has ever been recorded
+        - record: datasource:grafana_datasource_request_errors:rate5m
+          expr: |
+            sum by (datasource) (rate(grafana_datasource_request_total{code=~"[45].."}[5m]))
+            or
+            sum by (datasource) (rate(grafana_datasource_request_total[5m]) * 0)
+
         - alert: DatasourceRequestTotalMetricAbsent
           expr: absent(grafana_datasource_request_total{code=~"[12345].."})
           for: 15m
@@ -20,9 +28,15 @@ spec:
             summary: grafana_datasource_request_total absent or missing 'code' label
 
         - alert: DatasourceTooManyErrors
-          expr: sum by (datasource) (increase(grafana_datasource_request_total{code=~"[45].."}[5m])) > 0
+          # 0/0 yields NaN when a datasource is idle, so the alert stays silent
+          expr: |
+            datasource:grafana_datasource_request_errors:rate5m
+            / sum by (datasource) (rate(grafana_datasource_request_total[5m]))
+            > 0.05
           for: 15m
           labels:
             severity: warning
           annotations:
-            summary: "Datasource {{`{{ $labels.datasource }}`}} returning errors"
+            summary: >-
+              Datasource {{`{{ $labels.datasource }}`}} error rate above 5%
+              ({{`{{ $value | humanizePercentage }}`}})
