@@ -17,6 +17,9 @@ spec:
       destination:
         ports:
           - {{ $stack.vmagent.spec.port }}
+          # VM config-reloader sidecar exposes /metrics on 8435 and vmagent
+          # scrapes it; the port is a fixed operator default, not configurable
+          - 8435
   egress:
     - action: Allow
       destination:
