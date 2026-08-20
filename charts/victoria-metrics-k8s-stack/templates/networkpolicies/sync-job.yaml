@@ -1,0 +1,30 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- if $stack.syncJob.enabled }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: sync-job-network-policy
+spec:
+  # the sync-job pod only carries chart labels (no app.simcore.io labels are
+  # settable on it), so select it by its component label
+  selector: app.kubernetes.io/component == "syncJob"
+  types: # calico only defaults this on create, so it must be explicit
+    - Egress
+  egress:
+    # apply the fetched VMRule objects to the kubernetes api server
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}
+    # fetch rule manifests from raw.githubusercontent.com over HTTPS
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 443
+{{- end }}

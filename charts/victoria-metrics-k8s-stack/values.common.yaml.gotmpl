@@ -1,8 +1,9 @@
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.90.2/charts/victoria-metrics-k8s-stack/values.yaml
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
 {{- $httpPathPrefix := "/metrics" }}
 {{- $alertsPathPrefix := "/alerts" }}
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+{{- $vmclusterEnabled := "true" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
@@ -85,7 +86,7 @@ vm-k8s-stack:
   # vmcluster (store metrics and serve them)
   #
   vmcluster:
-    enabled: true
+    enabled: {{ $vmclusterEnabled }}
     spec:
       replicationFactor: 1
       retentionPeriod: {{ requiredEnv "VICTORIA_METRICS_METRICS_RETENTION_PERIOD" | quote }}
@@ -316,6 +317,38 @@ vm-k8s-stack:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
 
+  #
+  # sync-job: since 0.85.0 VMRules/dashboards are no longer rendered by Helm.
+  # a post-install/upgrade Job fetches them from raw.githubusercontent.com and
+  # creates the VMRule objects (needs egress to GitHub + api server, see
+  # templates/networkpolicies/sync-job.yaml)
+  #
+  syncJob:
+    enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    # restricted PodSecurity is enforced on the namespace
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65534 # image defaults to root, force nobody
+      runAsGroup: 65534
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
+    # required by the require-resource-limits VAP (security-hardening chart)
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
   defaultRules: # rules for vmalert
     enabled: true
     rules: # per-rule overrides
@@ -330,80 +363,97 @@ vm-k8s-stack:
         enabled: false
       KubeHpaMaxedOut:
         enabled: false
+      # we don't configure alert limits
+      AlertingRuleResultsApproachingLimit:
+        enabled: false
+      RecordingRuleResultsApproachingLimit:
+        enabled: false
     # start with a few alerts. Add more with time
+    # keys must match upstream group names exactly (renamed in 0.85.0)
     groups:
       etcd:
         enabled: false
-      general:
+      alertmanager.rules:
+        enabled: false
+      general.rules:
         enabled: true
-      k8sContainerCpuLimits:
+      k8s.rules.container_cpu_limits:
         enabled: false
-      k8sContainerCpuRequests:
+      k8s.rules.container_cpu_requests:
         enabled: false
-      k8sContainerCpuUsageSecondsTotal:
+      k8s.rules.container_cpu_usage_seconds_total:
         enabled: false
-      k8sContainerMemoryLimits:
+      k8s.rules.container_memory_limits:
         enabled: false
-      k8sContainerMemoryRequests:
+      k8s.rules.container_memory_requests:
         enabled: false
-      k8sContainerMemoryRss:
+      k8s.rules.container_memory_rss:
         enabled: false
-      k8sContainerMemoryCache:
+      k8s.rules.container_memory_cache:
         enabled: false
-      k8sContainerMemoryWorkingSetBytes:
+      k8s.rules.container_memory_working_set_bytes:
         enabled: false
-      k8sContainerMemorySwap:
+      k8s.rules.container_memory_swap:
         enabled: false
-      k8sPodOwner:
+      k8s.rules.pod_owner:
         enabled: false
-      k8sContainerResource:
+      kube-apiserver-burnrate.rules:
         enabled: false
-      kubeApiserver:
+      kube-apiserver-histogram.rules:
         enabled: false
-      kubeApiserverAvailability:
+      kube-apiserver-slos:
         enabled: false
-      kubeApiserverBurnrate:
+      kube-prometheus-general.rules:
         enabled: false
-      kubeApiserverHistogram:
+      kube-prometheus-node-recording.rules:
         enabled: false
-      kubeApiserverSlos:
+      kube-scheduler.rules:
         enabled: false
-      kubelet:
+      kube-state-metrics:
         enabled: false
-      kubePrometheusGeneral:
+      kubelet.rules:
         enabled: false
-      kubePrometheusNodeRecording:
+      kube-apiserver-availability.rules:
         enabled: false
-      kubernetesApps:
+      kubernetes-apps:
         enabled: true
-      kubernetesResources:
+      kubernetes-resources:
         enabled: false
-      kubernetesStorage:
+      kubernetes-storage:
         enabled: false
-      kubernetesSystem:
+      kubernetes-system:
         enabled: false
-      kubernetesSystemKubelet:
+      kubernetes-system-apiserver:
         enabled: false
-      kubernetesSystemApiserver:
+      kubernetes-system-controller-manager:
         enabled: false
-      kubernetesSystemControllerManager:
+      kubernetes-system-kubelet:
         enabled: false
-      kubeScheduler:
+      kubernetes-system-scheduler:
         enabled: false
-      kubernetesSystemScheduler:
+      node-exporter:
         enabled: false
-      kubeStateMetrics:
+      node-exporter.rules:
         enabled: false
-      nodeNetwork:
+      node-network:
         enabled: false
-      node:
+      node.rules:
         enabled: false
+      vm-health:
+        enabled: true
+      vmagent:
+        enabled: true
+      vmalert:
+        enabled: true
+      vmcluster:
+        enabled: {{ $vmclusterEnabled }}
+      vmoperator:
+        enabled: true
       vmsingle:
         enabled: false
-      vmcluster:
+    sources:
+      vmoperator: # we need vmoperator rules to monitor operator installed separately
         enabled: true
-      alertmanager:
-        enabled: false
 
   #
   # Rest of k8s stack's components (not used atm)
