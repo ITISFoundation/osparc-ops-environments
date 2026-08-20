@@ -9,6 +9,9 @@ kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
+# https://github.com/VictoriaMetrics/operator/blob/v0.74.0/cmd/config-reloader/README.md
+configReloaderPort: 8435 # hardcoded in operator
+
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
 
