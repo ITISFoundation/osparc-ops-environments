@@ -379,6 +379,19 @@ vm-k8s-stack:
         enabled: false
       RecordingRuleResultsApproachingLimit:
         enabled: false
+      # systemd exporter is not enabled
+      NodeSystemdServiceFailed:
+        enabled: false
+      NodeSystemdServiceCrashlooping:
+        enabled: false
+      # We don't have this metric
+      NodeBondingDegraded:
+        enabled: false
+      # no raid used in our clusters
+      NodeRAIDDegraded:
+        enabled: false
+      NodeRAIDDiskFailure:
+        enabled: false
     # start with a few alerts. Add more with time
     # keys must match upstream group names exactly (renamed in 0.85.0)
     groups:
@@ -443,7 +456,7 @@ vm-k8s-stack:
       kubernetes-system-scheduler:
         enabled: false
       node-exporter:
-        enabled: false
+        enabled: true
       node-exporter.rules:
         enabled: false
       node-network:
