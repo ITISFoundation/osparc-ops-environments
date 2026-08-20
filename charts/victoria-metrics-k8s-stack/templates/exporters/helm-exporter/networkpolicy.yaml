@@ -1,0 +1,29 @@
+{{- $labels := index .Values "helm-exporter" "podLabels" }}
+# helm-exporter reads helm release secrets via k8s API
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: helm-exporter-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    # allow prometheus/vmagent to scrape metrics
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ index .Values "helm-exporter" "service" "port" }}
+  egress:
+    # k8s API server access (to get helm releases statuses)
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16

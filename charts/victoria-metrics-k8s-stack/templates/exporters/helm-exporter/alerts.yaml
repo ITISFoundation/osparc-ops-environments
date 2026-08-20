@@ -1,0 +1,45 @@
+# helm-exporter status codes:
+# -1 FAILED
+# 0 UNKNOWN
+# 1 DEPLOYED
+# 2 DELETED
+# 3 SUPERSEDED
+# 5 DELETIN
+# 6 PENDING_INSTAL
+# 7 PENDING_UPGRAD
+# 8 PENDING_ROLLBAC
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: helm-release-health
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  groups:
+    - name: helm-release-health
+      rules:
+        - alert: HelmReleaseNotDeployed
+          expr: helm_chart_info != 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Helm release {{`{{ $labels.release }}`}} in namespace
+              {{`{{ $labels.namespace }}`}} is not in deployed state
+              (status code {{`{{ $value }}`}})
+            description: >-
+              Chart {{`{{ $labels.chart }}`}} release {{`{{ $labels.release }}`}}
+              has been in a non-deployed state for more than 10 minutes.
+              See status codes at https://github.com/sstarcher/helm-exporter/tree/1.3.0#format
+
+        - alert: HelmExporterMetricAbsent
+          expr: absent(helm_chart_info)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: helm_chart_info metric is absent - helm-exporter may be down

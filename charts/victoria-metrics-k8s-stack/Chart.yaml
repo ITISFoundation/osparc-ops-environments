@@ -17,3 +17,6 @@ dependencies:
     version: 0.84.0
     alias: vm-k8s-stack
     repository: "https://victoriametrics.github.io/helm-charts/"
+  - name: helm-exporter
+    version: 1.3.0
+    repository: "https://shanestarcher.com/helm-charts/"
