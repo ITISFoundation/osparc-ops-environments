@@ -336,10 +336,18 @@ vm-k8s-stack:
         type: RuntimeDefault
     containerSecurityContext:
       allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true # KSV-0014; /tmp is mounted writable below
       capabilities:
         drop: ["ALL"]
       seccompProfile:
         type: RuntimeDefault
+    # writable scratch space since the root filesystem is read-only
+    extraVolumes:
+      - name: tmp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp
     # required by the require-resource-limits VAP (security-hardening chart)
     resources:
       requests:
