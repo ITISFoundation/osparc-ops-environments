@@ -17,6 +17,7 @@ spec:
       destination:
         ports:
           - {{ $stack.vmauth.spec.port }}
+          - {{ .Values.configReloaderPort }} # VM config-reloader sidecar exposes /metrics
   egress:
     - action: Allow
       protocol: TCP
