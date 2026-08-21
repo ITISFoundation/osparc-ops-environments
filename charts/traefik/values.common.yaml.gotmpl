@@ -62,6 +62,9 @@ traefik:
         enabled: true
       serviceMonitor:
         enabled: true
+        # fixes service label for `traefik_service_requests_total` metric
+        # otherwise, actual service name lives in `exported_service` label
+        # the dashboard we use relies on `service` label
         honorLabels: true
       # disalbe checking Capabilities that break in helm diff default behavior
       # using special env for helm diff can solve it but YH would rather keep it simple
