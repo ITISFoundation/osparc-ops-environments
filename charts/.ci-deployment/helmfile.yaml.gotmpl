@@ -31,6 +31,7 @@ releases:
     namespace: {{ requiredEnv "TRAEFIK_NAMESPACE" }}
     needs:
       - cert-manager/cert-manager
+      - victoria-metrics-operator/prometheus-operator-crds
     values:
       - traefik/values.common.yaml.gotmpl
 

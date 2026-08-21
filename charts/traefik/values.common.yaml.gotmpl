@@ -1,4 +1,8 @@
+# https://github.com/traefik/traefik-helm-chart/blob/v41.0.0/traefik/values.yaml
 {{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") }}
+
+metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
 middlewares:
   basicAuth:
@@ -22,6 +26,9 @@ certificate:
     kind: ClusterIssuer
 
 traefik:
+  global:
+    checkNewVersion: false
+
   deployment:
     kind: DaemonSet
 
@@ -46,6 +53,22 @@ traefik:
     level: INFO
   accessLog:
     enabled: false
+
+  metrics:
+    addInternals: true # add metrics / traefik entrypoints and internal services
+    prometheus:
+      entryPoint: metrics
+      service:
+        enabled: true
+      serviceMonitor:
+        enabled: true
+        # fixes service label for `traefik_service_requests_total` metric
+        # otherwise, actual service name lives in `exported_service` label
+        # the dashboard we use relies on `service` label
+        honorLabels: true
+      # disalbe checking Capabilities that break in helm diff default behavior
+      # using special env for helm diff can solve it but YH would rather keep it simple
+      disableAPICheck: true
 
   service:
     # we use traefik via hostPorts only
@@ -73,6 +96,10 @@ traefik:
         default: false
     traefik:
       port: 8080
+      expose:
+        default: false
+    metrics:
+      port: 9100
       expose:
         default: false
 
