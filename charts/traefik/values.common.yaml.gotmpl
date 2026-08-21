@@ -26,6 +26,9 @@ certificate:
     kind: ClusterIssuer
 
 traefik:
+  global:
+    checkNewVersion: false
+
   deployment:
     kind: DaemonSet
 
@@ -52,12 +55,14 @@ traefik:
     enabled: false
 
   metrics:
+    addInternals: true # add metrics / traefik entrypoints and internal services
     prometheus:
       entryPoint: metrics
       service:
         enabled: true
       serviceMonitor:
         enabled: true
+        honorLabels: true
       # disalbe checking Capabilities that break in helm diff default behavior
       # using special env for helm diff can solve it but YH would rather keep it simple
       disableAPICheck: true
