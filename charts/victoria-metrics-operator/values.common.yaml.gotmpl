@@ -1,7 +1,13 @@
-# Values reference https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-operator-0.55.1/charts/victoria-metrics-operator/values.yaml
+# Values reference https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-operator-0.67.2/charts/victoria-metrics-operator/values.yaml
 {{- $appLabelValue := "victoria-metrics-operator" }}
 {{- $webhookPort := 9443 }}
 {{- $servicePort := 8080 }}
+
+env:
+  # https://github.com/VictoriaMetrics/operator/issues/2270
+  # https://github.com/VictoriaMetrics/operator/pull/2442
+  - name: VM_PROMCR_VALIDATION_ENABLED
+    value: "true"
 
 operator:
   # converts prometheus-operator objects into victoria-metrics-operator ones
