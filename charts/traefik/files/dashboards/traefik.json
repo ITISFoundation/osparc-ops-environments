@@ -1937,7 +1937,9 @@
     "links": [],
     "liveNow": false,
     "preload": false,
-    "tags": [],
+    "tags": [
+      "traefik"
+    ],
     "timeSettings": {
       "timezone": "browser",
       "from": "now-6h",
