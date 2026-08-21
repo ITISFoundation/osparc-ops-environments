@@ -5951,7 +5951,9 @@
     "links": [],
     "liveNow": false,
     "preload": false,
-    "tags": [],
+    "tags": [
+      "grafana"
+    ],
     "timeSettings": {
       "timezone": "browser",
       "from": "now-1h",
