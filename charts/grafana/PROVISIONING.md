@@ -40,6 +40,7 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 
 1. Make dashboard in grafana UI
 2. Export dashboard as json file
+    * WARNING: make sure that in `Advanced options` Model `Classic` is selected to avoid error logs in grafana (they appear if a new V2 Resource version is used)
 3. Replace hardcoded datasource uid/type with `__DS_UID__` / `__DS_TYPE__`
 4. Add config map with dashboard json and special label
 5. When rendering dashboard json datasource replace uid/type variables with real values
