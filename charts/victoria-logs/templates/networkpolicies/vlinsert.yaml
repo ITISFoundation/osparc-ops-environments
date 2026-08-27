@@ -1,0 +1,37 @@
+{{- $logs := index .Values "victoria-logs-cluster" }}
+{{- $insertPort := trimPrefix ":" (index $logs.vlinsert.http 0).value }}
+{{- $storagePort := trimPrefix ":" (index $logs.vlstorage.http 0).value }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vlinsert-network-policy
+spec:
+  selector: >-
+    app.kubernetes.io/instance == "{{ .Release.Name }}"
+    && app.kubernetes.io/name == "victoria-logs-cluster"
+    && app == "vlinsert"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $insertPort }}
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $storagePort }}
+    - action: Allow
+      protocol: UDP
+      destination:
+        ports:
+          - 53
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 53

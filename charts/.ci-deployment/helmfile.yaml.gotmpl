@@ -77,6 +77,12 @@ releases:
     values:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
 
+  - name: victoria-logs
+    chart: ./victoria-logs
+    namespace: victoria-logs
+    values:
+      - victoria-logs/values.common.yaml.gotmpl
+
   - name: grafana
     chart: ./grafana
     namespace: grafana

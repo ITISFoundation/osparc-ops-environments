@@ -1,0 +1,19 @@
+{{- $logs := index .Values "victoria-logs-cluster" }}
+{{- $storagePort := trimPrefix ":" (index $logs.vlstorage.http 0).value }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vlstorage-network-policy
+spec:
+  selector: >-
+    app.kubernetes.io/instance == "{{ .Release.Name }}"
+    && app.kubernetes.io/name == "victoria-logs-cluster"
+    && app == "vlstorage"
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $storagePort }}
