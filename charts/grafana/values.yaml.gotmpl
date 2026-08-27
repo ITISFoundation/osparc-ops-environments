@@ -166,3 +166,8 @@ grafana:
       labelValue: true_string
       logLevel: {{ requiredEnv "GRAFANA_LOG_LEVEL" }}
       searchNamespace: ALL
+
+  # shadows /usr/share/grafana/data/plugins-bundled with an emptyDir so bundled
+  # plugins (e.g. elasticsearch) can be updated on the read-only root filesystem
+  # remove once https://github.com/grafana-community/helm-charts/issues/729 is fixed
+  shadowBundledPlugins: true
