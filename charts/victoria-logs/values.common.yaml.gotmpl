@@ -1,5 +1,15 @@
 
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
+{{- $defaultSecurityContext := dict
+  "enabled" true
+  "allowPrivilegeEscalation" false
+  "readOnlyRootFilesystem" true
+  "runAsNonRoot" true
+  "runAsUser" 1000
+  "runAsGroup" 1000
+  "seccompProfile" (dict "type" "RuntimeDefault")
+}}
+
 victoria-logs-cluster:
   global:
     image:
@@ -19,15 +29,7 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
-    securityContext:
-      enabled: true
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 1000
-      seccompProfile:
-        type: RuntimeDefault
+    securityContext: {{ $defaultSecurityContext | toYaml | nindent 6 }}
     resources:
       requests:
         cpu: 10m
@@ -49,15 +51,7 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
-    securityContext:
-      enabled: true
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 1000
-      seccompProfile:
-        type: RuntimeDefault
+    securityContext: {{ $defaultSecurityContext | toYaml | nindent 6 }}
     resources:
       requests:
         cpu: 50m
@@ -79,15 +73,7 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
-    securityContext:
-      enabled: true
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 1000
-      seccompProfile:
-        type: RuntimeDefault
+    securityContext: {{ $defaultSecurityContext | toYaml | nindent 6 }}
     resources:
       requests:
         cpu: 50m
@@ -110,15 +96,7 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
-    securityContext:
-      enabled: true
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 1000
-      seccompProfile:
-        type: RuntimeDefault
+    securityContext: {{ $defaultSecurityContext | toYaml | nindent 6 }}
     resources:
       requests:
         cpu: 100m
