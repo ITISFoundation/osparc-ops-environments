@@ -77,11 +77,20 @@ releases:
     values:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
 
-  - name: victoria-logs
-    chart: ./victoria-logs
-    namespace: victoria-logs
+  - name: victoria-logs-cluster
+    chart: ./victoria-logs-cluster
+    namespace: victoria-logs-cluster
     values:
-      - victoria-logs/values.common.yaml.gotmpl
+      - victoria-logs-cluster/values.common.yaml.gotmpl
+
+  - name: vector
+    chart: ./vector
+    namespace: vector
+    needs:
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - vector/values.common.yaml.gotmpl
+
 
   - name: grafana
     chart: ./grafana

@@ -1,4 +1,8 @@
+# https://docs.victoriametrics.com/helm/victoria-logs-cluster/
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
 
+metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
 {{- $defaultSecurityContext := dict
   "enabled" true
@@ -7,11 +11,10 @@
   "runAsNonRoot" true
   "runAsUser" 1000
   "runAsGroup" 1000
+  "capabilities" (dict "drop" (list "ALL"))
   "seccompProfile" (dict "type" "RuntimeDefault")
 }}
 
-# https://docs.victoriametrics.com/helm/victoria-logs-cluster/
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
 victoria-logs-cluster:
   global:
     image:
@@ -20,7 +23,7 @@ victoria-logs-cluster:
   vmauth:
     enabled: true
     replicaCount: 1
-    fullnameOverride: vmauth
+    fullnameOverride: victoria-logs-cluster-vmauth
     podLabels:
       app.simcore.io/name: vmauth
     extraArgs:
@@ -61,7 +64,7 @@ victoria-logs-cluster:
 
   vlinsert:
     replicaCount: 1
-    fullnameOverride: vlinsert
+    fullnameOverride: victoria-logs-cluster-vlinsert
     podLabels:
       app.simcore.io/name: vlinsert
     http:
@@ -83,7 +86,7 @@ victoria-logs-cluster:
 
   vlselect:
     replicaCount: 1
-    fullnameOverride: vlselect
+    fullnameOverride: victoria-logs-cluster-vlselect
     podLabels:
       app.simcore.io/name: vlselect
     http:
@@ -106,7 +109,7 @@ victoria-logs-cluster:
   vlstorage:
     replicaCount: 1
     retentionPeriod: 30d
-    fullnameOverride: vlstorage
+    fullnameOverride: victoria-logs-cluster-vlstorage
     podLabels:
       app.simcore.io/name: vlstorage
     http:

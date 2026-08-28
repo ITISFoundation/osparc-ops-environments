@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.vectorConfigName | quote }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  agent.yaml: |
+    data_dir: {{ .Values.vector.dataDir | quote }}
+
+    api:
+      enabled: true
+      address: 0.0.0.0:{{ .Values.apiPort }}
+
+    sources:
+      k8s:
+        type: kubernetes_logs
+      internal_metrics:
+        type: internal_metrics
+
+    transforms:
+      parser:
+        type: remap
+        inputs: [k8s]
+        source: |
+          .log = parse_json(.message) ?? .message
+          del(.message)
+
+    sinks:
+      exporter:
+        type: prometheus_exporter
+        address: 0.0.0.0:{{ .Values.metricsPort }}
+        inputs: [internal_metrics]
+      vlogs:
+        type: elasticsearch
+        inputs: [parser]
+        mode: bulk
+        api_version: v8
+        compression: gzip
+        healthcheck:
+          enabled: false
+        request:
+          headers:
+            VL-Time-Field: timestamp
+            VL-Stream-Fields: kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+            VL-Ignore-Fields: kubernetes.node_labels.*,kubernetes.pod_labels.*,kubernetes.pod_annotations.*,kubernetes.namespace_labels.*,kubernetes.pod_ip,kubernetes.pod_ips,file
+            VL-Msg-Field: message,msg,_msg,log.msg,log.message,log
+            AccountID: "0"
+            ProjectID: "0"
+        endpoints:
+          - http://victoria-logs-cluster-vmauth.victoria-logs-cluster.svc:8427/logs/insert/elasticsearch/
