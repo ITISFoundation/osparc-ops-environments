@@ -1,5 +1,6 @@
-{{- $logs := index .Values "victoria-logs-cluster" }}
-{{- $storagePort := trimPrefix ":" (index $logs.vlstorage.http 0).value }}
+{{- $cluster := index .Values "victoria-logs-cluster" }}
+{{- $storagePort := trimPrefix ":" (index $cluster.vlstorage.http 0).value }}
+{{- $storageLabels := $cluster.vlstorage.podLabels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -7,8 +8,7 @@ metadata:
 spec:
   selector: >-
     app.kubernetes.io/instance == "{{ .Release.Name }}"
-    && app.kubernetes.io/name == "victoria-logs-cluster"
-    && app == "vlstorage"
+    && app.simcore.io/name == "{{ index $storageLabels "app.simcore.io/name" }}"
   types:
     - Ingress
   ingress:

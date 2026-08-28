@@ -1,6 +1,7 @@
-{{- $logs := index .Values "victoria-logs-cluster" }}
-{{- $insertPort := trimPrefix ":" (index $logs.vlinsert.http 0).value }}
-{{- $storagePort := trimPrefix ":" (index $logs.vlstorage.http 0).value }}
+{{- $cluster := index .Values "victoria-logs-cluster" }}
+{{- $insertPort := trimPrefix ":" (index $cluster.vlinsert.http 0).value }}
+{{- $storagePort := trimPrefix ":" (index $cluster.vlstorage.http 0).value }}
+{{- $insertLabels := $cluster.vlinsert.podLabels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -8,8 +9,7 @@ metadata:
 spec:
   selector: >-
     app.kubernetes.io/instance == "{{ .Release.Name }}"
-    && app.kubernetes.io/name == "victoria-logs-cluster"
-    && app == "vlinsert"
+    && app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
   types:
     - Ingress
     - Egress
@@ -25,13 +25,3 @@ spec:
       destination:
         ports:
           - {{ $storagePort }}
-    - action: Allow
-      protocol: UDP
-      destination:
-        ports:
-          - 53
-    - action: Allow
-      protocol: TCP
-      destination:
-        ports:
-          - 53

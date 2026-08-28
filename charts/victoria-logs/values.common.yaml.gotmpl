@@ -1,69 +1,91 @@
+
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
 victoria-logs-cluster:
-	vmauth:
-		enabled: true
-		replicaCount: 1
-		http:
+  vmauth:
+    enabled: true
+    replicaCount: 1
+    fullnameOverride: vmauth
+    podLabels:
+      app.simcore.io/name: vmauth
+    http:
       - name: http
-          primary: true
-          value: :8427
-		nodeSelector:
-			node-role.kubernetes.io/ops: ""
-		resources:
-			requests:
-				cpu: 10m
-				memory: 64Mi
-			limits:
-				cpu: 200m
-				memory: 128Mi
+        primary: true
+        value: ":8427"
+    vmServiceScrape:
+      enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
 
-	vlinsert:
-		replicaCount: 1
-		http:
-			- name: http
-				primary: true
-				value: :9481
-		nodeSelector:
-			node-role.kubernetes.io/ops: ""
-		resources:
-			requests:
-				cpu: 50m
-				memory: 128Mi
-			limits:
-				cpu: 500m
-				memory: 512Mi
+  vlinsert:
+    replicaCount: 1
+    fullnameOverride: vlinsert
+    podLabels:
+      app.simcore.io/name: vlinsert
+    http:
+      - name: http
+        primary: true
+        value: ":9481"
+    vmServiceScrape:
+      enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
-	vlselect:
-		replicaCount: 1
-		http:
-			- name: http
-				primary: true
-				value: :9471
-		nodeSelector:
-			node-role.kubernetes.io/ops: ""
-		resources:
-			requests:
-				cpu: 50m
-				memory: 128Mi
-			limits:
-				cpu: 500m
-				memory: 512Mi
+  vlselect:
+    replicaCount: 1
+    fullnameOverride: vlselect
+    podLabels:
+      app.simcore.io/name: vlselect
+    http:
+      - name: http
+        primary: true
+        value: ":9471"
+    vmServiceScrape:
+      enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
-	vlstorage:
-		replicaCount: 1
-		retentionPeriod: 30d
-		http:
-			- name: http
-				primary: true
-				value: :9491
-		nodeSelector:
-			node-role.kubernetes.io/ops: ""
-		resources:
-			requests:
-				cpu: 100m
-				memory: 256Mi
-			limits:
-				cpu: "1"
-				memory: 2Gi
-		persistentVolume:
-			storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
-			size: 50Gi
+  vlstorage:
+    replicaCount: 1
+    retentionPeriod: 30d
+    fullnameOverride: vlstorage
+    podLabels:
+      app.simcore.io/name: vlstorage
+    http:
+      - name: http
+        primary: true
+        value: ":9491"
+    vmServiceScrape:
+      enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+    persistentVolume:
+      storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
+      size: 50Gi

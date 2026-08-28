@@ -1,7 +1,8 @@
-{{- $logs := index .Values "victoria-logs-cluster" }}
-{{- $vmauthPort := trimPrefix ":" (index $logs.vmauth.http 0).value }}
-{{- $insertPort := trimPrefix ":" (index $logs.vlinsert.http 0).value }}
-{{- $selectPort := trimPrefix ":" (index $logs.vlselect.http 0).value }}
+{{- $cluster := index .Values "victoria-logs-cluster" }}
+{{- $vmauthPort := trimPrefix ":" (index $cluster.vmauth.http 0).value }}
+{{- $insertPort := trimPrefix ":" (index $cluster.vlinsert.http 0).value }}
+{{- $selectPort := trimPrefix ":" (index $cluster.vlselect.http 0).value }}
+{{- $vmauthLabels := $cluster.vmauth.podLabels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -9,8 +10,7 @@ metadata:
 spec:
   selector: >-
     app.kubernetes.io/instance == "{{ .Release.Name }}"
-    && app.kubernetes.io/name == "victoria-logs-cluster"
-    && app == "vmauth"
+    && app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
   types:
     - Ingress
     - Egress
@@ -27,13 +27,3 @@ spec:
         ports:
           - {{ $insertPort }}
           - {{ $selectPort }}
-    - action: Allow
-      protocol: UDP
-      destination:
-        ports:
-          - 53
-    - action: Allow
-      protocol: TCP
-      destination:
-        ports:
-          - 53
