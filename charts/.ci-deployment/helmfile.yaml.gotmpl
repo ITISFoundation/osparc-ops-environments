@@ -83,15 +83,6 @@ releases:
     values:
       - victoria-logs-cluster/values.common.yaml.gotmpl
 
-  - name: vector
-    chart: ./vector
-    namespace: vector
-    needs:
-      - victoria-metrics-operator/prometheus-operator-crds
-    values:
-      - vector/values.common.yaml.gotmpl
-
-
   - name: grafana
     chart: ./grafana
     namespace: grafana
