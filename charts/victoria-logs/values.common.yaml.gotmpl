@@ -1,6 +1,10 @@
 
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
 victoria-logs-cluster:
+  global:
+    image:
+      registry: quay.io # common registry we already use for other workloads
+
   vmauth:
     enabled: true
     replicaCount: 1
@@ -15,6 +19,15 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       requests:
         cpu: 10m
@@ -36,6 +49,15 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       requests:
         cpu: 50m
@@ -57,6 +79,15 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       requests:
         cpu: 50m
@@ -79,6 +110,15 @@ victoria-logs-cluster:
       enabled: true
     nodeSelector:
       node-role.kubernetes.io/ops: ""
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       requests:
         cpu: 100m
