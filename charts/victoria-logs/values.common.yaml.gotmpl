@@ -1,5 +1,5 @@
 
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
+
 {{- $defaultSecurityContext := dict
   "enabled" true
   "allowPrivilegeEscalation" false
@@ -10,6 +10,8 @@
   "seccompProfile" (dict "type" "RuntimeDefault")
 }}
 
+# https://docs.victoriametrics.com/helm/victoria-logs-cluster/
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-cluster-0.2.7/charts/victoria-logs-cluster/values.yaml
 victoria-logs-cluster:
   global:
     image:
@@ -21,12 +23,31 @@ victoria-logs-cluster:
     fullnameOverride: vmauth
     podLabels:
       app.simcore.io/name: vmauth
+    extraArgs:
+      http.pathPrefix: /logs
     http:
       - name: http
         primary: true
         value: ":8427"
     vmServiceScrape:
       enabled: true
+      spec:
+        endpoints:
+          - port: http
+            path: /logs/metrics
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+          path:
+            - /logs
+          port: http
+      annotations:
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: >
+          {{ requiredEnv "TRAEFIK_NAMESPACE" }}-{{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}@kubernetescrd
     nodeSelector:
       node-role.kubernetes.io/ops: ""
     securityContext: {{ $defaultSecurityContext | toYaml | nindent 6 }}
