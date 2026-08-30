@@ -74,6 +74,12 @@ releases:
     namespace: victoria-metrics-k8s-stack
     needs:
       - victoria-metrics-operator/victoria-metrics-operator
+      # vmalert creates alert rules for victoria-logs-cluster
+      # but we install victoria-logs-cluster separately,
+      # so we need to have victoria logs cluster running before
+      # to avoid having alert rules for non-existing metrics
+      # see https://github.com/VictoriaMetrics/helm-charts/issues/3182
+      - victoria-logs-cluster/victoria-logs-cluster
     values:
       - victoria-metrics-k8s-stack/values.common.yaml.gotmpl
 

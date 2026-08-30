@@ -478,6 +478,10 @@ vm-k8s-stack:
     sources:
       vmoperator: # we need vmoperator rules to monitor operator installed separately
         enabled: true
+      vlhealth: # we need vlhealth rules to monitor victoria-logs-cluster (installed separately)
+        enabled: true
+      victorialogs: # we need victoria-logs-cluster rules to monitor victoria-logs-cluster (installed separately)
+        enabled: true
 
   #
   # Rest of k8s stack's components (not used atm)
