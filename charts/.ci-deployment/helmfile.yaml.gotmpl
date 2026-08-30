@@ -86,6 +86,8 @@ releases:
   - name: victoria-logs-cluster
     chart: ./victoria-logs-cluster
     namespace: victoria-logs-cluster
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
     values:
       - victoria-logs-cluster/values.common.yaml.gotmpl
 
