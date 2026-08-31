@@ -32,11 +32,13 @@ service:
   servicePort: {{ $servicePort }}
   webhookPort: {{ $webhookPort }}
 
-# Scrape the operator's own metrics. `vm: true` creates a VMServiceScrape
-# (reconciled by this operator) instead of a prometheus-operator ServiceMonitor.
 serviceMonitor:
-  enabled: true
-  vm: true
+  enabled: true # expose metrics
+
+  # Avoid chicken-and-egg problem: the operator is not yet running,
+  # so VictoriaMetrics CRDs are not yet ready to be used. Use Prometheus CRDs
+  # instead that are installed beforehand.
+  vm: false
 
 podLabels:
   app.simcore.io/name: {{ $appLabelValue }} # app.kubernetes.io/name is used inside the chart
