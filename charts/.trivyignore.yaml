@@ -326,6 +326,17 @@ misconfigurations:
       false positive.
 
   #
+  # victoria-logs-single
+  #
+  - id: AVD-KSV-0023
+    paths:
+      - "victoria-metrics-k8s-stack/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
+    statement: >
+      Vector must mount /var/log and /var/lib as hostPath volumes to read
+      container logs from the node filesystem. This is inherent to how
+      node-level log collectors operate.
+
+  #
   # grafana
   #
   - id: AVD-KSV-0041

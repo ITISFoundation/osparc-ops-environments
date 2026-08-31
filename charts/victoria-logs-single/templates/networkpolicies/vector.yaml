@@ -1,0 +1,32 @@
+{{- $single := index .Values "victoria-logs-single" }}
+{{- $vectorLabels := $single.vector.podLabels }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vector-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $vectorLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $vectorLabels "app.simcore.io/part-of" }}"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vectorMetricsPort }}
+  egress:
+    # send collected logs to the victoria-logs server
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.vmSinglePort }}
+    # kubernetes_logs source needs API access for pod discovery and metadata
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}

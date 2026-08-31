@@ -1,0 +1,18 @@
+apiVersion: v2
+name: victoria-metrics-k8s-stack
+description: >
+  A wrapper chart for victoria-metrics-k8s-stack.
+  It adds network policies. Once release containing
+  https://github.com/VictoriaMetrics/operator/pull/2299
+  is available and stable, we can drop the wrapper chart
+
+type: application
+
+version: 0.0.1 # unused
+
+appVersion: 0.0.1 # unused
+
+dependencies:
+  - name: victoria-logs-single
+    version: 0.13.8
+    repository: "https://victoriametrics.github.io/helm-charts/"
