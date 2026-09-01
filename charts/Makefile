@@ -11,17 +11,17 @@ include ${REPO_BASE_DIR}/charts/.tools.Makefile
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
-# Example of usage:
-# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector name=traefik'
-HELMFILE_EXTRA_ARGS ?=
-
 # Note on HELM_DIFF_USE_UPGRADE_DRY_RUN:
 # helm-diff renders with `helm template` by default, where `lookup` and API
 # capabilities resolve empty — charts using them would show permanent phantom diffs.
 # See https://github.com/databus23/helm-diff/issues/253
-export HELM_DIFF_USE_UPGRADE_DRY_RUN := true
+HELM_DIFF_ENV := HELM_DIFF_USE_UPGRADE_DRY_RUN=true
 
-HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
+# Example of usage:
+# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector name=traefik'
+HELMFILE_EXTRA_ARGS ?=
+
+HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
 
 TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 
