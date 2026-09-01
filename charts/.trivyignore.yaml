@@ -330,7 +330,7 @@ misconfigurations:
   #
   - id: AVD-KSV-0023
     paths:
-      - "victoria-metrics-k8s-stack/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
+      - "victoria-logs-single/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
     statement: >
       Vector must mount /var/log and /var/lib as hostPath volumes to read
       container logs from the node filesystem. This is inherent to how
@@ -338,7 +338,7 @@ misconfigurations:
 
   - id: AVD-KSV-0012
     paths:
-      - "victoria-metrics-k8s-stack/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
+      - "victoria-logs-single/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
     statement: >
       Vector's kubernetes_logs source persists checkpoints to a hostPath volume
       (/var/lib/vector) to track which log lines have already been sent. The

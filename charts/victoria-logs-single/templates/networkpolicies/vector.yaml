@@ -1,5 +1,6 @@
 {{- $single := index .Values "victoria-logs-single" }}
 {{- $vectorLabels := $single.vector.podLabels }}
+{{- $serverLabels := $single.server.podLabels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -15,6 +16,10 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
         ports:
           - {{ .Values.vectorMetricsPort }}
   egress:
@@ -22,11 +27,18 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $serverLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $serverLabels "app.simcore.io/part-of" }}"
         ports:
           - {{ .Values.vmSinglePort }}
     # kubernetes_logs source needs API access for pod discovery and metadata
     - action: Allow
       protocol: TCP
       destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
         ports:
           - {{ .Values.kubernetesApiServerPort }}

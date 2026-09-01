@@ -1,7 +1,7 @@
 apiVersion: v2
-name: victoria-metrics-k8s-stack
+name: victoria-logs-single
 description: >
-  A wrapper chart for victoria-metrics-k8s-stack.
+  A wrapper chart for victoria-logs-single.
   It adds network policies. Once release containing
   https://github.com/VictoriaMetrics/operator/pull/2299
   is available and stable, we can drop the wrapper chart
