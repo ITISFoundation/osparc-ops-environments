@@ -126,6 +126,7 @@ print-labels: ## Print all docker node labels from all nodes (machines)
 _git_origin := $(shell git remote get-url origin)
 staging_prefix := staging_
 release_prefix := v
+staging_latest_tag := staging-latest
 _git_get_current_branch = $(shell git rev-parse --abbrev-ref HEAD)
 _git_get_formatted_staging_tag = ${staging_prefix}${name}$(version)
 _git_get_formatted_release_tag = ${release_prefix}$(version)
@@ -183,3 +184,9 @@ release-staging:  ## Helper to create a staging or production release in Github 
 		git push origin $$currentDesiredTag && \
 		echo "Created tag $$currentDesiredTag on git remote $(_git_origin)"; \
     fi
+	@echo "Updating movable tag $(staging_latest_tag) to point to latest staging release"; \
+	git tag -d $(staging_latest_tag) >/dev/null 2>&1 || true; \
+	git push --delete $(_git_origin) $(staging_latest_tag) >/dev/null 2>&1 || true; \
+	git tag $(staging_latest_tag) && \
+	git push origin $(staging_latest_tag) && \
+	echo "Updated tag $(staging_latest_tag) on git remote $(_git_origin)"
