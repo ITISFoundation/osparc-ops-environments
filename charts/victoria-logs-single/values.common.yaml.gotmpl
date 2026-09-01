@@ -136,3 +136,10 @@ victoria-logs-single:
       requests:
         cpu: "500m"
         memory: 512Mi
+
+  dashboards:
+    enabled: true
+    labels:
+      grafana_dashboard: "true_string"
+    annotations:
+      dashboard_folder: "OPS Apps"

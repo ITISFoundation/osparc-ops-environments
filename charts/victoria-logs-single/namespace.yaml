@@ -12,4 +12,8 @@ kind: Namespace
 metadata:
   name: victoria-logs-single
   labels:
+    # vectordev needs privileged more to access logs
+    # vm-single chart does not allow deploying vectordev in
+    # a separate namespace. So, vmsingle and vector go to the
+    # same privileged namespace.
     pod-security.kubernetes.io/enforce: privileged

@@ -25,3 +25,9 @@ spec:
   endpoints:
     - port: http
       path: {{ $pathPrefix }}/metrics
+      # alerts vlhealth/victorialogs configured in `victoria-metrics-k8s-stack`
+      # rely on job=~".*victorialogs.*". To make them work, we need to adjust
+      # the job label
+      relabelConfigs:
+        - targetLabel: job
+          replacement: victorialogs
