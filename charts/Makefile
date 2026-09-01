@@ -13,7 +13,7 @@ CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
 # Note on HELM_DIFF_USE_UPGRADE_DRY_RUN:
 # helm-diff renders with `helm template` by default, where `lookup` and API
-# capabilities resolve empty — charts using them would show permanent phantom diffs.
+# capabilities resolve empty - charts using them would show permanent phantom diffs.
 # See https://github.com/databus23/helm-diff/issues/253
 HELM_DIFF_ENV := HELM_DIFF_USE_UPGRADE_DRY_RUN=true
 
