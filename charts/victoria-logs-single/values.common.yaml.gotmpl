@@ -2,6 +2,7 @@
 {{- $pathPrefix := "/logs" }}
 {{- $vectorMetricsPort := 9090 }}
 {{- $vmSinglePort := 9428 }}
+{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
@@ -52,11 +53,10 @@ victoria-logs-single:
     podMonitor:
       enabled: true
 
+    # vector needs write access to hostPath /var/lib/vector for checkpoints,
+    # running as non-root is not feasible: https://github.com/vectordotdev/vector/issues/1599
+    # also see https://github.com/vectordotdev/helm-charts/issues/266
     podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
       seccompProfile:
         type: RuntimeDefault
 
@@ -90,7 +90,7 @@ victoria-logs-single:
           namespace: "{{ .Release.Namespace }}"
           traefik.ingress.kubernetes.io/router.tls: "true"
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: traefik-logs-strip-prefix@kubernetescrd,traefik-traefik-basic-auth@kubernetescrd # namespace + middleware name
+          traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
       hosts:
         - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
           path:
@@ -98,14 +98,7 @@ victoria-logs-single:
           pathType: Prefix
 
     vmServiceScrape:
-      enabled: true
-      # fix wrong metrics path (chart templates don't account for http.pathPrefix)
-      # example of fix for Promethes Pod Monitor https://github.com/VictoriaMetrics/helm-charts/pull/3073
-      # no fix for vmServiceScrape available
-      relabelings:
-        - action: replace
-          targetLabel: __metrics_path__
-          replacement: {{ $pathPrefix }}/metrics
+      enabled: false # added in ./templates since vm-single templates don't set correct metrics path
 
     http:
       - name: http
@@ -138,8 +131,8 @@ victoria-logs-single:
 
     resources:
       limits:
-        cpu: "500m"
+        cpu: "2"
         memory: 2Gi
       requests:
-        cpu: "2"
+        cpu: "500m"
         memory: 512Mi

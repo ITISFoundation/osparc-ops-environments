@@ -1,0 +1,27 @@
+# chart templates don't account for http.pathPrefix in metrics endpoints
+# Pod Monitor fix not released yet: https://github.com/VictoriaMetrics/helm-charts/pull/3073
+# VMServiceScrape: no fix available at all
+
+{{- $single := index .Values "victoria-logs-single" }}
+{{- $pathPrefix := index $single.server.extraArgs "http.pathPrefix" }}
+
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: {{ .Release.Name }}-server
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: victoria-logs-single
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: server
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: victoria-logs-single
+  endpoints:
+    - port: http
+      path: {{ $pathPrefix }}/metrics
