@@ -93,7 +93,7 @@ victoria-logs-single:
           request:
             headers:
               # overwrite default headers to include source_type and exclude less useful stream
-              VL-Stream-Fields: source_typea,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+              VL-Stream-Fields: source_type,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
 
     # /proc and /sys are not needed for kubernetes_logs source (KSV-0121)
     defaultVolumes:
