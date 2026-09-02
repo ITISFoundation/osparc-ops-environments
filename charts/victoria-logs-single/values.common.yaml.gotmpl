@@ -22,7 +22,7 @@ victoria-logs-single:
     image:
       base: debian
 
-    customConfig:
+    customConfig: # extends default vector config (only includes kubernetes logs)
       sources:
         # Host systemd journal (kubelet, containerd, kernel, ...).
         # Assumes persistent journald: Storage=persistent in journald.conf
@@ -33,8 +33,7 @@ victoria-logs-single:
           current_boot_only: true
 
       transforms:
-        # Trim journald events to a low-cardinality, useful field set.
-        journald_parser:
+        journald_parser: # Trim journald events to a low-cardinality, useful field set.
           type: remap
           inputs: [journald]
           source: |
@@ -75,7 +74,7 @@ victoria-logs-single:
             }
 
       sinks:
-        vlogs_journald: # endpoint is configured automatically by charta
+        vlogs_journald: # endpoint is configured automatically by victoria logs charts's template
           type: elasticsearch
           inputs: [journald_parser]
           mode: bulk
