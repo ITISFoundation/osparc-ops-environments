@@ -1,0 +1,145 @@
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.13.8/charts/victoria-logs-single/values.yaml
+{{- $pathPrefix := "/logs" }}
+{{- $vectorMetricsPort := 9090 }}
+{{- $vmSinglePort := 9428 }}
+{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
+vmSinglePort: {{ $vmSinglePort }} # easy to use in templates (instead of values extracting)
+
+victoria-logs-single:
+  global:
+    image:
+      registry: quay.io # common registry we already use for other workloads
+
+  # scrape logs and send them to VictoriaLogs
+  vector:
+    enabled: true
+
+    # /proc and /sys are not needed for kubernetes_logs source (KSV-0121)
+    defaultVolumes:
+      - name: var-log
+        hostPath:
+          path: "/var/log/"
+      - name: var-lib
+        hostPath:
+          path: "/var/lib/"
+    defaultVolumeMounts:
+      - name: var-log
+        mountPath: "/var/log/"
+        readOnly: true
+      - name: var-lib
+        mountPath: "/var/lib"
+        readOnly: true
+
+    containerPorts:
+      - name: prom-exporter
+        containerPort: {{ $vectorMetricsPort }} # define explicitly. do not rely on chart defaults as they may change
+        protocol: TCP
+
+    podLabels: # use in network policy. don't rely on chart labels as they can change
+      app.simcore.io/name: victoria-logs-single-vector
+      app.simcore.io/part-of: {{ .Release.Name }}
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+
+    podMonitor:
+      enabled: true
+
+    # vector needs write access to hostPath /var/lib/vector for checkpoints,
+    # running as non-root is not feasible: https://github.com/vectordotdev/vector/issues/1599
+    # also see https://github.com/vectordotdev/helm-charts/issues/266
+    podSecurityContext:
+      seccompProfile:
+        type: RuntimeDefault
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+
+  # victoria-logs server. store and serve logs
+  server:
+    replicaCount: 1
+
+    # https://docs.victoriametrics.com/victorialogs/#retention
+    retentionPeriod: 30d
+    # https://docs.victoriametrics.com/victorialogs/#percentage-based-disk-space-limit
+    retentionDiskSpaceUsage: 95
+
+    extraArgs:
+      http.pathPrefix: {{ $pathPrefix | quote }}
+
+    persistentVolume:
+      enabled: true
+      storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
+      size: 100Gi
+
+    ingress:
+      enabled: true
+      annotations:
+          namespace: "{{ .Release.Namespace }}"
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
+      hosts:
+        - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+          path:
+            - {{ $pathPrefix | quote }}
+          pathType: Prefix
+
+    vmServiceScrape:
+      enabled: false # added in ./templates since vm-single templates don't set correct metrics path
+
+    http:
+      - name: http
+        primary: true
+        value: :{{ $vmSinglePort }} # define explicitly. do not rely on chart defaults as they may change
+
+    podLabels: # use in network policy. don't rely on chart labels as they can change
+      app.simcore.io/name: victoria-logs-single
+      app.simcore.io/part-of: {{ .Release.Name }}
+
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+
+    # Schedule pods on different nodes if possible (HA)
+    # https://stackoverflow.com/a/64958458/12124525
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "kubernetes.io/hostname"
+        whenUnsatisfiable: DoNotSchedule
+        # hardcoded due to https://github.com/VictoriaMetrics/helm-charts/issues/2219
+        labelSelector:
+          matchLabels:
+            app: server
+            app.kubernetes.io/instance: victoria-logs
+            app.kubernetes.io/name: victoria-logs-single
+
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+
+    resources:
+      limits:
+        cpu: "2"
+        memory: 2Gi
+      requests:
+        cpu: "500m"
+        memory: 512Mi
+
+  dashboards:
+    enabled: true
+    labels:
+      grafana_dashboard: "true_string"
+    annotations:
+      dashboard_folder: "OPS Apps"

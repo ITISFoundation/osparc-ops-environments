@@ -11,13 +11,17 @@ include ${REPO_BASE_DIR}/charts/.tools.Makefile
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
+# Note on HELM_DIFF_USE_UPGRADE_DRY_RUN:
+# helm-diff renders with `helm template` by default, where `lookup` and API
+# capabilities resolve empty - charts using them would show permanent phantom diffs.
+# See https://github.com/databus23/helm-diff/issues/253
+HELM_DIFF_ENV := HELM_DIFF_USE_UPGRADE_DRY_RUN=true
+
 # Example of usage:
 # make helmfile-diff HELMFILE_EXTRA_ARGS='--selector name=traefik'
 HELMFILE_EXTRA_ARGS ?=
-HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 
-CHART_TEMPLATE_DIR := $(REPO_BASE_DIR)/charts/.template
-CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
+HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
 
 TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 
@@ -29,16 +33,6 @@ TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 .helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) -f $(word 2,$^) $*
-
-.PHONY: add-new-chart-directory-from-template
-add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart directory with standard structure
-	$(eval CHART_DIR := $(REPO_BASE_DIR)/charts/$(CHART_NAME))
-	@mkdir $(CHART_DIR)
-	@echo "CHART_NAME=$(CHART_NAME)" > $(CHART_DIR)/.env
-	@$(foreach tmpl,$(CHART_TEMPLATES),\
-		$(call jinja, $(tmpl), $(CHART_DIR)/.env, $(CHART_DIR)/$(notdir $(tmpl)));\
-	)
-	@rm $(CHART_DIR)/.env
 
 #
 # Artifacts
