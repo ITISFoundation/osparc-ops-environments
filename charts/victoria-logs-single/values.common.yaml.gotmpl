@@ -74,7 +74,7 @@ victoria-logs-single:
             }
 
       sinks:
-        vlogs_journald: # endpoint is configured automatically by victoria logs charts's template
+        vlogs_journald: # endpoint is configured automatically by the victoria-logs chart template
           type: elasticsearch
           inputs: [journald_parser]
           mode: bulk
