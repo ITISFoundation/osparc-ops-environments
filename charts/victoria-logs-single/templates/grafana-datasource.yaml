@@ -1,9 +1,11 @@
 # https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/README.md#sidecar-for-datasources
 {{- $single := index .Values "victoria-logs-single" }}
-{{- $svcName := printf "%s-server" .Release.Name }}
 {{- $pathPrefix := index $single.server.extraArgs "http.pathPrefix" }}
 {{- $clusterDomain := index $single "global" "cluster" "dnsDomain" }}
 {{- $vmuiUrl := printf "https://%s%s/select/vmui/" .Values.ingressHost $pathPrefix }}
+
+{{- /* reuse the subchart's own naming helper so the service name stays in sync with upstream */}}
+{{- $svcName := include "vm.plain.fullname" (dict "helm" (dict "Chart" .Chart "Release" .Release "Capabilities" .Capabilities "Values" $single) "appKey" "server") }}
 
 apiVersion: v1
 kind: Secret
