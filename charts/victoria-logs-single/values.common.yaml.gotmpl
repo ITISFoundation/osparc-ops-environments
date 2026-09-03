@@ -1,10 +1,11 @@
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.13.8/charts/victoria-logs-single/values.yaml
 {{- $ingressHttpPathPrefix := "/logs" }}
+{{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
 {{- $vectorMetricsPort := 9090 }}
 {{- $vmSinglePort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 
-ingressHost: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+ingressHost: {{ $ingressHost }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
@@ -205,7 +206,7 @@ victoria-logs-single:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
           traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
       hosts:
-        - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        - name: {{ $ingressHost | quote }}
           path:
             - {{ $ingressHttpPathPrefix | quote }}
           pathType: Prefix
