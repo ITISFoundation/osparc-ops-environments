@@ -180,6 +180,10 @@ victoria-logs-single:
   server:
     replicaCount: 1
 
+    # take over the control of naming so we can reuse it in our templates
+    # robustly (e.g. in datasource url)
+    fullnameOverride: {{ .Release.Name }}-server
+
     # https://docs.victoriametrics.com/victorialogs/#retention
     retentionPeriod: 30d
     # https://docs.victoriametrics.com/victorialogs/#percentage-based-disk-space-limit
