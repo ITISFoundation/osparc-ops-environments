@@ -17,6 +17,8 @@ victoria-logs-single:
   global:
     image:
       registry: quay.io # common registry we already use for other workloads
+    cluster:
+      dnsDomain: cluster.local.
 
   # scrape logs and send them to VictoriaLogs
   vector:

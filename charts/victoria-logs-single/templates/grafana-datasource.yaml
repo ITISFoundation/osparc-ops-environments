@@ -1,11 +1,11 @@
 # https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/README.md#sidecar-for-datasources
-{{- $single := index .Values "victoria-logs-single" }}
-{{- $pathPrefix := index $single.server.extraArgs "http.pathPrefix" }}
-{{- $clusterDomain := index $single "global" "cluster" "dnsDomain" }}
-{{- $vmuiUrl := printf "https://%s%s/select/vmui/" .Values.ingressHost $pathPrefix }}
+{{- $vmSingleValues := index .Values "victoria-logs-single" }}
 
-{{- /* reuse the subchart's own naming helper so the service name stays in sync with upstream */}}
-{{- $svcName := include "vm.plain.fullname" (dict "helm" (dict "Chart" .Chart "Release" .Release "Capabilities" .Capabilities "Values" $single) "appKey" "server") }}
+{{- $svcName := printf "%s-server" .Release.Name }}
+{{- $clusterDomain := index $vmSingleValues "global" "cluster" "dnsDomain" }}
+{{- $pathPrefix := index $vmSingleValues.server.extraArgs "http.pathPrefix" }}
+
+{{- $vmuiUrl := printf "https://%s%s/select/vmui/" .Values.ingressHost $pathPrefix }}
 
 apiVersion: v1
 kind: Secret
@@ -20,6 +20,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
     helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 stringData:
+  # https://grafana.com/grafana/plugins/victoriametrics-logs-datasource/
   datasource.yaml: |-
     apiVersion: 1
     datasources:
