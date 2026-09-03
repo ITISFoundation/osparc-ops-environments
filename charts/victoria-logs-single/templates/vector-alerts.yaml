@@ -20,7 +20,8 @@ spec:
           annotations:
             summary: >-
               vector_build_info is absent. Either no vector pod is running or scraping
-              is broken. Log shipping to VictoriaLogs is most likely down.
+              is broken. Other vector alerts are probably useless, since no vector metrics
+              are present
 
         - alert: VectorSinkErrors
           expr: |
@@ -33,7 +34,7 @@ spec:
           annotations:
             summary: >-
               Vector sink {{`{{ $labels.component_id }}`}} has been failing continuously.
-              Logs are not reaching VictoriaLogs.
+              No logs from this source are being gathered.
 
         - alert: VectorBufferNearlyFull
           expr: |
@@ -46,8 +47,8 @@ spec:
           annotations:
             summary: >-
               Vector disk buffer for sink {{`{{ $labels.component_id }}`}} is
-              {{`{{ $value | humanizePercentage }}`}} full. At 100% events are dropped
-              (when_full: drop_newest), so the sink is likely not draining.
+              {{`{{ $value | humanizePercentage }}`}} is almost full. At 100%
+              logs will be missing.
 
         - alert: VectorEventsDiscarded
           expr: |
