@@ -22,6 +22,11 @@ victoria-logs-single:
     image:
       base: debian
 
+    persistence: # done to keep logs from disk buffer and survive vector restarts
+      hostPath:
+        enabled: true
+        path: /var/lib/vector
+
     customConfig: # extends default vector config (only includes kubernetes logs)
       sources:
         # Host systemd journal (kubelet, containerd, kernel, ...).
@@ -90,6 +95,13 @@ victoria-logs-single:
               AccountID: "0"
               ProjectID: "0"
         vlogs:
+          # when endpoint is not available keep logs in disk buffer to avoid losing them
+          # once endpoint is back, logs will be sent from buffer to endpoint
+          # https://vector.dev/docs/architecture/buffering-model/#disk-buffers
+          buffer:
+            type: disk
+            max_size: 1073741824  # 1Gi
+            when_full: drop_newest
           request:
             headers:
               # overwrite default headers to include source_type and exclude less useful stream

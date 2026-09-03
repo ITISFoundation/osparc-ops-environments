@@ -1,0 +1,63 @@
+# vmalert picks these up from any namespace (selectAllByDefault: true in victoria-metrics-k8s-stack)
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: {{ .Release.Name }}-vector
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  groups:
+    - name: vl-vector-logs-collector
+      rules:
+        - alert: VectorMetricsAbsent
+          expr: absent(vector_build_info)
+          for: 15m
+          labels:
+            severity: info
+          annotations:
+            summary: >-
+              vector_build_info is absent. Either no vector pod is running or scraping
+              is broken. Log shipping to VictoriaLogs is most likely down.
+
+        - alert: VectorSinkErrors
+          expr: |
+            sum by (component_id) (
+              rate(vector_component_errors_total{component_kind="sink"}[5m])
+            ) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Vector sink {{`{{ $labels.component_id }}`}} has been failing continuously.
+              Logs are not reaching VictoriaLogs.
+
+        - alert: VectorBufferNearlyFull
+          expr: |
+            sum by (component_id) (vector_buffer_byte_size)
+            / sum by (component_id) (vector_buffer_max_byte_size)
+            > 0.8
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Vector disk buffer for sink {{`{{ $labels.component_id }}`}} is
+              {{`{{ $value | humanizePercentage }}`}} full. At 100% events are dropped
+              (when_full: drop_newest), so the sink is likely not draining.
+
+        - alert: VectorEventsDiscarded
+          expr: |
+            sum by (component_id) (
+              rate(vector_component_discarded_events_total[5m])
+            ) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Vector component {{`{{ $labels.component_id }}`}} is dropping events
+              ({{`{{ $value | humanize }}`}}/s). These logs are lost permanently.
