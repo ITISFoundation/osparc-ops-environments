@@ -94,7 +94,7 @@ services:
           memory: 5G
         reservations:
           cpus: "0.1"
-          memory: 1200M
+          memory: 1200M # 1.2G (we use 1200M since 1.2G is not rounded nicely during convertion)
       labels:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
