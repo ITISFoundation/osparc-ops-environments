@@ -51,6 +51,10 @@ services:
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:6.0.5
+
+    # Give more time for graceful shutdown to avoid locks (e.g.
+    # The journal is already locked by another process)
+    stop_grace_period: 2m
     init: true
     configs:
     - source: graylog_config
@@ -77,15 +81,20 @@ services:
           - graylog
     deploy:
       replicas: 1
+      update_config:
+        order: stop-first # never run two tasks against the same volume
+        parallelism: 1
       restart_policy:
         condition: on-failure
+        delay: 20s
+        max_attempts: 3 # prevent crash loops
       resources:
         limits:
           cpus: "2.00"
           memory: 5G
         reservations:
           cpus: "0.1"
-          memory: 1G
+          memory: 1200M # 1.2G (we use 1200M since 1.2G is not rounded nicely during convertion)
       labels:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
