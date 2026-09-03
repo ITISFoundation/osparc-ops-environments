@@ -51,7 +51,10 @@ services:
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:6.0.5
-    stop_grace_period: 2m # give the JVM time to flush + release the lock
+
+    # Give more time for graceful shutdown to avoid locks (e.g.
+    # The journal is already locked by another process)
+    stop_grace_period: 2m
     init: true
     configs:
     - source: graylog_config
