@@ -1,12 +1,17 @@
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.13.8/charts/victoria-logs-single/values.yaml
-{{- $pathPrefix := "/logs" }}
+{{- $ingressHttpPathPrefix := "/logs" }}
 {{- $vectorMetricsPort := 9090 }}
-{{- $vmSinglePort := 9428 }}
+{{- $vmSinglePort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+ingressHost: {{ requiredEnv "K8S_MONITORING_FQDN" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
 vmSinglePort: {{ $vmSinglePort }} # easy to use in templates (instead of values extracting)
+
+grafanaLogsDatasourceType: victoriametrics-logs-datasource
+grafanaLogsDatasourceUid: victoria-logs
 
 victoria-logs-single:
   global:
@@ -103,9 +108,21 @@ victoria-logs-single:
             max_size: 1073741824  # 1Gi
             when_full: drop_newest
           request:
+            # https://docs.victoriametrics.com/victorialogs/data-ingestion/#http-headers
             headers:
               # overwrite default headers to include source_type and exclude less useful stream
               VL-Stream-Fields: source_type,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+              # remove some noisy fields
+              # (see all fields at https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/#line-fields)
+              VL-Ignore-Fields: >-
+                kubernetes.node_labels.*,
+                kubernetes.pod_labels.*,
+                kubernetes.pod_annotations.*,
+                kubernetes.namespace_labels.*,
+                kubernetes.pod_ip,
+                kubernetes.pod_ips,
+                kubernetes.container_image_id,
+                file
 
     # /proc and /sys are not needed for kubernetes_logs source (KSV-0121)
     defaultVolumes:
@@ -167,7 +184,7 @@ victoria-logs-single:
     retentionDiskSpaceUsage: 95
 
     extraArgs:
-      http.pathPrefix: {{ $pathPrefix | quote }}
+      http.pathPrefix: {{ $ingressHttpPathPrefix | quote }}
 
     persistentVolume:
       enabled: true
@@ -184,7 +201,7 @@ victoria-logs-single:
       hosts:
         - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
           path:
-            - {{ $pathPrefix | quote }}
+            - {{ $ingressHttpPathPrefix | quote }}
           pathType: Prefix
 
     vmServiceScrape:

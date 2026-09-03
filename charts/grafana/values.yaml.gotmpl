@@ -17,6 +17,7 @@ grafana:
         - port: {{ requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" | int }}
         - port: 443 # install plugins from outside
         - port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" | int }}
+        - port: {{ requiredEnv "VICTORIA_LOGS_HTTP_PORT" | int }}
 
   persistence:
     enabled: true
@@ -171,3 +172,6 @@ grafana:
   # plugins (e.g. elasticsearch) can be updated on the read-only root filesystem
   # remove once https://github.com/grafana-community/helm-charts/issues/729 is fixed
   shadowBundledPlugins: true
+
+  plugins:
+  - victoriametrics-logs-datasource
