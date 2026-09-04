@@ -188,7 +188,7 @@ victoria-logs-single:
     # https://docs.victoriametrics.com/victorialogs/#retention
     retentionPeriod: 30d
     # https://docs.victoriametrics.com/victorialogs/#percentage-based-disk-space-limit
-    retentionDiskSpaceUsage: 95
+    retentionMaxDiskUsagePercent: 90
 
     extraArgs:
       http.pathPrefix: {{ $ingressHttpPathPrefix | quote }}
