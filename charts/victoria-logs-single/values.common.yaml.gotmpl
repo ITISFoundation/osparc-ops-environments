@@ -1,17 +1,25 @@
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-logs-single-0.13.8/charts/victoria-logs-single/values.yaml
-{{- $pathPrefix := "/logs" }}
+{{- $ingressHttpPathPrefix := "/logs" }}
+{{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
 {{- $vectorMetricsPort := 9090 }}
-{{- $vmSinglePort := 9428 }}
+{{- $vmSinglePort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+ingressHost: {{ $ingressHost }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
 vmSinglePort: {{ $vmSinglePort }} # easy to use in templates (instead of values extracting)
 
+grafanaLogsDatasourceType: victoriametrics-logs-datasource
+grafanaLogsDatasourceUid: victoria-logs
+
 victoria-logs-single:
   global:
     image:
       registry: quay.io # common registry we already use for other workloads
+    cluster:
+      dnsDomain: cluster.local.
 
   # scrape logs and send them to VictoriaLogs
   vector:
@@ -21,6 +29,11 @@ victoria-logs-single:
     # https://github.com/vectordotdev/vector/issues/19325#issuecomment-2816718363
     image:
       base: debian
+
+    persistence: # done to keep logs from disk buffer and survive vector restarts
+      hostPath:
+        enabled: true
+        path: /var/lib/vector
 
     customConfig: # extends default vector config (only includes kubernetes logs)
       sources:
@@ -90,10 +103,29 @@ victoria-logs-single:
               AccountID: "0"
               ProjectID: "0"
         vlogs:
+          # when endpoint is not available keep logs in disk buffer to avoid losing them
+          # once endpoint is back, logs will be sent from buffer to endpoint
+          # https://vector.dev/docs/architecture/buffering-model/#disk-buffers
+          buffer:
+            type: disk
+            max_size: 1073741824  # 1Gi
+            when_full: drop_newest
           request:
+            # https://docs.victoriametrics.com/victorialogs/data-ingestion/#http-headers
             headers:
               # overwrite default headers to include source_type and exclude less useful stream
               VL-Stream-Fields: source_type,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+              # remove some noisy fields
+              # (see all fields at https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/#line-fields)
+              VL-Ignore-Fields: >-
+                kubernetes.node_labels.*,
+                kubernetes.pod_labels.*,
+                kubernetes.pod_annotations.*,
+                kubernetes.namespace_labels.*,
+                kubernetes.pod_ip,
+                kubernetes.pod_ips,
+                kubernetes.container_image_id,
+                file
 
     # /proc and /sys are not needed for kubernetes_logs source (KSV-0121)
     defaultVolumes:
@@ -149,13 +181,17 @@ victoria-logs-single:
   server:
     replicaCount: 1
 
+    # take over the control of naming so we can reuse it in our templates
+    # robustly (e.g. in datasource url)
+    fullnameOverride: {{ .Release.Name }}-server
+
     # https://docs.victoriametrics.com/victorialogs/#retention
     retentionPeriod: 30d
     # https://docs.victoriametrics.com/victorialogs/#percentage-based-disk-space-limit
     retentionDiskSpaceUsage: 95
 
     extraArgs:
-      http.pathPrefix: {{ $pathPrefix | quote }}
+      http.pathPrefix: {{ $ingressHttpPathPrefix | quote }}
 
     persistentVolume:
       enabled: true
@@ -170,9 +206,9 @@ victoria-logs-single:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
           traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
       hosts:
-        - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        - name: {{ $ingressHost | quote }}
           path:
-            - {{ $pathPrefix | quote }}
+            - {{ $ingressHttpPathPrefix | quote }}
           pathType: Prefix
 
     vmServiceScrape:

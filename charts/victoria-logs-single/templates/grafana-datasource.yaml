@@ -1,0 +1,35 @@
+# https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/README.md#sidecar-for-datasources
+{{- $vmSingleValues := index .Values "victoria-logs-single" }}
+
+{{- $svcName := $vmSingleValues.server.fullnameOverride }}
+{{- $clusterDomain := index $vmSingleValues "global" "cluster" "dnsDomain" }}
+{{- $pathPrefix := index $vmSingleValues.server.extraArgs "http.pathPrefix" }}
+
+{{- $vmuiUrl := printf "https://%s%s/select/vmui/" .Values.ingressHost $pathPrefix }}
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: victoria-logs-grafana-datasource
+  labels:
+    # special label to be picked up by the grafana sidecar
+    grafana_datasource: true_string
+    # TODO: add reusable common labels
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+stringData:
+  # https://grafana.com/grafana/plugins/victoriametrics-logs-datasource/
+  datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: VictoriaLogs
+        type: {{ .Values.grafanaLogsDatasourceType }}
+        uid: {{ .Values.grafanaLogsDatasourceUid }}
+        access: proxy
+        url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ .Values.vmSinglePort }}{{ $pathPrefix }}/
+        # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
+        editable: false
+        jsonData:
+          vmuiUrl: {{ $vmuiUrl | quote }}
