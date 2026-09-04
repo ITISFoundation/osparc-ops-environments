@@ -1,0 +1,21 @@
+apiVersion: v2
+name: victoria-traces
+description: >
+  A wrapper chart for victoria-traces-single.
+  It adds network policies. Once release containing
+  https://github.com/VictoriaMetrics/operator/pull/2299
+  is available and stable, we can drop the wrapper chart
+
+type: application
+
+version: 0.0.1 # unused
+
+appVersion: 0.0.1 # unused
+
+dependencies:
+  - name: victoria-traces-single
+    version: 0.1.11
+    repository: "https://victoriametrics.github.io/helm-charts/"
+  - name: opentelemetry-collector
+    version: 0.162.0
+    repository: "https://open-telemetry.github.io/opentelemetry-helm-charts"

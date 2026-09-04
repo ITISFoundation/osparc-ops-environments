@@ -1,0 +1,139 @@
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
+{{- $otlpGrpcPortNumber := 4317 }}
+{{- $otlpHttpPortNumber := 4318 }}
+
+{{- $victoriaTracesFullname := "victoria-traces-single" }}
+
+victoria-traces-single:
+
+  {{- $persistentVolumeSizeGi := 10 }}
+  {{- $victoriaTracesMaxDiskSpaceUsageGi := 9 }}
+  {{- $httpPathPrefix := "/traces" }}
+  {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+  {{- if ge $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi }}
+  {{- fail (printf "victoriaTracesMaxDiskSpaceUsageGi (%d) must be less than persistentVolumeSizeGi (%d)" $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi) }}
+  {{- end }}
+
+  fullnameOverride: {{ $victoriaTracesFullname | quote}}
+
+  global:
+    image:
+      registry: quay.io # common registry we already use for other workloads
+    cluster:
+      dnsDomain: cluster.local.
+
+  server:
+    enabled: true
+
+    replicaCount: 1
+
+    http:
+      - name: http
+        primary: true
+        value: :10428
+
+    extraArgs:
+      http.pathPrefix: {{ $httpPathPrefix | quote }}
+
+      # otlp https://github.com/VictoriaMetrics/helm-charts/issues/2761
+      otlpGRPCListenAddr: :{{ $otlpGrpcPortNumber }}
+      otlpGRPC.tls: "false"
+
+    extraContainerPorts:
+      - name: otlp-grpc
+        containerPort: {{ $otlpGrpcPortNumber }}
+        protocol: TCP
+
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+
+    persistentVolume:
+      enabled: true
+      size: {{ $persistentVolumeSizeGi }}Gi
+      storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" }}
+
+    podLabels: # use in network policy. don't rely on chart labels as they can change
+      app.simcore.io/name: victoria-traces-single
+      app.simcore.io/part-of: {{ .Release.Name }}
+
+    # https://docs.victoriametrics.com/victoriatraces/#retention
+    retentionPeriod: 2 # no char unit means Months
+    # https://docs.victoriametrics.com/victoriatraces/#retention-by-disk-space-usage
+    retentionDiskSpaceUsage: {{ $victoriaTracesMaxDiskSpaceUsageGi }} # `GiB` unit added by chart automatically
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+    ingress:
+      enabled: true
+      annotations:
+        namespace: "{{ .Release.Namespace }}"
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
+      hosts:
+        - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+          port: http
+          path:
+            - {{ $httpPathPrefix | quote }}
+
+    vmServiceScrape:
+      enabled: true
+
+# https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-collector-0.162.0/charts/opentelemetry-collector/values.yaml
+opentelemetry-collector:
+
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:{{ $otlpGrpcPortNumber }}
+          http:
+            endpoint: 0.0.0.0:{{ $otlpHttpPortNumber }}
+    exporters:
+      otlp: # to vt traces (in-cluster gRPC service)
+        endpoint: {{ $victoriaTracesFullname }}-server.{{ .Release.Namespace }}.svc.cluster.local:{{ $otlpGrpcPortNumber }}
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [otlphttp,otlp]
+          processors: [batch,filter/drop_healthcheck]
+      telemetry:
+        metrics: # https://opentelemetry.io/docs/collector/internal-telemetry/#prometheus-endpoint-for-internal-metrics
+          readers:
+            - pull:
+                exporter:
+                  prometheus:
+                    host: '0.0.0.0'
+                    port: 8888
+        logs:
+          level: warn
+    processors:
+      batch:
+        timeout: 5s
+        send_batch_size: 8192
+      filter/drop_healthcheck:
+        error_mode: ignore
+        traces:
+          span:
+            - attributes["http.route"] == "/health"
+            - attributes["http.target"] == "/socket.io/"
+            - attributes["url.path"] == "/socket.io/"
+            - attributes["server.address"] == "/var/run/docker.sock"
+            - IsMatch(attributes["server.address"], "^monitoring..*")
+            - attributes["net.peer.name"] == "/var/run/docker.sock"
+            - attributes["http.route"] == "healthcheck_readiness_probe"
+            - attributes["http.route"] == "healthcheck_liveness_probe"
+            - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
+            - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
+            - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"

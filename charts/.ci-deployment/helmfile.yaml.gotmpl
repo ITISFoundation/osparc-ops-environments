@@ -11,6 +11,8 @@ repositories:
     url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
+  - name: open-telemetry
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
 
 releases:
   - name: security-hardening
@@ -88,8 +90,18 @@ releases:
     namespace: victoria-logs-single
     needs:
       - victoria-metrics-operator/victoria-metrics-operator
+      - victoria-metrics-operator/prometheus-operator-crds
     values:
       - victoria-logs-single/values.common.yaml.gotmpl
+
+  - name: victoria-traces
+    chart: ./victoria-traces
+    namespace: victoria-traces
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - victoria-traces/values.common.yaml.gotmpl
 
   - name: grafana
     chart: ./grafana
