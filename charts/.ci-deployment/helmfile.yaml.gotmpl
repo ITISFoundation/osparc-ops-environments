@@ -1,5 +1,12 @@
 # CI-only stub for static tests (trivy scan, helmfile lint, etc.)
 
+environments:
+  default:
+    values:
+      - helmfile_environment.yaml
+
+---
+
 repositories:
   - name: jetstack # cert-manager
     url: https://charts.jetstack.io
