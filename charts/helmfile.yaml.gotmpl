@@ -1,0 +1,271 @@
+environments:
+  default:
+    values:
+      - helmfile_environment.yaml
+
+---
+
+helmDefaults:
+  # wait for all resources to be ready before marking the release as successful
+  # this makes sure that releases are properly installed before continuing with
+  # dependant (via `needs`) releases. Read more via `helm install --help`
+  wait: true
+  waitForJobs: true
+  timeout: 600
+
+  # avoid errors on first installation
+  # passes --disable-validation to helm 3 diff plugin
+  disableValidation: true
+
+repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: victoria-metrics
+    url: https://victoriametrics.github.io/helm-charts
+  - name: cert-manager
+    url: https://charts.jetstack.io
+{{- if (.Values | get "aws_ebs_csi_driver.enabled" false) }}
+  - name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+{{- end }}
+{{- if (.Values | get "topolvm.enabled" false) }}
+  - name: topolvm
+    url: https://topolvm.github.io/topolvm
+{{- end }}
+
+
+{{- if and (.Values | get "aws_ebs_csi_driver.enabled" false) (.Values | get "topolvm.enabled" false) }}
+{{ fail "Enable only one: aws_ebs_csi_driver, topolvm: each defines a default storage class" }}
+{{- end }}
+
+releases:
+  - name: security-hardening
+    namespace: kube-system
+    chart: ./security-hardening
+    createNamespace: false
+    values:
+      - ./security-hardening/values.yaml.gotmpl
+      {{- range (.Values | get "security_hardening.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+
+  - name: traefik
+    namespace: '{{ requiredEnv "TRAEFIK_NAMESPACE" }}'
+    chart: ./traefik
+    createNamespace: false
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./traefik/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./traefik/namespace.yaml"]
+    needs:
+      - victoria-metrics-operator/prometheus-operator-crds
+      - cert-manager/cert-manager
+    values:
+      - ./traefik/values.common.yaml.gotmpl
+
+  - name: cert-manager
+    namespace: cert-manager
+    chart: ./cert-manager
+    createNamespace: false
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./cert-manager/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./cert-manager/namespace.yaml"]
+    values:
+      - ./cert-manager/values.common.yaml.gotmpl
+      {{- range (.Values | get "cert_manager.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+
+  # install prometheus crds. many charts expose metrics via prometheus CRDs
+  # victoria metrics operator can process prometheus CRDs,
+  # but they need to be installed separately
+  - name: prometheus-operator-crds
+    namespace: victoria-metrics-operator
+    chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
+    # the version shall be dictated by victoria metrics operator
+    # but then we cannot manage it with renovate and most likely
+    # it will get out-of-sync. We just use latest version for now.
+    # See https://github.com/VictoriaMetrics/helm-charts/issues/3155
+    version: 30.0.0
+
+  - name: victoria-metrics-operator
+    namespace: victoria-metrics-operator
+    chart: victoria-metrics/victoria-metrics-operator
+    # see available versions at
+    # https://github.com/VictoriaMetrics/helm-charts/releases?q=victoria-metrics-operator
+    version: 0.67.2
+    createNamespace: false
+    needs:
+      - cert-manager/cert-manager
+      # prometheus crds need to be installed separately
+      # see https://docs.victoriametrics.com/operator/integrations/prometheus/
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - ./victoria-metrics-operator/values.common.yaml.gotmpl
+      {{- range (.Values | get "victoria_metrics_operator.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./victoria-metrics-operator/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./victoria-metrics-operator/namespace.yaml"]
+
+  - name: victoria-metrics-k8s-stack
+    chart: ./victoria-metrics-k8s-stack
+    namespace: victoria-metrics-k8s-stack
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+      # vmalert creates alert rules for victoria-logs-single
+      # but we install victoria-logs-single separately,
+      # so we need to have victoria logs cluster running before
+      # to avoid having alert rules for non-existing metrics
+      # see https://github.com/VictoriaMetrics/helm-charts/issues/3182
+      - victoria-logs-single/victoria-logs-single
+    values:
+      - ./victoria-metrics-k8s-stack/values.common.yaml.gotmpl
+      {{- range (.Values | get "victoria_metrics_k8s_stack.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./victoria-metrics-k8s-stack/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./victoria-metrics-k8s-stack/namespace.yaml"]
+
+  - name: victoria-logs-single
+    chart: ./victoria-logs-single
+    namespace: victoria-logs-single
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+    values:
+      - victoria-logs-single/values.common.yaml.gotmpl
+      {{- range (.Values | get "victoria_logs_single.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./victoria-logs-single/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./victoria-logs-single/namespace.yaml"]
+
+  - name: grafana
+    namespace: grafana
+    chart: ./grafana
+    createNamespace: false
+    needs:
+      - victoria-metrics-operator/prometheus-operator-crds
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./grafana/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./grafana/namespace.yaml"]
+    values:
+      - ./grafana/values.yaml.gotmpl
+
+{{- if (.Values | get "aws_ebs_csi_driver.enabled" false) }}
+  - name: aws-ebs-csi-driver
+    namespace: aws-ebs-csi-driver
+    chart: ./aws-ebs-csi-driver
+    createNamespace: false
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./aws-ebs-csi-driver/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./aws-ebs-csi-driver/namespace.yaml"]
+    values:
+      - ./aws-ebs-csi-driver/values.yaml.gotmpl
+{{- end }}
+
+{{- if (.Values | get "topolvm.enabled" false) }}
+  - name: topolvm
+    namespace: topolvm
+    chart: ./topolvm
+    createNamespace: false
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - ./topolvm/values.yaml.gotmpl
+      {{- range (.Values | get "topolvm.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+    hooks:
+      # manage namespace
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./topolvm/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./topolvm/namespace.yaml"]
+      # https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/getting-started.md#install-instructions
+      - events:
+          - postsync  # cannot use presync for first install (namespace does not exist yet)
+        showlogs: true
+        command: kubectl
+        args: ["label", "namespace", "{{`{{ .Release.Namespace }}`}}", "topolvm.io/webhook=ignore"]
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["label", "namespace", "kube-system", "topolvm.io/webhook=ignore"]
+      # https://github.com/topolvm/topolvm/blob/topolvm-chart-v15.5.5/docs/uninstall.md#uninstall
+      - events:
+          - preuninstall
+        showlogs: true
+        command: kubectl
+        args: ["label", "namespace", "{{`{{ .Release.Namespace }}`}}", "topolvm.io/webhook-"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["label", "namespace", "kube-system", "topolvm.io/webhook-"]
+{{- end }}

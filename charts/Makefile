@@ -30,9 +30,9 @@ TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl
+.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl helmfile_environment.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) -f $(word 2,$^) $*
+	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
 
 #
 # Artifacts
