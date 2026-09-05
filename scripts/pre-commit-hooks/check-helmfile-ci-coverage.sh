@@ -3,7 +3,7 @@
 # Ensures every new chart is scanned by the Trivy PR workflow.
 set -euo pipefail
 
-exclude_dirs_regex='^(\..*|simcore-charts)$'
+exclude_dirs_regex='^(\..*)$'
 
 return_code=0
 
