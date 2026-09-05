@@ -46,9 +46,9 @@ spec:
             severity: warning
           annotations:
             summary: >-
-              Vector disk buffer for sink {{`{{ $labels.component_id }}`}} is
-              {{`{{ $value | humanizePercentage }}`}} is almost full. At 100%
-              logs will be missing.
+              Vector disk buffer for sink {{`{{ $labels.component_id }}`}}
+              ({{`{{ $labels.component_type }}`}}) is {{`{{ $value | humanizePercentage }}`}}
+              is almost full. At 100% logs will be missing.
 
         - alert: VectorEventsDiscarded
           expr: |
