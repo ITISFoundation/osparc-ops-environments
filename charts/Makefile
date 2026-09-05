@@ -30,19 +30,16 @@ TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl
+.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl helmfile_environment.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) -f $(word 2,$^) $*
+	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
 
 #
 # Artifacts
 #
 
-helmfile.yaml.gotmpl: simcore-charts/helmfile.yaml
-	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml.gotmpl
-
-simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts directory
-	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
+helmfile_environment.yaml:
+	cp $(CONFIG_DIR)/$@ $@
 
 $(TRIVY_TEMPLATES_DIR):
 	# generate helm templates for trivy scanning

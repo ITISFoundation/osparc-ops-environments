@@ -1,7 +1,5 @@
-k8s_hosts.ini
+# Ignore Helm chart packages
 *.tgz
 
-helmfile.yml
-helmfile.yaml
-helmfile.yml.gotmpl
-helmfile.yaml.gotmpl
+helmfile_environment.yml
+helmfile_environment.yaml
