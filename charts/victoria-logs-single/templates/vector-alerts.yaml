@@ -25,7 +25,7 @@ spec:
 
         - alert: VectorSinkErrors
           expr: |
-            sum by (component_id) (
+            sum by (component_id, component_type) (
               rate(vector_component_errors_total{component_kind="sink"}[5m])
             ) > 0
           for: 15m
@@ -33,26 +33,26 @@ spec:
             severity: warning
           annotations:
             summary: >-
-              Vector sink {{`{{ $labels.component_id }}`}} has been failing continuously.
-              No logs from this source are being gathered.
+              Vector sink {{`{{ $labels.component_id }}`}} ({{`{{ $labels.component_type }}`}})
+              has been failing continuously. No logs from this source are being gathered.
 
         - alert: VectorBufferNearlyFull
           expr: |
-            sum by (component_id) (vector_buffer_byte_size)
-            / sum by (component_id) (vector_buffer_max_byte_size)
+            sum by (component_id, component_type) (vector_buffer_byte_size)
+            / sum by (component_id, component_type) (vector_buffer_max_byte_size)
             > 0.8
           for: 15m
           labels:
             severity: warning
           annotations:
             summary: >-
-              Vector disk buffer for sink {{`{{ $labels.component_id }}`}} is
-              {{`{{ $value | humanizePercentage }}`}} is almost full. At 100%
-              logs will be missing.
+              Vector disk buffer for sink {{`{{ $labels.component_id }}`}}
+              ({{`{{ $labels.component_type }}`}}) is {{`{{ $value | humanizePercentage }}`}}
+              is almost full. At 100% logs will be missing.
 
         - alert: VectorEventsDiscarded
           expr: |
-            sum by (component_id) (
+            sum by (component_id, component_type) (
               rate(vector_component_discarded_events_total[5m])
             ) > 0
           for: 15m
@@ -60,5 +60,31 @@ spec:
             severity: warning
           annotations:
             summary: >-
-              Vector component {{`{{ $labels.component_id }}`}} is dropping events
-              ({{`{{ $value | humanize }}`}}/s). These logs are lost permanently.
+              Vector component {{`{{ $labels.component_id }}`}} ({{`{{ $labels.component_type }}`}})
+              is dropping events ({{`{{ $value | humanize }}`}}/s). These logs are lost permanently.
+
+        - alert: VectorSourceNoEventsReceived
+          expr: |
+            sum by (component_id, component_type) (
+              rate(vector_component_received_events_total{component_kind="source"}[5m])
+            ) == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Vector source {{`{{ $labels.component_id }}`}} ({{`{{ $labels.component_type }}`}})
+              is not receiving events
+
+        - alert: VectorSinkNoEventsSent
+          expr: |
+            sum by (component_id, component_type) (
+              rate(vector_component_sent_events_total{component_kind="sink"}[5m])
+            ) == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Vector sink {{`{{ $labels.component_id }}`}} ({{`{{ $labels.component_type }}`}})
+              is not sending events
