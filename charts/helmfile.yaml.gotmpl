@@ -35,7 +35,10 @@ repositories:
 
 
 {{- if and (.Values | get "aws_ebs_csi_driver.enabled" false) (.Values | get "topolvm.enabled" false) }}
+# allow having both in CI where we only generate templates to do static analysis
+{{- if not (.Values | get "isCi" false) }}
 {{ fail "Enable only one: aws_ebs_csi_driver, topolvm: each defines a default storage class" }}
+{{- end }}
 {{- end }}
 
 releases:
