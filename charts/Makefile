@@ -69,6 +69,9 @@ helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unles
 .PHONY: helmfile-destroy
 helmfile-destroy: .helmfile-destroy ## Delete the helmfile configuration
 
+.PHONY: helmfile-list
+helmfile-list: .helmfile-list ## List all releases managed by helmfile
+
 .PHONY: trivy-scan
 trivy-scan: $(TRIVY_TEMPLATES_DIR) .verify-trivy-installation
 trivy-scan: ## Scan rendered helm templates for vulnerabilities
