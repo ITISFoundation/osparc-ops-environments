@@ -9,7 +9,6 @@ include ${REPO_BASE_DIR}/charts/.tools.Makefile
 #
 
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
-CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
 
 # Note on HELM_DIFF_USE_UPGRADE_DRY_RUN:
 # helm-diff renders with `helm template` by default, where `lookup` and API
@@ -23,7 +22,7 @@ HELMFILE_EXTRA_ARGS ?=
 
 HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
 
-TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
+TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 
 #
 # Helpers

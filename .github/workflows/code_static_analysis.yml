@@ -49,6 +49,9 @@ jobs:
   trivy-scan-charts:
     runs-on: ubuntu-22.04
 
+    env:
+      TRIVY_TEMPLATES_DIR: /tmp/rendered-helm-templates # re-used in trivy makefile targets
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -64,6 +67,12 @@ jobs:
           # https://docs.renovatebot.com/modules/manager/github-actions/#withversion-support-for-built-in-actions
           # NOTE: keep in sync with trivy version in makefile
           version: v0.72.0
+
+      - name: Generate helm templates
+        run: make --directory ./charts "$TRIVY_TEMPLATES_DIR"
+
+      - name: Check Trivy coverage
+        run: make --directory ./charts/.ci-deployment check-trivy-coverage
 
       - name: Run trivy scan
         run: make --directory ./charts trivy-scan
