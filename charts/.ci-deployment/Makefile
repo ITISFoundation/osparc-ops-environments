@@ -18,6 +18,8 @@ $(TRIVY_TEMPLATES_DIR):
 	@echo "Generate it separately using ci deployment configuration"
 	@exit 1
 
+# This target is only relevant for CI deployment where we want to have all charts
+# rendered to do static analysis
 .PHONY: check-trivy-coverage
 check-trivy-coverage: guard-TRIVY_TEMPLATES_DIR $(TRIVY_TEMPLATES_DIR) # ensure trivy scans all existing charts
 	@return_code=0; \
