@@ -2,9 +2,7 @@ apiVersion: v2
 name: victoria-traces
 description: >
   A wrapper chart for victoria-traces-single.
-  It adds network policies. Once release containing
-  https://github.com/VictoriaMetrics/operator/pull/2299
-  is available and stable, we can drop the wrapper chart
+  It adds open telemetry collector integration.
 
 type: application
 
