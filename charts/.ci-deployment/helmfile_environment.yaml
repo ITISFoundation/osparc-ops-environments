@@ -4,4 +4,4 @@ aws_ebs_csi_driver:
   enabled: true
 
 topolvm:
-  enabled: false
+  enabled: true
