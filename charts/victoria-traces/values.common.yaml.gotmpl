@@ -1,15 +1,25 @@
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
+
 {{- $otlpGrpcPortNumber := 4317 }}
 {{- $otlpHttpPortNumber := 4318 }}
+{{- $otelMetricsPort := 8888 }}
+{{- $victoriaTracesHttpPortNumber := 10428 }}
 
 {{- $victoriaTracesFullname := "victoria-traces-single" }}
 
+victoriaTracesHttpPortNumber: {{ $victoriaTracesHttpPortNumber }}
+otlpGrpcPortNumber: {{ $otlpGrpcPortNumber }}
+otlpHttpPortNumber: {{ $otlpHttpPortNumber }}
+otelMetricsPortNumber: {{ $otelMetricsPort }}
+
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
 victoria-traces-single:
 
   {{- $persistentVolumeSizeGi := 10 }}
   {{- $victoriaTracesMaxDiskSpaceUsageGi := 9 }}
   {{- $httpPathPrefix := "/traces" }}
   {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+  {{- $serverCustomLabels := dict "app.simcore.io/name" "victoria-traces-single" "app.simcore.io/part-of" .Release.Name }}
 
   {{- if ge $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi }}
   {{- fail (printf "victoriaTracesMaxDiskSpaceUsageGi (%d) must be less than persistentVolumeSizeGi (%d)" $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi) }}
@@ -31,7 +41,7 @@ victoria-traces-single:
     http:
       - name: http
         primary: true
-        value: :10428
+        value: :{{ $victoriaTracesHttpPortNumber }}
 
     extraArgs:
       http.pathPrefix: {{ $httpPathPrefix | quote }}
@@ -53,9 +63,13 @@ victoria-traces-single:
       size: {{ $persistentVolumeSizeGi }}Gi
       storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" }}
 
-    podLabels: # use in network policy. don't rely on chart labels as they can change
-      app.simcore.io/name: victoria-traces-single
-      app.simcore.io/part-of: {{ .Release.Name }}
+    podLabels: # use in network policy & VMServiceScrape. don't rely on chart labels as they can change
+      {{- toYaml $serverCustomLabels | nindent 6 }}
+
+    service:
+      # mirror pod custom labels on the Service so VMServiceScrape can select it
+      labels:
+        {{- toYaml $serverCustomLabels | nindent 8 }}
 
     # https://docs.victoriametrics.com/victoriatraces/#retention
     retentionPeriod: 2 # no char unit means Months
@@ -69,6 +83,10 @@ victoria-traces-single:
       limits:
         cpu: 1000m
         memory: 2Gi
+
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
 
     ingress:
       enabled: true
@@ -84,13 +102,84 @@ victoria-traces-single:
             - {{ $httpPathPrefix | quote }}
 
     vmServiceScrape:
-      enabled: true
+      enabled: false # broken when used with http.pathPrefix. Created manually in templates
 
 # https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-collector-0.162.0/charts/opentelemetry-collector/values.yaml
 opentelemetry-collector:
+  image:
+    repository: "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s"
+  command:
+    name: "otelcol-k8s"
+  mode: "deployment"
+
+  podLabels: # use in network policy. don't rely on chart labels as they can change
+    app.simcore.io/name: opentelemetry-collector
+    app.simcore.io/part-of: {{ .Release.Name }}
+
+  ports:
+    otlp:
+      enabled: true
+      containerPort: {{ $otlpGrpcPortNumber }}
+      servicePort: {{ $otlpGrpcPortNumber }}
+      hostPort: {{ $otlpGrpcPortNumber }}
+      protocol: TCP
+      # nodePort: 30317
+      appProtocol: grpc
+    otlp-http:
+      enabled: true
+      containerPort: {{ $otlpHttpPortNumber }}
+      servicePort: {{ $otlpHttpPortNumber }}
+      hostPort: {{ $otlpHttpPortNumber }}
+      protocol: TCP
+    jaeger-compact:
+      enabled: false
+      protocol: UDP
+    jaeger-thrift:
+      enabled: false
+      protocol: TCP
+    jaeger-grpc:
+      enabled: false
+      protocol: TCP
+    zipkin:
+      enabled: false
+      protocol: TCP
+    metrics:
+      # The metrics port is disabled by default. However you need to enable the port
+      # in order to use the ServiceMonitor (serviceMonitor.enabled) or PodMonitor (podMonitor.enabled).
+      enabled: true
+      containerPort: {{ $otelMetricsPort }}
+      servicePort: {{ $otelMetricsPort }}
+      protocol: TCP
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
 
   config:
     receivers:
+      jaeger: null # not used
+      prometheus: null # not used
+      zipkin: null # not used
       otlp:
         protocols:
           grpc:
@@ -104,9 +193,11 @@ opentelemetry-collector:
           insecure: true
     service:
       pipelines:
+        metrics: null # not used
+        logs: null # not used
         traces:
           receivers: [otlp]
-          exporters: [otlphttp,otlp]
+          exporters: [otlp]
           processors: [batch,filter/drop_healthcheck]
       telemetry:
         metrics: # https://opentelemetry.io/docs/collector/internal-telemetry/#prometheus-endpoint-for-internal-metrics
@@ -115,7 +206,7 @@ opentelemetry-collector:
                 exporter:
                   prometheus:
                     host: '0.0.0.0'
-                    port: 8888
+                    port: {{ $otelMetricsPort }}
         logs:
           level: warn
     processors:
@@ -137,3 +228,6 @@ opentelemetry-collector:
             - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
             - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
             - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"
+
+  podMonitor:
+    enabled: true
