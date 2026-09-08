@@ -1,4 +1,4 @@
-{{- $vtFullname := index .Values "victoria-traces-single" "fullnameOverride" }}
+{{- $vtFullname := index .Values "victoria-traces-single" "server" "fullnameOverride" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -38,7 +38,7 @@ data:
             - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"
     exporters:
       otlp_grpc:
-        endpoint: {{ $vtFullname }}-server.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.otlpGrpcPortNumber }}
+        endpoint: {{ $vtFullname }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.otlpGrpcPortNumber }}
         tls:
           insecure: true
     service:

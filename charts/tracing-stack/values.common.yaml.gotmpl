@@ -2,9 +2,11 @@
 {{- $otlpGrpcPortNumber := 4317 }}
 {{- $otlpHttpPortNumber := 4318 }}
 {{- $otelMetricsPort := 8888 }}
-{{- $victoriaTracesHttpPortNumber := 10428 }}
+{{- $victoriaTracesHttpPortNumber := requiredEnv "VICTORIA_TRACES_HTTP_PORT" | int }}
 
 {{- $victoriaTracesFullname := "victoria-traces-single" }}
+
+{{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
 
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
@@ -13,6 +15,8 @@ victoriaTracesHttpPortNumber: {{ $victoriaTracesHttpPortNumber }}
 otlpGrpcPortNumber: {{ $otlpGrpcPortNumber }}
 otlpHttpPortNumber: {{ $otlpHttpPortNumber }}
 otelMetricsPortNumber: {{ $otelMetricsPort }}
+
+ingressHost: {{ $ingressHost }}
 
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
 victoria-traces-single:
@@ -28,8 +32,6 @@ victoria-traces-single:
   {{- fail (printf "victoriaTracesMaxDiskSpaceUsageGi (%d) must be less than persistentVolumeSizeGi (%d)" $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi) }}
   {{- end }}
 
-  fullnameOverride: {{ $victoriaTracesFullname | quote}}
-
   global:
     image:
       registry: quay.io # common registry we already use for other workloads
@@ -40,6 +42,8 @@ victoria-traces-single:
     enabled: true
 
     replicaCount: 1
+
+    fullnameOverride: {{ $victoriaTracesFullname | quote }}
 
     http:
       - name: http
@@ -99,7 +103,7 @@ victoria-traces-single:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
       hosts:
-        - name: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        - name: {{ $ingressHost }}
           port: http
           path:
             - {{ $httpPathPrefix | quote }}
