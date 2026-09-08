@@ -1,14 +1,12 @@
 apiVersion: v2
-name: victoria-traces
-description: >
-  A wrapper chart for victoria-traces-single.
-  It adds open telemetry collector integration.
+name: tracing-stack
+description: A wrapper chart for tracing-stack-single and open telemetry collector.
 
 type: application
 
-version: 0.0.1 # unused
+version: 0.0.1
 
-appVersion: 0.0.1 # unused
+appVersion: 0.0.1
 
 dependencies:
   - name: victoria-traces-single

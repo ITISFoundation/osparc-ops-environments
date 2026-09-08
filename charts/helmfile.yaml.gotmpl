@@ -185,6 +185,26 @@ releases:
         command: kubectl
         args: ["delete", "-f", "./victoria-logs-single/namespace.yaml"]
 
+  - name: tracing-stack
+    chart: ./tracing-stack
+    namespace: tracing-stack
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+      - victoria-metrics-operator/prometheus-operator-crds
+    values:
+      - tracing-stack/values.common.yaml.gotmpl
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./tracing-stack/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./tracing-stack/namespace.yaml"]
+
   - name: grafana
     namespace: grafana
     chart: ./grafana

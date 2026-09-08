@@ -109,6 +109,8 @@ victoria-traces-single:
 
 # https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-collector-0.162.0/charts/opentelemetry-collector/values.yaml
 opentelemetry-collector:
+
+  # image.repository, command.name and mode must be set explicitly (chat documentation)
   image:
     repository: "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s"
   command:
@@ -138,13 +140,10 @@ opentelemetry-collector:
       protocol: UDP
     jaeger-thrift:
       enabled: false
-      protocol: TCP
     jaeger-grpc:
       enabled: false
-      protocol: TCP
     zipkin:
       enabled: false
-      protocol: TCP
     metrics:
       # The metrics port is disabled by default. However you need to enable the port
       # in order to use the ServiceMonitor (serviceMonitor.enabled) or PodMonitor (podMonitor.enabled).
