@@ -22,6 +22,8 @@ repositories:
     url: https://traefik.github.io/charts
   - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts
+  - name: opentelemetry
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
   - name: cert-manager
     url: https://charts.jetstack.io
 {{- if (.Values | get "aws_ebs_csi_driver.enabled" false) }}
