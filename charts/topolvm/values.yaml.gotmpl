@@ -152,8 +152,10 @@ topolvm:
 
   # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/topolvm-scheduler.md
   scheduler:
-    # start simple
+    # start simple. when enabled adjust affinity to avoid race conditions
+    # and dead locks during updates
     enabled: false
+
 
   cert-manager:
     enabled: false # use existing cert manager
