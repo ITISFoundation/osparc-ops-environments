@@ -1,11 +1,5 @@
 # https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/README.md#sidecar-for-datasources
-{{- $vtSingleValues := index .Values "victoria-traces-single" }}
-
-{{- $svcName := $vtSingleValues.server.fullnameOverride }}
-{{- $clusterDomain := index $vtSingleValues "global" "cluster" "dnsDomain" }}
-{{- $pathPrefix := index $vtSingleValues.server.extraArgs "http.pathPrefix" }}
-
-{{- $vmuiUrl := printf "https://%s%s/select/vmui/" .Values.ingressHost $pathPrefix }}
+{{- $pathPrefix := index .Values "victoria-traces-single" "server" "extraArgs" "http.pathPrefix" }}
 
 apiVersion: v1
 kind: Secret
@@ -29,6 +23,6 @@ stringData:
         type: tempo
         uid: victoria-traces
         access: proxy
-        url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ .Values.victoriaTracesHttpPortNumber }}{{ $pathPrefix }}/select/tempo
+        url: http://{{ include "tracing-stack.vtHost" . }}:{{ .Values.victoriaTracesHttpPortNumber }}{{ $pathPrefix }}/select/tempo
         # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
         editable: false

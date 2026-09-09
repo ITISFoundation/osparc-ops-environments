@@ -1,4 +1,4 @@
-{{- $vtFullname := index .Values "victoria-traces-single" "server" "fullnameOverride" }}
+{{- /* victoria-traces-single OTLP gRPC endpoint (same host as the Grafana datasource) */ -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -38,7 +38,7 @@ data:
             - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"
     exporters:
       otlp_grpc:
-        endpoint: {{ $vtFullname }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.otlpGrpcPortNumber }}
+        endpoint: {{ include "tracing-stack.vtHost" . }}:{{ .Values.otlpGrpcPortNumber }}
         tls:
           insecure: true
     service:
