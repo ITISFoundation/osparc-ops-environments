@@ -1,0 +1,9 @@
+# namespace with defined pod security standard
+# ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+# see charts/SECURITY.md
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: headlamp
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

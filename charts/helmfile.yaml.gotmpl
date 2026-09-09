@@ -26,6 +26,8 @@ repositories:
     url: https://open-telemetry.github.io/opentelemetry-helm-charts
   - name: cert-manager
     url: https://charts.jetstack.io
+  - name: headlamp
+    url: https://kubernetes-sigs.github.io/headlamp/
 {{- if (.Values | get "aws_ebs_csi_driver.enabled" false) }}
   - name: aws-ebs-csi-driver
     url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
@@ -226,6 +228,29 @@ releases:
         args: ["delete", "-f", "./grafana/namespace.yaml"]
     values:
       - ./grafana/values.yaml.gotmpl
+
+  - name: headlamp
+    namespace: headlamp
+    chart: ./headlamp
+    createNamespace: false
+    needs:
+      - {{ requiredEnv "TRAEFIK_NAMESPACE" }}/traefik
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./headlamp/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./headlamp/namespace.yaml"]
+    values:
+      - ./headlamp/values.yaml.gotmpl
+      {{- range (.Values | get "headlamp.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
 
 {{- if (.Values | get "aws_ebs_csi_driver.enabled" false) }}
   - name: aws-ebs-csi-driver
