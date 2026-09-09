@@ -16,7 +16,7 @@ spec:
         expr: up{job=~".*opentelemetry.*collector.*"} == 0
         for: 1m
         labels:
-          severity: critical
+          severity: error
         annotations:
           summary: OpenTelemetry Collector down (instance {{ `{{ $labels.instance }}` }})
           description: >-

@@ -79,7 +79,7 @@ victoria-traces-single:
         {{- toYaml $serverCustomLabels | nindent 8 }}
 
     # https://docs.victoriametrics.com/victoriatraces/#retention
-    retentionPeriod: 2 # no char unit means Months
+    retentionPeriod: 10d
     # https://docs.victoriametrics.com/victoriatraces/#retention-by-disk-space-usage
     retentionDiskSpaceUsage: {{ $victoriaTracesMaxDiskSpaceUsageGi }} # `GiB` unit added by chart automatically
 
@@ -153,6 +153,9 @@ opentelemetry-collector:
       containerPort: {{ $otelMetricsPort }}
       servicePort: {{ $otelMetricsPort }}
       protocol: TCP
+
+  nodeSelector:
+    node-role.kubernetes.io/ops: ""
 
   resources:
     requests:
