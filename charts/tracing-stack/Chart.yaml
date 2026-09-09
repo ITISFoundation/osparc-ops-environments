@@ -1,6 +1,6 @@
 apiVersion: v2
 name: tracing-stack
-description: A wrapper chart for tracing-stack-single and open telemetry collector.
+description: A wrapper chart for tracing-stack-single and open telemetry collector
 
 type: application
 
