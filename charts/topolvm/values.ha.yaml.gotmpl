@@ -1,3 +1,18 @@
 topolvm:
   controller:
     replicaCount: 2
+
+    updateStrategy:
+      type: RollingUpdate
+
+    leaderElection:
+      enabled: true
+
+    affinity: |
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.simcore.io/name: topolvm-controller
+                app.simcore.io/part-of: {{ .Release.Name | quote }}
