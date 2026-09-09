@@ -130,14 +130,12 @@ opentelemetry-collector:
       enabled: true
       containerPort: {{ $otlpGrpcPortNumber }}
       servicePort: {{ $otlpGrpcPortNumber }}
-      hostPort: {{ $otlpGrpcPortNumber }}
       protocol: TCP
       appProtocol: grpc
     otlp-http:
       enabled: true
       containerPort: {{ $otlpHttpPortNumber }}
       servicePort: {{ $otlpHttpPortNumber }}
-      hostPort: {{ $otlpHttpPortNumber }}
       protocol: TCP
     jaeger-compact:
       enabled: false
@@ -186,6 +184,9 @@ opentelemetry-collector:
     existingName: otel-collector-config
 
   # restart pods whenever the config changes
+  # NOTE: it renders sha of template. Variable value changes does not change SHA
+  #       (does not trigger redeploy)
+
   podAnnotations:
     checksum/config: {{ readFile "./templates/otel-collector-config.yaml" | sha256sum | quote }}
 

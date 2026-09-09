@@ -5,7 +5,8 @@ metadata:
   name: {{ index .Values "opentelemetry-collector" "configMap" "existingName" }}
   namespace: {{ .Release.Namespace }}
 data:
-  # key MUST be `relay` (required by opentelemetry-collector chart when using configMap.existingName)
+  # key MUST be `relay` (required by opentelemetry-collector chart when using
+  # standalone configMap
   relay: |
     extensions:
       health_check:
