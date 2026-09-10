@@ -29,6 +29,8 @@ spec:
           - 192.168.0.0/16
       destination:
         ports:
+          # hardcoded in upstream chart. we have to hardcode it here as well
+          # https://github.com/kubernetes-sigs/headlamp/blob/v0.45.0/charts/headlamp/templates/deployment.yaml#L400
           - 4466
   egress:
     # TCP: headlamp -> Kubernetes API server

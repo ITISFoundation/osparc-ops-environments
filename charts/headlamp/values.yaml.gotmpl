@@ -1,24 +1,28 @@
-# https://github.com/kubernetes-sigs/headlamp/blob/headlamp-0.45.0/charts/headlamp/values.yaml
+# https://github.com/kubernetes-sigs/headlamp/blob/v0.45.0/charts/headlamp/values.yaml
 
 {{- $pathPrefix := "headlamp" }}
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+{{- $redirectMiddlewareName := "add-trailing-slash" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+redirectMiddlewareName: {{ $redirectMiddlewareName | quote}}
 
 headlamp:
   replicaCount: 1
 
   config:
     baseURL: /{{ $pathPrefix }}
-    unsafeUseServiceAccountToken: true
+    unsafeUseServiceAccountToken: true # login using common traefik auth
 
-  # Restrict SA to read-only. Users authenticate by pasting their own token.
+  # Restrict SA to read-only. Cluster-scoped read (nodes, PVs, storageclasses) is added via a second
+  # additionally in templates
   clusterRoleBinding:
     create: true
     clusterRoleName: view
 
   serviceAccount:
     create: true
+    name: {{ .Release.Name }}
 
   podSecurityContext:
     runAsNonRoot: true
@@ -53,7 +57,9 @@ headlamp:
     annotations:
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
+      traefik.ingress.kubernetes.io/router.middlewares: >-
+        {{ $basicAuthMiddleware }},
+        {{ .Release.Namespace }}-{{ $redirectMiddlewareName }}@kubernetescrd
     hosts:
       - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
         paths:
