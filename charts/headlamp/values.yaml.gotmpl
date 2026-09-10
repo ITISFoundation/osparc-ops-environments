@@ -13,7 +13,9 @@ headlamp:
   config:
     baseURL: /{{ $pathPrefix }}
     unsafeUseServiceAccountToken: true # login using common traefik auth
-
+    oidc: # we don't use it
+      secret:
+        create: false
   # Restrict SA to read-only. Cluster-scoped read (nodes, PVs, storageclasses)
   # is added via an additional ClusterRole template.
   clusterRoleBinding:
