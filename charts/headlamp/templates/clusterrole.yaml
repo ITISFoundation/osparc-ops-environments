@@ -1,4 +1,4 @@
-{{- $roleName := "headlamp-cluster-role-extension" -}}
+{{- $roleName := printf "%s-%s-%s" .Release.Namespace .Release.Name "cluster-role-extension" -}}
 
 # Cluster-scoped read-only extras that the built-in `view` ClusterRole omits.
 apiVersion: rbac.authorization.k8s.io/v1

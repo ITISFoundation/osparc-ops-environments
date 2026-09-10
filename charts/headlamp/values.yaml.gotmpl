@@ -14,8 +14,8 @@ headlamp:
     baseURL: /{{ $pathPrefix }}
     unsafeUseServiceAccountToken: true # login using common traefik auth
 
-  # Restrict SA to read-only. Cluster-scoped read (nodes, PVs, storageclasses) is added via a second
-  # additionally in templates
+  # Restrict SA to read-only. Cluster-scoped read (nodes, PVs, storageclasses)
+  # is added via an additional ClusterRole template.
   clusterRoleBinding:
     create: true
     clusterRoleName: view
