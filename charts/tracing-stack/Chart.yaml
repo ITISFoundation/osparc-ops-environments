@@ -13,5 +13,5 @@ dependencies:
     version: 0.1.11
     repository: "https://victoriametrics.github.io/helm-charts/"
   - name: opentelemetry-collector
-    version: 0.162.0
+    version: 0.165.0
     repository: "https://open-telemetry.github.io/opentelemetry-helm-charts"
