@@ -17,14 +17,14 @@ export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
 HELM_DIFF_ENV := HELM_DIFF_USE_UPGRADE_DRY_RUN=true HELM_DIFF_OUTPUT_CONTEXT=5
 
 # Example of usage:
-# make helmfile-template HELMFILE_EXTRA_ARGS='debug'
+# make helmfile-template HELMFILE_EXTRA_ARGS='--debug'
 HELMFILE_EXTRA_ARGS ?=
 
 # Shortcut for the common case `--selector name=<release>`.
-# Example: make helmfile-diff NAME=traefik
-NAME ?=
-ifneq ($(strip $(NAME)),)
-override HELMFILE_EXTRA_ARGS += --selector name=$(NAME)
+# Example: make helmfile-diff RELEASE=traefik
+RELEASE ?=
+ifneq ($(strip $(RELEASE)),)
+override HELMFILE_EXTRA_ARGS += --selector 'name=$(RELEASE)'
 endif
 
 HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
