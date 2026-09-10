@@ -26,8 +26,18 @@ topolvm:
   controller:
     replicaCount: 1
 
+    podLabels:
+      app.simcore.io/name: topolvm-controller
+      app.simcore.io/part-of: {{ .Release.Name | quote }}
+
     nodeSelector:
       node-role.kubernetes.io/control-plane: ""
+
+    updateStrategy:
+      type: Recreate # stop-first to avoid race conditions
+
+    leaderElection:
+      enabled: false # does not make sense with 1 replica
 
   node:
     # Pod-level seccomp profile applies to all containers in the pod
@@ -142,8 +152,10 @@ topolvm:
 
   # https://github.com/topolvm/topolvm/blob/topolvm-chart-v16.1.0/docs/topolvm-scheduler.md
   scheduler:
-    # start simple
+    # start simple. when enabled adjust affinity to avoid race conditions
+    # and dead locks during updates
     enabled: false
+
 
   cert-manager:
     enabled: false # use existing cert manager
