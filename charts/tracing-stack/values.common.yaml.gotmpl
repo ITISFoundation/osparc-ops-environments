@@ -1,0 +1,197 @@
+
+{{- $otlpGrpcPortNumber := 4317 }}
+{{- $otlpHttpPortNumber := 4318 }}
+{{- $otelMetricsPort := 8888 }}
+{{- $victoriaTracesHttpPortNumber := requiredEnv "VICTORIA_TRACES_HTTP_PORT" | int }}
+
+{{- $victoriaTracesFullname := "victoria-traces-single" }}
+
+{{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
+
+metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
+
+victoriaTracesHttpPortNumber: {{ $victoriaTracesHttpPortNumber }}
+otlpGrpcPortNumber: {{ $otlpGrpcPortNumber }}
+otlpHttpPortNumber: {{ $otlpHttpPortNumber }}
+otelMetricsPortNumber: {{ $otelMetricsPort }}
+
+ingressHost: {{ $ingressHost }}
+
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
+victoria-traces-single:
+
+  {{- $persistentVolumeSizeGi := 10 }}
+  {{- $victoriaTracesMaxDiskSpaceUsageGi := 9 }}
+  {{- $httpPathPrefix := "/traces" }}
+  {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+
+  {{- $serverCustomLabels := dict "app.simcore.io/name" "victoria-traces-single" "app.simcore.io/part-of" .Release.Name }}
+
+  {{- if ge $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi }}
+  {{- fail (printf "victoriaTracesMaxDiskSpaceUsageGi (%d) must be less than persistentVolumeSizeGi (%d)" $victoriaTracesMaxDiskSpaceUsageGi $persistentVolumeSizeGi) }}
+  {{- end }}
+
+  global:
+    image:
+      registry: quay.io # common registry we already use for other workloads
+    cluster:
+      dnsDomain: cluster.local.
+
+  server:
+    enabled: true
+
+    replicaCount: 1
+
+    fullnameOverride: {{ $victoriaTracesFullname | quote }}
+
+    http:
+      - name: http
+        primary: true
+        value: :{{ $victoriaTracesHttpPortNumber }}
+
+    extraArgs:
+      http.pathPrefix: {{ $httpPathPrefix | quote }}
+
+      # otlp https://github.com/VictoriaMetrics/helm-charts/issues/2761
+      otlpGRPCListenAddr: :{{ $otlpGrpcPortNumber }}
+      otlpGRPC.tls: "false"
+
+    extraContainerPorts:
+      - name: otlp-grpc
+        containerPort: {{ $otlpGrpcPortNumber }}
+        protocol: TCP
+
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+
+    persistentVolume:
+      enabled: true
+      size: {{ $persistentVolumeSizeGi }}Gi
+      storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" }}
+
+    podLabels: # use in network policy & VMServiceScrape. don't rely on chart labels as they can change
+      {{- toYaml $serverCustomLabels | nindent 6 }}
+
+    service:
+      # mirror pod custom labels on the Service so VMServiceScrape can select it
+      labels:
+        {{- toYaml $serverCustomLabels | nindent 8 }}
+
+    # https://docs.victoriametrics.com/victoriatraces/#retention
+    retentionPeriod: 10d
+    # https://docs.victoriametrics.com/victoriatraces/#retention-by-disk-space-usage
+    retentionDiskSpaceUsage: {{ $victoriaTracesMaxDiskSpaceUsageGi }} # `GiB` unit added by chart automatically
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+
+    ingress:
+      enabled: true
+      annotations:
+        namespace: "{{ .Release.Namespace }}"
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
+      hosts:
+        - name: {{ $ingressHost }}
+          port: http
+          path:
+            - {{ $httpPathPrefix | quote }}
+
+    vmServiceScrape:
+      enabled: false # broken when used with http.pathPrefix. Created manually in templates
+
+# https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-collector-0.162.0/charts/opentelemetry-collector/values.yaml
+opentelemetry-collector:
+
+  # image.repository, command.name and mode must be set explicitly (chart documentation)
+  image:
+    repository: "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s"
+  command:
+    name: "otelcol-k8s"
+  mode: "deployment"
+
+  podLabels: # use in network policy. don't rely on chart labels as they can change
+    app.simcore.io/name: opentelemetry-collector
+    app.simcore.io/part-of: {{ .Release.Name }}
+
+  ports:
+    otlp:
+      enabled: true
+      containerPort: {{ $otlpGrpcPortNumber }}
+      servicePort: {{ $otlpGrpcPortNumber }}
+      protocol: TCP
+      appProtocol: grpc
+    otlp-http:
+      enabled: true
+      containerPort: {{ $otlpHttpPortNumber }}
+      servicePort: {{ $otlpHttpPortNumber }}
+      protocol: TCP
+    jaeger-compact:
+      enabled: false
+      protocol: UDP
+    jaeger-thrift:
+      enabled: false
+    jaeger-grpc:
+      enabled: false
+    zipkin:
+      enabled: false
+    metrics:
+      # The metrics port is disabled by default. However you need to enable the port
+      # in order to use the ServiceMonitor (serviceMonitor.enabled) or PodMonitor (podMonitor.enabled).
+      enabled: true
+      containerPort: {{ $otelMetricsPort }}
+      servicePort: {{ $otelMetricsPort }}
+      protocol: TCP
+
+  nodeSelector:
+    node-role.kubernetes.io/ops: ""
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  # collector config comes from ConfigMap defined in `templates/otel-collector-config.yaml`
+  configMap:
+    create: false
+    existingName: otel-collector-config
+
+  # restart pods whenever the config changes
+  # NOTE: it renders sha of template. Variable value changes does not change SHA
+  #       (does not trigger redeploy)
+
+  podAnnotations:
+    checksum/config: {{ readFile "./templates/otel-collector-config.yaml" | sha256sum | quote }}
+
+  podMonitor:
+    enabled: true

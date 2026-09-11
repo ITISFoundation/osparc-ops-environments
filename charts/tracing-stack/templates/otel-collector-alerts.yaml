@@ -1,0 +1,54 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: opentelemetry-collector
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  # Source: https://samber.github.io/awesome-prometheus-alerts/rules/observability/opentelemetry-collector/
+  groups:
+  - name: vt-otel-collector
+    rules:
+      - alert: OpenTelemetryCollectorDown
+        expr: up{job=~".*opentelemetry.*collector.*"} == 0
+        for: 1m
+        labels:
+          severity: error
+        annotations:
+          summary: OpenTelemetry Collector down (instance {{ `{{ $labels.instance }}` }})
+          description: >-
+            OpenTelemetry Collector instance has disappeared or is not being scraped
+              VALUE = {{ `{{ $value }}` }}
+              LABELS = {{ `{{ $labels }}` }}
+
+      - alert: OpenTelemetryCollectorHighMemoryUsage
+        expr: (otelcol_process_runtime_heap_alloc_bytes / on(instance, job) otelcol_process_runtime_total_sys_memory_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: >-
+            OpenTelemetry Collector high memory usage
+            (instance {{ `{{ $labels.instance }}` }})
+          description: >-
+            OpenTelemetry Collector memory usage is above 90%
+              VALUE = {{ `{{ $value }}` }}
+              LABELS = {{ `{{ $labels }}` }}
+
+      - alert: OpenTelemetryCollectorExporterQueueNearlyFull
+        expr: (otelcol_exporter_queue_size / on(instance, job, exporter) otelcol_exporter_queue_capacity) > 0.8 and otelcol_exporter_queue_capacity > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: >-
+            OpenTelemetry Collector exporter queue nearly full
+            (instance {{ `{{ $labels.instance }}` }})
+          description: >-
+            OpenTelemetry Collector exporter {{ `{{ $labels.exporter }}` }}
+            queue is over 80% full
+              VALUE = {{ `{{ $value }}` }}
+              LABELS = {{ `{{ $labels }}` }}

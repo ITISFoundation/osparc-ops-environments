@@ -7,6 +7,17 @@ nodes:
         hostPort: 80
       - containerPort: 443
         hostPort: 443
+
+    # kind runs the "node" as a Docker container with its own (volatile) journal,
+    # so /var/log/journal does not exist inside it. Bind-mount the host's
+    # persistent journal into the node at the same path the vector DaemonSet
+    # already reads (node /var/log), so victoria-logs' journald source can scrape
+    # real system logs locally. Read-only: we never want to mutate the host journal.
+    extraMounts:
+      - hostPath: /var/log/journal
+        containerPath: /var/log/journal
+        readOnly: true
+
     # NOTE: node-role.kubernetes.io/* labels cannot be set here. kind passes
     # them to the kubelet as --node-labels, but the NodeRestriction admission
     # plugin rejects self-assigned labels in the node-role.kubernetes.io/

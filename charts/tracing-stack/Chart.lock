@@ -1,0 +1,9 @@
+dependencies:
+- name: victoria-traces-single
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.1.11
+- name: opentelemetry-collector
+  repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+  version: 0.165.0
+digest: sha256:7869c23851793c16a165f1b707ac60110ec7be88a293ca09f4aeb0edc4687f42
+generated: "2026-09-10T00:05:23.512560671Z"

@@ -76,10 +76,6 @@ for service in $($_yq e '.services | keys | .[]' ${COMPOSE_FILE}); do
     if [ "${TARGETNAME}" == "whoami" ]; then
         continue
     fi
-    #  Continue if the service is efs-guardian, as it cannot start because mounting the AWS Distributed Elastic File System to the runner would be required.
-    if [ "${TARGETNAME}" == "efs-guardian" ]; then
-        continue
-    fi
     if [ "${TARGETNAME}" == "docker-api-proxy" ]; then
         continue
     fi

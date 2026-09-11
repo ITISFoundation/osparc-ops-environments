@@ -1,0 +1,74 @@
+# https://github.com/kubernetes-sigs/headlamp/blob/v0.45.0/charts/headlamp/values.yaml
+
+{{- $pathPrefix := "headlamp" }}
+{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+{{- $redirectMiddlewareName := "add-trailing-slash" }}
+
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+redirectMiddlewareName: {{ $redirectMiddlewareName | quote}}
+
+headlamp:
+  replicaCount: 1
+
+  config:
+    baseURL: /{{ $pathPrefix }}
+    unsafeUseServiceAccountToken: true # login using common traefik auth
+    oidc: # we don't use it
+      secret:
+        create: false
+  # Restrict SA to read-only. Cluster-scoped read (nodes, PVs, storageclasses)
+  # is added via an additional ClusterRole template.
+  clusterRoleBinding:
+    create: true
+    clusterRoleName: view
+
+  serviceAccount:
+    create: true
+    name: {{ .Release.Name }}
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 100
+    runAsGroup: 101
+    fsGroup: 101
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  nodeSelector:
+    node-role.kubernetes.io/ops: ""
+
+  ingress:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: >-
+        {{ $basicAuthMiddleware }},
+        {{ .Release.Namespace }}-{{ $redirectMiddlewareName }}@kubernetescrd
+    hosts:
+      - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
+        paths:
+          - path: /{{ $pathPrefix }}
+            type: Prefix
+
+  # use in NetworkPolicy — don't rely on chart labels
+  podLabels:
+    app.simcore.io/name: headlamp
+    app.simcore.io/part-of: headlamp

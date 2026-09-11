@@ -326,6 +326,29 @@ misconfigurations:
       false positive.
 
   #
+  # victoria-logs-single
+  #
+  - id: AVD-KSV-0023
+    paths:
+      - "victoria-logs-single/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
+    statement: >
+      Vector must mount /var/log and /var/lib as hostPath volumes to read
+      container logs from the node filesystem. This is inherent to how
+      node-level log collectors operate.
+
+  - id: AVD-KSV-0012
+    paths:
+      - "victoria-logs-single/charts/victoria-logs-single/charts/vector/templates/daemonset.yaml"
+    statement: >
+      Vector's kubernetes_logs source persists checkpoints to a hostPath volume
+      (/var/lib/vector) to track which log lines have already been sent. The
+      hostPath directory is created by kubelet as root:root and fsGroup has no
+      effect on hostPath volumes, so the container must run as root to write
+      checkpoints. Without checkpoints, logs would be duplicated or lost on
+      every pod restart. Related issues: https://github.com/vectordotdev/vector/issues/1599
+      and https://github.com/vectordotdev/helm-charts/issues/266
+
+  #
   # grafana
   #
   - id: AVD-KSV-0041

@@ -14,6 +14,7 @@ spec:
           - {{ .Values.traefik.ports.web.port }}
           - {{ .Values.traefik.ports.websecure.port }}
           - {{ .Values.traefik.ports.traefik.port }}
+          - {{ .Values.traefik.ports.metrics.port }}
   egress:
     # egress to internal/private networks only
     # (DNS egress is already allowed by the global policy)

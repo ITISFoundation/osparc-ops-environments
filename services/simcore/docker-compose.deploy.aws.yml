@@ -9,10 +9,6 @@ services:
         constraints:
           - node.role == worker
 
-  efs-guardian:
-    volumes:
-      - efs_volume:/data/efs
-
   clusters-keeper:
     deploy:
       replicas: 1
@@ -41,10 +37,3 @@ services:
         - traefik.tcp.routers.rabbit.entrypoints=rabbitmq
         - traefik.tcp.routers.rabbit.tls=false
         - traefik.tcp.routers.rabbit.rule=ClientIP(`10.0.0.0/8`) || ClientIP(`172.16.0.0/12`) || ClientIP(`192.168.0.0/16`)
-
-volumes:
-  efs_volume:
-    driver_opts:
-      type: nfs
-      o: addr=${EFS_DNS_NAME},rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
-      device: :/
