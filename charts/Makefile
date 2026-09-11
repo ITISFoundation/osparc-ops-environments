@@ -31,8 +31,6 @@ HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
 
 TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 
-TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
-
 #
 # Helpers
 #
@@ -48,12 +46,6 @@ TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
 
 helmfile_environment.yaml:
 	cp $(CONFIG_DIR)/$@ $@
-
-$(TRIVY_TEMPLATES_DIR):
-	# generate helm templates for trivy scanning
-	@rm -rf $(TRIVY_TEMPLATES_DIR)
-	@$(MAKE) --no-print-directory helmfile-template \
-		HELMFILE_EXTRA_ARGS="--output-dir $(TRIVY_TEMPLATES_DIR) --output-dir-template={{.OutputDir}}"
 
 $(TRIVY_TEMPLATES_DIR):
 	# generate helm templates for trivy scanning
