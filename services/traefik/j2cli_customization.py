@@ -9,7 +9,7 @@ def _generate_domain_capture_all_rule(domain: str) -> str:
         f"HostRegexp(`{{subhost:[a-zA-Z0-9-]+}}.services.testing.{domain}`)",
         f"Host(`pay.{domain}`)",
         f"Host(`api.{domain}`)",
-        f"Host(`api.testing.{domain}`)",
+        f"Host(`testing.api.{domain}`)",
         f"Host(`testing.{domain}`)",
         f"Host(`manual.{domain}`)",
     ]
