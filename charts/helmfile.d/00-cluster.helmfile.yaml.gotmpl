@@ -1,0 +1,13 @@
+bases:
+  - ./helmfile_bases.yaml
+
+releases:
+  - name: security-hardening
+    namespace: kube-system
+    chart: ./security-hardening
+    createNamespace: false
+    values:
+      - ./security-hardening/values.yaml.gotmpl
+      {{- range (.Values | get "security_hardening.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}

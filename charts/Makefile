@@ -27,7 +27,7 @@ ifneq ($(strip $(RELEASE)),)
 override HELMFILE_EXTRA_ARGS += --selector 'name=$(RELEASE)'
 endif
 
-HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
+HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS) --sequential-helmfiles
 
 TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 
@@ -36,9 +36,9 @@ TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl helmfile_environment.yaml
+.helmfile-%: .verify-helmfile-installation helmfile_environment.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
+	$(HELMFILE) --environment default $*
 
 #
 # Artifacts
