@@ -7,7 +7,7 @@
 # Based on helm version choose the highest compatible helmfile version.
 # (helmfile defines minimum required helm version)
 # NOTE: keep in sync with github workflows and version in running clusters
-HELMFILE_EXPECTED_VERSION := 1.1.0
+HELMFILE_EXPECTED_VERSION := 1.1.6
 
 # NOTE: keep in sync with version used in github workflows (actions)
 TRIVY_EXPECTED_VERSION := 0.72.0
