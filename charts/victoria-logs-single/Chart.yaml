@@ -14,5 +14,5 @@ appVersion: 0.0.1 # unused
 
 dependencies:
   - name: victoria-logs-single
-    version: 0.13.8
+    version: 0.13.9
     repository: "https://victoriametrics.github.io/helm-charts/"
