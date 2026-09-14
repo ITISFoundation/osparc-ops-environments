@@ -20,7 +20,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: internal-ipallowlist
+  name: {{ .Values.middlewares.ipAllowList.name | quote }}
   namespace: {{ .Release.Namespace }}
 spec:
   ipAllowList:

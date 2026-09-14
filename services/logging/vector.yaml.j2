@@ -155,7 +155,7 @@ sinks:
       user: "{{ SERVICES_USER }}"
       password: "{{ SERVICES_PASSWORD }}"
     endpoints:
-      - {{ LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT }}/logs/insert/elasticsearch
+      - {{ LOGGING_VECTOR_KUBERNETES_VICTORIA_LOGS_ENDPOINT }}/insert/elasticsearch
     api_version: v8
     compression: gzip
     healthcheck:
