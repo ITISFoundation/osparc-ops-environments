@@ -1,7 +1,6 @@
 # https://github.com/grafana-community/helm-charts/blob/grafana-12.4.4/charts/grafana/README.md#sidecar-for-datasources
 {{- $vmauth := index .Values "vm-k8s-stack" "vmauth" }}
-{{- $fullname := index .Values "vm-k8s-stack" "fullnameOverride" }}
-{{- $svcName := printf "vmauth-%s" $fullname }}
+{{- $svcName := printf "vmauth-%s" (index .Values "vm-k8s-stack" "fullnameOverride") }}
 {{- $port := $vmauth.spec.port }}
 {{- $pathPrefix := index $vmauth.spec.extraArgs "http.pathPrefix" }}
 {{- $clusterDomain := index .Values "vm-k8s-stack" "global" "cluster" "dnsDomain" }}
