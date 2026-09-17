@@ -1543,7 +1543,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(traefik_config_reloads_total, osparc_cluster)",
-        "includeAll": true,
+        "includeAll": false,
         "name": "osparc_cluster",
         "options": [],
         "query": {
@@ -1564,7 +1564,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(traefik_open_connections{osparc_cluster=~\"$osparc_cluster\"}, entrypoint)",
-        "includeAll": true,
+        "includeAll": false,
         "name": "entrypoint",
         "options": [],
         "query": {
@@ -1639,7 +1639,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\"}, service)",
-        "includeAll": true,
+        "includeAll": false,
         "name": "service",
         "options": [],
         "query": {
