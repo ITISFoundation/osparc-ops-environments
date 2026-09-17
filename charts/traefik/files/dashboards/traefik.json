@@ -131,7 +131,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "count(traefik_config_reloads_total)",
+          "expr": "count(traefik_config_reloads_total{osparc_cluster=~\"$osparc_cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -201,7 +201,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(traefik_service_requests_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) by (method, code)",
+          "expr": "sum(rate(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",protocol=\"http\"}[$interval])) by (method, code)",
           "legendFormat": "{{method}}[{{code}}]",
           "range": true,
           "refId": "A"
@@ -308,7 +308,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(traefik_entrypoint_requests_total{entrypoint=~\"$entrypoint\"}[$interval])) by (entrypoint)",
+          "expr": "sum(rate(traefik_entrypoint_requests_total{osparc_cluster=~\"$osparc_cluster\",entrypoint=~\"$entrypoint\"}[$interval])) by (entrypoint)",
           "legendFormat": "{{entrypoint}}",
           "range": true,
           "refId": "A"
@@ -415,7 +415,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        traefik_service_request_duration_seconds_sum{service=~\"$service.*\",protocol=\"http\"} / \n          traefik_service_request_duration_seconds_count{service=~\"$service.*\",protocol=\"http\"},\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)\n\n",
+          "expr": "topk(15,\n    label_replace(\n        traefik_service_request_duration_seconds_sum{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",protocol=\"http\"} / \n          traefik_service_request_duration_seconds_count{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",protocol=\"http\"},\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)\n\n",
           "legendFormat": "{{method}}[{{code}}] on {{service}}",
           "range": true,
           "refId": "A"
@@ -522,7 +522,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        sum by (service,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
+          "expr": "topk(15,\n    label_replace(\n        sum by (service,code) \n          (rate(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
           "legendFormat": "[{{code}}] on {{service}}",
           "range": true,
           "refId": "A"
@@ -629,7 +629,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_bucket{le=\"0.3\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method) + \n sum(rate(traefik_entrypoint_request_duration_seconds_bucket{le=\"1.2\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method)) / 2 / \n sum(rate(traefik_entrypoint_request_duration_seconds_count{code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method)\n",
+          "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_bucket{osparc_cluster=~\"$osparc_cluster\",le=\"0.3\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method) + \n sum(rate(traefik_entrypoint_request_duration_seconds_bucket{osparc_cluster=~\"$osparc_cluster\",le=\"1.2\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method)) / 2 / \n sum(rate(traefik_entrypoint_request_duration_seconds_count{osparc_cluster=~\"$osparc_cluster\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method)\n",
           "legendFormat": "{{method}}",
           "range": true,
           "refId": "A"
@@ -744,7 +744,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "label_replace(\n  1 - (sum by (service)\n    (rate(traefik_service_request_duration_seconds_bucket{le=\"1.2\",service=~\"$service.*\"}[$interval])) / sum by (service) \n    (rate(traefik_service_request_duration_seconds_count{service=~\"$service.*\"}[$interval]))\n  ) > 0,\n  \"service\", \"$1\", \"service\", \"([^@]+)@.*\"\n)",
+          "expr": "label_replace(\n  1 - (sum by (service)\n    (rate(traefik_service_request_duration_seconds_bucket{osparc_cluster=~\"$osparc_cluster\",le=\"1.2\",service=~\"$service.*\"}[$interval])) / sum by (service) \n    (rate(traefik_service_request_duration_seconds_count{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\"}[$interval]))\n  ) > 0,\n  \"service\", \"$1\", \"service\", \"([^@]+)@.*\"\n)",
           "legendFormat": "{{service}}",
           "range": true,
           "refId": "A"
@@ -847,7 +847,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "label_replace(\n  1 - (sum by (service)\n    (rate(traefik_service_request_duration_seconds_bucket{le=\"0.3\",service=~\"$service.*\"}[$interval])) / sum by (service) \n    (rate(traefik_service_request_duration_seconds_count{service=~\"$service.*\"}[$interval]))\n  ) > 0,\n  \"service\", \"$1\", \"service\", \"([^@]+)@.*\"\n)",
+          "expr": "label_replace(\n  1 - (sum by (service)\n    (rate(traefik_service_request_duration_seconds_bucket{osparc_cluster=~\"$osparc_cluster\",le=\"0.3\",service=~\"$service.*\"}[$interval])) / sum by (service) \n    (rate(traefik_service_request_duration_seconds_count{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\"}[$interval]))\n  ) > 0,\n  \"service\", \"$1\", \"service\", \"([^@]+)@.*\"\n)",
           "legendFormat": "{{service}}",
           "range": true,
           "refId": "A"
@@ -966,7 +966,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",code=~\"2..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
+          "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",code=~\"2..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
           "legendFormat": "{{method}}[{{code}}] on {{service}}",
           "range": true,
           "refId": "A"
@@ -1074,7 +1074,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",code=~\"5..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
+          "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",code=~\"5..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
           "legendFormat": "{{method}}[{{code}}] on {{service}}",
           "range": true,
           "refId": "A"
@@ -1182,7 +1182,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",code!~\"5..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
+          "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",code!~\"5..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
           "legendFormat": "{{method}}[{{code}}] on {{service}}",
           "range": true,
           "refId": "A"
@@ -1290,7 +1290,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        sum by (service,method) \n          (rate(traefik_service_requests_bytes_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
+          "expr": "topk(15,\n    label_replace(\n        sum by (service,method) \n          (rate(traefik_service_requests_bytes_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
           "legendFormat": "{{method}} on {{service}}",
           "range": true,
           "refId": "A"
@@ -1398,7 +1398,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "topk(15,\n    label_replace(\n        sum by (service,method) \n          (rate(traefik_service_responses_bytes_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
+          "expr": "topk(15,\n    label_replace(\n        sum by (service,method) \n          (rate(traefik_service_responses_bytes_total{osparc_cluster=~\"$osparc_cluster\",service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
           "legendFormat": "{{method}} on {{service}}",
           "range": true,
           "refId": "A"
@@ -1505,7 +1505,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(traefik_open_connections{entrypoint=~\"$entrypoint\"}) by (entrypoint)\n",
+          "expr": "sum(traefik_open_connections{osparc_cluster=~\"$osparc_cluster\",entrypoint=~\"$entrypoint\"}) by (entrypoint)\n",
           "legendFormat": "{{entrypoint}}",
           "range": true,
           "refId": "A"
@@ -1542,12 +1542,33 @@
           "type": "__DS_TYPE__",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(traefik_open_connections, entrypoint)",
+        "definition": "label_values(traefik_config_reloads_total, osparc_cluster)",
+        "includeAll": true,
+        "name": "osparc_cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(traefik_config_reloads_total, osparc_cluster)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allowCustomValue": true,
+        "current": {},
+        "datasource": {
+          "type": "__DS_TYPE__",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(traefik_open_connections{osparc_cluster=~\"$osparc_cluster\"}, entrypoint)",
         "includeAll": true,
         "name": "entrypoint",
         "options": [],
         "query": {
-          "query": "label_values(traefik_open_connections, entrypoint)",
+          "query": "label_values(traefik_open_connections{osparc_cluster=~\"$osparc_cluster\"}, entrypoint)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1617,12 +1638,12 @@
           "type": "__DS_TYPE__",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(traefik_service_requests_total, service)",
+        "definition": "label_values(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\"}, service)",
         "includeAll": true,
         "name": "service",
         "options": [],
         "query": {
-          "query": "label_values(traefik_service_requests_total, service)",
+          "query": "label_values(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\"}, service)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
