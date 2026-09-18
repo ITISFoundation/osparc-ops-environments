@@ -25,6 +25,9 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
+    # Give more time for graceful shutdown to avoid locks (e.g.
+    # The journal is already locked by another process)
+    stop_grace_period: 2m
     image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data:/prometheus
@@ -70,6 +73,9 @@ services:
           memory: 2048M
           cpus: "0.2"
   prometheusfederation:
+    # Give more time for graceful shutdown to avoid locks (e.g.
+    # The journal is already locked by another process)
+    stop_grace_period: 2m
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v3.5.1
     volumes:
@@ -228,8 +234,11 @@ services:
       - public
     deploy:
       labels:
-        - prometheus-job=grafana
-        - prometheus-port=3000
+        # YH: very soon moved to kubernetes
+        # since we store metrics in kubernets where we have another grafana instance
+        # to aovid mixing similar metrics we completely switch off metrics from swarm grafana
+        # - prometheus-job=grafana
+        # - prometheus-port=3000
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
