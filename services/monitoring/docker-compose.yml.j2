@@ -234,11 +234,8 @@ services:
       - public
     deploy:
       labels:
-        # YH: very soon moved to kubernetes
-        # since we store metrics in kubernets where we have another grafana instance
-        # to aovid mixing similar metrics we completely switch off metrics from swarm grafana
-        # - prometheus-job=grafana
-        # - prometheus-port=3000
+        - prometheus-job=grafana
+        - prometheus-port=3000
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
