@@ -13,7 +13,7 @@
 - [ ] The Stack has been included in CI Workflow
 -->
 
-<!-- New Workload Introduction
+<!-- New Workload Introduction (Docker Swarm Service / Kubernetes Helm Chart)
 - [ ] Has resource limits and reservations
 - [ ] Has scheduling constraints defined, or is intentionally scheduled on every node
 - [ ] Is restartable
