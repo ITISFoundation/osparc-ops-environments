@@ -25,6 +25,8 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
+    # Give more time for graceful shutdown to avoid locks or wal issues
+    stop_grace_period: 2m
     image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data:/prometheus
@@ -70,6 +72,8 @@ services:
           memory: 2048M
           cpus: "0.2"
   prometheusfederation:
+    # Give more time for graceful shutdown to avoid locks or wal issues
+    stop_grace_period: 2m
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v3.5.1
     volumes:
