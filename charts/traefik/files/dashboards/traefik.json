@@ -1564,7 +1564,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(traefik_open_connections{osparc_cluster=~\"$osparc_cluster\"}, entrypoint)",
-        "includeAll": false,
+        "includeAll": true,
         "name": "entrypoint",
         "options": [],
         "query": {
@@ -1639,7 +1639,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(traefik_service_requests_total{osparc_cluster=~\"$osparc_cluster\"}, service)",
-        "includeAll": false,
+        "includeAll": true,
         "name": "service",
         "options": [],
         "query": {
