@@ -4,6 +4,17 @@
 {{- $port := $vmauth.spec.port }}
 {{- $pathPrefix := index $vmauth.spec.extraArgs "http.pathPrefix" }}
 {{- $clusterDomain := index .Values "vm-k8s-stack" "global" "cluster" "dnsDomain" }}
+{{- $url := printf "http://%s.%s.svc.%s:%s%s/select/0/prometheus/" $svcName .Release.Namespace $clusterDomain $port $pathPrefix }}
+{{- $uid := .Values.metricsDatasourceUid }}
+{{- $type := .Values.metricsDatasourceType }}
+
+{{- define "vmk8s.datasource" -}}
+type: {{ .type }}
+access: proxy
+url: {{ .url }}
+# if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
+editable: false
+{{- end }}
 
 apiVersion: v1
 kind: Secret
@@ -20,15 +31,27 @@ metadata:
 stringData:
   datasource.yaml: |-
     apiVersion: 1
-    datasources:
+    # remove the pre-split single datasource so its uid can be reused by "All".
+    # https://grafana.com/docs/grafana/latest/administration/provisioning/#example-data-source-config-file
+    deleteDatasources:
       - name: VictoriaMetrics
-        type: {{ .Values.metricsDatasourceType }}
-        uid: {{ .Values.metricsDatasourceUid }}
-        access: proxy
-        url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ $port }}{{ $pathPrefix }}/select/0/prometheus/
+        orgId: 1
+    datasources:
+      - name: VictoriaMetrics All
+        uid: {{ $uid }}
+        {{- include "vmk8s.datasource" (dict "type" $type "url" $url) | nindent 8 }}
         # historically, this is 1st datasource in grafana. Grafana sets
         # first datasource automatically to be default. So, isDefault setting
         # is not respected in this case
         isDefault: true
-        # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
-        editable: false
+      - name: VictoriaMetrics Kubernetes only
+        uid: {{ $uid }}-kubernetes
+        {{- include "vmk8s.datasource" (dict "type" $type "url" $url) | nindent 8 }}
+        jsonData:
+          # https://docs.victoriametrics.com/victoriametrics/#prometheus-querying-api-enhancements
+          customQueryParameters: "extra_label=osparc_cluster=kubernetes"
+      - name: VictoriaMetrics Docker Swarm only
+        uid: {{ $uid }}-swarm
+        {{- include "vmk8s.datasource" (dict "type" $type "url" $url) | nindent 8 }}
+        jsonData:
+          customQueryParameters: "extra_label=osparc_cluster=docker_swarm"
