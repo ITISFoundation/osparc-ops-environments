@@ -25,9 +25,14 @@ alerting:
 
 remote_write:
   # https://docs.victoriametrics.com/victoriametrics/integrations/prometheus/#
-  # WARNING: we send to a different tenant (1) to keep swarm metrics separate
-  # from kubernetes metrics (tenant 0)
-  - url: ${KUBERNETES_VICTORIA_METRICS_INTERNAL_ENDPOINT}/insert/1/prometheus
+  - url: ${KUBERNETES_VICTORIA_METRICS_INTERNAL_ENDPOINT}/insert/0/prometheus
+    basic_auth:
+      username: ${SERVICES_USER}
+      password: ${SERVICES_PASSWORD}
+    # only tag series sent to remote storage, not local ones
+    write_relabel_configs:
+      - target_label: osparc_cluster
+        replacement: docker_swarm
 
 # A scrape configuration containing exactly one endpoint to scrape:
 scrape_configs:

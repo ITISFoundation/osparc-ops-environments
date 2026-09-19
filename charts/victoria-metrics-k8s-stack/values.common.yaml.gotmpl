@@ -10,6 +10,7 @@ metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
 ingressHttpPathPrefix: {{ $httpPathPrefix | quote }}
+basicAuthMiddleware: {{ $basicAuthMiddleware | quote }}
 
 # https://github.com/VictoriaMetrics/operator/blob/v0.74.0/cmd/config-reloader/README.md
 configReloaderPort: 8435 # hardcoded in operator
@@ -184,6 +185,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       extraArgs:
+        remoteWrite.label: "osparc_cluster=kubernetes"
         remoteWrite.maxHourlySeries: "150000" # side-effect: enables a metric used in alerts
         remoteWrite.maxDailySeries: "300000" # side-effect: enables a metric used in alerts
       port: "8429"

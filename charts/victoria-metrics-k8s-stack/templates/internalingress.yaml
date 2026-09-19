@@ -9,6 +9,7 @@ metadata:
     helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: webinternal
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.basicAuthMiddleware | quote }}
 spec:
   ingressClassName: traefik
   rules:
