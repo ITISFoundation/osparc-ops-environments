@@ -4,7 +4,7 @@
 {{- $port := $vmauth.spec.port }}
 {{- $pathPrefix := index $vmauth.spec.extraArgs "http.pathPrefix" }}
 {{- $clusterDomain := index .Values "vm-k8s-stack" "global" "cluster" "dnsDomain" }}
-{{- $url := printf "http://%s.%s.svc.%s:%s%s/select/0/prometheus/" $svcName .Release.Namespace $clusterDomain $port $pathPrefix }}
+{{- $url := printf "http://%s.%s.svc.%s:%s%s/select/prometheus/" $svcName .Release.Namespace $clusterDomain $port $pathPrefix }}
 {{- $uid := .Values.metricsDatasourceUid }}
 {{- $type := .Values.metricsDatasourceType }}
 
