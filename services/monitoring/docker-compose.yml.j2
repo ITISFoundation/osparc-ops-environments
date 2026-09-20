@@ -232,8 +232,11 @@ services:
       - public
     deploy:
       labels:
-        - prometheus-job=grafana
-        - prometheus-port=3000
+        # kubernetes grafana dashboard does not 100% support non-kubernetes environments
+        # to avoid issues, we disable the prometheus job and port for swarm grafana
+        # the plan is to replace it rather soon (before mid-October 2026 - YH)
+        #- prometheus-job=grafana
+        #- prometheus-port=3000
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
