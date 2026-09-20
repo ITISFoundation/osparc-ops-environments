@@ -408,6 +408,8 @@ vm-k8s-stack:
         rules: {}
         spec:
           params:
+            # only check for kubernetes metrics as in swarm many (prometheus) targets are down
+            # YH does not want to fix swarm targets for now, so we exclude them
             extra_label:
               - osparc_cluster=kubernetes
       k8s.rules.container_cpu_limits:
