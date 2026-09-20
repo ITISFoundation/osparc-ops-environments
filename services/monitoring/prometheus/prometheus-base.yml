@@ -25,7 +25,7 @@ alerting:
 
 remote_write:
   # https://docs.victoriametrics.com/victoriametrics/integrations/prometheus/#
-  - url: ${KUBERNETES_VICTORIA_METRICS_INTERNAL_ENDPOINT}/insert/0/prometheus
+  - url: ${KUBERNETES_VICTORIA_METRICS_INTERNAL_ENDPOINT}/insert/prometheus
     basic_auth:
       username: ${SERVICES_USER}
       password: ${SERVICES_PASSWORD}
