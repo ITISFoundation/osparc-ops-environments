@@ -49,9 +49,9 @@ stringData:
         {{- include "vmk8s.datasource" (dict "type" $type "url" $url) | nindent 8 }}
         jsonData:
           # https://docs.victoriametrics.com/victoriametrics/#prometheus-querying-api-enhancements
-          customQueryParameters: "extra_label=osparc_cluster=kubernetes"
+          customQueryParameters: "extra_label=cluster=kubernetes"
       - name: VictoriaMetrics Docker Swarm only
         uid: {{ $uid }}-swarm
         {{- include "vmk8s.datasource" (dict "type" $type "url" $url) | nindent 8 }}
         jsonData:
-          customQueryParameters: "extra_label=osparc_cluster=docker_swarm"
+          customQueryParameters: "extra_label=cluster=docker_swarm"

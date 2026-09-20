@@ -31,7 +31,7 @@ remote_write:
       password: ${SERVICES_PASSWORD}
     # only tag series sent to remote storage, not local ones
     write_relabel_configs:
-      - target_label: osparc_cluster
+      - target_label: cluster
         replacement: docker_swarm
 
 # A scrape configuration containing exactly one endpoint to scrape:

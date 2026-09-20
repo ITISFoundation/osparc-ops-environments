@@ -185,7 +185,7 @@ vm-k8s-stack:
     enabled: true
     spec:
       extraArgs:
-        remoteWrite.label: "osparc_cluster=kubernetes"
+        remoteWrite.label: "cluster=kubernetes"
         remoteWrite.maxHourlySeries: "150000" # side-effect: enables a metric used in alerts
         remoteWrite.maxDailySeries: "300000" # side-effect: enables a metric used in alerts
       port: "8429"
@@ -411,7 +411,7 @@ vm-k8s-stack:
             # only check for kubernetes metrics as in swarm many (prometheus) targets are down
             # YH does not want to fix swarm targets for now, so we exclude them
             extra_label:
-              - osparc_cluster=kubernetes
+              - cluster=kubernetes
       k8s.rules.container_cpu_limits:
         enabled: false
       k8s.rules.container_cpu_requests:
