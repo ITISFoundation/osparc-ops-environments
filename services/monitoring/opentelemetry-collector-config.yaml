@@ -6,8 +6,6 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318 # Default endpoint for OTLP over HTTP
 exporters:
-  otlphttp:
-    endpoint: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}  # Adjust to your Jaeger endpoint
   otlp:
     endpoint: http://tempo:4317
     tls:
