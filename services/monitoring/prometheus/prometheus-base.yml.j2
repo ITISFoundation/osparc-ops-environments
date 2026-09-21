@@ -23,6 +23,7 @@ alerting:
         - targets:
             - "alertmanager:9093"
 
+{%- if MONITORING_SEND_SWARM_METRICS_TO_KUBERNETES_ENABLED == "true" %}
 remote_write:
   # https://docs.victoriametrics.com/victoriametrics/integrations/prometheus/#
   - url: ${KUBERNETES_VICTORIA_METRICS_INTERNAL_ENDPOINT}/insert/prometheus
@@ -33,6 +34,7 @@ remote_write:
     write_relabel_configs:
       - target_label: cluster
         replacement: docker_swarm
+{%- endif %}
 
 # A scrape configuration containing exactly one endpoint to scrape:
 scrape_configs:
