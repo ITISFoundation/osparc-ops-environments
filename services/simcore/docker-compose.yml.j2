@@ -824,7 +824,7 @@ services:
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_api.rule=(${DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE})
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_api.entrypoints=https
         - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_api.tls=true
-        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_api.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_auth@swarm, ops_whitelist_ips@swarm
+        - traefik.http.routers.${SWARM_STACK_NAME}_testing_simcore_api.middlewares=ops_gzip@swarm, ops_sslheader@swarm, ops_whitelist_ips@swarm
       update_config:
         parallelism: 2
         order: start-first
