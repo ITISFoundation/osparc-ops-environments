@@ -35,7 +35,7 @@ spec:
           expr: count by (namespace) (kube_pod_status_phase == 1) > 30
           for: 15m
           labels:
-            severity: critical
+            severity: info
           annotations:
             summary: >-
               {{`{{ $value }}`}} pods in namespace {{`{{ $labels.namespace }}`}}
