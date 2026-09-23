@@ -12,10 +12,6 @@ spec:
     - name: kubernetes-pods-extra
       rules:
         - alert: TooManyUnhealthyPods
-          description: >-
-            Too many unhealthy pods in the namespace. It might be an indication of
-            an ongoing problem or an accumulation of failing pods over time. Clean
-            up is necessary
           expr: |
             count by (namespace) (
               kube_pod_status_phase{phase=~"Pending|Failed|Unknown"} == 1
@@ -24,18 +20,21 @@ spec:
           labels:
             severity: warning
           annotations:
+            description: >-
+              Too many unhealthy pods in the namespace. It might be an indication of
+              an ongoing problem or an accumulation of failing pods over time
             summary: >-
               {{`{{ $value }}`}} unhealthy pods (Pending/Failed/Unknown)
               in namespace {{`{{ $labels.namespace }}`}}
 
         - alert: TooManyPodsInNamespace
-          description: >-
-            Too many pods in the namespace. It might be an indication of a misconfiguration
-            or an accumulation of failing pods over time. Clean up is necessary
           expr: count by (namespace) (kube_pod_status_phase == 1) > 30
           for: 15m
           labels:
             severity: info
           annotations:
+            description: >-
+              Too many pods in the namespace. It might be an indication of a misconfiguration
+              or an accumulation of pods over time
             summary: >-
               {{`{{ $value }}`}} pods in namespace {{`{{ $labels.namespace }}`}}
