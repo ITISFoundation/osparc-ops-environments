@@ -5,6 +5,8 @@
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 {{- $vmclusterEnabled := true }}
 
+{{- $kubeletAlertsEnabled := true }}
+
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
@@ -436,7 +438,7 @@ vm-k8s-stack:
       kube-state-metrics:
         enabled: false
       kubelet.rules:
-        enabled: false
+        enabled: {{ $kubeletAlertsEnabled }}
       kube-apiserver-availability.rules:
         enabled: false
       kubernetes-apps:
@@ -452,7 +454,7 @@ vm-k8s-stack:
       kubernetes-system-controller-manager:
         enabled: false
       kubernetes-system-kubelet:
-        enabled: true
+        enabled: {{ $kubeletAlertsEnabled }}
       kubernetes-system-scheduler:
         enabled: false
       node-exporter:
