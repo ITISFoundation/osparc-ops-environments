@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-internal
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: webinternal
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.basicAuthMiddleware | quote }}
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: {{ .Values.internalIngressHost | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingressHttpPathPrefix | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "vmauth-%s" (index .Values "vm-k8s-stack" "fullnameOverride") }}
+                port:
+                  number: {{ index .Values "vm-k8s-stack" "vmauth" "spec" "port" }}
