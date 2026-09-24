@@ -1,0 +1,41 @@
+{{- $federated := .Values.federatedVmsingle -}}
+{{- if $federated.enabled -}}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+  name: federated
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  retentionPeriod: {{ $federated.retentionPeriod | quote }}
+  port: {{ $federated.port | quote }}
+  logLevel: {{ $federated.logLevel }}
+  # make VMUI / API endpoints work correctly behind the ingress path prefix
+  # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
+  extraArgs:
+    http.pathPrefix: {{ $federated.httpPathPrefix | quote }}
+  # enforce restricted PodSecurity on operator-managed containers
+  useStrictSecurity: true
+  podMetadata:
+    labels: # labels used by the network policy (templates/networkpolicies)
+      {{- toYaml $federated.podMetadata.labels | nindent 6 }}
+  nodeSelector:
+    node-role.kubernetes.io/ops: ""
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  storage:
+    accessModes: ["ReadWriteOnce"]
+    storageClassName: {{ $federated.storage.storageClassName | quote }}
+    resources:
+      requests:
+        storage: {{ $federated.storage.size | quote }}
+{{- end }}

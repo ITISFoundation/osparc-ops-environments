@@ -1,0 +1,20 @@
+{{- if .Values.federatedVmsingle.enabled -}}
+{{- $labels := .Values.federatedVmsingle.podMetadata.labels -}}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmsingle-federated-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $labels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $labels "app.simcore.io/part-of" }}"
+  types: # calico only defaults this on create, so it must be explicit
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ .Values.federatedVmsingle.port }}
+{{- end }}
