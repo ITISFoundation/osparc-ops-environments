@@ -27,7 +27,7 @@ federatedVmsingle:
     size: 20Gi
     storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
   logLevel: {{ $logLevel }}
-  httpPathPrefix: "/metrics-federated"
+  httpPathPrefix: "/federated-metrics"
   # public ingress served under the shared monitoring FQDN + basic-auth middleware
   ingress:
     host: {{ requiredEnv "K8S_MONITORING_FQDN" | quote }}
@@ -35,9 +35,6 @@ federatedVmsingle:
     labels:
       app.simcore.io/name: vmsingle-federated
       app.simcore.io/part-of: {{ .Release.Name }}
-  # regex applied on __name__ by the vmagent writeRelabelConfigs: only series
-  # whose metric name matches this expression are forwarded to the VMSingle
-  metricNameRegex: {{ $federatedVmsingleMetricNameRegex | quote }}
 
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
