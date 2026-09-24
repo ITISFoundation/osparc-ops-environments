@@ -6,7 +6,7 @@
 
 {{- $federatedVmsingleEnabled := true }}
 {{- $federatedVmsinglePort := "8429" }}
-{{- $federatedVmsingleMetricNameRegex := "(s4l_|osparc_|simcore_|traefik_config_).*" }}
+{{- $federatedVmsingleMetricNameRegex := "(s4l_|osparc_|simcore_).*" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
