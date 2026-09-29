@@ -6,6 +6,7 @@
 
 {{- $federatedVmsingleEnabled := true }}
 {{- $federatedVmsinglePort := "8429" }}
+{{- $federatedVmsingleHttpPathPrefix := "/federated-metrics" }}
 {{- $federatedVmsingleMetricNameRegex := "(s4l_|osparc_|simcore_).*" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
@@ -28,7 +29,7 @@ federatedVmsingle:
     storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
   logLevel: {{ $logLevel }}
   extraArgs:
-    http.pathPrefix: "/federated-metrics"
+    http.pathPrefix: {{ $federatedVmsingleHttpPathPrefix | quote }}
   # public ingress served under the shared monitoring FQDN + basic-auth middleware
   ingress:
     host: {{ requiredEnv "K8S_MONITORING_FQDN" | quote }}
@@ -218,7 +219,7 @@ vm-k8s-stack:
     # here: fan-out a curated subset of series into the federated VMSingle
     additionalRemoteWrites:
 {{- if $federatedVmsingleEnabled }}
-      - url: http://vmsingle-federated.{{ .Release.Namespace }}.svc.cluster.local:{{ $federatedVmsinglePort }}/api/v1/write
+      - url: http://vmsingle-federated.{{ .Release.Namespace }}.svc.cluster.local:{{ $federatedVmsinglePort }}{{ $federatedVmsingleHttpPathPrefix }}/api/v1/write
         inlineUrlRelabelConfig:
           - action: keep
             source_labels: [__name__]
@@ -229,6 +230,7 @@ vm-k8s-stack:
         remoteWrite.label: "cluster=kubernetes"
         remoteWrite.maxHourlySeries: "150000" # side-effect: enables a metric used in alerts
         remoteWrite.maxDailySeries: "300000" # side-effect: enables a metric used in alerts
+        remoteWrite.maxDiskUsagePerURL: "1GB"
       port: "8429"
       logLevel: {{ $logLevel }}
       # enforce restricted PodSecurity on operator-managed containers

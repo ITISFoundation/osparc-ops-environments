@@ -38,3 +38,47 @@ spec:
               or an accumulation of pods over time
             summary: >-
               {{`{{ $value }}`}} pods in namespace {{`{{ $labels.namespace }}`}}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: vmsingle-federated
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  groups:
+    - name: vmsingle-federated
+      rules:
+        - alert: DiskRunsOutOfSpace
+          expr: |
+            sum(vm_data_size_bytes{job="vmsingle-federated"}) by(job, instance) /
+            (
+              sum(vm_free_disk_space_bytes{job="vmsingle-federated"}) by(job, instance) +
+              sum(vm_data_size_bytes{job="vmsingle-federated"}) by(job, instance)
+            ) > 0.7
+          for: 30m
+          labels:
+            severity: info
+          annotations:
+            dashboard: {{`"{{ $externalURL }}/d/wNf0q_kZk?viewPanel=53&var-instance={{ $labels.instance }}"`}}
+            summary: >-
+              Instance {{`{{ $labels.instance }}`}} (job={{`{{ $labels.job }}`}}) will run out of disk space soon
+            description: >-
+              Disk utilisation on instance {{`{{ $labels.instance }}`}} is more than 70%.
+              Having less than 30% of free disk space could cripple merge processes and overall performance.
+              Consider to limit the ingestion rate, decrease retention or scale the disk space if possible.
+        - alert: NoMetricsIngested
+          # vmagent -> federated remote-write can fail silently; catch a stalled write path
+          expr: sum(rate(vm_rows_inserted_total{job="vmsingle-federated"}[5m])) == 0
+          for: 15m
+          labels:
+            severity: info
+          annotations:
+            description: >-
+              vmsingle-federated has not ingested any samples in the last 15 minutes.
+              Check vmagent additionalRemoteWrites and network policies.
+            summary: >-
+              vmsingle-federated is not receiving metrics
