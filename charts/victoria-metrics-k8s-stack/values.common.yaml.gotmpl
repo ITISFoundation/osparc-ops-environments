@@ -27,7 +27,8 @@ federatedVmsingle:
     size: 20Gi
     storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
   logLevel: {{ $logLevel }}
-  httpPathPrefix: "/federated-metrics"
+  extraArgs:
+    http.pathPrefix: "/federated-metrics"
   # public ingress served under the shared monitoring FQDN + basic-auth middleware
   ingress:
     host: {{ requiredEnv "K8S_MONITORING_FQDN" | quote }}
@@ -35,6 +36,15 @@ federatedVmsingle:
     labels:
       app.simcore.io/name: vmsingle-federated
       app.simcore.io/part-of: {{ .Release.Name }}
+  nodeSelector:
+    node-role.kubernetes.io/ops: ""
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant

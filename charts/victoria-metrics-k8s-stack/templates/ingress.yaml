@@ -1,6 +1,5 @@
 {{- $federated := .Values.federatedVmsingle -}}
 {{- if $federated.enabled -}}
-{{- $trimmedPathPrefix := $federated.httpPathPrefix | trimSuffix "/" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -20,7 +19,7 @@ spec:
     - host: {{ $federated.ingress.host | quote }}
       http:
         paths:
-          - path: {{ $trimmedPathPrefix | quote }}
+          - path: {{ index $federated.extraArgs "http.pathPrefix" | trimSuffix "/" | quote }}
             pathType: Prefix
             backend:
               service:

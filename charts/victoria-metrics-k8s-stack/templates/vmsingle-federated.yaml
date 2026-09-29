@@ -14,24 +14,16 @@ spec:
   retentionPeriod: {{ $federated.retentionPeriod | quote }}
   port: {{ $federated.port | quote }}
   logLevel: {{ $federated.logLevel }}
-  # make VMUI / API endpoints work correctly behind the ingress path prefix
-  # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
   extraArgs:
-    http.pathPrefix: {{ $federated.httpPathPrefix | quote }}
-  # enforce restricted PodSecurity on operator-managed containers
+    {{- toYaml $federated.extraArgs | nindent 4 }}
   useStrictSecurity: true
   podMetadata:
-    labels: # labels used by the network policy (templates/networkpolicies)
+    labels:
       {{- toYaml $federated.podMetadata.labels | nindent 6 }}
   nodeSelector:
-    node-role.kubernetes.io/ops: ""
+    {{- toYaml $federated.nodeSelector | nindent 4 }}
   resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+    {{- toYaml $federated.resources | nindent 4 }}
   storage:
     accessModes: ["ReadWriteOnce"]
     storageClassName: {{ $federated.storage.storageClassName | quote }}
