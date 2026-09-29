@@ -1,9 +1,19 @@
 {{- $replicationFactor := 2 }}
+{{- /* dedup required: replicationFactor > 1 + unclustered vmagent replicas; scrapeInterval covers both */ -}}
+{{- $scrapeInterval := "20s" }}
+# it is recommended to have deduplication interval equal to the scrape interval
+# https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#deduplication
+{{- $dedupInterval := $scrapeInterval }}
+
+federatedVmsingle:
+  extraArgs:
+    dedup.minScrapeInterval: {{ $dedupInterval | quote }}
 
 vm-k8s-stack:
   vmagent:
     spec:
       replicaCount: 2
+      scrapeInterval: {{ $scrapeInterval | quote }}
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -14,12 +24,13 @@ vm-k8s-stack:
               app.simcore.io/part-of: {{ .Release.Name }}
 
   vmcluster:
-    enabled: true
     spec:
       replicationFactor: {{ $replicationFactor }} # to how many storage nodes the data is replicated
 
       vmstorage:
         replicaCount: {{ sub (mul 2 $replicationFactor) 1 }} # 2*N-1 - VMCluster HA Requirement
+        extraArgs:
+          dedup.minScrapeInterval: {{ $dedupInterval | quote }}
         affinity:
           podAntiAffinity: # enforce that vmstorage pods are not scheduled on the same node
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -31,6 +42,8 @@ vm-k8s-stack:
 
       vmselect:
         replicaCount: 2
+        extraArgs:
+          dedup.minScrapeInterval: {{ $dedupInterval | quote }} # required when replicationFactor > 1
         topologySpreadConstraints:
           - maxSkew: 1
             topologyKey: kubernetes.io/hostname

@@ -152,6 +152,7 @@ releases:
       - victoria-logs-single/victoria-logs-single
     values:
       - ./victoria-metrics-k8s-stack/values.common.yaml.gotmpl
+      - ./victoria-metrics-k8s-stack/values.alert-rules.yaml.gotmpl
       {{- range (.Values | get "victoria_metrics_k8s_stack.extra_values_files" list) }}
       - {{ . }}
       {{- end }}

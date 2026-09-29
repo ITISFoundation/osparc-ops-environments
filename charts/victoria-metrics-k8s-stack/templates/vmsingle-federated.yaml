@@ -1,0 +1,33 @@
+{{- $federated := .Values.federatedVmsingle -}}
+{{- if $federated.enabled -}}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+  name: federated
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  retentionPeriod: {{ $federated.retentionPeriod | quote }}
+  port: {{ $federated.port | quote }}
+  logLevel: {{ $federated.logLevel }}
+  extraArgs:
+    {{- toYaml $federated.extraArgs | nindent 4 }}
+  useStrictSecurity: true
+  podMetadata:
+    labels:
+      {{- toYaml $federated.podMetadata.labels | nindent 6 }}
+  nodeSelector:
+    {{- toYaml $federated.nodeSelector | nindent 4 }}
+  resources:
+    {{- toYaml $federated.resources | nindent 4 }}
+  storage:
+    accessModes: ["ReadWriteOnce"]
+    storageClassName: {{ $federated.storage.storageClassName | quote }}
+    resources:
+      requests:
+        storage: {{ $federated.storage.size | quote }}
+{{- end }}
