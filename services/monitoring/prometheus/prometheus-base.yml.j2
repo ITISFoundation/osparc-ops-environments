@@ -26,7 +26,7 @@ alerting:
 {%- if MONITORING_SEND_SWARM_METRICS_TO_KUBERNETES_ENABLED == "true" %}
 remote_write:
   # https://docs.victoriametrics.com/victoriametrics/integrations/prometheus/#
-  - url: ${KUBERNETES_VICTORIA_METRICS_INTERNAL_ENDPOINT}/insert/prometheus
+  - url: ${K8S_MONITORING_PRIVATE_ENDPOINT}/metrics/insert/prometheus
     basic_auth:
       username: ${SERVICES_USER}
       password: ${SERVICES_PASSWORD}
