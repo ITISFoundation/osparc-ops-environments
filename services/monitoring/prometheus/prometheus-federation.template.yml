@@ -3,14 +3,14 @@ global:
   evaluation_interval: ${PROMETHEUS_SCRAPE_INTERVAL_SECONDS}s
   scrape_timeout: ${PROMETHEUS_SCRAPE_TIMEOUT_SECONDS}s
 
-  remote_write:
-    - url: ${K8S_MONITORING_PRIVATE_ENDPOINT}/federated-metrics/api/v1/write
-      basic_auth:
-        username: ${SERVICES_USER}
-        password: ${SERVICES_PASSWORD}
-      write_relabel_configs:
-        - target_label: cluster
-          replacement: docker_swarm
+remote_write:
+  - url: ${K8S_MONITORING_PRIVATE_ENDPOINT}/federated-metrics/api/v1/write
+    basic_auth:
+      username: ${SERVICES_USER}
+      password: ${SERVICES_PASSWORD}
+    write_relabel_configs:
+      - target_label: cluster
+        replacement: docker_swarm
 
 scrape_configs:
   - job_name: 'federate' # A job defines a series of targets and parameters describing how to scrape them.
