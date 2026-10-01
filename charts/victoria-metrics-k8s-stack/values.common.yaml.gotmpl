@@ -217,16 +217,6 @@ vm-k8s-stack:
   #
   vmagent:
     enabled: true
-    # extra remoteWrite targets appended to the auto-generated vminsert one;
-    # here: fan-out a curated subset of series into the federated VMSingle
-    additionalRemoteWrites:
-{{- if $federatedVmsingleEnabled }}
-      - url: http://vmsingle-federated.{{ .Release.Namespace }}.svc.cluster.local:{{ $federatedVmsinglePort }}{{ $federatedVmsingleHttpPathPrefix }}/api/v1/write
-        inlineUrlRelabelConfig:
-          - action: keep
-            source_labels: [__name__]
-            regex: {{ $federatedVmsingleMetricNameRegex | quote }}
-{{- end }}
     spec:
       extraArgs:
         remoteWrite.label: "cluster=kubernetes"

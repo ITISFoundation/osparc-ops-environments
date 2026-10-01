@@ -16,6 +16,15 @@ spec:
     - host: {{ .Values.internalIngressHost | quote }}
       http:
         paths:
+{{- if .Values.federatedVmsingle.enabled }}
+          - path: {{ index .Values "federatedVmsingle" "extraArgs" "http.pathPrefix" | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: vmsingle-federated
+                port:
+                  number: {{ index .Values "federatedVmsingle" "port" }}
+{{- end }}
           - path: {{ .Values.ingressHttpPathPrefix | quote }}
             pathType: Prefix
             backend:
