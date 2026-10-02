@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-otel-internal
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: webinternal
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.basicAuthMiddleware | quote }}
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: {{ .Values.internalIngressHost | quote }}
+      http:
+        paths:
+          - path: /insert/opentelemetry/v1/traces
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "victoria-traces-single" "server" "fullnameOverride" }}
+                port:
+                  number: {{ .Values.victoriaTracesHttpPortNumber }}

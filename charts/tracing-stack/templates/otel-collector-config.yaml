@@ -47,7 +47,7 @@ data:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch, filter/drop_healthcheck]
+          processors: [batch, filter/drop_healthcheck, resource/kubernetes_cluster]
           exporters: [otlp_grpc]
       telemetry:
         metrics:
@@ -60,3 +60,9 @@ data:
                     port: {{ .Values.otelMetricsPortNumber }}
         logs:
           level: warn
+    processors:
+      resource/kubernetes_cluster:
+        attributes:
+          - key: cluster
+            value: kubernetes
+            action: upsert

@@ -5,19 +5,41 @@ receivers:
         endpoint: 0.0.0.0:4317  # Default endpoint for OTLP over gRPC
       http:
         endpoint: 0.0.0.0:4318 # Default endpoint for OTLP over HTTP
+{% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+extensions:
+  basicauth/kubernetes:
+    client_auth:
+      username: ${SERVICES_USER}
+      password: ${SERVICES_PASSWORD}
+{% endif %}
 exporters:
   otlphttp:
-    endpoint: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}  # Adjust to your Jaeger endpoint
+    endpoint: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}  # Existing trace destination
   otlp:
     endpoint: http://tempo:4317
     tls:
       insecure: true
+{% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+  otlphttp/kubernetes:
+    traces_endpoint: ${K8S_MONITORING_PRIVATE_ENDPOINT}/insert/opentelemetry/v1/traces
+    auth:
+      authenticator: basicauth/kubernetes
+{% endif %}
 service:
+{% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+  extensions: [basicauth/kubernetes]
+{% endif %}
   pipelines:
     traces:
       receivers: [otlp]
       exporters: [otlphttp,otlp]
       processors: [batch,filter/drop_healthcheck]
+{% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+    traces/kubernetes:
+      receivers: [otlp]
+      exporters: [otlphttp/kubernetes]
+      processors: [batch,filter/drop_healthcheck,resource/swarm_cluster]
+{% endif %}
   telemetry:
     metrics: # https://opentelemetry.io/docs/collector/internal-telemetry/#prometheus-endpoint-for-internal-metrics
       readers:
@@ -48,3 +70,10 @@ processors:
         - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
         - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
         - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"
+{% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+  resource/swarm_cluster:
+    attributes:
+      - key: cluster
+        value: docker_swarm
+        action: upsert
+{% endif %}
