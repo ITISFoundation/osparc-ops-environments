@@ -67,6 +67,16 @@ misconfigurations:
       Traefik needs to manages see secrets to manage middlewares or other resources.
 
   #
+  # tracing-stack
+  #
+  - id: KSV-01010
+    paths:
+      - "tracing-stack/templates/otel-collector-config.yaml"
+    statement: >
+      This is a false positive: `key` is an OpenTelemetry resource attribute
+      name, not sensitive content.
+
+  #
   # aws-ebs-csi-driver
   #
 
