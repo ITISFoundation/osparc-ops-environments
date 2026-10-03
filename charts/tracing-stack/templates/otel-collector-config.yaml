@@ -37,6 +37,12 @@ data:
             - attributes["http.target"] == "/metrics" and IsMatch(attributes["http.user_agent"], ".*Prometheus.*") == true
             - attributes["db.statement"] == "PING" and attributes["db.system"] == "redis"
             - IsMatch(attributes["db.statement"], "^SCAN[\\s?]*$") and attributes["db.system"] == "redis"
+      resource/kubernetes_cluster:
+        attributes:
+          - key: cluster
+            value: kubernetes
+            action: upsert
+
     exporters:
       otlp_grpc:
         endpoint: {{ include "tracing-stack.vtHost" . }}:{{ .Values.otlpGrpcPortNumber }}
@@ -60,9 +66,3 @@ data:
                     port: {{ .Values.otelMetricsPortNumber }}
         logs:
           level: warn
-    processors:
-      resource/kubernetes_cluster:
-        attributes:
-          - key: cluster
-            value: kubernetes
-            action: upsert
