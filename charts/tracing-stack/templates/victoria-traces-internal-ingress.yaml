@@ -1,7 +1,8 @@
+{{- $pathPrefix := index .Values "victoria-traces-single" "server" "extraArgs" "http.pathPrefix" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-otel-internal
+  name: {{ .Release.Name }}-victoria-traces-internal
   labels:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
@@ -16,7 +17,7 @@ spec:
     - host: {{ .Values.internalIngressHost | quote }}
       http:
         paths:
-          - path: /insert/opentelemetry/v1/traces
+          - path: {{ printf "%s/insert/opentelemetry/v1/traces" $pathPrefix | quote }}
             pathType: Exact
             backend:
               service:
