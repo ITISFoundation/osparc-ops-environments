@@ -21,7 +21,7 @@ exporters:
       insecure: true
 {% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
   otlphttp/kubernetes:
-    traces_endpoint: ${K8S_MONITORING_PRIVATE_ENDPOINT}/insert/opentelemetry/v1/traces
+    traces_endpoint: ${K8S_MONITORING_PRIVATE_ENDPOINT}/traces/insert/opentelemetry/v1/traces
     auth:
       authenticator: basicauth/kubernetes
 {% endif %}
