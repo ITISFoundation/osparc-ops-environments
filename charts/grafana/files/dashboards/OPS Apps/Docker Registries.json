@@ -38,8 +38,8 @@
     {
       "datasource": {
         "default": false,
-        "type": "prometheus",
-        "uid": "RmZEr52nz"
+        "type": "__DS_TYPE__",
+        "uid": "${ds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -119,8 +119,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "RmZEr52nz"
+            "type": "__DS_TYPE__",
+            "uid": "${ds}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -140,8 +140,8 @@
     {
       "datasource": {
         "default": false,
-        "type": "prometheus",
-        "uid": "RmZEr52nz"
+        "type": "__DS_TYPE__",
+        "uid": "${ds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -221,8 +221,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "RmZEr52nz"
+            "type": "__DS_TYPE__",
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "container_memory_usage_bytes{container_label_com_docker_swarm_service_name=\"${swarm_registry_stack}_${registry}\"}",
@@ -251,8 +251,8 @@
     {
       "datasource": {
         "default": false,
-        "type": "prometheus",
-        "uid": "RmZEr52nz"
+        "type": "__DS_TYPE__",
+        "uid": "${ds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -332,8 +332,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "RmZEr52nz"
+            "type": "__DS_TYPE__",
+            "uid": "${ds}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -353,8 +353,8 @@
     {
       "datasource": {
         "default": false,
-        "type": "prometheus",
-        "uid": "RmZEr52nz"
+        "type": "__DS_TYPE__",
+        "uid": "${ds}"
       },
       "description": "",
       "fieldConfig": {
@@ -466,8 +466,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "RmZEr52nz"
+            "type": "__DS_TYPE__",
+            "uid": "${ds}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -487,8 +487,8 @@
     {
       "datasource": {
         "default": false,
-        "type": "prometheus",
-        "uid": "RmZEr52nz"
+        "type": "__DS_TYPE__",
+        "uid": "${ds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -568,8 +568,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "RmZEr52nz"
+            "type": "__DS_TYPE__",
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "avg by (handler) (rate(registry_http_request_duration_seconds_sum{job=\"$registry\"}[5m]))",
@@ -598,8 +598,8 @@
     {
       "datasource": {
         "default": false,
-        "type": "prometheus",
-        "uid": "RmZEr52nz"
+        "type": "__DS_TYPE__",
+        "uid": "${ds}"
       },
       "fieldConfig": {
         "defaults": {
@@ -678,8 +678,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "RmZEr52nz"
+            "type": "__DS_TYPE__",
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "avg by (action) (rate(registry_storage_action_seconds_sum{job=\"$registry\"}[5m]))",
@@ -702,6 +702,16 @@
   ],
   "templating": {
     "list": [
+      {
+        "allowCustomValue": true,
+        "includeAll": false,
+        "name": "ds",
+        "options": [],
+        "query": "__DS_TYPE__",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
       {
         "current": {
           "selected": false,
