@@ -17,6 +17,8 @@ otlpHttpPortNumber: {{ $otlpHttpPortNumber }}
 otelMetricsPortNumber: {{ $otelMetricsPort }}
 
 ingressHost: {{ $ingressHost }}
+internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
+basicAuthMiddleware: {{ printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") | quote }}
 
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
 victoria-traces-single:
@@ -111,7 +113,7 @@ victoria-traces-single:
     vmServiceScrape:
       enabled: false # broken when used with http.pathPrefix. Created manually in templates
 
-# https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-collector-0.162.0/charts/opentelemetry-collector/values.yaml
+# https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-collector-0.168.0/charts/opentelemetry-collector/values.yaml
 opentelemetry-collector:
 
   # image.repository, command.name and mode must be set explicitly (chart documentation)
