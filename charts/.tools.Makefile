@@ -10,7 +10,7 @@
 HELMFILE_EXPECTED_VERSION := 1.1.6
 
 # NOTE: keep in sync with version used in github workflows (actions)
-TRIVY_EXPECTED_VERSION := 0.72.0
+TRIVY_EXPECTED_VERSION := 0.73.0
 
 #
 # Helpers
