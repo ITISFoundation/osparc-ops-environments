@@ -17,6 +17,8 @@ otlpHttpPortNumber: {{ $otlpHttpPortNumber }}
 otelMetricsPortNumber: {{ $otelMetricsPort }}
 
 ingressHost: {{ $ingressHost }}
+internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
+basicAuthMiddleware: {{ printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") | quote }}
 
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
 victoria-traces-single:
