@@ -13,8 +13,8 @@ kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
 vmSinglePort: {{ $vmSinglePort }} # easy to use in templates (instead of values extracting)
 
-grafanaLogsDatasourceType: victoriametrics-logs-datasource
-grafanaLogsDatasourceUid: victoria-logs
+grafanaLogsDatasourceType: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_TYPE" }}
+grafanaLogsDatasourceUid: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_ID" }}
 
 victoria-logs-single:
   global:

@@ -553,8 +553,8 @@
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "eevd4kpcuqiv4d"
+        "type": "__LOGS_DS_TYPE__",
+        "uid": "__LOGS_DS_UID__"
       },
       "description": "Service logs. N.B. info-level health check and metrics logs are removed. Maintainer: MB.",
       "fieldConfig": {
@@ -583,13 +583,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "eevd4kpcuqiv4d"
+            "type": "__LOGS_DS_TYPE__",
+            "uid": "__LOGS_DS_UID__"
           },
-          "direction": "backward",
-          "editorMode": "builder",
-          "expr": "{service_name=~\".*$deployment.*$service.*\"} | json | message !~ `.*log_level=INFO.*GET / HTTP.*` | message !~ `.*log_level=INFO.*GET /metrics HTTP.*` | line_format `{{.log_msg}}`",
-          "queryType": "range",
+          "editorMode": "code",
+          "expr": "{source_type=\"docker_swarm_logs\", service_name=\"${deployment}-simcore_${deployment}_${service}\"} NOT (log_level:=\"INFO\" AND _msg:\"GET / HTTP\") NOT (log_level:=\"INFO\" AND _msg:\"GET /metrics HTTP\")",
+          "queryType": "raw",
           "refId": "A"
         }
       ],
