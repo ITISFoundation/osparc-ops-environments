@@ -1,0 +1,36 @@
+{{- define "standalone-dashboards.configmap" -}}
+{{- $root := .root -}}
+{{- $name := .name -}}
+{{- $folder := .folder -}}
+{{- $content := $root.Files.Get .path
+  | replace "__DS_UID__" $root.Values.metricsDatasourceUid
+  | replace "__DS_TYPE__" $root.Values.metricsDatasourceType
+  | replace "__LOGS_DS_UID__" $root.Values.logsDatasourceUid
+  | replace "__LOGS_DS_TYPE__" $root.Values.logsDatasourceType -}}
+{{- if $content }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ $root.Release.Namespace }}
+  name: {{ $name | replace "_" "-" }}-grafana-dashboard
+  labels:
+    grafana_dashboard: true_string
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ $root.Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ $root.Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" $root.Chart.Name $root.Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+  annotations:
+    dashboard_folder: {{ $folder | quote }}
+data:
+  {{ $name }}.json: | {{ $content | nindent 4 }}
+---
+{{- end }}
+{{- end -}}
+
+{{- range $flavor, $flavorCfg := .Values.flavors }}
+{{- if $flavorCfg.enabled }}
+{{- range $name, $dashCfg := $flavorCfg.dashboards }}
+{{- include "standalone-dashboards.configmap" (dict "root" $ "name" $name "folder" $dashCfg.folder "path" (printf "files/dashboards/%s/%s.json" $flavor $name)) }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -230,6 +230,14 @@ releases:
     values:
       - ./grafana/values.yaml.gotmpl
 
+  - name: standalone-dashboards
+    namespace: grafana
+    chart: ./standalone-dashboards
+    needs:
+      - grafana/grafana
+    values:
+      - ./standalone-dashboards/values.yaml.gotmpl
+
   - name: headlamp
     namespace: headlamp
     chart: ./headlamp

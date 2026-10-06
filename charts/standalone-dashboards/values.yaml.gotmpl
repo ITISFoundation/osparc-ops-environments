@@ -1,0 +1,25 @@
+metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" | quote }}
+metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" | quote }}
+logsDatasourceUid: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_ID" | quote }}
+logsDatasourceType: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_TYPE" | quote }}
+
+flavors:
+  common:
+    enabled: true
+    dashboards:
+      docker_registries:
+        folder: OPS Apps
+      gpu_nodes:
+        folder: System
+      postgres_overview:
+        folder: OPS Apps
+      requests_load_overview:
+        folder: Simcore
+      simcore_services:
+        folder: Simcore
+  aws:
+    enabled: false
+    dashboards: {}
+  onpremise:
+    enabled: false
+    dashboards: {}
