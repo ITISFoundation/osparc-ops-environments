@@ -237,6 +237,9 @@ releases:
       - grafana/grafana
     values:
       - ./standalone-dashboards/values.yaml.gotmpl
+      {{- range (.Values | get "standalone_dashboards.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
 
   - name: headlamp
     namespace: headlamp
