@@ -5,3 +5,7 @@ aws_ebs_csi_driver:
 
 topolvm:
   enabled: true
+
+grafana:
+  extra_values_files:
+    - charts/grafana/values.aws.yaml.gotmpl

@@ -19,11 +19,17 @@ flavors:
         folder: Simcore
       swarm_nodes:
         folder: System
+      rabbitmq_overview:
+        folder: OPS Apps
   aws:
     enabled: false
     dashboards:
       autoscaling_overview:
         folder: Simcore
+      aws_rds_overview:
+        folder: OPS Apps
   onpremise:
     enabled: false
-    dashboards: {}
+    dashboards:
+      redis_overview:
+        folder: OPS Apps

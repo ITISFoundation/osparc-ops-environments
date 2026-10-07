@@ -1,0 +1,28 @@
+{{- if .Values.aws.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudwatch-grafana-datasource
+  labels:
+    grafana_datasource: true_string
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+type: Opaque
+stringData:
+  datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: cloudwatch
+        type: cloudwatch
+        uid: {{ .Values.aws.cloudwatchDatasource.uid | quote }}
+        access: proxy
+        editable: false
+        jsonData:
+          authType: keys
+          defaultRegion: {{ .Values.aws.cloudwatchDatasource.defaultRegion | quote }}
+        secureJsonData:
+          accessKey: {{ .Values.aws.cloudwatchDatasource.accessKey | quote }}
+          secretKey: {{ .Values.aws.cloudwatchDatasource.secretKey | quote }}
+{{- end }}
