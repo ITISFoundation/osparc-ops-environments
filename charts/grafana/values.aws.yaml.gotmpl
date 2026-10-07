@@ -2,6 +2,6 @@ aws:
   enabled: true
   cloudwatchDatasource:
     uid: aws-cloudwatch
-    defaultRegion: {{ requiredEnv "AWS_DEFAULT_REGION" | quote }}
+    defaultRegion: {{ requiredEnv "TF_VAR_AWS_DEFAULT_REGION" | quote }}
     accessKey: {{ requiredEnv "TF_VAR_GRAFANA_CLOUDWATCH_DATASOURCE_USER_ACCESS_KEY" | quote }}
     secretKey: {{ requiredEnv "TF_VAR_GRAFANA_CLOUDWATCH_DATASOURCE_USER_SECRET_KEY" | quote }}

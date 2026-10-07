@@ -8,4 +8,4 @@ topolvm:
 
 grafana:
   extra_values_files:
-    - charts/grafana/values.aws.yaml.gotmpl
+    - ./grafana/values.aws.yaml.gotmpl
