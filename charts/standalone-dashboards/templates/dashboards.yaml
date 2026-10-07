@@ -7,7 +7,9 @@
   | replace "__DS_TYPE__" $root.Values.metricsDatasourceType
   | replace "__LOGS_DS_UID__" $root.Values.logsDatasourceUid
   | replace "__LOGS_DS_TYPE__" $root.Values.logsDatasourceType -}}
-{{- if $content }}
+{{- if not $content }}
+{{- fail (printf "dashboard file %q is empty" .path) }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -24,13 +26,25 @@ metadata:
 data:
   {{ $name }}.json: | {{ $content | nindent 4 }}
 ---
-{{- end }}
 {{- end -}}
 
-{{- range $flavor, $flavorCfg := .Values.flavors }}
-{{- if $flavorCfg.enabled }}
-{{- range $name, $dashCfg := $flavorCfg.dashboards }}
-{{- include "standalone-dashboards.configmap" (dict "root" $ "name" $name "folder" $dashCfg.folder "path" (printf "files/dashboards/%s/%s.json" $flavor $name)) }}
+{{- range $path, $_ := .Files.Glob "files/dashboards/*/*/*.json" }}
+
+{{- $parts := splitList "/" (trimPrefix "files/dashboards/" (dir $path)) }}
+{{- $flavor := index $parts 0 }}
+{{- $folder := index $parts 1 }}
+
+{{- if not (hasKey $.Values.flavors $flavor) }}
+{{- fail (printf "dashboard file %q uses unknown flavor %q" $path $flavor) }}
 {{- end }}
+
+{{- if (index $.Values.flavors $flavor).enabled }}
+{{- include "standalone-dashboards.configmap" (dict
+  "root" $
+  "name" (trimSuffix ".json" (base $path))
+  "folder" $folder
+  "path" $path
+) }}
 {{- end }}
+
 {{- end }}

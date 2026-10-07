@@ -6,23 +6,6 @@ logsDatasourceType: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_TYPE" | quote }}
 flavors:
   common:
     enabled: true
-    dashboards:
-      docker_registries:
-        folder: OPS Apps
-      gpu_nodes:
-        folder: System
-      postgres_overview:
-        folder: OPS Apps
-      requests_load_overview:
-        folder: Simcore
-      simcore_services:
-        folder: Simcore
-      swarm_nodes:
-        folder: System
-      rabbitmq_overview:
-        folder: OPS Apps
-      chatbox:
-        folder: Vendor
   aws:
     enabled: false
   onpremise:
