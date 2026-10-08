@@ -2,6 +2,8 @@ metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" | quote }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" | quote }}
 logsDatasourceUid: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_ID" | quote }}
 logsDatasourceType: {{ requiredEnv "VICTORIA_LOGS_DATASOURCE_TYPE" | quote }}
+tracesDatasourceUid: {{ requiredEnv "VICTORIA_TRACES_DATASOURCE_ID" | quote }}
+tracesDatasourceType: {{ requiredEnv "VICTORIA_TRACES_DATASOURCE_TYPE" | quote }}
 
 flavors:
   common:

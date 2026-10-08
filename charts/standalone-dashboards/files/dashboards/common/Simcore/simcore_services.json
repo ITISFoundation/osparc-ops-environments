@@ -1145,8 +1145,8 @@
     },
     {
       "datasource": {
-        "type": "tempo",
-        "uid": "delr011tpeupsc"
+        "type": "__TRACES_DS_TYPE__",
+        "uid": "__TRACES_DS_UID__"
       },
       "fieldConfig": {
         "defaults": {
@@ -1209,8 +1209,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "tempo",
-            "uid": "delr011tpeupsc"
+            "type": "__TRACES_DS_TYPE__",
+            "uid": "__TRACES_DS_UID__"
           },
           "limit": 20,
           "metricsQueryType": "range",
@@ -1221,8 +1221,8 @@
         },
         {
           "datasource": {
-            "type": "tempo",
-            "uid": "delr011tpeupsc"
+            "type": "__TRACES_DS_TYPE__",
+            "uid": "__TRACES_DS_UID__"
           },
           "hide": false,
           "limit": 20,
@@ -1238,8 +1238,8 @@
     },
     {
       "datasource": {
-        "type": "tempo",
-        "uid": "delr011tpeupsc"
+        "type": "__TRACES_DS_TYPE__",
+        "uid": "__TRACES_DS_UID__"
       },
       "fieldConfig": {
         "defaults": {
@@ -1320,8 +1320,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "tempo",
-            "uid": "delr011tpeupsc"
+            "type": "__TRACES_DS_TYPE__",
+            "uid": "__TRACES_DS_UID__"
           },
           "limit": 20,
           "metricsQueryType": "range",
@@ -1333,8 +1333,8 @@
         },
         {
           "datasource": {
-            "type": "tempo",
-            "uid": "delr011tpeupsc"
+            "type": "__TRACES_DS_TYPE__",
+            "uid": "__TRACES_DS_UID__"
           },
           "hide": false,
           "limit": 20,
@@ -1350,8 +1350,8 @@
     },
     {
       "datasource": {
-        "type": "tempo",
-        "uid": "delr011tpeupsc"
+        "type": "__TRACES_DS_TYPE__",
+        "uid": "__TRACES_DS_UID__"
       },
       "description": "",
       "fieldConfig": {
@@ -1432,8 +1432,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "tempo",
-            "uid": "delr011tpeupsc"
+            "type": "__TRACES_DS_TYPE__",
+            "uid": "__TRACES_DS_UID__"
           },
           "limit": 20,
           "metricsQueryType": "range",
@@ -1444,8 +1444,8 @@
         },
         {
           "datasource": {
-            "type": "tempo",
-            "uid": "delr011tpeupsc"
+            "type": "__TRACES_DS_TYPE__",
+            "uid": "__TRACES_DS_UID__"
           },
           "hide": false,
           "limit": 20,
