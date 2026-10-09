@@ -77,7 +77,8 @@ helmfile-lint: .helmfile-lint ## Lint apps
 helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unless you know why)
 
 .PHONY: helmfile-destroy
-helmfile-destroy: guard-RELEASE .confirm-action .helmfile-destroy ## Delete a helmfile release
+helmfile-destroy: guard-RELEASE .confirm-action .helmfile-destroy
+helmfile-destroy: ## Delete a particular helmfile release
 
 .PHONY: helmfile-list
 helmfile-list: .helmfile-list ## List all releases managed by helmfile
