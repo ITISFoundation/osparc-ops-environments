@@ -4036,7 +4036,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "datasource",
-          "pluginId": "cloudwatch",
+          "pluginId": "__CLOUDWATCH_DS_TYPE__",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
