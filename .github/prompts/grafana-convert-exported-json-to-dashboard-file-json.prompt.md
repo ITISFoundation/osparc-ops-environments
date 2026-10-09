@@ -13,6 +13,10 @@ Check the JSON is the V2 model: `apiVersion` starts with `dashboard.grafana.app/
 
 If not, stop and tell the user to re-export the dashboard from the Grafana UI with Model `V2`. Change nothing.
 
+Check the export was made with **Share dashboard with another instance** enabled: `metadata` must have no `namespace`, no `uid` and no `resourceVersion`, and its `labels` and `annotations` must be empty.
+
+If not, stop and tell the user to re-export from the Grafana UI with the **Share dashboard with another instance** toggle switched on. Change nothing.
+
 ## 2. Find the placeholders
 
 In the chart owning the dashboard file, find the Helm template that injects the dashboard JSON (grep for `__DS` or `Files.Get`). Its `replace` calls are the only valid placeholders, and they differ per chart.
