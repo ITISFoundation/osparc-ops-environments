@@ -40,6 +40,10 @@ TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
 
+.PHONY: .confirm-action
+.confirm-action:
+	@$(call confirm_action)
+
 #
 # Artifacts
 #
@@ -73,7 +77,8 @@ helmfile-lint: .helmfile-lint ## Lint apps
 helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unless you know why)
 
 .PHONY: helmfile-destroy
-helmfile-destroy: .helmfile-destroy ## Delete the helmfile configuration
+helmfile-destroy: guard-RELEASE .confirm-action .helmfile-destroy
+helmfile-destroy: ## Delete a particular helmfile release
 
 .PHONY: helmfile-list
 helmfile-list: .helmfile-list ## List all releases managed by helmfile
