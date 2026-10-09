@@ -8,7 +8,8 @@
   | replace "__LOGS_DS_UID__" $root.Values.logsDatasourceUid
   | replace "__LOGS_DS_TYPE__" $root.Values.logsDatasourceType
   | replace "__TRACES_DS_UID__" $root.Values.tracesDatasourceUid
-  | replace "__TRACES_DS_TYPE__" $root.Values.tracesDatasourceType -}}
+  | replace "__TRACES_DS_TYPE__" $root.Values.tracesDatasourceType
+  | replace "__CLOUDWATCH_DS_TYPE__" $root.Values.cloudwatchDatasourceType -}}
 {{- if not $content }}
 {{- fail (printf "dashboard file %q is empty" .path) }}
 {{- end }}
