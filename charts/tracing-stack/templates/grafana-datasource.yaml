@@ -20,8 +20,8 @@ stringData:
     apiVersion: 1
     datasources:
       - name: VictoriaTraces
-        type: tempo
-        uid: victoria-traces
+        type: {{ .Values.tracesDatasourceType | quote }}
+        uid: {{ .Values.tracesDatasourceUid | quote }}
         access: proxy
         url: http://{{ include "tracing-stack.vtHost" . }}:{{ .Values.victoriaTracesHttpPortNumber }}{{ $pathPrefix }}/select/tempo
         # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
