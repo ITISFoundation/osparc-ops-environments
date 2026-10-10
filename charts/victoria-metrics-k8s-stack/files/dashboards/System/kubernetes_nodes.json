@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "k8s_views_nodes",
-    "generation": 1,
-    "creationTimestamp": "2026-09-04T12:42:53Z",
+    "generation": 2,
+    "creationTimestamp": "2026-10-10T13:59:14Z",
     "labels": {},
     "annotations": {}
   },
@@ -15,26 +15,20 @@
         "spec": {
           "query": {
             "kind": "DataQuery",
-            "group": "datasource",
+            "group": "grafana",
             "version": "v0",
             "spec": {
               "limit": 100,
               "matchAny": false,
               "tags": [],
               "type": "dashboard"
-            },
-            "labels": {
-              "grafana.app/export-label": "datasource-1"
             }
           },
           "enable": true,
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
           "name": "Annotations & Alerts",
-          "builtIn": true,
-          "legacyOptions": {
-            "type": "dashboard"
-          }
+          "builtIn": true
         }
       }
     ],
@@ -47,6 +41,7 @@
         "spec": {
           "id": 11,
           "title": "CPU Total",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -82,7 +77,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -109,7 +104,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -127,6 +122,7 @@
         "spec": {
           "id": 13,
           "title": "RAM Usage",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -163,9 +159,17 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
+                "barShape": "flat",
+                "barWidthFactor": 0.5,
+                "effects": {
+                  "barGlow": false,
+                  "centerGlow": false,
+                  "gradient": false
+                },
+                "endpointMarker": "point",
                 "minVizHeight": 75,
                 "minVizWidth": 75,
                 "orientation": "auto",
@@ -176,10 +180,15 @@
                   "fields": "",
                   "values": false
                 },
+                "segmentCount": 1,
+                "segmentSpacing": 0.3,
+                "shape": "gauge",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true,
+                "showThresholdMarkers": false,
                 "sizing": "auto",
-                "text": {}
+                "sparkline": false,
+                "text": {},
+                "textMode": "auto"
               },
               "fieldConfig": {
                 "defaults": {
@@ -191,7 +200,7 @@
                     "mode": "percentage",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -216,6 +225,7 @@
         "spec": {
           "id": 15,
           "title": "RAM Used",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -252,7 +262,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -279,7 +289,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -297,6 +307,7 @@
         "spec": {
           "id": 17,
           "title": "RAM Total",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -333,7 +344,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -360,7 +371,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -378,6 +389,7 @@
         "spec": {
           "id": 18,
           "title": "uptime",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -414,7 +426,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -441,7 +453,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -467,6 +479,7 @@
         "spec": {
           "id": 2,
           "title": "CPU Usage",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -503,7 +516,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -513,6 +526,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -525,7 +539,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -564,6 +578,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -585,6 +600,7 @@
         "spec": {
           "id": 20,
           "title": "Network usage (bytes/s)",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -646,7 +662,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -656,6 +672,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -667,7 +684,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -703,6 +720,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -724,6 +742,7 @@
         "spec": {
           "id": 24,
           "title": "Pods on node",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -759,7 +778,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -785,7 +804,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "blue"
                       }
                     ]
@@ -803,6 +822,7 @@
         "spec": {
           "id": 26,
           "title": "CPU usage by Pod",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -838,7 +858,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -848,6 +868,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "single",
                   "sort": "none"
                 }
@@ -859,7 +880,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -895,6 +916,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -916,6 +938,7 @@
         "spec": {
           "id": 28,
           "title": "Memory usage by Pod",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -951,7 +974,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -961,6 +984,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "single",
                   "sort": "none"
                 }
@@ -972,7 +996,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1008,6 +1032,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1029,6 +1054,7 @@
         "spec": {
           "id": 3,
           "title": "Memory Usage",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1197,7 +1223,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -1207,6 +1233,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1218,7 +1245,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1257,6 +1284,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1278,6 +1306,7 @@
         "spec": {
           "id": 30,
           "title": "Persistent Volumes - Usage in %",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1315,7 +1344,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -1325,6 +1354,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1337,7 +1367,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1373,6 +1403,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1394,6 +1425,7 @@
         "spec": {
           "id": 32,
           "title": "Persistent Volumes - Inodes",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1431,7 +1463,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -1441,6 +1473,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1453,7 +1486,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1489,6 +1522,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1510,6 +1544,7 @@
         "spec": {
           "id": 34,
           "title": "Persistent Volumes - Usage in GB",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1626,18 +1661,10 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "table",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "cellHeight": "sm",
-                "footer": {
-                  "countRows": false,
-                  "fields": "",
-                  "reducer": [
-                    "sum"
-                  ],
-                  "show": false
-                },
                 "showHeader": true,
                 "sortBy": []
               },
@@ -1648,7 +1675,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1666,6 +1693,9 @@
                       "type": "auto"
                     },
                     "filterable": false,
+                    "footer": {
+                      "reducers": []
+                    },
                     "inspect": false
                   }
                 },
@@ -1705,6 +1735,7 @@
         "spec": {
           "id": 46,
           "title": "Context Switches & Interrupts",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1767,7 +1798,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -1777,6 +1808,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1787,7 +1819,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1823,6 +1855,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1844,6 +1877,7 @@
         "spec": {
           "id": 48,
           "title": "System Load",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1929,7 +1963,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -1939,6 +1973,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1949,7 +1984,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -1988,6 +2023,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2009,6 +2045,7 @@
         "spec": {
           "id": 49,
           "title": "File Descriptors",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2070,7 +2107,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -2080,6 +2117,7 @@
                   "showLegend": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2090,7 +2128,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -2129,6 +2167,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2150,6 +2189,7 @@
         "spec": {
           "id": 5,
           "title": "List of pods on node",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2274,18 +2314,10 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "table",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "cellHeight": "sm",
-                "footer": {
-                  "countRows": false,
-                  "fields": "",
-                  "reducer": [
-                    "sum"
-                  ],
-                  "show": false
-                },
                 "showHeader": true,
                 "sortBy": []
               },
@@ -2295,7 +2327,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -2311,6 +2343,9 @@
                     "align": "auto",
                     "cellOptions": {
                       "type": "auto"
+                    },
+                    "footer": {
+                      "reducers": []
                     },
                     "inspect": false
                   }
@@ -2387,6 +2422,7 @@
         "spec": {
           "id": 60,
           "title": "TCP Currently Established",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2424,7 +2460,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -2434,6 +2470,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2445,7 +2482,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -2481,6 +2518,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2502,6 +2540,7 @@
         "spec": {
           "id": 61,
           "title": "Network errors",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2561,7 +2600,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -2571,6 +2610,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2582,7 +2622,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -2618,6 +2658,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2639,6 +2680,7 @@
         "spec": {
           "id": 62,
           "title": "Network usage (packet/s)",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2700,7 +2742,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -2710,6 +2752,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2721,7 +2764,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -2757,6 +2800,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2778,6 +2822,7 @@
         "spec": {
           "id": 64,
           "title": "Network total drops",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2835,7 +2880,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -2845,6 +2890,7 @@
                   "showLegend": false
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2856,7 +2902,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -2892,6 +2938,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2951,7 +2998,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "8.3.3",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "legend": {
@@ -2967,6 +3014,7 @@
                   "sortDesc": true
                 },
                 "tooltip": {
+                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2979,7 +3027,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -3018,6 +3066,7 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
+                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -3039,6 +3088,7 @@
         "spec": {
           "id": 7,
           "title": "CPU  Usage",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3075,9 +3125,17 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
+                "barShape": "flat",
+                "barWidthFactor": 0.5,
+                "effects": {
+                  "barGlow": false,
+                  "centerGlow": false,
+                  "gradient": false
+                },
+                "endpointMarker": "point",
                 "minVizHeight": 75,
                 "minVizWidth": 75,
                 "orientation": "auto",
@@ -3088,10 +3146,15 @@
                   "fields": "",
                   "values": false
                 },
+                "segmentCount": 1,
+                "segmentSpacing": 0.3,
+                "shape": "gauge",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true,
+                "showThresholdMarkers": false,
                 "sizing": "auto",
-                "text": {}
+                "sparkline": false,
+                "text": {},
+                "textMode": "auto"
               },
               "fieldConfig": {
                 "defaults": {
@@ -3103,7 +3166,7 @@
                     "mode": "percentage",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "green"
                       },
                       {
@@ -3128,6 +3191,7 @@
         "spec": {
           "id": 9,
           "title": "CPU Used",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3164,7 +3228,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "11.2.0",
+            "version": "13.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -3192,7 +3256,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
+                        "value": 0,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -3224,7 +3288,7 @@
                       "spec": {
                         "x": 0,
                         "y": 0,
-                        "width": 4,
+                        "width": 8,
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
@@ -3235,9 +3299,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 4,
+                        "x": 8,
                         "y": 0,
-                        "width": 4,
+                        "width": 8,
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
@@ -3248,9 +3312,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 8,
+                        "x": 16,
                         "y": 0,
-                        "width": 4,
+                        "width": 8,
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
@@ -3261,22 +3325,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 0,
-                        "width": 12,
-                        "height": 11,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-5"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
                         "x": 0,
                         "y": 8,
-                        "width": 2,
+                        "width": 4,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3287,9 +3338,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 2,
+                        "x": 4,
                         "y": 8,
-                        "width": 2,
+                        "width": 4,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3300,9 +3351,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 4,
+                        "x": 8,
                         "y": 8,
-                        "width": 2,
+                        "width": 8,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3313,9 +3364,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 6,
+                        "x": 16,
                         "y": 8,
-                        "width": 2,
+                        "width": 4,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3326,13 +3377,26 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 8,
+                        "x": 20,
                         "y": 8,
                         "width": 4,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-18"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 11,
+                        "width": 24,
+                        "height": 11,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-5"
                         }
                       }
                     }
@@ -3616,6 +3680,7 @@
       "Nodes"
     ],
     "timeSettings": {
+      "timezone": "browser",
       "from": "now-1h",
       "to": "now",
       "autoRefresh": "30s",
@@ -3700,7 +3765,8 @@
           "includeAll": false,
           "hide": "dontHide",
           "skipUrlSync": false,
-          "allowCustomValue": true
+          "allowCustomValue": true,
+          "valuesFormat": "csv"
         }
       },
       {
@@ -3712,7 +3778,7 @@
             "value": ""
           },
           "hide": "dontHide",
-          "refresh": "onTimeRangeChanged",
+          "refresh": "onDashboardLoad",
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
@@ -3728,6 +3794,7 @@
             }
           },
           "regex": "",
+          "regexApplyTo": "value",
           "sort": "alphabeticalAsc",
           "definition": "label_values(kube_node_info, node)",
           "options": [],
@@ -3745,7 +3812,7 @@
             "value": ""
           },
           "hide": "hideVariable",
-          "refresh": "onTimeRangeChanged",
+          "refresh": "onDashboardLoad",
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
@@ -3761,6 +3828,7 @@
             }
           },
           "regex": "",
+          "regexApplyTo": "value",
           "sort": "alphabeticalAsc",
           "definition": "label_values(node_uname_info{nodename=~\"(?i:($node)(\\\\.[a-z0-9.-]+)?)\"}, instance)",
           "options": [],
