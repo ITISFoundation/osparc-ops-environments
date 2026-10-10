@@ -1,5 +1,5 @@
 ---
-name: Grafana convert exported json to file
+name: Grafana dashboard convert exported json to file
 description: Converts exported json (V2-model) to dashboard file, replacing hardcoded datasource types and datasource uids.
 argument-hint: "Path to an existing dashboard JSON file exported from Grafana (V2 model)"
 agent: agent
