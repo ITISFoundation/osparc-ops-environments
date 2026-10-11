@@ -397,8 +397,7 @@ services:
       labels:
         - prometheus-job=tempo
         - prometheus-port=3200
-        # migrated to kubernetes.
-        - traefik.enable=false
+        - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.tempo.loadbalancer.server.port=9095
         - traefik.http.routers.tempo.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/tempo`)
