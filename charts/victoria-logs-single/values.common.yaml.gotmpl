@@ -6,6 +6,8 @@
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 
 ingressHost: {{ $ingressHost }}
+internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
+ingressHttpPathPrefix: {{ $ingressHttpPathPrefix | quote }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)

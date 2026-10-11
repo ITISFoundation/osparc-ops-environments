@@ -7,7 +7,8 @@ nodes:
         hostPort: 80
       - containerPort: 443
         hostPort: 443
-
+      - containerPort: 32081 # internal cluster traffic
+        hostPort: 32081
     # kind runs the "node" as a Docker container with its own (volatile) journal,
     # so /var/log/journal does not exist inside it. Bind-mount the host's
     # persistent journal into the node at the same path the vector DaemonSet

@@ -31,7 +31,10 @@ include ${REPO_BASE_DIR}/scripts/common.Makefile
 # Artifacts
 #
 
-docker-compose.yml: docker-compose.yml.j2 venv .env
+opentelemetry-collector-config.yaml: opentelemetry-collector-config.yaml.j2 .env $(VENV_BIN)/j2
+	@$(call jinja, $<, .env, $@)
+
+docker-compose.yml: docker-compose.yml.j2 opentelemetry-collector-config.yaml .env $(VENV_BIN)/j2
 	@$(call jinja, $<, .env, $@)
 
 .PHONY: ${TEMP_COMPOSE}

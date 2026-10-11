@@ -1,0 +1,179 @@
+# vmalert rule toggles and the sync-job that fetches the upstream rule/dashboard
+# sources. Extracted from values.common.yaml.gotmpl so the main values file
+# stays focused on wire-level chart configuration.
+{{- $kubeletAlertsEnabled := true }}
+
+vm-k8s-stack:
+  #
+  # sync-job: since 0.85.0 VMRules/dashboards are no longer rendered by Helm.
+  # a post-install/upgrade Job fetches them from raw.githubusercontent.com and
+  # creates the VMRule objects (needs egress to GitHub + api server, see
+  # templates/networkpolicies/sync-job.yaml)
+  #
+  syncJob:
+    enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    # restricted PodSecurity is enforced on the namespace
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65534 # image defaults to root, force nobody
+      runAsGroup: 65534
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true # KSV-0014; /tmp is mounted writable below
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
+    # writable scratch space since the root filesystem is read-only
+    extraVolumes:
+      - name: tmp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp
+    # required by the require-resource-limits VAP (security-hardening chart)
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+  defaultRules:
+    enabled: true
+    rules: # per-rule overrides
+      # stream aggregation is not configured, so vm_streamaggr_* metrics never
+      # exist and these two alerts sit permanently in "nomatch"; disable them
+      StreamAggrFlushTimeout:
+        enabled: false
+      StreamAggrDedupFlushTimeout:
+        enabled: false
+      # no HPAs configured; kube_horizontalpodautoscaler_* metrics do not exist
+      KubeHpaReplicasMismatch:
+        enabled: false
+      KubeHpaMaxedOut:
+        enabled: false
+      # we don't configure alert limits
+      AlertingRuleResultsApproachingLimit:
+        enabled: false
+      RecordingRuleResultsApproachingLimit:
+        enabled: false
+      # systemd exporter is not enabled
+      NodeSystemdServiceFailed:
+        enabled: false
+      NodeSystemdServiceCrashlooping:
+        enabled: false
+      # We don't have this metric
+      NodeBondingDegraded:
+        enabled: false
+      # no raid used in our clusters
+      NodeRAIDDegraded:
+        enabled: false
+      NodeRAIDDiskFailure:
+        enabled: false
+    # start with a few alerts. Add more with time
+    # keys must match upstream group names exactly (renamed in 0.85.0)
+    groups:
+      etcd:
+        enabled: false
+      alertmanager.rules:
+        enabled: false
+      general.rules:
+        enabled: true
+        rules: {}
+        spec:
+          params:
+            # only check for kubernetes metrics as in swarm many (prometheus) targets are down
+            # YH does not want to fix swarm targets for now, so we exclude them
+            extra_label:
+              - cluster=kubernetes
+      k8s.rules.container_cpu_limits:
+        enabled: false
+      k8s.rules.container_cpu_requests:
+        enabled: false
+      k8s.rules.container_cpu_usage_seconds_total:
+        enabled: false
+      k8s.rules.container_memory_limits:
+        enabled: false
+      k8s.rules.container_memory_requests:
+        enabled: false
+      k8s.rules.container_memory_rss:
+        enabled: false
+      k8s.rules.container_memory_cache:
+        enabled: false
+      k8s.rules.container_memory_working_set_bytes:
+        enabled: false
+      k8s.rules.container_memory_swap:
+        enabled: false
+      k8s.rules.pod_owner:
+        enabled: false
+      kube-apiserver-burnrate.rules:
+        enabled: false
+      kube-apiserver-histogram.rules:
+        enabled: false
+      kube-apiserver-slos:
+        enabled: false
+      kube-prometheus-general.rules:
+        enabled: false
+      kube-prometheus-node-recording.rules:
+        enabled: false
+      kube-scheduler.rules:
+        enabled: false
+      kube-state-metrics:
+        enabled: false
+      kubelet.rules:
+        enabled: {{ $kubeletAlertsEnabled }}
+      kube-apiserver-availability.rules:
+        enabled: false
+      kubernetes-apps:
+        enabled: true
+      kubernetes-resources:
+        enabled: false
+      kubernetes-storage:
+        enabled: false
+      kubernetes-system:
+        enabled: false
+      kubernetes-system-apiserver:
+        enabled: false
+      kubernetes-system-controller-manager:
+        enabled: false
+      kubernetes-system-kubelet:
+        enabled: {{ $kubeletAlertsEnabled }}
+      kubernetes-system-scheduler:
+        enabled: false
+      node-exporter:
+        enabled: true
+      node-exporter.rules:
+        enabled: false
+      node-network:
+        enabled: false
+      node.rules:
+        enabled: false
+      vm-health:
+        enabled: true
+      vmagent:
+        enabled: true
+      vmalert:
+        enabled: true
+      vmcluster:
+        enabled: true
+      vmoperator:
+        enabled: true
+      vmsingle:
+        enabled: false
+    sources:
+      vmoperator: # we need vmoperator rules to monitor operator installed separately
+        enabled: true
+      vlhealth: # we need vlhealth rules to monitor victoria-logs-single (installed separately)
+        enabled: true
+      victorialogs: # we need victorialogs rules to monitor victoria-logs-single (installed separately)
+        enabled: true
+      vthealth:
+        enabled: true
+      victoriatraces:
+        enabled: true

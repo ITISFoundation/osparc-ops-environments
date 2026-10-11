@@ -1,10 +1,13 @@
-# https://github.com/traefik/traefik-helm-chart/blob/v41.0.0/traefik/values.yaml
+# https://github.com/traefik/traefik-helm-chart/blob/v41.0.2/traefik/values.yaml
 {{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") }}
+{{- $ipAllowListMiddlewareName := "internal-ipallowlist" }}
 
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
 middlewares:
+  ipAllowList:
+    name: {{ $ipAllowListMiddlewareName }}
   basicAuth:
     name: {{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}
     username: {{ requiredEnv "SERVICES_USER" }}
@@ -94,6 +97,20 @@ traefik:
       exposedPort: 443 # used to resolve redirect port
       expose:
         default: false
+    webinternal:
+      hostPort: {{ requiredEnv "KUBERNETES_WEBINTERNAL_PORT_NUMBER" }}
+      port: 8001
+      expose:
+        default: false
+      exposedPort: 81
+      protocol: TCP
+      http3:
+        enabled: false
+      http:
+        tls:
+          enabled: {{ requiredEnv "TRAEFIK_WEBINTERNAL_ENTRYPOINT_TLS_ENABLED" }}
+        middlewares:
+          - {{ .Release.Namespace }}-{{ $ipAllowListMiddlewareName }}@kubernetescrd
     traefik:
       port: 8080
       expose:

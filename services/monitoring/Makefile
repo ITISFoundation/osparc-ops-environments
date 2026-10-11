@@ -122,8 +122,11 @@ grafana/config.monitoring: grafana/template-config.monitoring ${REPO_CONFIG_LOCA
 	set +o allexport; \
 	envsubst < $< > $@
 
+prometheus/prometheus-base.yml: prometheus/prometheus-base.yml.j2 .env venv
+	@$(call jinja,$<,.env,$@)
+
 .PHONY: config.prometheus.simcore
-config.prometheus.simcore: ${REPO_CONFIG_LOCATION} venv
+config.prometheus.simcore: ${REPO_CONFIG_LOCATION} venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -142,7 +145,7 @@ config.prometheus.federation: ${REPO_CONFIG_LOCATION} venv
 prometheus/prometheus-federation.yml: config.prometheus.federation
 
 .PHONY: config.prometheus.simcore.aws
-config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv
+config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -151,7 +154,7 @@ config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus.ceph.simcore
-config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv
+config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -162,7 +165,7 @@ config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus
-config.prometheus: ${REPO_CONFIG_LOCATION} venv
+config.prometheus: ${REPO_CONFIG_LOCATION} venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
