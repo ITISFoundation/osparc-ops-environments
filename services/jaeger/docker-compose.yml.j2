@@ -16,7 +16,7 @@ services:
         constraints:
           - node.labels.ops==true
       labels:
-        - traefik.enable=true
+        - traefik.enable=false # use kubernetes app instead
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.jaeger.loadbalancer.server.port=16686
         - traefik.http.routers.jaeger.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/jaeger`)
