@@ -21,10 +21,8 @@ def find_errors(dashboard: dict) -> list[str]:
     errors = []
     if not str(api_version).startswith(V2_API_VERSION_PREFIX):
         errors.append(f"apiVersion {api_version!r} is not the V2 model")
-    for key in INSTANCE_SPECIFIC_KEYS:
-        value = dashboard.get("metadata", {}).get(key)
-        if value:
-            errors.append(f"metadata.{key} is instance-specific: {value!r}")
+    if any(dashboard.get("metadata", {}).get(key) for key in INSTANCE_SPECIFIC_KEYS):
+        errors.append("metadata contains instance-specific values")
     return errors
 
 

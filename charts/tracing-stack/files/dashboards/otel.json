@@ -4,7 +4,7 @@
   "metadata": {
     "name": "BKf2sowmj",
     "generation": 1,
-    "creationTimestamp": "2026-09-09T09:46:18Z",
+    "creationTimestamp": "2026-10-12T14:42:03Z",
     "labels": {},
     "annotations": {}
   },
@@ -17,14 +17,14 @@
             "kind": "DataQuery",
             "group": "grafana",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-label": "grafana-1"
+            },
             "spec": {
               "limit": 100,
               "matchAny": false,
               "tags": [],
               "type": "dashboard"
-            },
-            "labels": {
-              "grafana.app/export-label": "grafana-1"
             }
           },
           "enable": true,
@@ -58,8 +58,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -72,10 +76,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Max queue size: {{exporter}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -191,8 +191,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -205,10 +209,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Accepted: {{receiver}} {{transport}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -220,8 +220,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -234,10 +238,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Refused: {{receiver}} {{transport}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -375,8 +375,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -389,10 +393,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Filtered: {{filter}} {{transport}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -511,8 +511,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -525,10 +529,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Sent: {{exporter}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -540,8 +540,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -554,10 +558,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Enqueue: {{exporter}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -569,8 +569,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -583,10 +587,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Failed: {{exporter}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "C",
@@ -725,8 +725,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -739,10 +743,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Max CPU usage{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -754,8 +754,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -768,10 +772,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Avg CPU usage{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -783,8 +783,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -797,10 +801,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Min CPU usage{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "C",
@@ -985,8 +985,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -999,10 +1003,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Max Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "C",
@@ -1014,8 +1014,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1028,10 +1032,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Avg Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1043,8 +1043,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1057,10 +1061,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Min Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -1249,8 +1249,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1263,10 +1267,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Service instance count",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -1422,8 +1422,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1436,10 +1440,6 @@
                         "interval": "$minstep",
                         "intervalFactor": 1,
                         "legendFormat": "{{le}}"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -1532,8 +1532,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1546,10 +1550,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Max Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "C",
@@ -1561,8 +1561,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1575,10 +1579,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Avg Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1590,8 +1590,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1604,10 +1608,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Min Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -1796,8 +1796,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1810,10 +1814,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Max Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "C",
@@ -1825,8 +1825,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1839,10 +1843,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Avg Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1854,8 +1854,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1868,10 +1872,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Min Memory RSS{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -2059,8 +2059,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2073,10 +2077,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Service instance uptime:{{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -2195,8 +2195,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2209,10 +2213,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Queue capacity: {{exporter}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -2327,8 +2327,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2342,10 +2346,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "__auto",
                         "range": false
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -2436,8 +2436,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2449,10 +2453,6 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "nodes",
@@ -2464,8 +2464,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2477,10 +2481,6 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "edges",
@@ -2556,8 +2556,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2570,10 +2574,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Queue capacity usage: {{exporter}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -2689,8 +2689,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2703,10 +2707,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Incoming: {{processor}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -2718,8 +2718,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -2732,10 +2736,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Outgoing: {{processor}} {{service_instance_id}}{{service.instance.id}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "B",
@@ -3236,7 +3236,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "datasource",
-          "pluginId": "__DS_TYPE__",
+          "pluginId": "prometheus",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
@@ -3266,8 +3266,12 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3275,10 +3279,6 @@
               "qryType": 3,
               "query": "query_result({__name__=~\"otelcol_process_uptime.*\"})",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/.*{.*job=\"([a-zA-Z0-9_\\/-]+)\".*}/",
@@ -3375,8 +3375,12 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3384,10 +3388,6 @@
               "qryType": 3,
               "query": "query_result(avg by (receiver) ({__name__=~\"otelcol_receiver_.+\",job=\"$job\"}))",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/.*receiver=\"(.*)\".*/",
@@ -3415,8 +3415,12 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3424,10 +3428,6 @@
               "qryType": 3,
               "query": "query_result(avg by (processor) ({__name__=~\"otelcol_processor_.+\",job=\"$job\"}))",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/.*processor=\"(.*)\".*/",
@@ -3455,8 +3455,12 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3464,10 +3468,6 @@
               "qryType": 3,
               "query": "query_result(avg by (exporter) ({__name__=~\"otelcol_exporter_.+\",job=\"$job\"}))",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/.*exporter=\"(.*)\".*/",
@@ -3537,8 +3537,12 @@
           "description": "Some exporter(s) configuration(s) may add the metric suffix _total. This variable will detect this case.",
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3546,10 +3550,6 @@
               "qryType": 3,
               "query": "query_result({__name__=~\"otelcol_process_uptime.+\",job=\"$job\"})",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/(_total_total|_total)(?={)/",
@@ -3591,8 +3591,12 @@
           "description": "Some exporter(s) configuration(s) may add the metric suffix _seconds_total. This variable will detect this \"_seconds\" suffix part.",
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3600,10 +3604,6 @@
               "qryType": 3,
               "query": "query_result({__name__=~\"otelcol_process_uptime.+\",job=\"$job\"})",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/otelcol_process_uptime(_seconds|)?/",
@@ -3631,8 +3631,12 @@
           "description": "Some exporter(s) configuration(s) may add the metric suffix _bytes. This variable will detect this \"_bytes\" suffix part.",
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3640,10 +3644,6 @@
               "qryType": 3,
               "query": "query_result({__name__=~\"otelcol_process_memory_rss.+\",job=\"$job\"})",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/otelcol_process_memory_rss(.*){.*/",
@@ -3671,8 +3671,12 @@
           "description": "Some metrics (e.g., RPC, HTTP) may no longer have the otelcol_ prefix. This will detect it. See https://github.com/open-telemetry/opentelemetry-collector/pull/9759",
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
@@ -3680,10 +3684,6 @@
               "qryType": 3,
               "query": "query_result({__name__=~\".*rpc_server_duration_.*bucket|.*rpc_client_duration_.*bucket|.*http_server_duration_.*bucket|.*http_client_duration_.*bucket.*\",job=\"$job\"})",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/(.*)(grpc|rpc|http)_(server|client)_duration_(millisecods_|)bucket.*{.*/",
@@ -3698,7 +3698,11 @@
       },
       {
         "kind": "AdhocVariable",
-        "group": "__DS_TYPE__",
+        "group": "prometheus",
+        "labels": {
+          "grafana.app/export-datasource-name": "${datasource}",
+          "grafana.app/export-label": "prometheus-1"
+        },
         "datasource": {
           "name": "${datasource}"
         },
@@ -3712,10 +3716,6 @@
           "skipUrlSync": false,
           "allowCustomValue": true,
           "enableGroupBy": false
-        },
-        "labels": {
-          "grafana.app/export-label": "prometheus-1",
-          "grafana.app/export-datasource-name": "${datasource}"
         }
       }
     ]
