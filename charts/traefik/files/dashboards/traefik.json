@@ -4,7 +4,7 @@
   "metadata": {
     "name": "n5bu_kv4k",
     "generation": 1,
-    "creationTimestamp": "2026-09-04T12:42:52Z",
+    "creationTimestamp": "2026-10-12T14:32:02Z",
     "labels": {},
     "annotations": {}
   },
@@ -17,14 +17,14 @@
             "kind": "DataQuery",
             "group": "grafana",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-label": "grafana-1"
+            },
             "spec": {
               "limit": 100,
               "matchAny": false,
               "tags": [],
               "type": "dashboard"
-            },
-            "labels": {
-              "grafana.app/export-label": "grafana-1"
             }
           },
           "enable": true,
@@ -57,8 +57,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -67,10 +71,6 @@
                         "expr": "count(traefik_config_reloads_total)",
                         "legendFormat": "__auto",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -145,8 +145,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -155,10 +159,6 @@
                         "expr": "sum(rate(traefik_service_requests_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) by (method, code)",
                         "legendFormat": "{{method}}[{{code}}]",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -234,8 +234,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -244,10 +248,6 @@
                         "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",code=~\"2..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
                         "legendFormat": "{{method}}[{{code}}] on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -361,8 +361,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -371,10 +375,6 @@
                         "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",code=~\"5..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
                         "legendFormat": "{{method}}[{{code}}] on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -489,8 +489,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -499,10 +503,6 @@
                         "expr": "topk(15,\n    label_replace(\n        sum by (service,method,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",code!~\"5..\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
                         "legendFormat": "{{method}}[{{code}}] on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -617,8 +617,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -627,10 +631,6 @@
                         "expr": "topk(15,\n    label_replace(\n        sum by (service,method) \n          (rate(traefik_service_requests_bytes_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
                         "legendFormat": "{{method}} on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -745,8 +745,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -755,10 +759,6 @@
                         "expr": "sum(traefik_open_connections{entrypoint=~\"$entrypoint\"}) by (entrypoint)\n",
                         "legendFormat": "{{entrypoint}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -872,8 +872,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -882,10 +886,6 @@
                         "expr": "topk(15,\n    label_replace(\n        traefik_service_request_duration_seconds_sum{service=~\"$service.*\",protocol=\"http\"} / \n          traefik_service_request_duration_seconds_count{service=~\"$service.*\",protocol=\"http\"},\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)\n\n",
                         "legendFormat": "{{method}}[{{code}}] on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -999,8 +999,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1009,10 +1013,6 @@
                         "expr": "topk(15,\n    label_replace(\n        sum by (service,method) \n          (rate(traefik_service_responses_bytes_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
                         "legendFormat": "{{method}} on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1127,8 +1127,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1137,10 +1141,6 @@
                         "expr": "label_replace(\n  1 - (sum by (service)\n    (rate(traefik_service_request_duration_seconds_bucket{le=\"1.2\",service=~\"$service.*\"}[$interval])) / sum by (service) \n    (rate(traefik_service_request_duration_seconds_count{service=~\"$service.*\"}[$interval]))\n  ) > 0,\n  \"service\", \"$1\", \"service\", \"([^@]+)@.*\"\n)",
                         "legendFormat": "{{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1250,8 +1250,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1260,10 +1264,6 @@
                         "expr": "label_replace(\n  1 - (sum by (service)\n    (rate(traefik_service_request_duration_seconds_bucket{le=\"0.3\",service=~\"$service.*\"}[$interval])) / sum by (service) \n    (rate(traefik_service_request_duration_seconds_count{service=~\"$service.*\"}[$interval]))\n  ) > 0,\n  \"service\", \"$1\", \"service\", \"([^@]+)@.*\"\n)",
                         "legendFormat": "{{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1373,8 +1373,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1383,10 +1387,6 @@
                         "expr": "topk(15,\n    label_replace(\n        sum by (service,code) \n          (rate(traefik_service_requests_total{service=~\"$service.*\",protocol=\"http\"}[$interval])) > 0,\n        \"service\", \"$1\", \"service\", \"([^@]+)@.*\")\n)",
                         "legendFormat": "[{{code}}] on {{service}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1501,8 +1501,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1511,10 +1515,6 @@
                         "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_bucket{le=\"0.3\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method) + \n sum(rate(traefik_entrypoint_request_duration_seconds_bucket{le=\"1.2\",code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method)) / 2 / \n sum(rate(traefik_entrypoint_request_duration_seconds_count{code=\"200\",entrypoint=~\"$entrypoint\"}[$interval])) by (method)\n",
                         "legendFormat": "{{method}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -1627,8 +1627,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "${datasource}",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "datasource": {
                         "name": "${datasource}"
                       },
@@ -1637,10 +1641,6 @@
                         "expr": "sum(rate(traefik_entrypoint_requests_total{entrypoint=~\"$entrypoint\"}[$interval])) by (entrypoint)",
                         "legendFormat": "{{entrypoint}}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "${datasource}"
                       }
                     },
                     "refId": "A",
@@ -2003,7 +2003,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "datasource",
-          "pluginId": "__DS_TYPE__",
+          "pluginId": "prometheus",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
@@ -2032,18 +2032,18 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
             "spec": {
               "query": "label_values(traefik_open_connections, entrypoint)",
               "refId": "StandardVariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "",
@@ -2128,18 +2128,18 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "${datasource}",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "datasource": {
               "name": "${datasource}"
             },
             "spec": {
               "query": "label_values(traefik_service_requests_total, service)",
               "refId": "StandardVariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "${datasource}"
             }
           },
           "regex": "/([^@]+)@.*/",

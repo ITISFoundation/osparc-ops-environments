@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "k8s_views_nodes",
-    "generation": 2,
-    "creationTimestamp": "2026-10-10T13:59:14Z",
+    "generation": 1,
+    "creationTimestamp": "2026-10-12T14:32:02Z",
     "labels": {},
     "annotations": {}
   },
@@ -15,8 +15,11 @@
         "spec": {
           "query": {
             "kind": "DataQuery",
-            "group": "grafana",
+            "group": "datasource",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-label": "datasource-1"
+            },
             "spec": {
               "limit": 100,
               "matchAny": false,
@@ -28,7 +31,10 @@
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
           "name": "Annotations & Alerts",
-          "builtIn": true
+          "builtIn": true,
+          "legacyOptions": {
+            "type": "dashboard"
+          }
         }
       }
     ],
@@ -41,7 +47,6 @@
         "spec": {
           "id": 11,
           "title": "CPU Total",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -52,17 +57,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(machine_cpu_cores{node=\"$node\"})",
                         "interval": "$resolution",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -77,7 +82,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -104,7 +109,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -122,7 +127,6 @@
         "spec": {
           "id": 13,
           "title": "RAM Usage",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -133,18 +137,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": false,
                         "expr": "sum(node_memory_MemTotal_bytes{instance=\"$instance\"} - node_memory_MemAvailable_bytes{instance=\"$instance\"}) / sum(node_memory_MemTotal_bytes{instance=\"$instance\"})",
                         "instant": true,
                         "interval": "$resolution",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -159,17 +163,9 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
-                "barShape": "flat",
-                "barWidthFactor": 0.5,
-                "effects": {
-                  "barGlow": false,
-                  "centerGlow": false,
-                  "gradient": false
-                },
-                "endpointMarker": "point",
                 "minVizHeight": 75,
                 "minVizWidth": 75,
                 "orientation": "auto",
@@ -180,15 +176,10 @@
                   "fields": "",
                   "values": false
                 },
-                "segmentCount": 1,
-                "segmentSpacing": 0.3,
-                "shape": "gauge",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": false,
+                "showThresholdMarkers": true,
                 "sizing": "auto",
-                "sparkline": false,
-                "text": {},
-                "textMode": "auto"
+                "text": {}
               },
               "fieldConfig": {
                 "defaults": {
@@ -200,7 +191,7 @@
                     "mode": "percentage",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -225,7 +216,6 @@
         "spec": {
           "id": 15,
           "title": "RAM Used",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -236,18 +226,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": false,
                         "expr": "sum(node_memory_MemTotal_bytes{instance=\"$instance\"} - node_memory_MemAvailable_bytes{instance=\"$instance\"})",
                         "instant": true,
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -262,7 +252,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -289,7 +279,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -307,7 +297,6 @@
         "spec": {
           "id": 17,
           "title": "RAM Total",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -318,18 +307,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(machine_memory_bytes{node=\"$node\"})",
                         "instant": false,
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -344,7 +333,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -371,7 +360,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -389,7 +378,6 @@
         "spec": {
           "id": 18,
           "title": "uptime",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -400,18 +388,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(node_time_seconds{instance=\"$instance\"} - node_boot_time_seconds{instance=\"$instance\"})",
                         "instant": false,
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -426,7 +414,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -453,7 +441,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -479,7 +467,6 @@
         "spec": {
           "id": 2,
           "title": "CPU Usage",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -490,18 +477,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "avg(rate(node_cpu_seconds_total{instance=\"$instance\"}[$__rate_interval]) * 100) by (mode)",
                         "instant": false,
                         "interval": "$resolution",
                         "legendFormat": "{{ mode }}"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -516,7 +503,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "",
             "spec": {
               "options": {
                 "legend": {
@@ -526,7 +513,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -539,7 +525,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -578,7 +564,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -600,7 +585,6 @@
         "spec": {
           "id": 20,
           "title": "Network usage (bytes/s)",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -611,8 +595,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -620,10 +608,6 @@
                         "interval": "$resolution",
                         "legendFormat": "In",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -635,8 +619,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -644,10 +632,6 @@
                         "interval": "$resolution",
                         "legendFormat": "Out",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -662,7 +646,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -672,7 +656,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -684,7 +667,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -720,7 +703,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -742,7 +724,6 @@
         "spec": {
           "id": 24,
           "title": "Pods on node",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -753,17 +734,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(kube_pod_info{node=\"$node\"})",
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -778,7 +759,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -804,7 +785,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "blue"
                       }
                     ]
@@ -822,7 +803,6 @@
         "spec": {
           "id": 26,
           "title": "CPU usage by Pod",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -833,17 +813,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(rate(container_cpu_usage_seconds_total{node=\"$node\", image!=\"\"}[$__rate_interval])) by (pod)",
                         "interval": "$resolution",
                         "legendFormat": "{{ pod }}"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -858,7 +838,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -868,7 +848,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "single",
                   "sort": "none"
                 }
@@ -880,7 +859,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -916,7 +895,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -938,7 +916,6 @@
         "spec": {
           "id": 28,
           "title": "Memory usage by Pod",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -949,17 +926,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(container_memory_working_set_bytes{node=\"$node\", image!=\"\"}) by (pod)",
                         "interval": "$resolution",
                         "legendFormat": "{{ pod }}"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -974,7 +951,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -984,7 +961,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "single",
                   "sort": "none"
                 }
@@ -996,7 +972,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -1032,7 +1008,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1054,7 +1029,6 @@
         "spec": {
           "id": 3,
           "title": "Memory Usage",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1065,18 +1039,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_MemTotal_bytes{instance=\"$instance\"} - node_memory_MemFree_bytes{instance=\"$instance\"} - (node_memory_Cached_bytes{instance=\"$instance\"} + node_memory_Buffers_bytes{instance=\"$instance\"})",
                         "instant": false,
                         "interval": "$resolution",
                         "legendFormat": "RAM Used"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -1088,17 +1062,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_MemTotal_bytes{instance=\"$instance\"}",
                         "interval": "$resolution",
                         "legendFormat": "RAM Total"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -1110,17 +1084,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_Cached_bytes{instance=\"$instance\"}",
                         "interval": "$resolution",
                         "legendFormat": "RAM Cache"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "C",
@@ -1132,17 +1106,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_Buffers_bytes{instance=\"$instance\"}",
                         "interval": "$resolution",
                         "legendFormat": "RAM Buffer"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "D",
@@ -1154,17 +1128,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_MemFree_bytes{instance=\"$instance\"}",
                         "interval": "$resolution",
                         "legendFormat": "RAM Free"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "E",
@@ -1176,17 +1150,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_SwapTotal_bytes{instance=\"$instance\"} - node_memory_SwapFree_bytes{instance=\"$instance\"}",
                         "interval": "$resolution",
                         "legendFormat": "SWAP Used"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "F",
@@ -1198,17 +1172,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "node_memory_SwapTotal_bytes{instance=\"$instance\"}",
                         "interval": "$resolution",
                         "legendFormat": "SWAP Total"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "G",
@@ -1223,7 +1197,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "",
             "spec": {
               "options": {
                 "legend": {
@@ -1233,7 +1207,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1245,7 +1218,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -1284,7 +1257,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1306,7 +1278,6 @@
         "spec": {
           "id": 30,
           "title": "Persistent Volumes - Usage in %",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1317,8 +1288,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1326,10 +1301,6 @@
                         "interval": "$resolution",
                         "legendFormat": "{{ namespace }} - {{ persistentvolumeclaim }}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -1344,7 +1315,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -1354,7 +1325,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1367,7 +1337,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -1403,7 +1373,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1425,7 +1394,6 @@
         "spec": {
           "id": 32,
           "title": "Persistent Volumes - Inodes",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1436,8 +1404,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1445,10 +1417,6 @@
                         "interval": "$resolution",
                         "legendFormat": "{{ persistentvolumeclaim }}",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -1463,7 +1431,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -1473,7 +1441,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1486,7 +1453,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -1522,7 +1489,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1544,7 +1510,6 @@
         "spec": {
           "id": 34,
           "title": "Persistent Volumes - Usage in GB",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1555,18 +1520,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "max(kubelet_volume_stats_used_bytes{node=\"$node\"}) by (persistentvolumeclaim, namespace)",
                         "format": "table",
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -1578,18 +1543,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "max(kubelet_volume_stats_capacity_bytes{node=\"$node\"}) by (persistentvolumeclaim, namespace)",
                         "format": "table",
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -1661,10 +1626,18 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "table",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "cellHeight": "sm",
+                "footer": {
+                  "countRows": false,
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                },
                 "showHeader": true,
                 "sortBy": []
               },
@@ -1675,7 +1648,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -1693,9 +1666,6 @@
                       "type": "auto"
                     },
                     "filterable": false,
-                    "footer": {
-                      "reducers": []
-                    },
                     "inspect": false
                   }
                 },
@@ -1735,7 +1705,6 @@
         "spec": {
           "id": 46,
           "title": "Context Switches & Interrupts",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1746,8 +1715,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1756,10 +1729,6 @@
                         "intervalFactor": 1,
                         "legendFormat": "Context switches",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -1771,8 +1740,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1780,10 +1753,6 @@
                         "interval": "$resolution",
                         "legendFormat": "Interrupts",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -1798,7 +1767,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "",
             "spec": {
               "options": {
                 "legend": {
@@ -1808,7 +1777,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1819,7 +1787,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -1855,7 +1823,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -1877,7 +1844,6 @@
         "spec": {
           "id": 48,
           "title": "System Load",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1888,8 +1854,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1897,10 +1867,6 @@
                         "interval": "$resolution",
                         "legendFormat": "1m",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -1912,8 +1878,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1921,10 +1891,6 @@
                         "interval": "$resolution",
                         "legendFormat": "5m",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -1936,8 +1902,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -1945,10 +1915,6 @@
                         "interval": "$resolution",
                         "legendFormat": "15m",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "C",
@@ -1963,7 +1929,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "",
             "spec": {
               "options": {
                 "legend": {
@@ -1973,7 +1939,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "desc"
                 }
@@ -1984,7 +1949,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2023,7 +1988,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2045,7 +2009,6 @@
         "spec": {
           "id": 49,
           "title": "File Descriptors",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2056,8 +2019,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2065,10 +2032,6 @@
                         "instant": false,
                         "interval": "$resolution",
                         "legendFormat": "Maximum file descriptors"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2080,8 +2043,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2089,10 +2056,6 @@
                         "instant": false,
                         "interval": "$resolution",
                         "legendFormat": "Allocated file descriptors"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -2107,7 +2070,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "",
             "spec": {
               "options": {
                 "legend": {
@@ -2117,7 +2080,6 @@
                   "showLegend": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2128,7 +2090,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2167,7 +2129,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2189,7 +2150,6 @@
         "spec": {
           "id": 5,
           "title": "List of pods on node",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2200,18 +2160,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "kube_pod_info{node=\"$node\"}",
                         "format": "table",
                         "interval": "",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2314,10 +2274,18 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "table",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "cellHeight": "sm",
+                "footer": {
+                  "countRows": false,
+                  "fields": "",
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
+                },
                 "showHeader": true,
                 "sortBy": []
               },
@@ -2327,7 +2295,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2343,9 +2311,6 @@
                     "align": "auto",
                     "cellOptions": {
                       "type": "auto"
-                    },
-                    "footer": {
-                      "reducers": []
                     },
                     "inspect": false
                   }
@@ -2422,7 +2387,6 @@
         "spec": {
           "id": 60,
           "title": "TCP Currently Established",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2433,8 +2397,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2442,10 +2410,6 @@
                         "instant": false,
                         "interval": "$resolution",
                         "legendFormat": "TCP Currently Established"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2460,7 +2424,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -2470,7 +2434,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2482,7 +2445,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2518,7 +2481,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2540,7 +2502,6 @@
         "spec": {
           "id": 61,
           "title": "Network errors",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2551,17 +2512,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(rate(node_network_receive_errs_total{instance=\"$instance\"}[$__rate_interval]))",
                         "interval": "$resolution",
                         "legendFormat": "In"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2573,8 +2534,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2582,10 +2547,6 @@
                         "interval": "$resolution",
                         "legendFormat": "Out",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -2600,7 +2561,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -2610,7 +2571,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2622,7 +2582,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2658,7 +2618,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2680,7 +2639,6 @@
         "spec": {
           "id": 62,
           "title": "Network usage (packet/s)",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2691,8 +2649,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2700,10 +2662,6 @@
                         "interval": "$resolution",
                         "legendFormat": "In",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2715,8 +2673,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2724,10 +2686,6 @@
                         "interval": "$resolution",
                         "legendFormat": "Out",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -2742,7 +2700,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -2752,7 +2710,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2764,7 +2721,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2800,7 +2757,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2822,7 +2778,6 @@
         "spec": {
           "id": 64,
           "title": "Network total drops",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2833,17 +2788,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "sum(rate(node_network_receive_drop_total{instance=\"$instance\"}[$__rate_interval]))",
                         "interval": "$resolution",
                         "legendFormat": "In"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2855,17 +2810,17 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": true,
                         "expr": "- sum(rate(node_network_transmit_drop_total{instance=\"$instance\"}[$__rate_interval]))",
                         "interval": "$resolution",
                         "legendFormat": "Out"
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "B",
@@ -2880,7 +2835,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -2890,7 +2845,6 @@
                   "showLegend": false
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -2902,7 +2856,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -2938,7 +2892,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -2971,8 +2924,12 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "editorMode": "code",
                         "exemplar": true,
@@ -2980,10 +2937,6 @@
                         "interval": "$resolution",
                         "legendFormat": "Nb of cpu core throttles",
                         "range": true
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -2998,7 +2951,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.0",
+            "version": "8.3.3",
             "spec": {
               "options": {
                 "legend": {
@@ -3014,7 +2967,6 @@
                   "sortDesc": true
                 },
                 "tooltip": {
-                  "hideZeros": false,
                   "mode": "multi",
                   "sort": "none"
                 }
@@ -3027,7 +2979,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -3066,7 +3018,6 @@
                       "type": "linear"
                     },
                     "showPoints": "never",
-                    "showValues": false,
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
@@ -3088,7 +3039,6 @@
         "spec": {
           "id": 7,
           "title": "CPU  Usage",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3099,18 +3049,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": false,
                         "expr": "avg(sum by (cpu) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval])))",
                         "instant": true,
                         "interval": "$resolution",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -3125,17 +3075,9 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
-                "barShape": "flat",
-                "barWidthFactor": 0.5,
-                "effects": {
-                  "barGlow": false,
-                  "centerGlow": false,
-                  "gradient": false
-                },
-                "endpointMarker": "point",
                 "minVizHeight": 75,
                 "minVizWidth": 75,
                 "orientation": "auto",
@@ -3146,15 +3088,10 @@
                   "fields": "",
                   "values": false
                 },
-                "segmentCount": 1,
-                "segmentSpacing": 0.3,
-                "shape": "gauge",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": false,
+                "showThresholdMarkers": true,
                 "sizing": "auto",
-                "sparkline": false,
-                "text": {},
-                "textMode": "auto"
+                "text": {}
               },
               "fieldConfig": {
                 "defaults": {
@@ -3166,7 +3103,7 @@
                     "mode": "percentage",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "green"
                       },
                       {
@@ -3191,7 +3128,6 @@
         "spec": {
           "id": 9,
           "title": "CPU Used",
-          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3202,18 +3138,18 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
+                      "labels": {
+                        "grafana.app/export-datasource-name": "VictoriaMetrics All",
+                        "grafana.app/export-label": "prometheus-1"
+                      },
                       "spec": {
                         "exemplar": false,
                         "expr": "sum(rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval]))",
                         "instant": true,
                         "interval": "$resolution",
                         "legendFormat": ""
-                      },
-                      "labels": {
-                        "grafana.app/export-label": "prometheus-1",
-                        "grafana.app/export-datasource-name": "VictoriaMetrics All"
                       }
                     },
                     "refId": "A",
@@ -3228,7 +3164,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.0",
+            "version": "11.2.0",
             "spec": {
               "options": {
                 "colorMode": "none",
@@ -3256,7 +3192,7 @@
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": 0,
+                        "value": null,
                         "color": "rgb(255, 255, 255)"
                       }
                     ]
@@ -3288,7 +3224,7 @@
                       "spec": {
                         "x": 0,
                         "y": 0,
-                        "width": 8,
+                        "width": 4,
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
@@ -3299,9 +3235,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 8,
+                        "x": 4,
                         "y": 0,
-                        "width": 8,
+                        "width": 4,
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
@@ -3312,9 +3248,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 16,
+                        "x": 8,
                         "y": 0,
-                        "width": 8,
+                        "width": 4,
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
@@ -3325,9 +3261,22 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 0,
+                        "width": 12,
+                        "height": 11,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-5"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
                         "x": 0,
                         "y": 8,
-                        "width": 4,
+                        "width": 2,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3338,9 +3287,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 4,
+                        "x": 2,
                         "y": 8,
-                        "width": 4,
+                        "width": 2,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3351,9 +3300,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 8,
+                        "x": 4,
                         "y": 8,
-                        "width": 8,
+                        "width": 2,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3364,9 +3313,9 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 16,
+                        "x": 6,
                         "y": 8,
-                        "width": 4,
+                        "width": 2,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
@@ -3377,26 +3326,13 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 20,
+                        "x": 8,
                         "y": 8,
                         "width": 4,
                         "height": 3,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-18"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 0,
-                        "y": 11,
-                        "width": 24,
-                        "height": 11,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-5"
                         }
                       }
                     }
@@ -3680,7 +3616,6 @@
       "Nodes"
     ],
     "timeSettings": {
-      "timezone": "browser",
       "from": "now-1h",
       "to": "now",
       "autoRefresh": "30s",
@@ -3701,25 +3636,6 @@
     },
     "title": "Kubernetes Nodes",
     "variables": [
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "datasource",
-          "pluginId": "__DS_TYPE__",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "",
-            "value": ""
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
       {
         "kind": "CustomVariable",
         "spec": {
@@ -3765,8 +3681,7 @@
           "includeAll": false,
           "hide": "dontHide",
           "skipUrlSync": false,
-          "allowCustomValue": true,
-          "valuesFormat": "csv"
+          "allowCustomValue": true
         }
       },
       {
@@ -3778,23 +3693,22 @@
             "value": ""
           },
           "hide": "dontHide",
-          "refresh": "onDashboardLoad",
+          "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "VictoriaMetrics All",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "spec": {
               "query": "label_values(kube_node_info, node)",
               "refId": "StandardVariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "VictoriaMetrics All"
             }
           },
           "regex": "",
-          "regexApplyTo": "value",
           "sort": "alphabeticalAsc",
           "definition": "label_values(kube_node_info, node)",
           "options": [],
@@ -3812,23 +3726,22 @@
             "value": ""
           },
           "hide": "hideVariable",
-          "refresh": "onDashboardLoad",
+          "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
+            "labels": {
+              "grafana.app/export-datasource-name": "VictoriaMetrics All",
+              "grafana.app/export-label": "prometheus-1"
+            },
             "spec": {
               "query": "label_values(node_uname_info{nodename=~\"(?i:($node)(\\\\.[a-z0-9.-]+)?)\"}, instance)",
               "refId": "StandardVariableQuery"
-            },
-            "labels": {
-              "grafana.app/export-label": "prometheus-1",
-              "grafana.app/export-datasource-name": "VictoriaMetrics All"
             }
           },
           "regex": "",
-          "regexApplyTo": "value",
           "sort": "alphabeticalAsc",
           "definition": "label_values(node_uname_info{nodename=~\"(?i:($node)(\\\\.[a-z0-9.-]+)?)\"}, instance)",
           "options": [],
