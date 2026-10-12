@@ -38,9 +38,7 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 1. Create a temporary dashboard in the Grafana UI.
 2. Export it as JSON with **Model: V2** and enable **Share dashboard with another instance**.
 3. Save the exported JSON under the owning chart's `files/dashboards/` directory.
-4. Run the workspace prompt `.github/prompts/grafana-dashboard-convert-exported-json-file.prompt.md` on the exported JSON file. It validates the export, applies the owning chart's datasource placeholders and variables, and saves the converted dashboard in place.
-5. Apply changes with helm (helmfile)
-6. Delete the temporary dashboard.
+4. Delete the temporary dashboard.
 
 ### Example (Helm template)
 
