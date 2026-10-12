@@ -121,9 +121,9 @@ repos:
         entry: bash -c 'set -e; for f; do helm dependency update "$(dirname "$f")"; done' --
         language: system
         files: ^charts/.*/Chart\.ya?ml$
-      - id: validateGrafanaDashboardJson
-        name: validateGrafanaDashboardJson
-        description: Make sure Grafana dashboards use the V2 model and carry no instance-specific metadata
-        entry: python scripts/pre-commit-hooks/validateGrafanaDashboardJson/validate.py
+      - id: checkGrafanaDashboardExport
+        name: checkGrafanaDashboardExport
+        description: Require Grafana dashboard V2 exports without instance-specific metadata
+        entry: python scripts/pre-commit-hooks/checkGrafanaDashboardExport/validate.py
         language: python
         files: '^charts/.*/files/dashboards/.*\.json$'
