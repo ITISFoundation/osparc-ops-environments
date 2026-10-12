@@ -172,13 +172,6 @@ if [ "$start_opsstack" -eq 0 ]; then
     call_make "." up
     popd
 
-    # -------------------------------- JAEGER -------------------------------
-    log_info "starting jaeger..."
-    service_dir="${repo_basedir}"/services/jaeger
-    pushd "${service_dir}"
-    call_make "." up
-    popd
-
     # -------------------------------- Adminer -------------------------------
     log_info "starting adminer..."
     service_dir="${repo_basedir}"/services/adminer
