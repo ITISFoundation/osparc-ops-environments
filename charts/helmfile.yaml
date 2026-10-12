@@ -1,0 +1,3 @@
+helmfiles:
+  - ./00-cluster.helmfile.yaml.gotmpl
+  - ./01-ops.helmfile.yaml.gotmpl
