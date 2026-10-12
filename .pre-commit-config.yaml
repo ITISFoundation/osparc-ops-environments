@@ -121,9 +121,3 @@ repos:
         entry: bash -c 'set -e; for f; do helm dependency update "$(dirname "$f")"; done' --
         language: system
         files: ^charts/.*/Chart\.ya?ml$
-      - id: helmfile-ci-coverage
-        name: Verify that CI helmfile.yaml covers all charts
-        entry: scripts/pre-commit-hooks/check-helmfile-ci-coverage.sh
-        language: system
-        pass_filenames: false
-        files: ^charts/

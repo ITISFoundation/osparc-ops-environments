@@ -25,6 +25,8 @@ services:
           cpus: "0.1"
   prometheuscatchall:
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
+    # Give more time for graceful shutdown to avoid locks or wal issues
+    stop_grace_period: 2m
     image: prom/prometheus:v3.5.1
     volumes:
       - prometheus_data:/prometheus
@@ -70,6 +72,8 @@ services:
           memory: 2048M
           cpus: "0.2"
   prometheusfederation:
+    # Give more time for graceful shutdown to avoid locks or wal issues
+    stop_grace_period: 2m
     hostname: "{% raw %}{{.Service.Name}}{% endraw %}"
     image: prom/prometheus:v3.5.1
     volumes:
@@ -228,8 +232,11 @@ services:
       - public
     deploy:
       labels:
-        - prometheus-job=grafana
-        - prometheus-port=3000
+        # kubernetes grafana dashboard does not 100% support non-kubernetes environments
+        # to avoid issues, we disable the prometheus job and port for swarm grafana
+        # the plan is to replace it rather soon (before mid-October 2026 - YH)
+        #- prometheus-job=grafana
+        #- prometheus-port=3000
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
@@ -403,6 +410,12 @@ services:
     environment:
       TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
       TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL: ${TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL}
+      TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}
+    {% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+      K8S_MONITORING_PRIVATE_ENDPOINT: ${K8S_MONITORING_PRIVATE_ENDPOINT}
+      SERVICES_USER: ${SERVICES_USER}
+      SERVICES_PASSWORD: ${SERVICES_PASSWORD}
+    {% endif %}
   tempo:
     image: grafana/tempo:2.10.0
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"

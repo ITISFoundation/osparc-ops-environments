@@ -1,0 +1,9 @@
+# Victoria Logs Cluster supports HA only for ingestion part
+# if any vmstorage node is down, querying is completely shut down.
+
+# Victoria Logs Single have a simplified HA that does not guarantee
+# consistent queries after disruptions.
+
+# See https://github.com/VictoriaMetrics/VictoriaLogs/issues/166
+
+{{ fail "Not Implemented. Victoria Logs does not support full-fledged HA out-of-the-box" }}

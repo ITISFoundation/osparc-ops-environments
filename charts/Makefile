@@ -9,46 +9,47 @@ include ${REPO_BASE_DIR}/charts/.tools.Makefile
 #
 
 export CONFIG_DIR := $(shell dirname $(REPO_CONFIG_LOCATION))
-CHART_DIRS := $(wildcard $(REPO_BASE_DIR)/charts/*/)
+
+# Note on HELM_DIFF_USE_UPGRADE_DRY_RUN:
+# helm-diff renders with `helm template` by default, where `lookup` and API
+# capabilities resolve empty - charts using them would show permanent phantom diffs.
+# See https://github.com/databus23/helm-diff/issues/253
+HELM_DIFF_ENV := HELM_DIFF_USE_UPGRADE_DRY_RUN=true HELM_DIFF_OUTPUT_CONTEXT=5
 
 # Example of usage:
-# make helmfile-diff HELMFILE_EXTRA_ARGS='--selector name=traefik'
+# make helmfile-template HELMFILE_EXTRA_ARGS='--debug'
 HELMFILE_EXTRA_ARGS ?=
-HELMFILE := helmfile $(HELMFILE_EXTRA_ARGS)
 
-CHART_TEMPLATE_DIR := $(REPO_BASE_DIR)/charts/.template
-CHART_TEMPLATES := $(wildcard $(CHART_TEMPLATE_DIR)/*)
+# Shortcut for the common case `--selector name=<release>`.
+# Example: make helmfile-diff RELEASE=traefik
+RELEASE ?=
+ifneq ($(strip $(RELEASE)),)
+override HELMFILE_EXTRA_ARGS += --selector 'name=$(RELEASE)'
+endif
 
-TRIVY_TEMPLATES_DIR := /tmp/rendered-helm-templates
+HELMFILE := $(HELM_DIFF_ENV) helmfile $(HELMFILE_EXTRA_ARGS)
+
+TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 
 #
 # Helpers
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl
+.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl helmfile_environment.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) -f $(word 2,$^) $*
+	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
 
-.PHONY: add-new-chart-directory-from-template
-add-new-chart-directory-from-template: guard-CHART_NAME venv ## Adds a new chart directory with standard structure
-	$(eval CHART_DIR := $(REPO_BASE_DIR)/charts/$(CHART_NAME))
-	@mkdir $(CHART_DIR)
-	@echo "CHART_NAME=$(CHART_NAME)" > $(CHART_DIR)/.env
-	@$(foreach tmpl,$(CHART_TEMPLATES),\
-		$(call jinja, $(tmpl), $(CHART_DIR)/.env, $(CHART_DIR)/$(notdir $(tmpl)));\
-	)
-	@rm $(CHART_DIR)/.env
+.PHONY: .confirm-action
+.confirm-action:
+	@$(call confirm_action)
 
 #
 # Artifacts
 #
 
-helmfile.yaml.gotmpl: simcore-charts/helmfile.yaml
-	cp $(CONFIG_DIR)/$@ $(REPO_BASE_DIR)/charts/helmfile.yaml.gotmpl
-
-simcore-charts/helmfile.yaml: ## Copies the simcore helmfile to the charts directory
-	cp $(CONFIG_DIR)/helmfile.simcore.yaml $(REPO_BASE_DIR)/charts/$@
+helmfile_environment.yaml:
+	cp $(CONFIG_DIR)/$@ $@
 
 $(TRIVY_TEMPLATES_DIR):
 	# generate helm templates for trivy scanning
@@ -76,7 +77,11 @@ helmfile-lint: .helmfile-lint ## Lint apps
 helmfile-sync: .helmfile-sync ## Deploy apps even if no changes (don't use unless you know why)
 
 .PHONY: helmfile-destroy
-helmfile-destroy: .helmfile-destroy ## Delete the helmfile configuration
+helmfile-destroy: guard-RELEASE .confirm-action .helmfile-destroy
+helmfile-destroy: ## Delete a particular helmfile release
+
+.PHONY: helmfile-list
+helmfile-list: .helmfile-list ## List all releases managed by helmfile
 
 .PHONY: trivy-scan
 trivy-scan: $(TRIVY_TEMPLATES_DIR) .verify-trivy-installation

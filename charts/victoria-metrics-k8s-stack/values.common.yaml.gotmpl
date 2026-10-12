@@ -1,12 +1,53 @@
-# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.82.0/charts/victoria-metrics-k8s-stack/values.yaml
+# https://github.com/VictoriaMetrics/helm-charts/blob/victoria-metrics-k8s-stack-0.91.1/charts/victoria-metrics-k8s-stack/values.yaml
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
 {{- $httpPathPrefix := "/metrics" }}
 {{- $alertsPathPrefix := "/alerts" }}
 {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
 
+{{- $federatedVmsingleEnabled := true }}
+{{- $federatedVmsinglePort := "8429" }}
+{{- $federatedVmsingleHttpPathPrefix := "/federated-metrics" }}
+{{- $federatedVmsingleMetricNameRegex := "(s4l_|osparc_|simcore_).*" }}
+
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
 metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
+internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
+ingressHttpPathPrefix: {{ $httpPathPrefix | quote }}
+basicAuthMiddleware: {{ $basicAuthMiddleware | quote }}
+
+# https://github.com/VictoriaMetrics/operator/blob/v0.74.0/cmd/config-reloader/README.md
+configReloaderPort: 8435 # hardcoded in operator
+
+#
+# metrics federation: stores a curated subset of long-lived business metrics
+#
+federatedVmsingle:
+  enabled: {{ $federatedVmsingleEnabled }}
+  port: {{ $federatedVmsinglePort | quote }}
+  retentionPeriod: "3y"
+  storage:
+    size: 20Gi
+    storageClassName: {{ requiredEnv "KUBERNETES_CRITICAL_STORAGE_CLASS_NAME" | quote }}
+  logLevel: {{ $logLevel }}
+  extraArgs:
+    http.pathPrefix: {{ $federatedVmsingleHttpPathPrefix | quote }}
+  # public ingress served under the shared monitoring FQDN + basic-auth middleware
+  ingress:
+    host: {{ requiredEnv "K8S_MONITORING_FQDN" | quote }}
+  podMetadata:
+    labels:
+      app.simcore.io/name: vmsingle-federated
+      app.simcore.io/part-of: {{ .Release.Name }}
+  nodeSelector:
+    node-role.kubernetes.io/ops: ""
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 vm-k8s-stack:
   fullnameOverride: vm-k8s-stack # by default names are long and redundant
@@ -178,8 +219,10 @@ vm-k8s-stack:
     enabled: true
     spec:
       extraArgs:
+        remoteWrite.label: "cluster=kubernetes"
         remoteWrite.maxHourlySeries: "150000" # side-effect: enables a metric used in alerts
         remoteWrite.maxDailySeries: "300000" # side-effect: enables a metric used in alerts
+        remoteWrite.maxDiskUsagePerURL: "1GB"
       port: "8429"
       logLevel: {{ $logLevel }}
       # enforce restricted PodSecurity on operator-managed containers
@@ -315,90 +358,6 @@ vm-k8s-stack:
         traefik.ingress.kubernetes.io/router.tls: "true"
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
-
-  defaultRules: # rules for vmalert
-    enabled: true
-    rules: # per-rule overrides
-      # stream aggregation is not configured, so vm_streamaggr_* metrics never
-      # exist and these two alerts sit permanently in "nomatch"; disable them
-      StreamAggrFlushTimeout:
-        enabled: false
-      StreamAggrDedupFlushTimeout:
-        enabled: false
-    # start with a few alerts. Add more with time
-    groups:
-      etcd:
-        enabled: false
-      general:
-        enabled: true
-      k8sContainerCpuLimits:
-        enabled: false
-      k8sContainerCpuRequests:
-        enabled: false
-      k8sContainerCpuUsageSecondsTotal:
-        enabled: false
-      k8sContainerMemoryLimits:
-        enabled: false
-      k8sContainerMemoryRequests:
-        enabled: false
-      k8sContainerMemoryRss:
-        enabled: false
-      k8sContainerMemoryCache:
-        enabled: false
-      k8sContainerMemoryWorkingSetBytes:
-        enabled: false
-      k8sContainerMemorySwap:
-        enabled: false
-      k8sPodOwner:
-        enabled: false
-      k8sContainerResource:
-        enabled: false
-      kubeApiserver:
-        enabled: false
-      kubeApiserverAvailability:
-        enabled: false
-      kubeApiserverBurnrate:
-        enabled: false
-      kubeApiserverHistogram:
-        enabled: false
-      kubeApiserverSlos:
-        enabled: false
-      kubelet:
-        enabled: false
-      kubePrometheusGeneral:
-        enabled: false
-      kubePrometheusNodeRecording:
-        enabled: false
-      kubernetesApps:
-        enabled: false
-      kubernetesResources:
-        enabled: false
-      kubernetesStorage:
-        enabled: false
-      kubernetesSystem:
-        enabled: false
-      kubernetesSystemKubelet:
-        enabled: false
-      kubernetesSystemApiserver:
-        enabled: false
-      kubernetesSystemControllerManager:
-        enabled: false
-      kubeScheduler:
-        enabled: false
-      kubernetesSystemScheduler:
-        enabled: false
-      kubeStateMetrics:
-        enabled: false
-      nodeNetwork:
-        enabled: false
-      node:
-        enabled: false
-      vmsingle:
-        enabled: false
-      vmcluster:
-        enabled: true
-      alertmanager:
-        enabled: false
 
   #
   # Rest of k8s stack's components (not used atm)

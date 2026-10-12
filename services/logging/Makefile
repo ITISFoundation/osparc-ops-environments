@@ -22,6 +22,10 @@ endef
 
 .PHONY: configure-graylog
 configure-graylog: .env venv ## Configure graylog
+	@# must be run once old replica is down to avoid situation
+	@# when scripts runs against old replica that is not yet terminated.
+	@# this is achieved via `--detach=false` option of docker stack deploy
+	@# it waits for services to converge
 	@cd scripts;\
 	VIRTUAL_ENV=$(VENV_DIR) $(UV) pip install --requirement requirements.txt > /dev/null 2>&1;\
 	set -o allexport; \
@@ -38,7 +42,7 @@ UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
 
 .PHONY: .up-dalco
 .up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
+	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
 	$(MAKE) configure-graylog
 
 .PHONY: .up-public
@@ -46,18 +50,18 @@ UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
 
 .PHONY: .up-aws
 .up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
+	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
 	$(MAKE) configure-graylog
 
 .PHONY: .up-master
 .up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES}
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
+	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
 	$(MAKE) configure-graylog
 
 .PHONY: .up-local
 .up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES}
 	@$(create-s3-bucket)
-	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
+	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
 	$(MAKE) configure-graylog
 
 #
@@ -70,8 +74,6 @@ UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
 	source $(REPO_CONFIG_LOCATION); \
 	GRAYLOG_ROOT_PASSWORD_SHA2=$$(echo -n "$${GRAYLOG_ROOT_PASSWORD}" | sha256sum | cut -d ' ' -f1);\
 	export GRAYLOG_ROOT_PASSWORD_SHA2;\
-	GRAYLOG_PASSWORD_SECRET=$$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16 ; echo '');\
-	export GRAYLOG_PASSWORD_SECRET;\
 	STACK_NAME=$(STACK_NAME); \
 	export STACK_NAME; \
 	set +o allexport; \

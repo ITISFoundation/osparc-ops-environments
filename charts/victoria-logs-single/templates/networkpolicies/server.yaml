@@ -1,0 +1,22 @@
+{{- $single := index .Values "victoria-logs-single" }}
+{{- $serverLabels := $single.server.podLabels }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: server-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $serverLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $serverLabels "app.simcore.io/part-of" }}"
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.vmSinglePort }}

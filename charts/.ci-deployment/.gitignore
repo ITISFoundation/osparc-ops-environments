@@ -1,3 +1,2 @@
-!helmfile.yaml
-!helmfile.yaml.gotmpl
 !repo.config
+!helmfile_environment.yaml

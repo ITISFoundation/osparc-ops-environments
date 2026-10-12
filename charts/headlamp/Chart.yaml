@@ -1,0 +1,16 @@
+apiVersion: v2
+name: headlamp
+description: >-
+  Wrapper around the upstream Headlamp helm chart.
+  Adds NetworkPolicy and defaults aligned with charts/SECURITY.md.
+
+type: application
+
+version: 0.0.1 # unused
+
+appVersion: 0.0.1 # unused
+
+dependencies:
+  - name: headlamp
+    version: 0.45.0
+    repository: "https://kubernetes-sigs.github.io/headlamp/"
