@@ -13,8 +13,6 @@ extensions:
       password: ${SERVICES_PASSWORD}
 {% endif %}
 exporters:
-  otlphttp:
-    endpoint: ${TRACING_OPENTELEMETRY_COLLECTOR_EXPORTER_ENDPOINT}  # Existing trace destination
   otlp:
     endpoint: http://tempo:4317
     tls:
@@ -32,7 +30,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlphttp,otlp]
+      exporters: [otlp]
       processors: [batch,filter/drop_healthcheck]
 {% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
     traces/kubernetes:
