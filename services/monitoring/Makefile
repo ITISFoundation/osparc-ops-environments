@@ -54,6 +54,7 @@ endef
 COMMON_COMPOSE_DEPENDENCIES: .env venv
 
 docker-compose.yml: docker-compose.yml.j2 \
+					opentelemetry-collector-config.yaml \
 					prometheus/prometheus-federation.yml \
 					prometheus/prometheus.rules.yml \
 					node-exporter/docker-entrypoint.sh \
