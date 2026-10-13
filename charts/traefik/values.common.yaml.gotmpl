@@ -2,9 +2,6 @@
 {{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") }}
 {{- $ipAllowListMiddlewareName := "internal-ipallowlist" }}
 
-metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
-metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
-
 middlewares:
   ipAllowList:
     name: {{ $ipAllowListMiddlewareName }}

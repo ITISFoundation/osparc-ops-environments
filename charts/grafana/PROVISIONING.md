@@ -1,14 +1,8 @@
 # Grafana provisioning via sidecar
 
-The Grafana sidecar watches Kubernetes resources (across namespaces — see `searchNamespace` in values) and provisions them automatically.
+The Grafana sidecar watches Kubernetes resources (across namespaces - see `searchNamespace` in values) and provisions them automatically.
 
 ## How to add a datasource
-
-### Rules
-
-1. Explicitly define datasource `uid` and `type`.
-2. Store uid & type in chart values so dashboards can reference them (most likely needs saving in repo config)
-3. Set `isDefault: false` — dashboards must reference the datasource explicitly.
 
 ### Example (Helm template)
 
@@ -24,8 +18,8 @@ stringData:
     apiVersion: 1
     datasources:
       - name: VictoriaMetrics
-        type: {{ .Values.metricsDatasourceType }}
-        uid: {{ .Values.metricsDatasourceUid }}
+        type: prometheus
+        uid: victoria-metrics
         access: proxy
         url: http://...
         isDefault: false
@@ -36,24 +30,14 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 
 ## How to add a dashboard
 
-### Get dashboard json file
-
-1. Make dashboard in grafana UI
-2. Export dashboard as json file
-    * WARNING: make sure that in `Advanced options` Model `Classic` is selected to avoid error logs in grafana (they appear if a new V2 Resource version is used)
-3. Replace hardcoded datasource uid/type with `__DS_UID__` / `__DS_TYPE__`
-4. Add config map with dashboard json and special label
-5. When rendering dashboard json datasource replace uid/type variables with real values
-
-NOTE: if you have multiple datasources, just use multiple variables. It is fine as long as you replace them at helm render time
+1. Create a temporary dashboard in the Grafana UI.
+2. Export it as JSON with **Model: V2** and enable **Share dashboard with another instance**.
+3. Save the exported JSON under the owning chart's `files/dashboards/` directory.
+4. Delete the temporary dashboard.
 
 ### Example (Helm template)
 
 ```yaml
-{{- $dashboardContent := .Files.Get "files/dashboards/dashboard.json"
-  | replace "__DS_UID__" .Values.datasourceUid
-  | replace "__DS_TYPE__" .Values.datasourceType -}}
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -63,15 +47,29 @@ metadata:
   annotations:
     dashboard_folder: "Simcore" # important: nested folders are not supported https://github.com/grafana/grafana/pull/119852
 data:
-  dashboard.json: | {{ $dashboardContent | nindent 4 }}
+  dashboard.json: | {{ .Files.Get "files/dashboards/dashboard.json" | nindent 4 }}
 ```
 
-See real implementation in `charts/victoria-metrics-k8s-stack`
-
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-dashboards
+
+## How to update a dashboard
+
+Provisioned dashboards are read-only in the UI, so edit a temporary copy instead of the original.
+
+1. Create that copy by exporting the provisioned dashboard as JSON and importing it back as a new dashboard
+2. Change the copy in the UI
+3. Follow [How to add a dashboard](#how-to-add-a-dashboard) from step 2, overwriting the chart's existing file instead of adding a new one
+
+**FAQ**
+
+Why can't I edit an existing dashboard?
+> UI updates are disabled (`allowUiUpdates: false` in the sidecar provider), so provisioned dashboards cannot be updated from the UI. Edit a copy instead (since it is not file-provisioned, it can be updated in UI)
+
+Why can't I use the JSON from the save dialog of the original dashboard?
+> That dialog has no **Share dashboard with another instance** toggle, so its JSON keeps instance-specific metadata and datasource references. See [grafana/grafana#134707](https://github.com/grafana/grafana/issues/134707).
 
 ## Troubleshooting
 
 * Check sidecar settings in values file and see comments to get clues for behaviour in different scenarios
 * Make sure the corresponding ConfigMap / Secret exists in the expected namespace.
-* Check sidecar logs: (see logs of sidecars running inside grafana pod)
+* Check sidecar logs (see logs of sidecars running inside grafana pod)

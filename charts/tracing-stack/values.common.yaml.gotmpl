@@ -8,11 +8,6 @@
 
 {{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
 
-metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
-metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
-tracesDatasourceUid: {{ requiredEnv "VICTORIA_TRACES_DATASOURCE_ID" | quote }}
-tracesDatasourceType: {{ requiredEnv "VICTORIA_TRACES_DATASOURCE_TYPE" | quote }}
-
 victoriaTracesHttpPortNumber: {{ $victoriaTracesHttpPortNumber }}
 otlpGrpcPortNumber: {{ $otlpGrpcPortNumber }}
 otlpHttpPortNumber: {{ $otlpHttpPortNumber }}
