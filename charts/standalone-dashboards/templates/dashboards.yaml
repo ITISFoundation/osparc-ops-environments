@@ -2,6 +2,7 @@
 {{- $root := .root -}}
 {{- $name := .name -}}
 {{- $folder := .folder -}}
+{{- $content := $root.Files.Get .path -}}
 
 {{- if not $content }}
 {{- fail (printf "dashboard file %q is empty" .path) }}
