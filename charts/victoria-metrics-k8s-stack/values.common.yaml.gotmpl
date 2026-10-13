@@ -10,8 +10,6 @@
 {{- $federatedVmsingleMetricNameRegex := "(s4l_|osparc_|simcore_).*" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
-metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
-metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
 ingressHttpPathPrefix: {{ $httpPathPrefix | quote }}
 basicAuthMiddleware: {{ $basicAuthMiddleware | quote }}

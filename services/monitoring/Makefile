@@ -54,6 +54,7 @@ endef
 COMMON_COMPOSE_DEPENDENCIES: .env venv
 
 docker-compose.yml: docker-compose.yml.j2 \
+					opentelemetry-collector-config.yaml \
 					prometheus/prometheus-federation.yml \
 					prometheus/prometheus.rules.yml \
 					node-exporter/docker-entrypoint.sh \
@@ -180,6 +181,9 @@ smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCA
 
 tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env venv
 	$(call jinja, $<, .env, $@);
+
+opentelemetry-collector-config.yaml: opentelemetry-collector-config.yaml.j2 .env $(VENV_BIN)/j2
+	@$(call jinja, $<, .env, $@)
 
 #
 # Grafana-related targets

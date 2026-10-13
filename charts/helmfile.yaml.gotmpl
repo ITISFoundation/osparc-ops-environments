@@ -229,6 +229,20 @@ releases:
         args: ["delete", "-f", "./grafana/namespace.yaml"]
     values:
       - ./grafana/values.yaml.gotmpl
+      {{- range (.Values | get "grafana.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
+
+  - name: standalone-dashboards
+    namespace: grafana
+    chart: ./standalone-dashboards
+    needs:
+      - grafana/grafana
+    values:
+      - ./standalone-dashboards/values.yaml.gotmpl
+      {{- range (.Values | get "standalone_dashboards.extra_values_files" list) }}
+      - {{ . }}
+      {{- end }}
 
   - name: headlamp
     namespace: headlamp

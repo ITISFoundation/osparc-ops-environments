@@ -3,8 +3,8 @@
 {{- $grafanaBasicAuthSecretName := "grafana-basic-auth" }}
 {{- $grafanaPathPrefix := "grafana" }}
 
-metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
-metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
+aws:
+  enabled: false
 
 grafana:
   networkPolicy:
