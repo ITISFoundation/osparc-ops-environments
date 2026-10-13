@@ -25,8 +25,8 @@ stringData:
     apiVersion: 1
     datasources:
       - name: VictoriaLogs
-        type: {{ .Values.grafanaLogsDatasourceType }}
-        uid: {{ .Values.grafanaLogsDatasourceUid }}
+        type: victoriametrics-logs-datasource
+        uid: victoria-logs
         access: proxy
         url: http://{{ $svcName }}.{{ .Release.Namespace }}.svc.{{ $clusterDomain }}:{{ .Values.vmSinglePort }}{{ $pathPrefix }}/
         # if edited in grafana, the datasource will be out-of-sync (helm won't notice the change)
