@@ -248,7 +248,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__CLOUDWATCH_DS_TYPE__",
+                      "group": "cloudwatch",
                       "version": "v0",
                       "datasource": {
                         "name": "$datasource"

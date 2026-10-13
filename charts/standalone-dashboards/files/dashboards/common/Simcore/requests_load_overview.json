@@ -53,7 +53,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -79,7 +79,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -229,7 +229,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -255,7 +255,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -353,7 +353,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -379,7 +379,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -529,7 +529,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -639,7 +639,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -749,7 +749,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -859,7 +859,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -965,7 +965,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1075,7 +1075,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1185,7 +1185,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1291,7 +1291,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1401,7 +1401,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1511,7 +1511,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1651,7 +1651,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1791,7 +1791,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1944,7 +1944,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -1971,7 +1971,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2095,7 +2095,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2181,7 +2181,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2202,7 +2202,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2331,7 +2331,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2352,7 +2352,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2480,7 +2480,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2501,7 +2501,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2629,7 +2629,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2650,7 +2650,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2782,7 +2782,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2803,7 +2803,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2931,7 +2931,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -2952,7 +2952,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3080,7 +3080,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3233,7 +3233,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3259,7 +3259,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3409,7 +3409,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3435,7 +3435,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3585,7 +3585,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3611,7 +3611,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3760,7 +3760,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3866,7 +3866,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -3976,7 +3976,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4086,7 +4086,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4113,7 +4113,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4237,7 +4237,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4263,7 +4263,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4361,7 +4361,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4514,7 +4514,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4540,7 +4540,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4689,7 +4689,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4715,7 +4715,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4865,7 +4865,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -4891,7 +4891,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5040,7 +5040,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5146,7 +5146,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5173,7 +5173,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5297,7 +5297,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5323,7 +5323,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5421,7 +5421,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5531,7 +5531,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5641,7 +5641,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5794,7 +5794,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5820,7 +5820,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5970,7 +5970,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -5996,7 +5996,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6145,7 +6145,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6171,7 +6171,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6320,7 +6320,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6426,7 +6426,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6453,7 +6453,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6577,7 +6577,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6603,7 +6603,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6701,7 +6701,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6811,7 +6811,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6921,7 +6921,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -6947,7 +6947,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${ds}"
@@ -7893,7 +7893,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "ds",
-          "pluginId": "__DS_TYPE__",
+          "pluginId": "prometheus",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {

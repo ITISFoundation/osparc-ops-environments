@@ -53,14 +53,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "fetched",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(irate(pg_stat_database_tup_fetched{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -121,14 +121,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "fetched",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(irate(pg_stat_database_tup_returned{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -189,14 +189,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "fetched",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(irate(pg_stat_database_tup_inserted{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -257,14 +257,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "fetched",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(irate(pg_stat_database_tup_updated{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -325,14 +325,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "fetched",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(irate(pg_stat_database_tup_deleted{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -490,7 +490,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -608,7 +608,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -692,7 +692,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -717,7 +717,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -860,7 +860,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -948,7 +948,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1062,14 +1062,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "Buffers Allocated",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "editorMode": "code",
                         "expr": "irate(pg_stat_bgwriter_buffers_alloc_total{instance=~'$host'}[5m])",
                         "format": "time_series",
@@ -1130,14 +1130,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "Buffers Allocated",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "editorMode": "code",
                         "expr": "irate(pg_stat_bgwriter_buffers_backend_fsync_total{instance=~'$host'}[5m])",
                         "format": "time_series",
@@ -1198,14 +1198,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "Buffers Allocated",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "editorMode": "code",
                         "expr": "irate(pg_stat_bgwriter_buffers_backend_total{instance=~'$host'}[5m])",
                         "format": "time_series",
@@ -1266,14 +1266,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "Buffers Allocated",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "editorMode": "code",
                         "expr": "irate(pg_stat_bgwriter_buffers_clean_total{instance=~'$host'}[5m])",
                         "format": "time_series",
@@ -1334,14 +1334,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "Buffers Allocated",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "editorMode": "code",
                         "expr": "irate(pg_stat_bgwriter_buffers_checkpoint_total{instance=~'$host'}[5m])",
                         "format": "time_series",
@@ -1541,7 +1541,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1563,7 +1563,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1706,14 +1706,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "conflicts",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(rate(pg_stat_database_deadlocks{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -1772,14 +1772,14 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
                       },
                       "spec": {
                         "alias": "deadlocks",
-                        "dsType": "__DS_TYPE__",
+                        "dsType": "prometheus",
                         "expr": "sum(rate(pg_stat_database_conflicts{datname=~\"$db\",instance=~\"$host\"}[5m]))",
                         "format": "time_series",
                         "groupBy": [
@@ -2102,7 +2102,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "datasource",
-          "pluginId": "__DS_TYPE__",
+          "pluginId": "prometheus",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
@@ -2130,7 +2130,7 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
             "datasource": {
               "name": "${datasource}"
@@ -2162,7 +2162,7 @@
           "skipUrlSync": false,
           "query": {
             "kind": "DataQuery",
-            "group": "__DS_TYPE__",
+            "group": "prometheus",
             "version": "v0",
             "datasource": {
               "name": "${datasource}"

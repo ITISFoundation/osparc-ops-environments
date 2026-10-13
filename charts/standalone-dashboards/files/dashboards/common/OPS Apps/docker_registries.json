@@ -926,7 +926,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "datasource",
-          "pluginId": "__DS_TYPE__",
+          "pluginId": "prometheus",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {

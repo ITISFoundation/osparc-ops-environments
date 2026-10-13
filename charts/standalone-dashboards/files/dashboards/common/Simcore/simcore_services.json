@@ -66,7 +66,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -170,7 +170,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -288,7 +288,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__TRACES_DS_TYPE__",
+                      "group": "tempo",
                       "version": "v0",
                       "spec": {
                         "limit": 20,
@@ -311,7 +311,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__TRACES_DS_TYPE__",
+                      "group": "tempo",
                       "version": "v0",
                       "spec": {
                         "limit": 20,
@@ -426,7 +426,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__TRACES_DS_TYPE__",
+                      "group": "tempo",
                       "version": "v0",
                       "spec": {
                         "limit": 20,
@@ -448,7 +448,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__TRACES_DS_TYPE__",
+                      "group": "tempo",
                       "version": "v0",
                       "spec": {
                         "limit": 20,
@@ -562,7 +562,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__TRACES_DS_TYPE__",
+                      "group": "tempo",
                       "version": "v0",
                       "spec": {
                         "limit": 20,
@@ -584,7 +584,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__TRACES_DS_TYPE__",
+                      "group": "tempo",
                       "version": "v0",
                       "spec": {
                         "limit": 20,
@@ -681,7 +681,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -805,7 +805,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -920,7 +920,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1037,7 +1037,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__LOGS_DS_TYPE__",
+                      "group": "victoriametrics-logs-datasource",
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
@@ -1097,7 +1097,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1220,7 +1220,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1335,7 +1335,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1464,7 +1464,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1585,7 +1585,7 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "__DS_TYPE__",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
                         "name": "${datasource}"
@@ -1949,7 +1949,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "datasource",
-          "pluginId": "__DS_TYPE__",
+          "pluginId": "prometheus",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
@@ -2123,7 +2123,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "logsDatasource",
-          "pluginId": "__LOGS_DS_TYPE__",
+          "pluginId": "victoriametrics-logs-datasource",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
@@ -2142,7 +2142,7 @@
         "kind": "DatasourceVariable",
         "spec": {
           "name": "tracesDatasource",
-          "pluginId": "__TRACES_DS_TYPE__",
+          "pluginId": "tempo",
           "refresh": "onDashboardLoad",
           "regex": "",
           "current": {
