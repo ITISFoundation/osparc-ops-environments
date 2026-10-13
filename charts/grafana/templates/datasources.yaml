@@ -16,7 +16,7 @@ stringData:
     datasources:
       - name: cloudwatch
         type: cloudwatch
-        uid: {{ .Values.aws.cloudwatchDatasource.uid | quote }}
+        uid: cloudwatch
         access: proxy
         editable: false
         jsonData:
