@@ -96,7 +96,7 @@ services:
           cpus: "0.1"
           memory: 1200M # 1.2G (we use 1200M since 1.2G is not rounded nicely during convertion)
       labels:
-        - traefik.enable=true
+        - traefik.enable=false # use kubernetes app instead
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.graylog.loadbalancer.server.port=9000
