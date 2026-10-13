@@ -4,11 +4,6 @@ The Grafana sidecar watches Kubernetes resources (across namespaces - see `searc
 
 ## How to add a datasource
 
-1. Explicitly define datasource `uid` and `type`.
-2. Store uid and type in chart values for datasource provisioning.
-3. Set `isDefault: false` - dashboards should select their datasource explicitly.
-4. In dashboard JSON, use datasource variables rather than binding to a chart-specific datasource UID.
-
 ### Example (Helm template)
 
 ```yaml
@@ -23,8 +18,8 @@ stringData:
     apiVersion: 1
     datasources:
       - name: VictoriaMetrics
-        type: {{ .Values.metricsDatasourceType }}
-        uid: {{ .Values.metricsDatasourceUid }}
+        type: prometheus
+        uid: victoria-metrics
         access: proxy
         url: http://...
         isDefault: false
@@ -43,9 +38,6 @@ Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-
 ### Example (Helm template)
 
 ```yaml
-{{- $dashboardContent := .Files.Get "files/dashboards/dashboard.json"
-  | replace "__DS_TYPE__" .Values.metricsDatasourceType -}}
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -55,7 +47,7 @@ metadata:
   annotations:
     dashboard_folder: "Simcore" # important: nested folders are not supported https://github.com/grafana/grafana/pull/119852
 data:
-  dashboard.json: | {{ $dashboardContent | nindent 4 }}
+  dashboard.json: | {{ .Files.Get "files/dashboards/dashboard.json" | nindent 4 }}
 ```
 
 Source: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-dashboards
