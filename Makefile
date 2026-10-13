@@ -94,7 +94,6 @@ info-local: ## Displays the links to the different services e.g. 'make info-loca
 	@echo "- https://$(MONITORING_DOMAIN)/grafana (grafana)": monitoring metrics/alerts management
 	@echo "- https://$(MONITORING_DOMAIN)/graylog/ (graylog)": aggregated logger
 	@echo "- https://$(MONITORING_DOMAIN)/adminer/ (adminer)": postgres adminer
-	@echo "- https://$(MONITORING_DOMAIN)/jaeger (jaeger)": jaeger
 	@echo "- https://$(MONITORING_DOMAIN)/redis (redis-commander)": access to redis
 	@echo ""
 	@echo "- https://$(REGISTRY_DOMAIN) (docker registry)": images registry
