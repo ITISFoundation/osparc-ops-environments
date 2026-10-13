@@ -4,10 +4,6 @@
 {{- $fileName := base $path -}}
 {{- $name := (trimSuffix (ext $fileName) $fileName) | replace "_" "-" -}}
 
-{{- $content := .Files.Get $path
-  | replace "__DS_UID__" .Values.metricsDatasourceUid
-  | replace "__DS_TYPE__" .Values.metricsDatasourceType -}}
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,7 +17,7 @@ metadata:
   annotations:
     dashboard_folder: "OPS Apps"
 data:
-  dashboard.json: | {{ $content | nindent 4 }}
+  dashboard.json: | {{ .Files.Get $path | nindent 4 }}
 ---
 {{ end }}
 {{ end }}
