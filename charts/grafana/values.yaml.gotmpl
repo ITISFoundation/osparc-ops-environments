@@ -3,6 +3,9 @@
 {{- $grafanaBasicAuthSecretName := "grafana-basic-auth" }}
 {{- $grafanaPathPrefix := "grafana" }}
 
+aws:
+  enabled: false
+
 grafana:
   networkPolicy:
     enabled: true

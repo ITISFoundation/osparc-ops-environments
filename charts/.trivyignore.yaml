@@ -368,3 +368,15 @@ misconfigurations:
       The datasource sidecar reads provisioning secrets (resource: secret)
       because datasource configs contain credentials. This requires cluster-wide
       secret read access (get, watch, list) in the ClusterRole.
+
+  #
+  # standalone-dashboards
+  #
+  - id: KSV-01010
+    paths:
+      - "standalone-dashboards/templates/dashboards.yaml"
+    statement: >
+      This is a false positive: the dashboard ConfigMaps embed Grafana dashboard
+      JSON, and the check's `key\s*(=|:)` pattern matches PromQL label selectors
+      such as `redis_key_value{key=~".+:alive"}` and `service_key=~"..."`.
+      These are metric label names, not sensitive content.

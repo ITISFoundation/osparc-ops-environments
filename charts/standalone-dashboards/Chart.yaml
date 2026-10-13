@@ -1,0 +1,5 @@
+apiVersion: v2
+name: standalone-dashboards
+description: Common and optional flavor Grafana dashboards
+type: application
+version: 0.1.0
