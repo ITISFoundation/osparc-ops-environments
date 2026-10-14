@@ -2,6 +2,7 @@ services:
   # MongoDB: https://hub.docker.com/_/mongo/
   mongodb:
     image: mongo:6.0.6
+    stop_grace_period: 2m
     init: true
     volumes:
       # data persistency
@@ -25,6 +26,7 @@ services:
   # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    stop_grace_period: 2m
     init: true
     volumes:
       # data persistency
