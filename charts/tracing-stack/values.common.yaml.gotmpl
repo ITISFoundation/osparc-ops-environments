@@ -78,7 +78,7 @@ victoria-traces-single:
         {{- toYaml $serverCustomLabels | nindent 8 }}
 
     # https://docs.victoriametrics.com/victoriatraces/#retention
-    retentionPeriod: 10d
+    retentionPeriod: {{ requiredEnv "VICTORIA_TRACES_RETENTION_PERIOD_DAYS" }}d
     # https://docs.victoriametrics.com/victoriatraces/#retention-by-disk-space-usage
     retentionDiskSpaceUsage: {{ $victoriaTracesMaxDiskSpaceUsageGi }} # `GiB` unit added by chart automatically
 
