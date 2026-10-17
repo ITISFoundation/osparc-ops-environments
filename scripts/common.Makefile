@@ -168,7 +168,7 @@ export DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE:=$(shell set -o allexp
 		count=0; \
 		for element in "$${hosts[@]}"; \
 		do \
-			DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE || Host(\`api.testing.$$element\`) && PathPrefix(\`/\`)";\
+			DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE="$$DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE || Host(\`testing.api.$$element\`) && PathPrefix(\`/\`)";\
 		done; \
 	fi; \
 	echo $$DEPLOYMENT_API_DOMAIN_TESTING_CAPTURE_TRAEFIK_RULE; \
