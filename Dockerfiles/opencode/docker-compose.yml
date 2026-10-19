@@ -3,7 +3,7 @@ services:
     build: .
     volumes:
       - ../..:/workspace
-      - opencode-data:/home/opencode/.local/share/opencode # sessions, auth
+      - osparc-ops-opencode-data:/home/opencode/.local/share/opencode # sessions, auth
       - ./opencode-config:/home/opencode/.config/opencode # config, prompts, skills
     stdin_open: true
     tty: true
@@ -13,4 +13,4 @@ networks:
     external: true
 
 volumes:
-  opencode-data:
+  osparc-ops-opencode-data:
