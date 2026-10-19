@@ -1,0 +1,103 @@
+{{- $alertsPathPrefix := "/alerts" }}
+{{- $vmalertPort := 8080 }} # vmalert HTTP service
+{{- $datasourceProxyName := "vmalert-datasource-proxy" }}
+{{- $datasourceProxyPort := 8427 }} # vmauth HTTP service
+{{- $stackVmauthPort := requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" }}
+{{- $victoriaLogsPort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
+{{- $victoriaLogsService := "victoria-logs-single-server" }}
+{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+{{- $stackVmauthURL := printf "http://vmauth-vm-k8s-stack.victoria-metrics-k8s-stack.svc.cluster.local.:%s" $stackVmauthPort }}
+{{- $vmselectURL := printf "%s/metrics/select/0/prometheus" $stackVmauthURL }}
+{{- $vminsertURL := printf "%s/metrics/insert/0/prometheus/api/v1/write" $stackVmauthURL }}
+{{- $datasourceProxyURL := printf "http://vmauth-%s.%s.svc.cluster.local.:%d/" $datasourceProxyName .Release.Namespace $datasourceProxyPort }}
+
+configReloaderPort: 8435 # hardcoded in victoria metrics operator
+
+vmauth:
+  name: {{ $datasourceProxyName }}
+  port: {{ $datasourceProxyPort }} # vmauth HTTP service
+  upstreamVMAuthPort: {{ $stackVmauthPort }}
+  victoriaLogsPort: {{ $victoriaLogsPort }}
+  spec:
+    port: {{ $datasourceProxyPort | quote }} # vmauth HTTP service
+    logLevel: {{ requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
+    useStrictSecurity: true
+    podMetadata:
+      labels:
+        app.simcore.io/name: vmauth-vmalert-datasource-proxy
+        app.simcore.io/part-of: victoria-metrics-alert
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    configReloaderResources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+    unauthorizedUserAccessSpec:
+      disabled: false
+      discover_backend_ips: true
+      url_map:
+        # vmalert sends Prometheus query API requests to its single datasource URL.
+        - src_paths:
+            - "/api/v1/query.*"
+          url_prefix:
+            - {{ printf "%s/metrics/select/prometheus/" $stackVmauthURL | quote }}
+        # VictoriaLogs query APIs are routed to its server, preserving its /logs prefix.
+        - src_paths:
+            - "/select/logsql/.*"
+          url_prefix:
+            - {{ printf "http://%s.victoria-logs-single.svc.cluster.local.:%s/logs/" $victoriaLogsService $victoriaLogsPort | quote }}
+
+vmalert:
+  name: victoria-metrics-alert
+  port: {{ $vmalertPort }}
+  spec:
+    datasource:
+      url: {{ $datasourceProxyURL | quote }}
+    remoteRead:
+      url: {{ $vmselectURL | quote }}
+    remoteWrite:
+      url: {{ $vminsertURL | quote }}
+    evaluationInterval: 30s
+    logLevel: {{ requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
+    port: {{ $vmalertPort | quote }}
+    selectAllByDefault: true
+    useStrictSecurity: true
+    extraArgs:
+      http.pathPrefix: {{ $alertsPathPrefix | quote }}
+      notifier.blackhole: "true" # notifications are intentionally disabled
+      remoteWrite.disablePathAppend: "true"
+    podMetadata:
+      labels:
+        app.simcore.io/name: vmalert
+        app.simcore.io/part-of: victoria-metrics-alert
+    nodeSelector:
+      node-role.kubernetes.io/ops: ""
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    configReloaderResources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  ingress:
+    host: {{ requiredEnv "K8S_MONITORING_FQDN" | quote }}
+    path: {{ $alertsPathPrefix | quote }}
+    basicAuthMiddleware: {{ $basicAuthMiddleware | quote }}

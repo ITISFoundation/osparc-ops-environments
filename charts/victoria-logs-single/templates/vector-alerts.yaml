@@ -1,4 +1,3 @@
-# vmalert picks these up from any namespace (selectAllByDefault: true in victoria-metrics-k8s-stack)
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:

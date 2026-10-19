@@ -21,6 +21,17 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
+        selector: >-
+          app.simcore.io/name == "vmstorage"
+          && app.simcore.io/part-of == "{{ .Release.Name }}"
         ports:
           - {{ $stack.vmcluster.spec.vmstorage.vmSelectPort }}
-          - {{ $stack.vmalert.spec.port }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "alerting"'
+        selector: >-
+          app.simcore.io/name == "vmalert"
+          && app.simcore.io/part-of == "victoria-metrics-alert"
+        ports:
+          - 8080 # vmalert HTTP service (VMUI proxy)

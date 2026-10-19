@@ -1,0 +1,9 @@
+# namespace with restricted pod security standard
+# official doc: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alerting
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

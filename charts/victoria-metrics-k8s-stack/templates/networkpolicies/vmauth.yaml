@@ -22,6 +22,9 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
+        selector: >-
+          app.simcore.io/name in {"vminsert", "vmselect"}
+          && app.simcore.io/part-of == "{{ .Release.Name }}"
         ports:
           - {{ $stack.vmcluster.spec.vminsert.port }}
           - {{ $stack.vmcluster.spec.vmselect.port }}

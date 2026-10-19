@@ -144,10 +144,8 @@ releases:
     namespace: victoria-metrics-k8s-stack
     needs:
       - victoria-metrics-operator/victoria-metrics-operator
-      # vmalert creates alert rules for victoria-logs-single
-      # but we install victoria-logs-single separately,
-      # so we need to have victoria logs cluster running before
-      # to avoid having alert rules for non-existing metrics
+      # The default alert rules include victoria-logs-single metrics, so install
+      # that datasource first to avoid evaluating rules against missing metrics.
       # see https://github.com/VictoriaMetrics/helm-charts/issues/3182
       - victoria-logs-single/victoria-logs-single
     values:
@@ -167,6 +165,27 @@ releases:
         showlogs: true
         command: kubectl
         args: ["delete", "-f", "./victoria-metrics-k8s-stack/namespace.yaml"]
+
+  - name: victoria-metrics-alert
+    namespace: alerting
+    chart: ./victoria-metrics-alert
+    needs:
+      - victoria-metrics-operator/victoria-metrics-operator
+      - victoria-metrics-k8s-stack/victoria-metrics-k8s-stack
+      - victoria-logs-single/victoria-logs-single
+    values:
+      - ./victoria-metrics-alert/values.common.yaml.gotmpl
+    hooks:
+      - events:
+          - presync
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "./victoria-metrics-alert/namespace.yaml"]
+      - events:
+          - postuninstall
+        showlogs: true
+        command: kubectl
+        args: ["delete", "-f", "./victoria-metrics-alert/namespace.yaml"]
 
   - name: victoria-logs-single
     chart: ./victoria-logs-single

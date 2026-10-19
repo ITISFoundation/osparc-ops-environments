@@ -1,0 +1,43 @@
+{{- $podLabels := .Values.vmalert.spec.podMetadata.labels -}}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmalert-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $podLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $podLabels "app.simcore.io/part-of" }}"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.vmalert.port }}
+          - {{ .Values.configReloaderPort }} # config-reloader metrics
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-metrics-k8s-stack"'
+        selector: >-
+          app.simcore.io/name == "vmauth"
+          && app.simcore.io/part-of == "victoria-metrics-k8s-stack"
+        ports:
+          - {{ .Values.vmauth.upstreamVMAuthPort }} # k8s-stack vmauth for remote read/write
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "alerting"'
+        selector: >-
+          app.simcore.io/name == "vmauth-vmalert-datasource-proxy"
+          && app.simcore.io/part-of == "victoria-metrics-alert"
+        ports:
+          - {{ .Values.vmauth.port }} # VMAlert datasource proxy

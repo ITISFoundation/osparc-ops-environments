@@ -1,0 +1,44 @@
+{{- $proxyLabels := .Values.vmauth.spec.podMetadata.labels -}}
+{{- $vmalertLabels := .Values.vmalert.spec.podMetadata.labels -}}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmalert-datasource-proxy-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $proxyLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $proxyLabels "app.simcore.io/part-of" }}"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      source:
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Release.Namespace }}"'
+        selector: >-
+          app.simcore.io/name == "{{ index $vmalertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmalertLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ .Values.vmauth.port }} # vmauth HTTP service
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-metrics-k8s-stack"'
+        selector: >-
+          app.simcore.io/name == "vmauth"
+          && app.simcore.io/part-of == "victoria-metrics-k8s-stack"
+        ports:
+          - {{ .Values.vmauth.upstreamVMAuthPort }} # k8s-stack vmauth
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-logs-single"'
+        selector: >-
+          app.simcore.io/name == "victoria-logs-single"
+          && app.simcore.io/part-of == "victoria-logs-single"
+        ports:
+          - {{ .Values.vmauth.victoriaLogsPort }} # VictoriaLogs HTTP service
