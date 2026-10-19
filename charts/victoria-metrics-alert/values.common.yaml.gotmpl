@@ -74,6 +74,7 @@ vmalert:
     selectAllByDefault: true
     useStrictSecurity: true
     extraArgs:
+      external.url: {{ printf "https://%s%s" (requiredEnv "K8S_MONITORING_FQDN") $alertsPathPrefix | quote }}
       http.pathPrefix: {{ $alertsPathPrefix | quote }}
       notifier.blackhole: "true" # notifications are intentionally disabled
       remoteWrite.disablePathAppend: "true"
