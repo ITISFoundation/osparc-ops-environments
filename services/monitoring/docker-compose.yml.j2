@@ -237,10 +237,12 @@ services:
         # the plan is to replace it rather soon (before mid-October 2026 - YH)
         #- prometheus-job=grafana
         #- prometheus-port=3000
-        - traefik.enable=false # use kubernetes app instead
+        - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
+        # only API is exposed to let CI configure grafana
+        # Grafana UI is not exposed. Use kubernetes grafana instead
+        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana/api`)
         - traefik.http.routers.grafana.entrypoints=https
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
