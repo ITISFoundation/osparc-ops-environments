@@ -241,6 +241,7 @@ services:
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
         # only API is exposed to let CI configure grafana
+        # and e2e test grafana state to pass successfully
         # Grafana UI is not exposed. Use kubernetes grafana instead
         - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana/api`)
         - traefik.http.routers.grafana.entrypoints=https
