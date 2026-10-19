@@ -1,0 +1,25 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: {{ .Release.Name }}-server-alerts
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  groups:
+    - name: vlogs
+      type: vlogs
+      rules:
+        - alert: VictoriaLogsStreamTooManyLogs
+          expr: '_time:1h | stats by (_stream) count() as logs | filter logs:>10000'
+          interval: 5m
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              VictoriaLogs stream {{`{{ $labels._stream }}`}} generated more than 10,000 logs in the last hour
+            description: >-
+              Stream {{`{{ $labels._stream }}`}} generated {{`{{ $value }}`}} logs in the rolling one-hour window.

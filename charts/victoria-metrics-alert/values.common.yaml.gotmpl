@@ -11,6 +11,8 @@
 {{- $vminsertURL := printf "%s/metrics/insert/0/prometheus/api/v1/write" $stackVmauthURL }}
 {{- $datasourceProxyURL := printf "http://vmauth-%s.%s.svc.cluster.local.:%d/" $datasourceProxyName .Release.Namespace $datasourceProxyPort }}
 
+kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+
 configReloaderPort: 8435 # hardcoded in victoria metrics operator
 
 vmauth:
@@ -43,7 +45,6 @@ vmauth:
         cpu: 100m
         memory: 64Mi
     unauthorizedUserAccessSpec:
-      disabled: false
       discover_backend_ips: true
       url_map:
         # vmalert sends Prometheus query API requests to its single datasource URL.

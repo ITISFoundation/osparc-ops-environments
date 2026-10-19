@@ -170,9 +170,6 @@ vm-k8s-stack:
         logLevel: {{ $logLevel }}
         # enforce restricted PodSecurity on operator-managed containers
         useStrictSecurity: true
-        extraArgs:
-          # Expose alerts in VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
-          vmalert.proxyURL: "http://vmalert-victoria-metrics-alert.alerting.svc:8080{{ $alertsPathPrefix }}"
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vmselect

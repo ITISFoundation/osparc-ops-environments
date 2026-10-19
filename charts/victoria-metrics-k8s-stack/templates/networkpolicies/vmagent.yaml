@@ -20,6 +20,16 @@ spec:
           - {{ .Values.configReloaderPort }} # VM config-reloader sidecar exposes /metrics
   egress:
     - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "alerting"'
+        selector: >-
+          app.simcore.io/name == "vmauth-vmalert-datasource-proxy"
+          && app.simcore.io/part-of == "victoria-metrics-alert"
+        ports:
+          - 8427 # Alerting vmauth datasource proxy
+          - {{ .Values.configReloaderPort }} # Alerting vmauth config-reloader metrics
+    - action: Allow
       destination:
         nets:
           - 10.0.0.0/8
