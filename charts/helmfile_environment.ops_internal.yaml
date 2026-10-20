@@ -1,0 +1,12 @@
+# settings re-used across multiple charts
+opsInternal:
+  victoriaLogs:
+    httpPort: 9428
+  victoriaTraces:
+    httpPort: 10428
+  victoriaMetrics:
+    vmAuthHttpPort: 8427
+  traefik:
+    namespace: traefik
+    basicAuthMiddlewareName: basic-auth
+    basicAuthMiddlewareRef: traefik-basic-auth@kubernetescrd

@@ -2,7 +2,7 @@
 {{- $otlpGrpcPortNumber := 4317 }}
 {{- $otlpHttpPortNumber := 4318 }}
 {{- $otelMetricsPort := 8888 }}
-{{- $victoriaTracesHttpPortNumber := requiredEnv "VICTORIA_TRACES_HTTP_PORT" | int }}
+{{- $victoriaTracesHttpPortNumber := .Values.opsInternal.victoriaTraces.httpPort | int }}
 
 {{- $victoriaTracesFullname := "victoria-traces-single" }}
 
@@ -15,7 +15,7 @@ otelMetricsPortNumber: {{ $otelMetricsPort }}
 
 ingressHost: {{ $ingressHost }}
 internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
-basicAuthMiddleware: {{ printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") | quote }}
+basicAuthMiddleware: {{ .Values.opsInternal.traefik.basicAuthMiddlewareRef | quote }}
 
 # https://github.com/VictoriaMetrics/helm-charts/blob/victoria-traces-single-0.1.11/charts/victoria-traces-single/values.yaml
 victoria-traces-single:
@@ -23,7 +23,7 @@ victoria-traces-single:
   {{- $persistentVolumeSizeGi := 10 }}
   {{- $victoriaTracesMaxDiskSpaceUsageGi := 9 }}
   {{- $httpPathPrefix := "/traces" }}
-  {{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+  {{- $basicAuthMiddleware := .Values.opsInternal.traefik.basicAuthMiddlewareRef }}
 
   {{- $serverCustomLabels := dict "app.simcore.io/name" "victoria-traces-single" "app.simcore.io/part-of" .Release.Name }}
 

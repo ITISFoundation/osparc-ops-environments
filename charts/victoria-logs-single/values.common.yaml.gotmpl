@@ -2,8 +2,8 @@
 {{- $ingressHttpPathPrefix := "/logs" }}
 {{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
 {{- $vectorMetricsPort := 9090 }}
-{{- $vmSinglePort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
-{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+{{- $vmSinglePort := .Values.opsInternal.victoriaLogs.httpPort }}
+{{- $basicAuthMiddleware := .Values.opsInternal.traefik.basicAuthMiddlewareRef }}
 
 ingressHost: {{ $ingressHost }}
 internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
