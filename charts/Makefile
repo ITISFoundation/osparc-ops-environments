@@ -36,7 +36,10 @@ TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation helmfile.yaml.gotmpl helmfile_environment.yaml
+.helmfile-%: .verify-helmfile-installation \
+			 helmfile.yaml.gotmpl \
+			 helmfile_environment.deployment.yaml \
+			 helmfile_environment.shared_ops.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
 
@@ -48,8 +51,8 @@ TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 # Artifacts
 #
 
-helmfile_environment.yaml:
-	cp $(CONFIG_DIR)/$@ $@
+helmfile_environment.deployment.yaml:
+	cp $(CONFIG_DIR)/helmfile_environment.yaml $@
 
 $(TRIVY_TEMPLATES_DIR):
 	# generate helm templates for trivy scanning

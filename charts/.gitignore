@@ -1,5 +1,5 @@
 # Ignore Helm chart packages
 *.tgz
 
-helmfile_environment.yml
-helmfile_environment.yaml
+helmfile_environment.deployment.yml
+helmfile_environment.deployment.yaml
