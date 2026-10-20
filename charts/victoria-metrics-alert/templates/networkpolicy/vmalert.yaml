@@ -20,18 +20,15 @@ spec:
           - 172.16.0.0/12
           - 192.168.0.0/16
         ports:
-          - {{ .Values.vmalert.port }}
+          - {{ .Values.vmalert.spec.port }}
           - {{ .Values.configReloaderPort }} # config-reloader metrics
   egress:
     - action: Allow
       protocol: TCP
       destination:
-        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-metrics-k8s-stack"'
-        selector: >-
-          app.simcore.io/name == "vmauth"
-          && app.simcore.io/part-of == "victoria-metrics-k8s-stack"
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
         ports:
-          - {{ .Values.vmauth.upstreamVMAuthPort }} # k8s-stack vmauth for remote read/write
+          - {{ .Values.vmK8sStackVMAuthPort }} # k8s-stack vmauth for remote read/write
     - action: Allow
       protocol: TCP
       destination:
@@ -40,4 +37,4 @@ spec:
           app.simcore.io/name == "vmauth-vmalert-datasource-proxy"
           && app.simcore.io/part-of == "victoria-metrics-alert"
         ports:
-          - {{ .Values.vmauth.port }} # VMAlert datasource proxy
+          - {{ .Values.vmauth.spec.port }} # VMAlert datasource proxy

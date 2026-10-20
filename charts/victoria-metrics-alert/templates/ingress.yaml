@@ -19,4 +19,4 @@ spec:
               service:
                 name: vmalert-{{ .Values.vmalert.name }}
                 port:
-                  number: {{ .Values.vmalert.port }}
+                  number: {{ .Values.vmalert.spec.port }}

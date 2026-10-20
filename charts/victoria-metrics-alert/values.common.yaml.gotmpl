@@ -1,25 +1,29 @@
 {{- $alertsPathPrefix := "/alerts" }}
-{{- $vmalertPort := 8080 }} # vmalert HTTP service
 {{- $datasourceProxyName := "vmalert-datasource-proxy" }}
 {{- $datasourceProxyPort := 8427 }} # vmauth HTTP service
-{{- $stackVmauthPort := requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" }}
-{{- $victoriaLogsPort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
-{{- $victoriaLogsService := "victoria-logs-single-server" }}
-{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
-{{- $stackVmauthURL := printf "http://vmauth-vm-k8s-stack.victoria-metrics-k8s-stack.svc.cluster.local.:%s" $stackVmauthPort }}
-{{- $vmselectURL := printf "%s/metrics/select/0/prometheus" $stackVmauthURL }}
-{{- $vminsertURL := printf "%s/metrics/insert/0/prometheus/api/v1/write" $stackVmauthURL }}
-{{- $datasourceProxyURL := printf "http://vmauth-%s.%s.svc.cluster.local.:%d/" $datasourceProxyName .Release.Namespace $datasourceProxyPort }}
 
+{{- $stackVmauthPort := requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" }}
+
+{{- $victoriaLogsPort := requiredEnv "VICTORIA_LOGS_HTTP_PORT" }}
+
+
+{{- $stackNamespace := "victoria-metrics-k8s-stack" }}
+{{- $traefikNamespace := requiredEnv "TRAEFIK_NAMESPACE" }}
+{{- $traefikBasicAuthMiddlewareName := requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}
+
+{{- $stackVmauthURL := printf "http://vmauth-vm-k8s-stack.%s.svc.cluster.local.:%s/%s" $stackNamespace $stackVmauthPort "metrics" }}
+
+
+vmK8sStackVMAuthPort: {{ $stackVmauthPort }}
+victoriaLogsPort: {{ $victoriaLogsPort }}
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+victoriaMetricsK8sStackNamespace: {{ $stackNamespace | quote }}
 
 configReloaderPort: 8435 # hardcoded in victoria metrics operator
 
 vmauth:
   name: {{ $datasourceProxyName }}
-  port: {{ $datasourceProxyPort }} # vmauth HTTP service
   upstreamVMAuthPort: {{ $stackVmauthPort }}
-  victoriaLogsPort: {{ $victoriaLogsPort }}
   spec:
     port: {{ $datasourceProxyPort | quote }} # vmauth HTTP service
     logLevel: {{ requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
@@ -56,21 +60,20 @@ vmauth:
         - src_paths:
             - "/select/logsql/.*"
           url_prefix:
-            - {{ printf "http://%s.victoria-logs-single.svc.cluster.local.:%s/logs/" $victoriaLogsService $victoriaLogsPort | quote }}
+            - {{ printf "http://%s.victoria-logs-single.svc.cluster.local.:%s/logs/" "victoria-logs-single-server" $victoriaLogsPort | quote }}
 
 vmalert:
   name: victoria-metrics-alert
-  port: {{ $vmalertPort }}
   spec:
     datasource:
-      url: {{ $datasourceProxyURL | quote }}
+      url: {{ printf "http://vmauth-%s:%d/" $datasourceProxyName $datasourceProxyPort }}
     remoteRead:
-      url: {{ $vmselectURL | quote }}
+      url: {{ printf "%s/select/prometheus" $stackVmauthURL }}
     remoteWrite:
-      url: {{ $vminsertURL | quote }}
+      url: {{ printf "%s/insert/prometheus" $stackVmauthURL }}
     evaluationInterval: 30s
     logLevel: {{ requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
-    port: {{ $vmalertPort | quote }}
+    port: "8080"
     selectAllByDefault: true
     useStrictSecurity: true
     extraArgs:
@@ -102,4 +105,4 @@ vmalert:
   ingress:
     host: {{ requiredEnv "K8S_MONITORING_FQDN" | quote }}
     path: {{ $alertsPathPrefix | quote }}
-    basicAuthMiddleware: {{ $basicAuthMiddleware | quote }}
+    basicAuthMiddleware: {{ printf "%s-%s@kubernetescrd" $traefikNamespace $traefikBasicAuthMiddlewareName }}

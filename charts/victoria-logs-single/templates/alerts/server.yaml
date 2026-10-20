@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 spec:
   groups:
-    - name: vlogs
+    - name: vlogs-extra # vlogs name already exists. To avoid conflicts use different name
       type: vlogs
       rules:
         - alert: VictoriaLogsStreamTooManyLogs

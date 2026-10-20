@@ -22,28 +22,28 @@ spec:
           && app.simcore.io/part-of == "{{ index $vmalertLabels "app.simcore.io/part-of" }}"
       destination:
         ports:
-          - {{ .Values.vmauth.port }} # vmauth HTTP service
+          - {{ .Values.vmauth.spec.port }} # vmauth HTTP service
     - action: Allow
       protocol: TCP
       source:
-        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-metrics-k8s-stack"'
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
         selector: >-
           app.simcore.io/name == "vmagent"
-          && app.simcore.io/part-of == "victoria-metrics-k8s-stack"
+          && app.simcore.io/part-of == "{{ .Values.victoriaMetricsK8sStackNamespace }}"
       destination:
         ports:
-          - {{ .Values.vmauth.port }} # vmagent -> alerting vmauth datasource proxy
+          - {{ .Values.vmauth.spec.port }} # vmagent -> alerting vmauth datasource proxy
           - {{ .Values.configReloaderPort }} # vmagent -> vmauth config-reloader metrics
   egress:
     - action: Allow
       protocol: TCP
       destination:
-        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-metrics-k8s-stack"'
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
         selector: >-
           app.simcore.io/name == "vmauth"
-          && app.simcore.io/part-of == "victoria-metrics-k8s-stack"
+          && app.simcore.io/part-of == "{{ .Values.victoriaMetricsK8sStackNamespace }}"
         ports:
-          - {{ .Values.vmauth.upstreamVMAuthPort }} # k8s-stack vmauth
+          - {{ .Values.vmK8sStackVMAuthPort }} # k8s-stack vmauth
     - action: Allow
       protocol: TCP
       destination:
@@ -52,7 +52,7 @@ spec:
           app.simcore.io/name == "victoria-logs-single"
           && app.simcore.io/part-of == "victoria-logs-single"
         ports:
-          - {{ .Values.vmauth.victoriaLogsPort }} # VictoriaLogs HTTP service
+          - {{ .Values.victoriaLogsPort }} # VictoriaLogs HTTP service
     - action: Allow
       protocol: TCP
       destination:

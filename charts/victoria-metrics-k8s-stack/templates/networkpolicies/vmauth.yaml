@@ -1,5 +1,7 @@
 {{- $stack := index .Values "vm-k8s-stack" -}}
 {{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
+{{- $insertLabels := $stack.vmcluster.spec.vminsert.podMetadata.labels }}
+{{- $selectLabels := $stack.vmcluster.spec.vmselect.podMetadata.labels }}
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
@@ -23,10 +25,17 @@ spec:
       protocol: TCP
       destination:
         selector: >-
-          app.simcore.io/name in {"vminsert", "vmselect"}
-          && app.simcore.io/part-of == "{{ .Release.Name }}"
+          app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
         ports:
           - {{ $stack.vmcluster.spec.vminsert.port }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $selectLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}"
+        ports:
           - {{ $stack.vmcluster.spec.vmselect.port }}
     - action: Allow
       protocol: TCP
