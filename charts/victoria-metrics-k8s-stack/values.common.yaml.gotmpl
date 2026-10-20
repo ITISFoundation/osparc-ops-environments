@@ -60,7 +60,7 @@ vm-k8s-stack:
   vmauth:
     enabled: true
     spec:
-      port: {{ .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
+      port: {{ .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | quote }}
       logLevel: {{ $logLevel }}
       # served under a path prefix on the ingress; makes VMUI links resolve correctly
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints
