@@ -6,7 +6,7 @@ middlewares:
   ipAllowList:
     name: {{ $ipAllowListMiddlewareName }}
   basicAuth:
-    name: {{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}
+    name: {{ .Values.sharedOps.traefik.basicAuthMiddlewareName }}
     username: {{ requiredEnv "SERVICES_USER" }}
     password: {{ requiredEnv "SERVICES_PASSWORD" }}
 

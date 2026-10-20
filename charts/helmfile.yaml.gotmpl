@@ -1,7 +1,8 @@
 environments:
   default:
     values:
-      - helmfile_environment.yaml
+      - helmfile_environment.shared_ops.yaml
+      - helmfile_environment.deployment.yaml
 
 ---
 
@@ -57,7 +58,7 @@ releases:
       {{- end }}
 
   - name: traefik
-    namespace: '{{ requiredEnv "TRAEFIK_NAMESPACE" }}'
+    namespace: {{ .Values.sharedOps.traefik.namespace }}
     chart: ./traefik
     createNamespace: false
     hooks:
@@ -268,7 +269,7 @@ releases:
     chart: ./headlamp
     createNamespace: false
     needs:
-      - {{ requiredEnv "TRAEFIK_NAMESPACE" }}/traefik
+      - {{ .Values.sharedOps.traefik.namespace }}/traefik
     hooks:
       - events:
           - presync
