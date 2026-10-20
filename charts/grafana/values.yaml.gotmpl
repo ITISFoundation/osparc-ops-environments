@@ -14,11 +14,11 @@ grafana:
     egress:
       enabled: true
       ports:
-        - port: {{ .Values.opsInternal.victoriaMetrics.vmAuthHttpPort | int }}
+        - port: {{ .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
         - port: 443 # install plugins from outside
         - port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" | int }}
-        - port: {{ .Values.opsInternal.victoriaLogs.httpPort | int }}
-        - port: {{ .Values.opsInternal.victoriaTraces.httpPort | int }}
+        - port: {{ .Values.sharedOps.victoriaLogs.httpPort | int }}
+        - port: {{ .Values.sharedOps.victoriaTraces.httpPort | int }}
 
   persistence:
     enabled: true

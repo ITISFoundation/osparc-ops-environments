@@ -39,7 +39,7 @@ TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 .helmfile-%: .verify-helmfile-installation \
 			 helmfile.yaml.gotmpl \
 			 helmfile_environment.deployment.yaml \
-			 helmfile_environment.ops_internal.yaml
+			 helmfile_environment.shared_ops.yaml
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
 	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
 

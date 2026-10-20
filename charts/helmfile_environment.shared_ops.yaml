@@ -1,5 +1,5 @@
 # settings re-used across multiple charts
-opsInternal:
+sharedOps:
   victoriaLogs:
     httpPort: 9428
   victoriaTraces:

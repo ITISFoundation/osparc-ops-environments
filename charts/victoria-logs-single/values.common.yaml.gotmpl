@@ -2,8 +2,8 @@
 {{- $ingressHttpPathPrefix := "/logs" }}
 {{- $ingressHost := requiredEnv "K8S_MONITORING_FQDN" }}
 {{- $vectorMetricsPort := 9090 }}
-{{- $vmSinglePort := .Values.opsInternal.victoriaLogs.httpPort }}
-{{- $basicAuthMiddleware := .Values.opsInternal.traefik.basicAuthMiddlewareRef }}
+{{- $vmSinglePort := .Values.sharedOps.victoriaLogs.httpPort }}
+{{- $basicAuthMiddleware := .Values.sharedOps.traefik.basicAuthMiddlewareRef }}
 
 ingressHost: {{ $ingressHost }}
 internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}

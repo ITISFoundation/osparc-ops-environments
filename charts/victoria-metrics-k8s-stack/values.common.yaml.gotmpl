@@ -2,7 +2,7 @@
 {{- $logLevel := requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }} # one of INFO, WARN, ERROR, FATAL, PANIC
 {{- $httpPathPrefix := "/metrics" }}
 {{- $alertsPathPrefix := "/alerts" }}
-{{- $basicAuthMiddleware := .Values.opsInternal.traefik.basicAuthMiddlewareRef }}
+{{- $basicAuthMiddleware := .Values.sharedOps.traefik.basicAuthMiddlewareRef }}
 
 {{- $federatedVmsingleEnabled := true }}
 {{- $federatedVmsinglePort := "8429" }}
@@ -60,7 +60,7 @@ vm-k8s-stack:
   vmauth:
     enabled: true
     spec:
-      port: {{ .Values.opsInternal.victoriaMetrics.vmAuthHttpPort | int }}
+      port: {{ .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
       logLevel: {{ $logLevel }}
       # served under a path prefix on the ingress; makes VMUI links resolve correctly
       # https://docs.victoriametrics.com/#prefix-for-http-api-endpoints

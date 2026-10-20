@@ -1,7 +1,7 @@
 # https://github.com/kubernetes-sigs/headlamp/blob/v0.45.0/charts/headlamp/values.yaml
 
 {{- $pathPrefix := "headlamp" }}
-{{- $basicAuthMiddleware := .Values.opsInternal.traefik.basicAuthMiddlewareRef }}
+{{- $basicAuthMiddleware := .Values.sharedOps.traefik.basicAuthMiddlewareRef }}
 {{- $redirectMiddlewareName := "add-trailing-slash" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
