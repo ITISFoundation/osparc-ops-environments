@@ -12,6 +12,7 @@ sharedOps:
     httpPort: 10428
   victoriaMetrics:
     vmAuthHttpPort: 8427
+    namespace: victoria-metrics-k8s-stack
   traefik:
     namespace: traefik
     basicAuthMiddlewareName: basic-auth
