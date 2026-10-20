@@ -1,0 +1,10 @@
+aws_ebs_csi_driver:
+  enabled: false
+security_hardening:
+  extra_values_files:
+  - ./security-hardening/values.local.yaml
+cert_manager:
+  extra_values_files:
+  - ./cert-manager/values.selfsigned.yaml.gotmpl
+topolvm:
+  enabled: false
