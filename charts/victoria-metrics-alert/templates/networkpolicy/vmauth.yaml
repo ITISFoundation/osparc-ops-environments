@@ -3,7 +3,7 @@
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: vmalert-datasource-proxy-network-policy
+  name: vmauth-datasource
   namespace: {{ .Release.Namespace }}
 spec:
   selector: >-

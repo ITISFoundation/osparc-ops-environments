@@ -2,24 +2,33 @@
 {{- $datasourceProxyName := "vmalert-datasource-proxy" }}
 {{- $datasourceProxyPort := 8427 }} # vmauth HTTP service
 
-{{- $victoriaLogsPort := .Values.sharedOps.victoriaLogs.httpPort }}
+{{- $logsPort := .Values.sharedOps.victoriaLogs.httpPort }}
+{{- $logsNamespace := .Values.sharedOps.victoriaLogs.namespace }}
+{{- $logsService := .Values.sharedOps.victoriaLogs.serviceName }}
 
-{{- $stackVmauthPort := .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
-{{- $stackNamespace := .Values.sharedOps.victoriaMetrics.namespace }}
-{{- $stackVmauthURL := printf "http://vmauth-vm-k8s-stack.%s.svc.cluster.local.:%d/%s" $stackNamespace $stackVmauthPort "metrics" }}
+{{- $metricsVMAuthPort := .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
+{{- $metricsNamespace := .Values.sharedOps.victoriaMetrics.namespace }}
+{{- $metricsService := .Values.sharedOps.victoriaMetrics.vmauthServiceName }}
 
-vmK8sStackVMAuthPort: {{ $stackVmauthPort }}
-victoriaLogsPort: {{ $victoriaLogsPort }}
+{{- $metricsVMAuthURL := printf "http://%s.%s.svc.cluster.local.:%d/%s" $metricsService $metricsNamespace $metricsVMAuthPort "metrics" }}
+{{- $logsURL := printf "http://%s.%s.svc.cluster.local.:%d/logs/" $logsService $logsNamespace $logsPort }}
+
+vmK8sStackVMAuthPort: {{ $metricsVMAuthPort }}
+victoriaLogsPort: {{ $logsPort }}
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
-victoriaMetricsK8sStackNamespace: {{ $stackNamespace | quote }}
+victoriaMetricsK8sStackNamespace: {{ $metricsNamespace | quote }}
 
 configReloaderPort: 8435 # hardcoded in victoria metrics operator
 
 vmauth:
+  # necessary to support alerts based on logs and metrics at the same time
+  # since vmalert support only one datasource, we need a proxy that later
+  # routes to multiple backends
+  # https://docs.victoriametrics.com/victorialogs/vmalert/#how-to-use-one-vmalert-for-victorialogs-and-victoriametrics-rules-at-the-same-time
   name: {{ $datasourceProxyName }}
-  upstreamVMAuthPort: {{ $stackVmauthPort }}
+  upstreamVMAuthPort: {{ $metricsVMAuthPort }}
   spec:
-    port: {{ $datasourceProxyPort | quote }} # vmauth HTTP service
+    port: {{ $datasourceProxyPort | quote }}
     logLevel: {{ requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
     useStrictSecurity: true
     podMetadata:
@@ -49,12 +58,12 @@ vmauth:
         - src_paths:
             - "/api/v1/query.*"
           url_prefix:
-            - {{ printf "%s/select/prometheus/" $stackVmauthURL | quote }}
+            - {{ printf "%s/select/prometheus/" $metricsVMAuthURL | quote }}
         # VictoriaLogs query APIs are routed to its server, preserving its /logs prefix.
         - src_paths:
             - "/select/logsql/.*"
           url_prefix:
-            - {{ printf "http://%s.victoria-logs-single.svc.cluster.local.:%d/logs/" "victoria-logs-single-server" $victoriaLogsPort | quote }}
+            - {{ $logsURL | quote }}
 
 vmalert:
   name: victoria-metrics-alert
@@ -62,9 +71,9 @@ vmalert:
     datasource:
       url: {{ printf "http://vmauth-%s:%d/" $datasourceProxyName $datasourceProxyPort }}
     remoteRead:
-      url: {{ printf "%s/select/prometheus" $stackVmauthURL }}
+      url: {{ printf "%s/select/prometheus" $metricsVMAuthURL }}
     remoteWrite:
-      url: {{ printf "%s/insert/prometheus" $stackVmauthURL }}
+      url: {{ printf "%s/insert/prometheus" $metricsVMAuthURL }}
     evaluationInterval: 30s
     logLevel: {{ requiredEnv "VICTORIA_METRICS_LOG_LEVEL" }}
     port: "8080"

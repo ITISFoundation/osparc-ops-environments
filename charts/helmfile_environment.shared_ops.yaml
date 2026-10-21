@@ -8,10 +8,13 @@
 sharedOps:
   victoriaLogs:
     httpPort: 9428
+    namespace: victoria-logs-single
+    serviceName: victoria-logs-single-server
   victoriaTraces:
     httpPort: 10428
   victoriaMetrics:
     vmAuthHttpPort: 8427
+    vmauthServiceName: vmauth-vm-k8s-stack
     namespace: victoria-metrics-k8s-stack
   traefik:
     namespace: traefik

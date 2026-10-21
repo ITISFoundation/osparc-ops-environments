@@ -2,7 +2,7 @@
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: vmalert-network-policy
+  name: vmalert
   namespace: {{ .Release.Namespace }}
 spec:
   selector: >-
@@ -32,7 +32,7 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        namespaceSelector: 'kubernetes.io/metadata.name == "alerting"'
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Release.Namespace }}"'
         selector: >-
           app.simcore.io/name == "vmauth-vmalert-datasource-proxy"
           && app.simcore.io/part-of == "victoria-metrics-alert"

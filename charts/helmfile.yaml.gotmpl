@@ -168,12 +168,12 @@ releases:
         args: ["delete", "-f", "./victoria-metrics-k8s-stack/namespace.yaml"]
 
   - name: victoria-metrics-alert
-    namespace: alerting
+    namespace: victoria-metrics-alert
     chart: ./victoria-metrics-alert
     needs:
       - victoria-metrics-operator/victoria-metrics-operator
-      - victoria-metrics-k8s-stack/victoria-metrics-k8s-stack
-      - victoria-logs-single/victoria-logs-single
+      - victoria-metrics-k8s-stack/victoria-metrics-k8s-stack # for alerts based on metrics
+      - victoria-logs-single/victoria-logs-single # for alerts based on logsql expressions
     values:
       - ./victoria-metrics-alert/values.common.yaml.gotmpl
     hooks:
@@ -190,7 +190,7 @@ releases:
 
   - name: victoria-logs-single
     chart: ./victoria-logs-single
-    namespace: victoria-logs-single
+    namespace: {{ .Values.sharedOps.victoriaLogs.namespace }}
     needs:
       - victoria-metrics-operator/victoria-metrics-operator
     values:

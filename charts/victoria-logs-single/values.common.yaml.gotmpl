@@ -182,7 +182,7 @@ victoria-logs-single:
 
     # take over the control of naming so we can reuse it in our templates
     # robustly (e.g. in datasource url)
-    fullnameOverride: {{ .Release.Name }}-server
+    fullnameOverride: {{ .Values.sharedOps.victoriaLogs.serviceName | quote }}
 
     # https://docs.victoriametrics.com/victorialogs/#retention
     retentionPeriod: 30d
