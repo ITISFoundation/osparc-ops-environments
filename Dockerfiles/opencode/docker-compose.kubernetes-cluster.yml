@@ -1,0 +1,17 @@
+services:
+  opencode:
+    networks:
+      - kind
+    environment:
+      KUBECONFIG: /kube/config
+    volumes:
+      - type: bind
+        source: ./kind-kubeconfig.yaml
+        target: /kube/config
+        read_only: true
+        bind:
+          create_host_path: false
+
+networks:
+  kind:
+    external: true
