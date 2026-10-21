@@ -26,9 +26,9 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.metricsNamespace }}"'
         ports:
-          - {{ .Values.vmK8sStackVMAuthPort }} # k8s-stack vmauth for remote read/write
+          - {{ .Values.metricsVMAuthPort }} # k8s-stack vmauth for remote read/write
     - action: Allow
       protocol: TCP
       destination:

@@ -26,10 +26,10 @@ spec:
     - action: Allow
       protocol: TCP
       source:
-        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.metricsNamespace }}"'
         selector: >-
           app.simcore.io/name == "vmagent"
-          && app.simcore.io/part-of == "{{ .Values.victoriaMetricsK8sStackNamespace }}"
+          && app.simcore.io/part-of == "{{ .Values.metricsNamespace }}"
       destination:
         ports:
           - {{ .Values.vmauth.spec.port }} # vmagent -> alerting vmauth datasource proxy
@@ -38,15 +38,15 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.metricsNamespace }}"'
         ports:
-          - {{ .Values.vmK8sStackVMAuthPort }} # k8s-stack vmauth
+          - {{ .Values.metricsVMAuthPort }} # k8s-stack vmauth
     - action: Allow
       protocol: TCP
       destination:
         namespaceSelector: 'kubernetes.io/metadata.name == "victoria-logs-single"'
         ports:
-          - {{ .Values.victoriaLogsPort }} # VictoriaLogs HTTP service
+          - {{ .Values.logsPort }} # VictoriaLogs HTTP service
     - action: Allow
       protocol: TCP
       destination:

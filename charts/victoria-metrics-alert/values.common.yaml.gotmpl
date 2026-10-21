@@ -13,10 +13,10 @@
 {{- $metricsVMAuthURL := printf "http://%s.%s.svc.cluster.local.:%d/%s" $metricsService $metricsNamespace $metricsVMAuthPort "metrics" }}
 {{- $logsURL := printf "http://%s.%s.svc.cluster.local.:%d/logs/" $logsService $logsNamespace $logsPort }}
 
-vmK8sStackVMAuthPort: {{ $metricsVMAuthPort }}
-victoriaLogsPort: {{ $logsPort }}
+metricsVMAuthPort: {{ $metricsVMAuthPort }}
+logsPort: {{ $logsPort }}
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
-victoriaMetricsK8sStackNamespace: {{ $metricsNamespace | quote }}
+metricsNamespace: {{ $metricsNamespace | quote }}
 
 configReloaderPort: 8435 # hardcoded in victoria metrics operator
 
