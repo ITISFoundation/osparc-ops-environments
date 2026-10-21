@@ -2,15 +2,11 @@
 {{- $datasourceProxyName := "vmalert-datasource-proxy" }}
 {{- $datasourceProxyPort := 8427 }} # vmauth HTTP service
 
-{{- $stackVmauthPort := .Values.sharedOps.victoriaMetrics.vmAuthHttpPort }}
-
 {{- $victoriaLogsPort := .Values.sharedOps.victoriaLogs.httpPort }}
 
-
+{{- $stackVmauthPort := .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
 {{- $stackNamespace := .Values.sharedOps.victoriaMetrics.namespace }}
-
-{{- $stackVmauthURL := printf "http://vmauth-vm-k8s-stack.%s.svc.cluster.local.:%s/%s" $stackNamespace $stackVmauthPort "metrics" }}
-
+{{- $stackVmauthURL := printf "http://vmauth-vm-k8s-stack.%s.svc.cluster.local.:%d/%s" $stackNamespace $stackVmauthPort "metrics" }}
 
 vmK8sStackVMAuthPort: {{ $stackVmauthPort }}
 victoriaLogsPort: {{ $victoriaLogsPort }}
@@ -53,12 +49,12 @@ vmauth:
         - src_paths:
             - "/api/v1/query.*"
           url_prefix:
-            - {{ printf "%s/metrics/select/prometheus/" $stackVmauthURL | quote }}
+            - {{ printf "%s/select/prometheus/" $stackVmauthURL | quote }}
         # VictoriaLogs query APIs are routed to its server, preserving its /logs prefix.
         - src_paths:
             - "/select/logsql/.*"
           url_prefix:
-            - {{ printf "http://%s.victoria-logs-single.svc.cluster.local.:%s/logs/" "victoria-logs-single-server" $victoriaLogsPort | quote }}
+            - {{ printf "http://%s.victoria-logs-single.svc.cluster.local.:%d/logs/" "victoria-logs-single-server" $victoriaLogsPort | quote }}
 
 vmalert:
   name: victoria-metrics-alert

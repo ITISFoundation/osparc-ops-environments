@@ -39,18 +39,12 @@ spec:
       protocol: TCP
       destination:
         namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.victoriaMetricsK8sStackNamespace }}"'
-        selector: >-
-          app.simcore.io/name == "vmauth"
-          && app.simcore.io/part-of == "{{ .Values.victoriaMetricsK8sStackNamespace }}"
         ports:
           - {{ .Values.vmK8sStackVMAuthPort }} # k8s-stack vmauth
     - action: Allow
       protocol: TCP
       destination:
         namespaceSelector: 'kubernetes.io/metadata.name == "victoria-logs-single"'
-        selector: >-
-          app.simcore.io/name == "victoria-logs-single"
-          && app.simcore.io/part-of == "victoria-logs-single"
         ports:
           - {{ .Values.victoriaLogsPort }} # VictoriaLogs HTTP service
     - action: Allow
