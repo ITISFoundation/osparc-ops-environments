@@ -15,4 +15,4 @@ sharedOps:
   traefik:
     namespace: traefik
     basicAuthMiddlewareName: basic-auth
-    basicAuthMiddlewareRef: traefik-basic-auth@kubernetescrd
+    basicAuthMiddlewareRef: traefik_basic-auth@kubernetescrd
