@@ -9,11 +9,9 @@ ENV KUBECTL_VERSION=v1.30.0 \
 
 # git is necessary for `helm plugin install` (used by helmfile init)
 # git is also useful for opencode
-# make is necessary to execute helmfile commands (e.g. make helmfile-diff)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl \
         git \
-        make \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSLo /usr/local/bin/kubectl \
