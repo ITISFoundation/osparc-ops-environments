@@ -61,7 +61,7 @@ headlamp:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: >-
         {{ $basicAuthMiddleware }},
-        {{ .Release.Namespace }}-{{ $redirectMiddlewareName }}@kubernetescrd
+        {{ .Release.Namespace }}_{{ $redirectMiddlewareName }}@kubernetescrd
     hosts:
       - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
         paths:

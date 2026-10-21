@@ -24,7 +24,7 @@ spec:
         ports:
           - {{ .Values.kubernetesApiServerPort }}
     # EC2 instance metadata service (IMDS)
-    # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/install.md#metadata
+    # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.64.0/docs/install.md#metadata
     - action: Allow
       protocol: TCP
       destination:

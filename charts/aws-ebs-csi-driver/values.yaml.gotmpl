@@ -4,7 +4,7 @@ awsCredentials:
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 
-# https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/charts/aws-ebs-csi-driver/values.yaml
+# https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.64.0/charts/aws-ebs-csi-driver/values.yaml
 aws-ebs-csi-driver:
 
   awsAccessSecret:
@@ -15,7 +15,7 @@ aws-ebs-csi-driver:
   storageClasses:
     - name: "{{ requiredEnv "KUBERNETES_DEFAULT_STORAGE_CLASS_NAME" }}"
 
-      # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/parameters.md#volume-availability-zone-and-topologies
+      # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.64.0/docs/parameters.md#volume-availability-zone-and-topologies
       volumeBindingMode: WaitForFirstConsumer
       parameters:
           type: "gp3"
@@ -45,7 +45,7 @@ aws-ebs-csi-driver:
 
       # Use VolumeAttributeClass to modify volumes instead.
       # It requires `VolumeAttributesClass` feature gate
-      # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.60.0/docs/modify-volume.md
+      # See https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/helm-chart-aws-ebs-csi-driver-2.64.0/docs/modify-volume.md
       volumeModificationFeature:
           enabled: false
       resources:
