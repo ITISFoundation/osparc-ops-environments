@@ -1,0 +1,18 @@
+# internal chart-settings that are configured by chart and re-used across multiple charts
+
+# for example, traefik namespace is a good candidate (configured in traefik release and
+# reused in other charts to refer to middlewares defined in traefik release) while
+# kubernetes api server port does not belong here as it is configured on cluster level (not
+# in a particular chart)
+
+sharedOps:
+  victoriaLogs:
+    httpPort: 9428
+  victoriaTraces:
+    httpPort: 10428
+  victoriaMetrics:
+    vmAuthHttpPort: 8427
+  traefik:
+    namespace: traefik
+    basicAuthMiddlewareName: basic-auth
+    basicAuthMiddlewareRef: traefik-basic-auth@kubernetescrd
