@@ -20,12 +20,7 @@ kind-kubeconfig.yaml: create-k8s-cluster
 # Targets
 #
 
-opencode: guard-optional-CMD ## Run opencode in container
+opencode: kind-kubeconfig.yaml guard-optional-CMD
+opencode: ## Run opencode in container
 	USER_UID=$(USER_UID) USER_GID=$(USER_GID) \
 	docker compose run --build --rm opencode $(CMD)
-
-opencode-with-kubernetes-cluster: kind-kubeconfig.yaml guard-optional-CMD
-opencode-with-kubernetes-cluster: ## Run opencode in container connected with Kubernetes cluster
-	USER_UID=$(USER_UID) USER_GID=$(USER_GID) \
-	docker compose -f docker-compose.yml -f docker-compose.kubernetes-cluster.yml \
-		run --build --rm opencode $(CMD)

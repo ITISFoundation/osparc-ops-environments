@@ -10,6 +10,7 @@ internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
 ingressHttpPathPrefix: {{ $ingressHttpPathPrefix | quote }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+alertingLogsPerStreamThreshold: {{ requiredEnv "ALERTING_LOGS_PER_STREAM_THRESHOLD" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
 vmSinglePort: {{ $vmSinglePort }} # easy to use in templates (instead of values extracting)
 
@@ -182,7 +183,7 @@ victoria-logs-single:
 
     # take over the control of naming so we can reuse it in our templates
     # robustly (e.g. in datasource url)
-    fullnameOverride: {{ .Release.Name }}-server
+    fullnameOverride: {{ .Values.sharedOps.victoriaLogs.serviceName | quote }}
 
     # https://docs.victoriametrics.com/victorialogs/#retention
     retentionPeriod: 30d

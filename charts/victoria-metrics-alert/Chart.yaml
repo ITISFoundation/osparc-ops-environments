@@ -1,0 +1,9 @@
+apiVersion: v2
+name: victoria-metrics-alert
+description: Operator-managed VMAlert resource with cluster security policies.
+
+type: application
+
+version: 0.0.1 # unused
+
+appVersion: 0.0.1 # unused

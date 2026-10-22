@@ -169,9 +169,6 @@ vm-k8s-stack:
         logLevel: {{ $logLevel }}
         # enforce restricted PodSecurity on operator-managed containers
         useStrictSecurity: true
-        extraArgs:
-          # Expose alerts in VMUI https://docs.victoriametrics.com/victoriametrics/vmalert/#vmui
-          vmalert.proxyURL: "http://vmalert-vm-k8s-stack:8080{{ $alertsPathPrefix }}"
         podMetadata:
           labels: # labels used by the network policies (templates/networkpolicies)
             app.simcore.io/name: vmselect
@@ -311,54 +308,10 @@ vm-k8s-stack:
     enabled: true
 
   #
-  # vmalert (alert rules and states)
-  #
-  vmalert:
-    enabled: true
-    spec:
-      port: "8080"
-      logLevel: {{ $logLevel }}
-      selectAllByDefault: true
-      evaluationInterval: 30s
-      useStrictSecurity: true
-      extraArgs:
-        notifier.blackhole: "true" # no notifications
-        http.pathPrefix: {{ $alertsPathPrefix | quote }}
-      podMetadata:
-        labels:
-          app.simcore.io/name: vmalert
-          app.simcore.io/part-of: {{ .Release.Name }}
-      nodeSelector:
-        node-role.kubernetes.io/ops: ""
-      resources:
-        requests:
-          cpu: 50m
-          memory: 128Mi
-        limits:
-          cpu: 0.5
-          memory: 512Mi
-      configReloaderResources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-    ingress: # a separate independent ingress (to access API)
-      enabled: true
-      ingressClassName: traefik
-      hosts:
-        - {{ requiredEnv "K8S_MONITORING_FQDN" }}
-      path: {{ $alertsPathPrefix }}
-      pathType: Prefix
-      annotations:
-        traefik.ingress.kubernetes.io/router.tls: "true"
-        traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: {{ $basicAuthMiddleware }}
-
-  #
   # Rest of k8s stack's components (not used atm)
   #
+  vmalert:
+    enabled: false # deployed as a separate chart
   vmsingle:
     enabled: false
   victoria-metrics-operator:

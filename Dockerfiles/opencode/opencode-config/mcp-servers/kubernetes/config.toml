@@ -1,0 +1,9 @@
+# Read-only MCP access to the cluster configured in the mounted kubeconfig.
+read_only = true
+toolsets = ["core"]
+
+# Do not expose Kubernetes Secret objects to the MCP tools.
+[[denied_resources]]
+group = ""
+version = "v1"
+kind = "Secret"
