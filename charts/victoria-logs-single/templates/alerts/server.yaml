@@ -14,8 +14,7 @@ spec:
       rules:
         - alert: VictoriaLogsStreamTooManyLogs
           expr: '_time:1h | stats by (_stream) count() as logs | filter logs:>10000'
-          interval: 5m
-          for: 10m
+          for: 15m
           labels:
             severity: warning
           annotations:
