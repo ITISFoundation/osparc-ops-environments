@@ -10,6 +10,7 @@ internalIngressHost: {{ requiredEnv "K8S_MONITORING_PRIVATE_FQDN" }}
 ingressHttpPathPrefix: {{ $ingressHttpPathPrefix | quote }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
+alertingLogsPerStreamThreshold: {{ requiredEnv "ALERTING_LOGS_PER_STREAM_THRESHOLD" }}
 vectorMetricsPort: {{ $vectorMetricsPort }} # easy to use in templates (instead of values extracting)
 vmSinglePort: {{ $vmSinglePort }} # easy to use in templates (instead of values extracting)
 
