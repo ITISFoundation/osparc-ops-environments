@@ -10,7 +10,7 @@
 HELMFILE_EXPECTED_VERSION := 1.1.6
 
 # NOTE: keep in sync with version used in github workflows (actions)
-TRIVY_EXPECTED_VERSION := 0.73.0
+TRIVY_EXPECTED_VERSION := 0.74.0
 
 #
 # Helpers
@@ -65,7 +65,7 @@ install-helmfile: guard-HELMFILE_EXPECTED_VERSION
 .PHONY: install-trivy
 install-trivy: guard-TRIVY_EXPECTED_VERSION
 	# installing trivy ...
-	@curl --silent --show-error --location \
+	curl --silent --show-error --location \
 		https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
 		| sudo sh -s -- -b /usr/local/bin v$(TRIVY_EXPECTED_VERSION)
 	@trivy --version
