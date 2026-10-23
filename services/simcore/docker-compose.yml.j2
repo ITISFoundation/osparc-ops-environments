@@ -304,10 +304,7 @@ services:
       - default
       - monitored
     deploy:
-      # NOTE: https://github.com/ITISFoundation/osparc-simcore/pull/4286
-      # NOTE: this MUSTN'T change, or weird things might happen
-      # this will stay until all legacy dynamic services are gone.
-      replicas: 1
+      replicas: 2
       update_config:
         parallelism: 2
         order: start-first

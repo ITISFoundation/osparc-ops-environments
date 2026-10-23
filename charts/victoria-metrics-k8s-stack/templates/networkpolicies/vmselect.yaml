@@ -21,6 +21,8 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
+        selector: >-
+          app.simcore.io/name == "vmstorage"
+          && app.simcore.io/part-of == "{{ .Release.Name }}"
         ports:
           - {{ $stack.vmcluster.spec.vmstorage.vmSelectPort }}
-          - {{ $stack.vmalert.spec.port }}

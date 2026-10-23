@@ -53,7 +53,7 @@ services:
     extra_hosts: []
     deploy:
       labels:
-        - traefik.enable=true
+        - traefik.enable=false # use kubernetes app instead
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheuscatchall.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
@@ -100,7 +100,7 @@ services:
     extra_hosts: []
     deploy:
       labels:
-        - traefik.enable=true
+        - traefik.enable=false # use kubernetes app instead
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.prometheusfederation.loadbalancer.server.port=${MONITORING_PROMETHEUS_PORT}
@@ -240,7 +240,10 @@ services:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
+        # only API is exposed to let CI configure grafana
+        # and e2e test grafana state to pass successfully
+        # Grafana UI is not exposed. Use kubernetes grafana instead
+        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana/api`)
         - traefik.http.routers.grafana.entrypoints=https
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
@@ -384,6 +387,36 @@ services:
         reservations:
           memory: 32M
           cpus: "0.1"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:${TRACING_OPENTELEMETRY_COLLECTOR_IMAGE_VERSION}
+    configs:
+      - source: opentelemetry-collector-config
+        target: /etc/otel/config.yaml
+    hostname: "{% raw %}{{.Node.Hostname}}-{{.Task.Slot}}{% endraw %}"
+    command:
+      - "--config=/etc/otel/config.yaml"
+    deploy:
+      labels:
+        - prometheus-job=otel-collector
+        - prometheus-port=8888
+      placement:
+        constraints:
+          - node.labels.ops==true
+    ports:
+      - "4318:4318"  # OTLP HTTP receiver
+    networks:
+      - public
+      - monitored
+      - interactive_services_subnet
+    environment:
+      TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE: ${TRACING_OPENTELEMETRY_COLLECTOR_BATCH_SIZE}
+      TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL: ${TRACING_OPENTELEMETRY_COLLECTOR_SERVICE_TELEMETRY_LOG_LEVEL}
+    {% if TRACING_SEND_SWARM_TRACES_TO_KUBERNETES_ENABLED == "true" %}
+      K8S_MONITORING_PRIVATE_ENDPOINT: ${K8S_MONITORING_PRIVATE_ENDPOINT}
+      SERVICES_USER: ${SERVICES_USER}
+      SERVICES_PASSWORD: ${SERVICES_PASSWORD}
+    {% endif %}
   tempo:
     image: grafana/tempo:2.10.0
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"
@@ -397,7 +430,7 @@ services:
       labels:
         - prometheus-job=tempo
         - prometheus-port=3200
-        - traefik.enable=true
+        - traefik.enable=false # use kubernetes app instead
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.tempo.loadbalancer.server.port=9095
         - traefik.http.routers.tempo.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/tempo`)
@@ -434,6 +467,9 @@ configs:
   smokeping_prober_config:
     name: ${STACK_NAME}_smokeping_prober_config_{{ "./smokeping_prober_config.yaml" | sha256file | substring(0,10) }}
     file: ./smokeping_prober_config.yaml
+  opentelemetry-collector-config:
+    name: ${STACK_NAME}_opentelemetry-collector-config_{{ "./opentelemetry-collector-config.yaml" | sha256file | substring(0,10) }}
+    file: ./opentelemetry-collector-config.yaml
 
 volumes:
   prometheus_data: {}
@@ -448,3 +484,6 @@ networks:
   public:
     external: true
     name: ${PUBLIC_NETWORK}
+  interactive_services_subnet:
+    name: ${SWARM_STACK_NAME}_interactive_services_subnet
+    external: true

@@ -1,15 +1,12 @@
-# https://github.com/traefik/traefik-helm-chart/blob/v41.0.2/traefik/values.yaml
+# https://github.com/traefik/traefik-helm-chart/blob/v41.3.0/traefik/values.yaml
 {{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") }}
 {{- $ipAllowListMiddlewareName := "internal-ipallowlist" }}
-
-metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
-metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
 
 middlewares:
   ipAllowList:
     name: {{ $ipAllowListMiddlewareName }}
   basicAuth:
-    name: {{ requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME" }}
+    name: {{ .Values.sharedOps.traefik.basicAuthMiddlewareName }}
     username: {{ requiredEnv "SERVICES_USER" }}
     password: {{ requiredEnv "SERVICES_PASSWORD" }}
 
@@ -110,7 +107,7 @@ traefik:
         tls:
           enabled: {{ requiredEnv "TRAEFIK_WEBINTERNAL_ENTRYPOINT_TLS_ENABLED" }}
         middlewares:
-          - {{ .Release.Namespace }}-{{ $ipAllowListMiddlewareName }}@kubernetescrd
+          - {{ .Release.Namespace }}_{{ $ipAllowListMiddlewareName }}@kubernetescrd
     traefik:
       port: 8080
       expose:
@@ -130,6 +127,10 @@ traefik:
 
   nodeSelector:
     node-role.kubernetes.io/control-plane: "" # in some cases may require tolerations
+
+  providers:
+    kubernetesCRD:
+      safeNaming: true
 
   tlsStore:
     default:

@@ -1,0 +1,23 @@
+services:
+  opencode:
+    build:
+      context: .
+      args:
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    networks:
+      - kind
+    volumes:
+      - ../..:/workspace
+      - osparc-ops-opencode-data:/home/opencode/.local/share/opencode # sessions, auth
+      - ./opencode-config:/home/opencode/.config/opencode # config, prompts, skills
+      - ./kind-kubeconfig.yaml:/home/opencode/.kube/config:ro
+    stdin_open: true
+    tty: true
+
+networks:
+  kind:
+    external: true
+
+volumes:
+  osparc-ops-opencode-data:

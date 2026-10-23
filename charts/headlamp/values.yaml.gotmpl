@@ -1,7 +1,7 @@
 # https://github.com/kubernetes-sigs/headlamp/blob/v0.45.0/charts/headlamp/values.yaml
 
 {{- $pathPrefix := "headlamp" }}
-{{- $basicAuthMiddleware := printf "%s-%s@kubernetescrd" (requiredEnv "TRAEFIK_NAMESPACE") (requiredEnv "TRAEFIK_BASIC_AUTH_MIDDLEWARE_NAME") }}
+{{- $basicAuthMiddleware := .Values.sharedOps.traefik.basicAuthMiddlewareRef }}
 {{- $redirectMiddlewareName := "add-trailing-slash" }}
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
@@ -61,7 +61,7 @@ headlamp:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: >-
         {{ $basicAuthMiddleware }},
-        {{ .Release.Namespace }}-{{ $redirectMiddlewareName }}@kubernetescrd
+        {{ .Release.Namespace }}_{{ $redirectMiddlewareName }}@kubernetescrd
     hosts:
       - host: {{ requiredEnv "K8S_MONITORING_FQDN" }}
         paths:

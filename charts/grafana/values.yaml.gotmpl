@@ -3,8 +3,8 @@
 {{- $grafanaBasicAuthSecretName := "grafana-basic-auth" }}
 {{- $grafanaPathPrefix := "grafana" }}
 
-metricsDatasourceUid: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_ID" }}
-metricsDatasourceType: {{ requiredEnv "VICTORIA_METRICS_DATASOURCE_TYPE" }}
+aws:
+  enabled: false
 
 grafana:
   networkPolicy:
@@ -14,11 +14,11 @@ grafana:
     egress:
       enabled: true
       ports:
-        - port: {{ requiredEnv "VICTORIA_METRICS_VMAUTH_PORT" | int }}
+        - port: {{ .Values.sharedOps.victoriaMetrics.vmAuthHttpPort | int }}
         - port: 443 # install plugins from outside
         - port: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" | int }}
-        - port: {{ requiredEnv "VICTORIA_LOGS_HTTP_PORT" | int }}
-        - port: {{ requiredEnv "VICTORIA_TRACES_HTTP_PORT" | int }}
+        - port: {{ .Values.sharedOps.victoriaLogs.httpPort | int }}
+        - port: {{ .Values.sharedOps.victoriaTraces.httpPort | int }}
 
   persistence:
     enabled: true
