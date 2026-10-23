@@ -122,10 +122,9 @@ services:
     volumes:
       - s4l-chatbot-chat-data:/app/chat_database:rw
     deploy:
-      # this service cannot be run in multiple replicas
-      # as it contains sqlite database inside itself
-      # running multiple leads to running multiple independent
-      # databases which provides inconsistent results
+      # The SQLite database is stored on a shared volume and cannot be
+      # accessed by multiple containers simultaneously.
+      # Keep one replica and stop the existing task before starting its replacement.
       replicas: 1
       placement:
         constraints:
