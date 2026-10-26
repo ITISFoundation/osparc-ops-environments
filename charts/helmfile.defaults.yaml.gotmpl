@@ -1,0 +1,46 @@
+environments:
+  default:
+    values:
+      - helmfile_environment.shared_ops.yaml
+      - helmfile_environment.deployment.yaml
+
+---
+
+helmDefaults:
+  # wait for all resources to be ready before marking the release as successful
+  # this makes sure that releases are properly installed before continuing with
+  # dependent (via `needs`) releases. Read more via `helm install --help`
+  wait: true
+  waitForJobs: true
+  timeout: 600
+
+  # avoid errors on first installation
+  # passes --disable-validation to helm 3 diff plugin
+  disableValidation: true
+
+repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: victoria-metrics
+    url: https://victoriametrics.github.io/helm-charts
+  - name: opentelemetry
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
+  - name: cert-manager
+    url: https://charts.jetstack.io
+  - name: headlamp
+    url: https://kubernetes-sigs.github.io/headlamp/
+{{- if (.Values | get "aws_ebs_csi_driver.enabled" false) }}
+  - name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+{{- end }}
+{{- if (.Values | get "topolvm.enabled" false) }}
+  - name: topolvm
+    url: https://topolvm.github.io/topolvm
+{{- end }}
+
+{{- if and (.Values | get "aws_ebs_csi_driver.enabled" false) (.Values | get "topolvm.enabled" false) }}
+# allow having both in CI where we only generate templates to do static analysis
+{{- if not (.Values | get "isCi" false) }}
+{{ fail "Enable only one: aws_ebs_csi_driver, topolvm: each defines a default storage class" }}
+{{- end }}
+{{- end }}
