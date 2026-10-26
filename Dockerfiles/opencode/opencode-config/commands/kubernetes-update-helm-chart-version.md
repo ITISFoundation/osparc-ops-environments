@@ -32,6 +32,5 @@ Input: $ARGUMENTS
 | List new version changes | |
 | Security check | |
 | Files changed | |
-| Compatibility edits | |
 | Validation | |
 | Unavailable checks | |
