@@ -1,23 +1,3 @@
-environments:
-  default:
-    values:
-      - helmfile_environment.shared_ops.yaml
-      - helmfile_environment.deployment.yaml
-
----
-
-helmDefaults:
-  # wait for all resources to be ready before marking the release as successful
-  # this makes sure that releases are properly installed before continuing with
-  # dependent (via `needs`) releases. Read more via `helm install --help`
-  wait: true
-  waitForJobs: true
-  timeout: 600
-
-  # avoid errors on first installation
-  # passes --disable-validation to helm 3 diff plugin
-  disableValidation: true
-
 repositories:
   - name: traefik
     url: https://traefik.github.io/charts
@@ -47,15 +27,6 @@ repositories:
 {{- end }}
 
 releases:
-  - name: security-hardening
-    namespace: kube-system
-    chart: ./security-hardening
-    createNamespace: false
-    values:
-      - ./security-hardening/values.yaml.gotmpl
-      {{- range (.Values | get "security_hardening.extra_values_files" list) }}
-      - {{ . }}
-      {{- end }}
 
   - name: traefik
     namespace: {{ .Values.sharedOps.traefik.namespace }}

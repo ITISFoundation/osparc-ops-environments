@@ -36,12 +36,9 @@ TRIVY_TEMPLATES_DIR ?= /tmp/rendered-helm-templates
 #
 
 .PHONY: .helmfile-%
-.helmfile-%: .verify-helmfile-installation \
-			 helmfile.yaml.gotmpl \
-			 helmfile_environment.deployment.yaml \
-			 helmfile_environment.shared_ops.yaml
+.helmfile-%: .verify-helmfile-installation
 	set -a; source $(REPO_CONFIG_LOCATION); set +a; \
-	$(HELMFILE) --file helmfile.yaml.gotmpl $* --environment default
+	$(HELMFILE) --environment default $*
 
 .PHONY: .confirm-action
 .confirm-action:
