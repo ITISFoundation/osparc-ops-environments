@@ -30,7 +30,7 @@ Input: $ARGUMENTS
 | --- | --- |
 | Chart | |
 | Old → New | |
-| Upstream compromised? | |
+| Security check | |
 | Sources | |
 | Files inspected | |
 | Files changed | |
