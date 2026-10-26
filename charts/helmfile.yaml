@@ -1,3 +1,28 @@
+environments:
+  default:
+    values: &environment_values
+      - ./helmfile_environment.deployment.yaml
+      - ./helmfile_environment.shared_ops.yaml
+
+---
+
+helmDefaults:
+  # wait for all resources to be ready before marking the release as successful
+  # this makes sure that releases are properly installed before continuing with
+  # dependent (via `needs`) releases. Read more via `helm install --help`
+  wait: true
+  waitForJobs: true
+  timeout: 600
+
+  # avoid errors on first installation
+  # passes --disable-validation to helm 3 diff plugin
+  disableValidation: true
+
 helmfiles:
-  - ./00-cluster.helmfile.yaml.gotmpl
-  - ./01-ops.helmfile.yaml.gotmpl
+  - path: ./00-cluster.helmfile.yaml.gotmpl
+    values:
+      - *environment_values
+  - path: ./01-ops.helmfile.yaml.gotmpl
+    values:
+      - ./helmfile_environment.deployment.yaml
+      - ./helmfile_environment.shared_ops.yaml
