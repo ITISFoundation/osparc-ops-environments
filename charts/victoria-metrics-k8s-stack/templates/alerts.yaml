@@ -82,3 +82,31 @@ spec:
               Check vmagent additionalRemoteWrites and network policies.
             summary: >-
               vmsingle-federated is not receiving metrics
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: docker-swarm-metrics-delivery-alerts
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  groups:
+    - name: docker-swarm-metrics-delivery
+      interval: 5m
+      rules:
+        - alert: DockerSwarmPrometheusRemoteWriteStalled
+          expr: |
+            absent(prometheus_remote_storage_samples_total{cluster="docker_swarm"})
+            or
+            sum(rate(prometheus_remote_storage_samples_total{cluster="docker_swarm"}[5m])) == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Docker Swarm Prometheus is not sending metrics to remote storage.
+            description: >-
+              No successfully sent remote-write samples. Most likely Docker Swarm Metrics
+              are missing in Kubernetes Cluster.
