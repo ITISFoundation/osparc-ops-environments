@@ -88,6 +88,9 @@ spec:
               Vector sink {{`{{ $labels.component_id }}`}} ({{`{{ $labels.component_type }}`}})
               is not sending events
         - alert: VectorDockerSwarmContainerLogsNotSentToKubernetes
+          # metrics is absent if no syslogs have been ever sent to Kubernetes
+          # because in this case vector does not initalize metrics. `or vector(0)`
+          # ensures the alert triggers in this case as well
           expr: |
             (
               sum(rate(vector_component_sent_events_total{component_id="docker-logs-to-kubernetes-victoria-logs"}[5m]))
