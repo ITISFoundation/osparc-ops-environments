@@ -87,3 +87,27 @@ spec:
             summary: >-
               Vector sink {{`{{ $labels.component_id }}`}} ({{`{{ $labels.component_type }}`}})
               is not sending events
+        - alert: VectorDockerSwarmContainerLogsNotSentToKubernetes
+          # Vector does not initialize this counter until the first event is sent.
+          # `absent()` also fires the alert when the counter series does not exist.
+          expr: |
+            sum(rate(vector_component_sent_events_total{component_id="docker-logs-to-kubernetes-victoria-logs"}[5m])) == 0
+            or
+            absent(vector_component_sent_events_total{component_id="docker-logs-to-kubernetes-victoria-logs"})
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: No Docker Swarm container logs have been sent to Kubernetes
+        - alert: VectorDockerSwarmSyslogsNotSentToKubernetes
+          # Vector does not initialize this counter until the first event is sent.
+          # `absent()` also fires the alert when the counter series does not exist.
+          expr: |
+            sum(rate(vector_component_sent_events_total{component_id="syslogs-to-kubernetes-victoria-logs"}[5m])) == 0
+            or
+            absent(vector_component_sent_events_total{component_id="syslogs-to-kubernetes-victoria-logs"})
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: No Docker Swarm syslogs have been sent to Kubernetes
