@@ -1,4 +1,4 @@
-# https://github.com/traefik/traefik-helm-chart/blob/v41.3.0/traefik/values.yaml
+# https://github.com/traefik/traefik-helm-chart/blob/v41.6.0/traefik/values.yaml
 {{- $certSecretName := printf "%s-tls" (requiredEnv "MACHINE_FQDN" | replace "." "-") }}
 {{- $ipAllowListMiddlewareName := "internal-ipallowlist" }}
 
