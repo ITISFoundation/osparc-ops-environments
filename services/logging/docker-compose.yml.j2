@@ -8,7 +8,7 @@ services:
       # data persistency
       - mongo_data:/data/db
     deploy:
-      replicas: 0
+      replicas: 1
       restart_policy:
         condition: on-failure
       resources:
@@ -37,7 +37,7 @@ services:
       - network.host=0.0.0.0
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     deploy:
-      replicas: 0
+      replicas: 1
       restart_policy:
         condition: on-failure
       resources:
@@ -82,7 +82,7 @@ services:
         aliases:
           - graylog
     deploy:
-      replicas: 0
+      replicas: 1
       update_config:
         order: stop-first # never run two tasks against the same volume
         parallelism: 1
@@ -102,7 +102,9 @@ services:
         - traefik.swarm.network=${PUBLIC_NETWORK}
         # direct access through port
         - traefik.http.services.graylog.loadbalancer.server.port=9000
-        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog`)
+        # only API is exposed to let CI configure graylog
+        # Graylog UI is not exposed. Use kubernetes logging instead
+        - traefik.http.routers.graylog.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/graylog/api`)
         - traefik.http.routers.graylog.entrypoints=https
         - traefik.http.routers.graylog.tls=true
         - traefik.http.middlewares.graylog_replace_regex.replacepathregex.regex=^/graylog/?(.*)$$
@@ -163,7 +165,7 @@ services:
         - prometheus-port=3100
       placement:
         constraints: []
-      replicas: 0
+      replicas: 1
       restart_policy:
         condition: any
         delay: 5s
