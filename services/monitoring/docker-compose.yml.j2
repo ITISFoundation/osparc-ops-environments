@@ -189,6 +189,7 @@ services:
       - source: alertmanager_config
         target: /etc/alertmanager/config.yml
     deploy:
+      replicas: 0
       placement:
         constraints:
           - node.role==manager
@@ -231,6 +232,7 @@ services:
       - monitored # needed to access postgres
       - public
     deploy:
+      replicas: 0
       labels:
         # kubernetes grafana dashboard does not 100% support non-kubernetes environments
         # to avoid issues, we disable the prometheus job and port for swarm grafana
@@ -240,10 +242,7 @@ services:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        # only API is exposed to let CI configure grafana
-        # and e2e test grafana state to pass successfully
-        # Grafana UI is not exposed. Use kubernetes grafana instead
-        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana/api`)
+        - traefik.http.routers.grafana.rule=Host(`${MONITORING_DOMAIN}`) && PathPrefix(`/grafana`)
         - traefik.http.routers.grafana.entrypoints=https
         - traefik.http.routers.grafana.tls=true
         - traefik.http.middlewares.grafana_replace_regex.replacepathregex.regex=^/grafana/?(.*)$$
@@ -427,6 +426,7 @@ services:
       - monitored
       - public
     deploy:
+      replicas: 0
       labels:
         - prometheus-job=tempo
         - prometheus-port=3200

@@ -43,7 +43,7 @@ UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
 .PHONY: .up-dalco
 .up-dalco: ${TEMP_COMPOSE}-dalco ${UP_COMMON_DEPENDENCIES}
 	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	$(MAKE) configure-graylog
+	# $(MAKE) configure-graylog # logging moved to kubernetes
 
 .PHONY: .up-public
 .up-public: .up-dalco
@@ -51,18 +51,18 @@ UP_COMMON_DEPENDENCIES = prune-docker-stack-configs
 .PHONY: .up-aws
 .up-aws: ${TEMP_COMPOSE}-aws ${UP_COMMON_DEPENDENCIES}
 	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	$(MAKE) configure-graylog
+	# $(MAKE) configure-graylog # logging moved to kubernetes
 
 .PHONY: .up-master
 .up-master: ${TEMP_COMPOSE}-master ${UP_COMMON_DEPENDENCIES}
 	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	$(MAKE) configure-graylog
+	# $(MAKE) configure-graylog # logging moved to kubernetes
 
 .PHONY: .up-local
 .up-local: ${TEMP_COMPOSE}-local ${UP_COMMON_DEPENDENCIES}
 	@$(create-s3-bucket)
 	@docker stack deploy --detach=false --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local ${STACK_NAME}
-	$(MAKE) configure-graylog
+	# $(MAKE) configure-graylog # logging moved to kubernetes
 
 #
 # Artifacts
