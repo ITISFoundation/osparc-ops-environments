@@ -1,4 +1,4 @@
-# Ingests GELF logs from Docker daemon and forwards to Loki and Graylog (both over TCP)
+# Ingests GELF logs from Docker daemon and forwards to Kubernetes VictoriaLogs
 
 sources:
   syslog_udp:
@@ -90,60 +90,62 @@ transforms:
         }
       }
 
-  process_logs_loki:
-    type: "remap"
-    inputs: ["process_logs_base"]
-    source: |
-      # ensure level field is set for Grafana Loki
-      if exists(.log_level){
-        .level = .log_level
-      } else {
-        .level = "UNKNOWN"
-      }
+  # disabled: logging moved to Kubernetes VictoriaLogs
+  # process_logs_loki:
+  #   type: "remap"
+  #   inputs: ["process_logs_base"]
+  #   source: |
+  #     # ensure level field is set for Grafana Loki
+  #     if exists(.log_level){
+  #       .level = .log_level
+  #     } else {
+  #       .level = "UNKNOWN"
+  #     }
 
 sinks:
-  loki:
-    type: loki
-    inputs: ["process_logs_loki"]
-    endpoint: "http://{{STACK_NAME}}_loki:3100"
-    encoding:
-      codec: json
-    labels:
-      source: "vector"
-      {%- raw %}
-      host: "{{ host }}"
-      container_name: "{{ container_name }}"
-      service_name: "{{ service_name }}"
-      {%- endraw %}
-    healthcheck:
-      enabled: true
+  # disabled: logging moved to Kubernetes VictoriaLogs
+  # loki:
+  #   type: loki
+  #   inputs: ["process_logs_loki"]
+  #   endpoint: "http://{{STACK_NAME}}_loki:3100"
+  #   encoding:
+  #     codec: json
+  #   labels:
+  #     source: "vector"
+  #     {%- raw %}
+  #     host: "{{ host }}"
+  #     container_name: "{{ container_name }}"
+  #     service_name: "{{ service_name }}"
+  #     {%- endraw %}
+  #   healthcheck:
+  #     enabled: true
   prometheus_exporter: # https://vector.dev/docs/administration/monitoring/#metrics
     type: prometheus_exporter
     inputs:
       - vector_metrics
     address: "0.0.0.0:9598"
 
+  # disabled: logging moved to Kubernetes VictoriaLogs
   # Send to Graylog via GELF over TCP
-  graylog-logs: &graylog-sink-common
-    type: socket
-    inputs:
-      - process_logs_base
-    address: "{{STACK_NAME}}_graylog:12201"
-    mode: tcp
-    encoding:
-      codec: gelf
-    healthcheck:
-      enabled: true
+  # graylog-logs: &graylog-sink-common
+  #   type: socket
+  #   inputs:
+  #     - process_logs_base
+  #   address: "{{STACK_NAME}}_graylog:12201"
+  #   mode: tcp
+  #   encoding:
+  #     codec: gelf
+  #   healthcheck:
+  #     enabled: true
+  #
+  # graylog-syslogs:
+  #   <<: *graylog-sink-common
+  #   inputs:
+  #     - syslog_udp
+  #   address: "{{STACK_NAME}}_graylog:12202"
+  #   encoding:
+  #     codec: syslog
 
-  graylog-syslogs:
-    <<: *graylog-sink-common
-    inputs:
-      - syslog_udp
-    address: "{{STACK_NAME}}_graylog:12202"
-    encoding:
-      codec: syslog
-
-{%- if LOGGING_SEND_SWARM_LOGS_TO_KUBERNETES_ENABLED == "true" %}
   # https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/
   docker-logs-to-kubernetes-victoria-logs: &victoria-logs-sink-common
     inputs:
@@ -203,8 +205,6 @@ sinks:
         VL-Time-Field: timestamp
         VL-Extra-Fields: source_type=docker_swarm_syslogs
         VL-Ignore-Fields: _*,version
-
-{%- endif %}
 
   # Temporary: Output to console for debugging
   #console_debug:
