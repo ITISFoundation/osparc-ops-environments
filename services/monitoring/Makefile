@@ -25,27 +25,27 @@ endef
 .up-local: ${TEMP_COMPOSE}-local
 	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-dalco
 .up-dalco: ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-public
 .up-public: ${TEMP_COMPOSE}-public
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-aws
 .up-aws: ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-master
 .up-master: ${TEMP_COMPOSE}-master
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 #
 # Artifacts (docker compose files)
