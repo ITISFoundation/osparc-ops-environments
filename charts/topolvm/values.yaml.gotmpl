@@ -1,4 +1,4 @@
-# https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.1.0/charts/topolvm/values.yaml
+# https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.2.0/charts/topolvm/values.yaml
 
 kubernetesApiServerPort: {{ requiredEnv "KUBERNETES_API_SERVER_PORT" }}
 
@@ -71,7 +71,7 @@ topolvm:
     - name: "{{ requiredEnv "KUBERNETES_DEFAULT_STORAGE_CLASS_NAME" }}"
       storageClass:
         # Want to use non-default device class? See configuration example in
-        # https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.1.0/docs/snapshot-and-restore.md#set-up-a-storage-class
+        # https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.2.0/docs/snapshot-and-restore.md#set-up-a-storage-class
 
         fsType: xfs
         isDefaultClass: true
@@ -94,7 +94,7 @@ topolvm:
         # and Logical Volumes (CR logicalvolumes.topolvm.io).
         # Removal Logical Volume (CR) would clean up the LVM on the node,
         # but PV has still to be removed manually.
-        # Read more: https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.1.0/docs/advanced-setup.md#storageclass
+        # Read more: https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.2.0/docs/advanced-setup.md#storageclass
         reclaimPolicy: Retain
 
   # Resource limits are mandatory: the security-hardening ValidatingAdmissionPolicy
@@ -156,7 +156,7 @@ topolvm:
         cpu: 200m
         memory: 200Mi
 
-  # https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.1.0/docs/topolvm-scheduler.md
+  # https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.2.0/docs/topolvm-scheduler.md
   scheduler:
     # start simple. when enabled adjust affinity to avoid race conditions
     # and dead locks during updates
@@ -168,7 +168,7 @@ topolvm:
 
   snapshot:
     # It requires thin vg provisioning
-    # see https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.1.0/docs/snapshot-and-restore.md#prerequisites
+    # see https://github.com/topolvm/topolvm/blob/topolvm-chart-v17.2.0/docs/snapshot-and-restore.md#prerequisites
     # Currently, we use thick provisioning for simplicity (and robustness).
     # For backups we can use https://velero.io/docs/v1.18/file-system-backup/
     enabled: false
