@@ -1,5 +1,5 @@
 ---
-description: Update a Helm chart dependency to a specified version, including its lockfile and focused validation.
+description: Update a Helm chart dependency to the version from a Renovate PR.
 ---
 
 Update a Helm chart dependency to the version proposed in a Renovate PR.
@@ -8,29 +8,30 @@ Input: $ARGUMENTS
 
 ## Rules
 
-- Input is exactly one Renovate PR URL. If it is missing or unreadable: STOP and ask.
-- Print `## Step N: <title>` before performing each step.
-- Link every external claim. If a source is unreachable, write `unavailable: <what>`.
-- Change only the dependency version in `Chart.yaml` plus values/templates required for compatibility.
-- Never change `appVersion` or the wrapper chart's own `version`.
-- Only the STOP conditions below end the run early.
+- Input: exactly one Renovate PR URL. Missing or unreadable: STOP and ask.
+- Print `## Step N: <title>` before each step.
+- Link every external claim; if unreachable, write `unavailable: <what>`.
+- Change only the dependency version in `Chart.yaml` and values/templates needed for compatibility. Never touch `appVersion` or the wrapper chart's `version`.
+- Only STOP conditions end the run early.
 
 ## Steps
 
-1. **Read PR** — extract chart name, upstream repo, old version, new version, chart directory in this workspace.
-2. **Security check** — via GitHub and osv.dev: repo not transferred, renamed or archived; no advisory or issue reporting compromise; new tag on the default branch by the usual publisher; old->new diff has no unexplained changes to `.github/workflows`, publish config or maintainers. Report findings.
-3. **List version changes** — list version changes, identify breaking changes. Max 10 bullets and then ellipsis.
-4. **Identify required changes** — list inspected files (`Chart.yaml`, `values*.yaml.gotmpl`, `templates/`, `files/`) and, per file, which step-3 items apply. Additionally search for any reference to old version and update them (e.g. pinned documentation links)
-5. **Edit** — apply the version bump plus the compatibility edits from step 4, or state `no compatibility changes needed`.
-6. **Validate** — set `.config.location` to point to `charts/.ci-deployment/repo.config`. From `charts/`, run `make helmfile-lint RELEASE=<release>` then `make helmfile-template RELEASE=<release>`. On failure fix and rerun, max 3 attempts, then STOP and report.
+1. **Read PR** — chart name, upstream repo, old/new version, local chart directory.
+2. **Security check** (GitHub, osv.dev) — repo not transferred/renamed/archived; no advisory or compromise report; new tag on default branch by usual publisher; no unexplained changes to `.github/workflows`, publish config or maintainers between versions.
+3. **Chart changes** — one bullet per chart version (`<old> -> <new>`), breaking changes marked. Max 10, then `…`.
+4. **Image changes** — only if upstream `appVersion` changed: one bullet per image tag (`<old> -> <new>`). From release notes, flag breaking changes, deprecations and renamed/removed metrics that affect this workspace (values, templates, collector/alert configs, dashboards). Max 10, then `…`.
+5. **Required changes** — per inspected file (`Chart.yaml`, `values*.yaml.gotmpl`, `templates/`, `files/`), list applicable step 3/4 items. Also update other references to the old version (e.g. pinned doc links).
+6. **Edit** — apply the bump and step 5 edits, or state `no compatibility changes needed`.
+7. **Validate** — set `.config.location` to `charts/.ci-deployment/repo.config`. In `charts/` run `make helmfile-lint RELEASE=<release>`, then `make helmfile-template RELEASE=<release>`. On failure fix and retry (max 3), then STOP and report.
 
 ## Report
 
-| Field | Value |
-| --- | --- |
-| Chart, old -> new version| |
-| List new version changes | |
-| Security check | |
-| Files changed | |
-| Validation | |
-| Unavailable checks | |
+Each section is a heading with one finding per bullet:
+
+- `### Chart` — `<name>, <old> -> <new>`
+- `### Chart version changes` — from step 3
+- `### Image version changes` — from step 4, with workspace impact; or `no image change`
+- `### Security check` — repo state, advisories, publisher, workflow/config diff
+- `### Files changed` — file and change made
+- `### Validation` — command, pass/fail, attempts
+- `### Unavailable checks` — or `none`
