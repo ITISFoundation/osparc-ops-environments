@@ -414,6 +414,12 @@ services:
       K8S_MONITORING_PRIVATE_ENDPOINT: ${K8S_MONITORING_PRIVATE_ENDPOINT}
       SERVICES_USER: ${SERVICES_USER}
       SERVICES_PASSWORD: ${SERVICES_PASSWORD}
+{%- if S3_BUCKET_NAME_AI_TRACES and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY %}
+      # AWS S3 archive of s4l-ai chat-completions traces (awss3 exporter)
+      S3_BUCKET_NAME_AI_TRACES: ${S3_BUCKET_NAME_AI_TRACES}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+{%- endif %}
   tempo:
     image: grafana/tempo:2.10.0
     command: "-target=scalable-single-binary -config.file=/etc/tempo.yaml"

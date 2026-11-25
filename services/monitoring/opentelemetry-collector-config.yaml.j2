@@ -20,6 +20,25 @@ exporters:
     traces_endpoint: ${K8S_MONITORING_PRIVATE_ENDPOINT}/traces/insert/opentelemetry/v1/traces
     auth:
       authenticator: basicauth/kubernetes
+{% if env("S3_BUCKET_NAME_AI_TRACES", "") and env("AWS_ACCESS_KEY_ID", "") and env("AWS_SECRET_ACCESS_KEY", "") %}
+  awss3/s4l_ai_archive:
+    marshaler: otlp_json
+    s3uploader:
+      region: us-east-1
+      s3_bucket: ${S3_BUCKET_NAME_AI_TRACES}
+      s3_prefix: ""
+      s3_partition_format: "year=%Y/month=%m/day=%d/hour=%H"
+      s3_partition_timezone: UTC
+      compression: none
+      retry_max_attempts: 99
+      retry_max_backoff: 60s
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+      wait_for_result: false
+    timeout: 30s
+{% endif %}
 service:
   extensions: [basicauth/kubernetes]
   pipelines:
@@ -32,6 +51,13 @@ service:
       receivers: [otlp]
       exporters: [otlphttp/kubernetes]
       processors: [batch,filter/drop_healthcheck,resource/swarm_cluster]
+{% if env("S3_BUCKET_NAME_AI_TRACES", "") and env("AWS_ACCESS_KEY_ID", "") and env("AWS_SECRET_ACCESS_KEY", "") %}
+    # archive the s4l-ai (vendors chatbot) chat-completions traces to AWS S3
+    traces/s4l_ai_archive:
+      receivers: [otlp]
+      exporters: [awss3/s4l_ai_archive]
+      processors: [filter/keep_s4l_ai_chat_completions,batch]
+{% endif %}
   telemetry:
     metrics: # https://opentelemetry.io/docs/collector/internal-telemetry/#prometheus-endpoint-for-internal-metrics
       readers:
@@ -67,3 +93,12 @@ processors:
       - key: cluster
         value: docker_swarm
         action: upsert
+{% if env("S3_BUCKET_NAME_AI_TRACES", "") and env("AWS_ACCESS_KEY_ID", "") and env("AWS_SECRET_ACCESS_KEY", "") %}
+  # keep only the vendors chatbot (service.name=s4l-ai) server spans of
+  # /v1/chat/completions
+  filter/keep_s4l_ai_chat_completions:
+    error_mode: ignore
+    traces:
+      span:
+        - 'not (resource.attributes["service.name"] == "s4l-ai" and IsMatch(attributes["http.route"], "^/v1/chat/completions"))'
+{% endif %}
