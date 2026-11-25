@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: grafana-health
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  groups:
+    - name: grafana-health
+      rules:
+        - alert: GrafanaMetricsMissing
+          expr: absent(grafana_build_info)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              grafana_build_info metric is absent. This usually indicates that
+              grafana metrics are missing completely. Probably, grafana dashboard
+              is empty as well.
+
+        - alert: DatasourceTooManyErrors
+          expr: |
+            sum by (datasource) (rate(grafana_datasource_request_total{code=~"[45].."}[5m]))
+            / sum by (datasource) (rate(grafana_datasource_request_total[5m]))
+            > 0.05
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Datasource {{`{{ $labels.datasource }}`}} error rate above 5%
+              ({{`{{ $value | humanizePercentage }}`}})

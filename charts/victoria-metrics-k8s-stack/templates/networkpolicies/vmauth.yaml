@@ -1,0 +1,48 @@
+{{- $stack := index .Values "vm-k8s-stack" -}}
+{{- $vmauthLabels := $stack.vmauth.spec.podMetadata.labels }}
+{{- $insertLabels := $stack.vmcluster.spec.vminsert.podMetadata.labels }}
+{{- $selectLabels := $stack.vmcluster.spec.vmselect.podMetadata.labels }}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-network-policy
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $vmauthLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $vmauthLabels "app.simcore.io/part-of" }}"
+  types: # calico only defaults this on create, so it must be explicit
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - {{ $stack.vmauth.spec.port }}
+          - {{ .Values.configReloaderPort }} # VM config-reloader sidecar exposes /metrics
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $insertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $insertLabels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $stack.vmcluster.spec.vminsert.port }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: >-
+          app.simcore.io/name == "{{ index $selectLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $selectLabels "app.simcore.io/part-of" }}"
+        ports:
+          - {{ $stack.vmcluster.spec.vmselect.port }}
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}

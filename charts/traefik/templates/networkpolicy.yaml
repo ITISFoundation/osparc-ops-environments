@@ -1,0 +1,21 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: traefik-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          {{- range $name, $cfg := .Values.traefik.ports }}
+          - {{ $cfg.port }}
+          {{- end }}
+  egress:
+    - action: Allow
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16

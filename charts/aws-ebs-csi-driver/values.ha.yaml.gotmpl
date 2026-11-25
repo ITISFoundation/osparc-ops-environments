@@ -1,0 +1,9 @@
+aws-ebs-csi-driver:
+  controller:
+    replicaCount: 2
+    podDisruptionBudget:
+      enabled: true
+    topologySpreadConstraints:
+     - maxSkew: 1
+       topologyKey: kubernetes.io/hostname
+       whenUnsatisfiable: ScheduleAnyway

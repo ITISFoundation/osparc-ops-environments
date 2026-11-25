@@ -1,0 +1,12 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: {{ .Values.vmalert.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | trunc 63 }}
+    app.kubernetes.io/instance: {{ .Release.Name | trunc 63 }}
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+spec:
+  {{ toYaml .Values.vmalert.spec | nindent 2 }}

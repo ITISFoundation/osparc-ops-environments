@@ -27,6 +27,7 @@ services:
 
   portainer:
     image: portainer/portainer-ce:2.33.6
+    stop_grace_period: 2m
     init: true
     command: >
       -H tcp://tasks.agent:9001 --tlsskipverify

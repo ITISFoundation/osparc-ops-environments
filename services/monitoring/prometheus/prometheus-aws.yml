@@ -14,9 +14,9 @@ scrape_configs:
         port: 9090
         # You can filter by tags, instance IDs, or other attributes to only discover the specific Prometheus instances
         filters:
-          - name: "tag:autoscaling"
-            values: ["computational"]
-          - name: "tag:role"
+          - name: "tag:io.simcore.instance-role"
+            values: ["autoscaled-computational"]
+          - name: "tag:io.simcore.clusters-keeper.role"
             values: ["manager"]
     basic_auth:
       username: ${PRIMARY_EC2_INSTANCES_PROMETHEUS_USERNAME}

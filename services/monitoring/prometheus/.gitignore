@@ -1,3 +1,4 @@
 prometheus-ceph.yml
 prometheus.yml
 prometheus-federation.yml
+prometheus-base.yml

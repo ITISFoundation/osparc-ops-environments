@@ -2,12 +2,13 @@ services:
   # MongoDB: https://hub.docker.com/_/mongo/
   mongodb:
     image: mongo:6.0.6
+    stop_grace_period: 2m
     init: true
     volumes:
       # data persistency
       - mongo_data:/data/db
     deploy:
-      replicas: 1
+      replicas: 0
       restart_policy:
         condition: on-failure
       resources:
@@ -25,6 +26,7 @@ services:
   # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    stop_grace_period: 2m
     init: true
     volumes:
       # data persistency
@@ -35,7 +37,7 @@ services:
       - network.host=0.0.0.0
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     deploy:
-      replicas: 1
+      replicas: 0
       restart_policy:
         condition: on-failure
       resources:
@@ -51,6 +53,10 @@ services:
   # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
     image: graylog/graylog:6.0.5
+
+    # Give more time for graceful shutdown to avoid locks (e.g.
+    # The journal is already locked by another process)
+    stop_grace_period: 2m
     init: true
     configs:
     - source: graylog_config
@@ -76,16 +82,21 @@ services:
         aliases:
           - graylog
     deploy:
-      replicas: 1
+      replicas: 0
+      update_config:
+        order: stop-first # never run two tasks against the same volume
+        parallelism: 1
       restart_policy:
         condition: on-failure
+        delay: 20s
+        max_attempts: 3 # prevent crash loops
       resources:
         limits:
           cpus: "2.00"
           memory: 5G
         reservations:
           cpus: "0.1"
-          memory: 1G
+          memory: 1200M # 1.2G (we use 1200M since 1.2G is not rounded nicely during convertion)
       labels:
         - traefik.enable=true
         - traefik.swarm.network=${PUBLIC_NETWORK}
@@ -130,6 +141,7 @@ services:
           memory: 256M
     networks:
       logging:
+      monitoring:
 
   loki:
     image: grafana/loki:3.6.4
@@ -151,7 +163,7 @@ services:
         - prometheus-port=3100
       placement:
         constraints: []
-      replicas: 1
+      replicas: 0
       restart_policy:
         condition: any
         delay: 5s

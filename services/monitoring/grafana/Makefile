@@ -73,4 +73,4 @@ ensure-grafana-online: $(WAIT_FOR_IT)
 	@set -o allexport; \
 	source $(REPO_CONFIG_LOCATION); \
 	set +o allexport; \
-	$(WAIT_FOR_IT) http $$TF_VAR_GRAFANA_URL --timeout=120s --interval=5s --expect-status-code 200
+	$(WAIT_FOR_IT) http "$${TF_VAR_GRAFANA_URL}/api/health" --timeout=120s --interval=5s --expect-status-code 200

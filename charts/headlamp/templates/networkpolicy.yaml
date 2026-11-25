@@ -1,0 +1,45 @@
+# Headlamp component communication:
+#   - traefik -> headlamp UI (HTTP, container port 4466)
+#   - headlamp -> kube-apiserver (list/watch resources on behalf of users)
+#
+# DNS egress is already allowed by the cluster-wide global policy shipped by
+# `security-hardening`. See charts/SECURITY.md.
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: headlamp-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: >-
+    app.simcore.io/name == "headlamp"
+    && app.simcore.io/part-of == "headlamp"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    # TCP: Traefik -> headlamp UI
+    - action: Allow
+      protocol: TCP
+      source:
+        # traefik runs with hostNetwork; scope by private CIDRs, same
+        # approach as other charts in this repo.
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      destination:
+        ports:
+          # hardcoded in upstream chart. we have to hardcode it here as well
+          # https://github.com/kubernetes-sigs/headlamp/blob/v0.45.0/charts/headlamp/templates/deployment.yaml#L400
+          - 4466
+  egress:
+    # TCP: headlamp -> Kubernetes API server
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}

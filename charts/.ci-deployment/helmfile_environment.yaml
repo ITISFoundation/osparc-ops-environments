@@ -1,0 +1,11 @@
+isCi: true
+
+aws_ebs_csi_driver:
+  enabled: true
+
+topolvm:
+  enabled: true
+
+grafana:
+  extra_values_files:
+    - ./grafana/values.aws.yaml.gotmpl

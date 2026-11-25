@@ -25,27 +25,27 @@ endef
 .up-local: ${TEMP_COMPOSE}-local
 	@$(create-s3-bucket)
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-local $(STACK_NAME)
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-dalco
 .up-dalco: ${TEMP_COMPOSE}-dalco
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-dalco ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-public
 .up-public: ${TEMP_COMPOSE}-public
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-public ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-aws
 .up-aws: ${TEMP_COMPOSE}-aws
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-aws ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 .PHONY: .up-master
 .up-master: ${TEMP_COMPOSE}-master
 	@docker stack deploy --with-registry-auth --prune --compose-file ${TEMP_COMPOSE}-master ${STACK_NAME}
-	$(MAKE) grafana-import
+	# $(MAKE) grafana-import # grafana moved to Kubernetes
 
 #
 # Artifacts (docker compose files)
@@ -54,6 +54,7 @@ endef
 COMMON_COMPOSE_DEPENDENCIES: .env venv
 
 docker-compose.yml: docker-compose.yml.j2 \
+					opentelemetry-collector-config.yaml \
 					prometheus/prometheus-federation.yml \
 					prometheus/prometheus.rules.yml \
 					node-exporter/docker-entrypoint.sh \
@@ -122,8 +123,11 @@ grafana/config.monitoring: grafana/template-config.monitoring ${REPO_CONFIG_LOCA
 	set +o allexport; \
 	envsubst < $< > $@
 
+prometheus/prometheus-base.yml: prometheus/prometheus-base.yml.j2 .env venv
+	@$(call jinja,$<,.env,$@)
+
 .PHONY: config.prometheus.simcore
-config.prometheus.simcore: ${REPO_CONFIG_LOCATION} venv
+config.prometheus.simcore: ${REPO_CONFIG_LOCATION} venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -142,7 +146,7 @@ config.prometheus.federation: ${REPO_CONFIG_LOCATION} venv
 prometheus/prometheus-federation.yml: config.prometheus.federation
 
 .PHONY: config.prometheus.simcore.aws
-config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv
+config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -151,7 +155,7 @@ config.prometheus.simcore.aws: ${REPO_CONFIG_LOCATION} venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus.ceph.simcore
-config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv
+config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -162,7 +166,7 @@ config.prometheus.ceph.simcore: ${REPO_CONFIG_LOCATION} .env venv
 	mv prometheus/prometheus.temp.yml prometheus/prometheus.yml
 
 .PHONY: config.prometheus
-config.prometheus: ${REPO_CONFIG_LOCATION} venv
+config.prometheus: ${REPO_CONFIG_LOCATION} venv prometheus/prometheus-base.yml
 	@set -o allexport; \
 	source $<; \
 	set +o allexport; \
@@ -177,6 +181,9 @@ smokeping_prober_config.yaml: smokeping_prober_config.yaml.j2 ${REPO_CONFIG_LOCA
 
 tempo_config.yaml: tempo_config.yaml.j2 ${REPO_CONFIG_LOCATION} .env venv
 	$(call jinja, $<, .env, $@);
+
+opentelemetry-collector-config.yaml: opentelemetry-collector-config.yaml.j2 .env $(VENV_BIN)/j2
+	@$(call jinja, $<, .env, $@)
 
 #
 # Grafana-related targets

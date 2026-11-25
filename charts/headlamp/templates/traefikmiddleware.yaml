@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Values.redirectMiddlewareName }}
+spec:
+  redirectRegex:
+    regex: ^(https?://[^/]+{{ .Values.headlamp.config.baseURL }})$
+    replacement: ${1}/
+    permanent: true

@@ -1,0 +1,58 @@
+{{- $proxyLabels := .Values.vmauth.spec.podMetadata.labels -}}
+{{- $vmalertLabels := .Values.vmalert.spec.podMetadata.labels -}}
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: vmauth-datasource
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: >-
+    app.simcore.io/name == "{{ index $proxyLabels "app.simcore.io/name" }}"
+    && app.simcore.io/part-of == "{{ index $proxyLabels "app.simcore.io/part-of" }}"
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      source:
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Release.Namespace }}"'
+        selector: >-
+          app.simcore.io/name == "{{ index $vmalertLabels "app.simcore.io/name" }}"
+          && app.simcore.io/part-of == "{{ index $vmalertLabels "app.simcore.io/part-of" }}"
+      destination:
+        ports:
+          - {{ .Values.vmauth.spec.port }} # vmauth HTTP service
+    - action: Allow
+      protocol: TCP
+      source:
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.metricsNamespace }}"'
+        selector: >-
+          app.simcore.io/name == "vmagent"
+          && app.simcore.io/part-of == "{{ .Values.metricsNamespace }}"
+      destination:
+        ports:
+          - {{ .Values.vmauth.spec.port }} # vmagent -> alerting vmauth datasource proxy
+          - {{ .Values.configReloaderPort }} # vmagent -> vmauth config-reloader metrics
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "{{ .Values.metricsNamespace }}"'
+        ports:
+          - {{ .Values.metricsVMAuthPort }} # k8s-stack vmauth
+    - action: Allow
+      protocol: TCP
+      destination:
+        namespaceSelector: 'kubernetes.io/metadata.name == "victoria-logs-single"'
+        ports:
+          - {{ .Values.logsPort }} # VictoriaLogs HTTP service
+    - action: Allow
+      protocol: TCP
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+        ports:
+          - {{ .Values.kubernetesApiServerPort }}
